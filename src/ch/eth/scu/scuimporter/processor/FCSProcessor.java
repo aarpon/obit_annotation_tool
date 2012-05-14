@@ -27,7 +27,7 @@ public class FCSProcessor extends Processor {
 
 		try {
 
-			// Read in the data line by line
+			// We use a RandomAccessFile to be able to seek around freely
 			in = new RandomAccessFile(new File(filename),"r");
 			
 			// Read the HEADER
@@ -183,22 +183,6 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * The TEXT and DATA offsets can theoretically be swapped in the header segment
-	 * We make sure that TEXT is assigned the lower and DATA the higher offset 
-	 */
-	private void swapOffsetsIfNeeded() {
-		if (TEXTbegin > DATAbegin) {
-			long tmp;
-			tmp = TEXTbegin;
-			TEXTbegin = DATAbegin;
-			DATAbegin = tmp;
-			tmp = TEXTend;
-			TEXTend = DATAend;
-			DATAend = tmp;			
-		}
-	}
-
-	/**
 	 * 
 	 * @return
 	 * @throws IOException
@@ -226,6 +210,21 @@ public class FCSProcessor extends Processor {
 	 */
 	private boolean parseData() throws IOException  {
 
+		// Seek to the DATA segment
+		long dataOffset;
+		try {
+			dataOffset = Long.parseLong( TEXTMapStandard.get("$BEGINDATA").trim() ); 
+		} catch ( NumberFormatException e ) {
+			System.out.println("Invalid offset for the DATA segment! " +
+					"This is a bug! Please report it.");
+			return false;
+		}
+		if (dataOffset == 0) {
+			System.out.println("No DATA present.");
+			return true;
+		}
+		//in.seek(dataOffset);
+		
 		return true;
 	}
 
@@ -245,6 +244,22 @@ public class FCSProcessor extends Processor {
 	 */
 	private boolean parseOther() throws IOException {
 		return true;		
+	}
+
+	/**
+	 * The TEXT and DATA offsets can theoretically be swapped in the header segment
+	 * We make sure that TEXT is assigned the lower and DATA the higher offset 
+	 */
+	private void swapOffsetsIfNeeded() {
+		if (TEXTbegin > DATAbegin) {
+			long tmp;
+			tmp = TEXTbegin;
+			TEXTbegin = DATAbegin;
+			DATAbegin = tmp;
+			tmp = TEXTend;
+			TEXTend = DATAend;
+			DATAend = tmp;			
+		}
 	}
 
 	/**
@@ -301,7 +316,5 @@ public class FCSProcessor extends Processor {
 	Map<String, String> TEXTMapCustom = new HashMap<String, String>();
 	Map<String, String> DATAMap = new HashMap<String, String>();
 	
-	String TEXT;
-
 }
 
