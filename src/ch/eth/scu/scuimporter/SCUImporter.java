@@ -15,7 +15,7 @@ public class SCUImporter {
 	public static void main(String[] args) throws IOException, ParserConfigurationException {
 		// TODO Auto-generated method stub
 
-		int test = 2;
+		int test = 1;
 		String filename;
 		
 		switch (test) {

@@ -10,8 +10,25 @@ import java.util.*;
  */
 public class FCSProcessor extends Processor {
 
+	/* Instance variables */
+	private String filename;
+	RandomAccessFile in = null;
+	long TEXTbegin = 0L;
+	long TEXTend   = 0L;
+	long DATAbegin = 0L;
+	long DATAend = 0L;
+	long ANALYSISbegin = 0L;
+	long ANALYSISend = 0L;
+	long OTHERbegin = 0L;
+	boolean valid = false;
+	char DELIMITER;
+	
+	Map<String, String> TEXTMapStandard = new HashMap<String, String>();
+	Map<String, String> TEXTMapCustom = new HashMap<String, String>();
+	Map<String, String> DATAMap = new HashMap<String, String>();
+
 	/**
-	 * 
+	 * Constructor 
 	 * @param filename
 	 */
 	public FCSProcessor(String filename) {
@@ -42,6 +59,10 @@ public class FCSProcessor extends Processor {
 			
 			// Read the main TEXT
 			parseText();
+			
+			// Process the parameters
+			// TODO Complete or remove.
+			processParameters();
 
 			// Read the DATA
 			parseData();
@@ -211,8 +232,8 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Parse the DATA segment.
+	 * @return true if the parsing was successful (or no data was present), false otherwise
 	 * @throws IOException
 	 */
 	private boolean parseData() throws IOException  {
@@ -230,7 +251,17 @@ public class FCSProcessor extends Processor {
 			System.out.println("No DATA present.");
 			return true;
 		}
-		//in.seek(dataOffset);
+		
+		// Seek to the beginning of the data offset
+		in.seek(dataOffset);
+		
+		// To read the data in the correct format we need to know the
+		// number of parameters, the number of events, the datatype and
+		// the endianity.
+		int nParameters   = numParameters();
+		int nEvents       = numEvents();
+		String datatype   = datatype();
+		String endianity  = endianity();
 		
 		return true;
 	}
@@ -254,8 +285,8 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * The TEXT and DATA offsets can theoretically be swapped in the header segment
-	 * We make sure that TEXT is assigned the lower and DATA the higher offset 
+	 * The TEXT and DATA offsets can theoretically be swapped in the header segment.
+	 * We make sure that TEXT is assigned the lower and DATA the higher offset.
 	 */
 	private void swapOffsetsIfNeeded() {
 		if (TEXTbegin > DATAbegin) {
@@ -272,8 +303,6 @@ public class FCSProcessor extends Processor {
 	/**
 	 * Extracts and returns the value in a segment for a given key
 	 * @param segment String containing the full segment (e.g. TEXT)
-	 * @param Key Name of the key to be found (without %)
-	 * @return String containing the value for the given key
 	 */
 	private void storeKeyValuePairs(String segment) {
 		assert(segment.charAt(0) == DELIMITER);
@@ -291,8 +320,8 @@ public class FCSProcessor extends Processor {
 					break;
 			}
 			endIndex     = segment.indexOf(DELIMITER, interIndex + 1);
-			String key   = segment.substring(beginIndex + 1, interIndex);
-			String value = segment.substring(interIndex + 1, endIndex);
+			String key   = segment.substring(beginIndex + 1, interIndex).trim();
+			String value = segment.substring(interIndex + 1, endIndex).trim();
 			
 			// If the key starts with a $ sign, we found a standard FCS keyword and
 			// we store it in the TEXTMapStandard map; otherwise, we have a custom 
@@ -306,22 +335,93 @@ public class FCSProcessor extends Processor {
 		}
 	}
 	
-	/* Instance variables */
-	private String filename;
-	RandomAccessFile in = null;
-	long TEXTbegin = 0L;
-	long TEXTend   = 0L;
-	long DATAbegin = 0L;
-	long DATAend = 0L;
-	long ANALYSISbegin = 0L;
-	long ANALYSISend = 0L;
-	long OTHERbegin = 0L;
-	boolean valid = false;
-	char DELIMITER;
+	/**
+	 * Process the parameters.
+	 * @return 	true if there were parameters and they could be processed successfully,
+	 * 			false otherwise.
+	 * TODO	Either complete or remove.
+	 */
+	private boolean processParameters() {
+		
+		// Number of parameters
+		int numParameters = 0;
+		if (TEXTMapStandard.containsKey("$PAR")) {
+			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
+		} else {
+			// No parameters
+			return false;
+		}
+		
+		// Now go over the parameters and extract all info
+		for (int i=0; i < numParameters; i++) {
+			
+		}
+		return true;
+		
+	}
 	
-	Map<String, String> TEXTMapStandard = new HashMap<String, String>();
-	Map<String, String> TEXTMapCustom = new HashMap<String, String>();
-	Map<String, String> DATAMap = new HashMap<String, String>();
+	/**
+	 * Return the number of parameters in the dataset.
+	 * @return number of parameters.
+	 */
+	private int numParameters() {
+		int numParameters = 0;
+		if (TEXTMapStandard.containsKey("$PAR")) {
+			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
+		}
+		return numParameters;
+	}
+
+	/**
+	 * Return the number of events in the dataset.
+	 * @return number of events.
+	 */
+	private int numEvents() {
+		int numEvents = 0;
+		if (TEXTMapStandard.containsKey("$TOT")) {
+			numEvents = Integer.parseInt(TEXTMapStandard.get("$TOT"));
+		}
+		return numEvents;
+	}
+
+	/**
+	 * Return the datatype of the data bytes, one of "I", "F", "D", or "A".
+	 * I: unsigned integer;
+	 * F: single-precision IEEE floating point;
+	 * D: double-precision IEEE floating point;
+	 * A: ASCII
+	 * @return datatype of the measurements ("I", "F", "D", "A"), or "N" if not defined
+	 */
+	private String datatype() {
+		String datatype = "N";
+		if (TEXTMapStandard.containsKey("$DATATYPE")) {
+			datatype = TEXTMapStandard.get("$DATATYPE");
+		}
+		return datatype;
+	}
+	
+	/**
+	 * Return the endianity of the data bytes, one of "L", "B", "U"
+	 * L: little endian (1,2,3,4);
+	 * B: big endian (4,3,2,1)
+	 * U: unsupported (3,4,1,2) 
+	 * N: not defined
+	 * @return endianity of the data bytes ("L", "B", "U"), or "N" if not defined
+	 */
+	private String endianity() {
+		String datatype = "N";
+		if (TEXTMapStandard.containsKey("$BYTEORD")) {
+			String byteOrd = TEXTMapStandard.get("$BYTEORD");
+			if ( byteOrd.equals("1,2,3,4") ) {
+				datatype = "L";
+			} else if ( byteOrd.equals("4,3,2,1") ) {
+				datatype = "B";
+			} else {
+				datatype = "U";
+			}
+		}
+		return datatype;
+	}
 	
 }
 
