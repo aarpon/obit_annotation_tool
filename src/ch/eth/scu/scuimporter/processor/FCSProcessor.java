@@ -19,6 +19,13 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
+	 * Return information about the Processor
+	 */
+	public String info() {
+		return "Data File Standard for Flow Cytometry, Version FCS3.0.";
+	}
+	
+	/**
 	 * 
 	 * @return
 	 * @throws IOException

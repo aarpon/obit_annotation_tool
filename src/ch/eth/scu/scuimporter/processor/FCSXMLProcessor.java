@@ -46,6 +46,13 @@ public class FCSXMLProcessor extends Processor {
 			parser = null;
 		}
 	}
+	
+	/**
+	 * Return information about the Processor
+	 */
+	public String info() {
+		return "BD BioSciences FACSDiva\u2122 Software";
+	}
 
 	/**
 	 * 

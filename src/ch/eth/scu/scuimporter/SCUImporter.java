@@ -28,6 +28,9 @@ public class SCUImporter {
 			//String filename = "/work/fcs/Kymb 090512 FCS EXport/96 Well - V bottom/Specimen_001_A10_A10.fcs";
 			
 			FCSProcessor fcsProcessor = new FCSProcessor(filename);
+			System.out.println(fcsProcessor.info() );
+			System.out.println("");
+
 			fcsProcessor.parse();
 			System.out.println(fcsProcessor);
 			break;
@@ -37,9 +40,11 @@ public class SCUImporter {
 			// Test the FCSXMLProcessor
 			
 			filename = "/work/fcs/Kymb 090512 Experiment Export/Kymb 090512.xml";
-			//String filename = "/work/fcs/Kymb 090512 FCS EXport/96 Well - V bottom/Specimen_001_A10_A10.fcs";
 			
 			FCSXMLProcessor fcsxmlProcessor = new FCSXMLProcessor(filename);
+			System.out.println(fcsxmlProcessor.info());
+			System.out.println("");
+
 			fcsxmlProcessor.parse();
 			System.out.println(fcsxmlProcessor);
 			break;
