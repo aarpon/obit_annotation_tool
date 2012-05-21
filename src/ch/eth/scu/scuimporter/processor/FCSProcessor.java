@@ -23,7 +23,6 @@ public class FCSProcessor extends Processor {
 	long ANALYSISbegin = 0L;
 	long ANALYSISend = 0L;
 	long OTHERbegin = 0L;
-	boolean valid = false;
 	char DELIMITER;
 	private ArrayList<Parameter> parameters = new ArrayList<Parameter>();
 	
@@ -33,22 +32,23 @@ public class FCSProcessor extends Processor {
 
 	/**
 	 * Constructor 
-	 * @param filename
+	 * @param filename Name with full path of the file to be opened.
 	 */
 	public FCSProcessor(String filename) {
 		this.filename = filename;
 	}
 
 	/**
-	 * Return information about the Processor
+	 * Information regarding the file format.
+	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
 		return "Data File Standard for Flow Cytometry, Version FCS3.0.";
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Parses the file to extract data and metadata. 
+	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
 	public boolean parse() throws IOException {
@@ -90,64 +90,60 @@ public class FCSProcessor extends Processor {
 
 		}
 
-		valid = true;
 		return true;
 
 	}
 	
 	/**
-	 * 
+	 * Return a String representation of the FCSProcessor.
+	 * @return String containing a description of the FCSProcessor. 
 	 */
 	public String toString() {
-		if ( valid == true ) {
-			String str = 
-			"Valid FCS3.0 file with TEXT: "     + 
-					TEXTbegin     + " - " + TEXTend     + ", DATA: " +
-					DATAbegin     + " - " + DATAend     + ", ANALYSIS: " +
-					ANALYSISbegin + " - " + ANALYSISend + ", OTHER: " +
-					OTHERbegin    + ".\n" +
-					"DELIMITER: (char) "  + (int)DELIMITER + "\n\n";  
+		String str = 
+				"Valid FCS3.0 file with TEXT: "     + 
+						TEXTbegin     + " - " + TEXTend     + ", DATA: " +
+						DATAbegin     + " - " + DATAend     + ", ANALYSIS: " +
+						ANALYSISbegin + " - " + ANALYSISend + ", OTHER: " +
+						OTHERbegin    + ".\n" +
+						"DELIMITER: (char) "  + (int)DELIMITER + "\n\n";  
 
-			// Output the list of standard key-value pairs
-			Set<String> keySet = TEXTMapStandard.keySet();
-			
-			str += "Standard TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
+		// Output the list of standard key-value pairs
+		Set<String> keySet = TEXTMapStandard.keySet();
 
-			for ( String key : keySet ) {
-				str += ( key + ": " + TEXTMapStandard.get(key) + "\n" );  
-			}
+		str += "Standard TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
 
-			// Output the list of custom key-value pairs 
-			keySet = TEXTMapCustom.keySet();
-			
-			str += "\n\n";
-			str += "Custom TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
-
-			for ( String key : keySet ) {
-				str += ( key + ": " + TEXTMapCustom.get(key) + "\n" );  
-			}
-			
-			// Output the list of parameters (and their attributes)
-			str += "\n\n";
-			str += "Parameters and their attributes:\n\n";
-
-			for (Parameter p : parameters ) {
-				str += ( "Parameter: " + p.name + ", range: " + p.range + 
-						", bits: " + p.bits + ", decade: " + p.decade + ", " +
-						"log: " + p.log + ", logzero: " + p.logzero + 
-						", gain: " + p.gain + "\n");
-			}
-
-			return str;
-
-		} else {
-			return ( "Error: invalid FCS3.0 file.");
+		for ( String key : keySet ) {
+			str += ( key + ": " + TEXTMapStandard.get(key) + "\n" );  
 		}
+
+		// Output the list of custom key-value pairs 
+		keySet = TEXTMapCustom.keySet();
+
+		str += "\n\n";
+		str += "Custom TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
+
+		for ( String key : keySet ) {
+			str += ( key + ": " + TEXTMapCustom.get(key) + "\n" );  
+		}
+
+		// Output the list of parameters (and their attributes)
+		str += "\n\n";
+		str += "Parameters and their attributes:\n\n";
+
+		for (Parameter p : parameters ) {
+			str += ( "Parameter: " + p.name + ", range: " + p.range + 
+					", bits: " + p.bits + ", decade: " + p.decade + ", " +
+					"log: " + p.log + ", logzero: " + p.logzero + 
+					", gain: " + p.gain + "\n");
+		}
+
+		return str;
+
 	}
 	
 	/**
-	 * Parse the header 
-	 * @return true if the file header could be parsed successfully, false otherwise 
+	 * Parse the header.
+	 * @return true if the file header could be parsed successfully, false otherwise. 
 	 * @throws IOException
 	 */
 	private boolean parseHeader() throws IOException {
@@ -227,8 +223,8 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Parse the TEXT segment.
+	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
 	private boolean parseText() throws IOException  {
@@ -249,8 +245,9 @@ public class FCSProcessor extends Processor {
 
 	/**
 	 * Parse the DATA (events) segment.
-	 * @return true if the parsing was successful (or no data was present), false otherwise
+	 * @return true if the parsing was successful (or no data was present), false otherwise.
 	 * @throws IOException
+	 * TODO Add support for multiple DATA segments.
 	 */
 	private boolean parseData() throws IOException  {
 
@@ -283,18 +280,20 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Parse the ANALYSIS segment.
+	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
+	 * TODO Implement
 	 */
 	private boolean parseAnalysis() throws IOException  {
 		return true;		
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Parse the OTHER segment.
+	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
+	 * TODO Implement
 	 */
 	private boolean parseOther() throws IOException {
 		return true;		
@@ -317,8 +316,8 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * Extracts and returns the value in a segment for a given key
-	 * @param segment String containing the full segment (e.g. TEXT)
+	 * Extracts and returns the value in a segment for a given key.
+	 * @param segment String containing the full segment (e.g. TEXT).
 	 */
 	private void storeKeyValuePairs(String segment) {
 		assert(segment.charAt(0) == DELIMITER);
@@ -352,7 +351,7 @@ public class FCSProcessor extends Processor {
 	}
 	
 	/**
-	 * Process the parameters.
+	 * Process the extracted parameters from the standard TEXT map.
 	 * @return 	true if there were parameters and they could be processed successfully,
 	 * 			false otherwise.
 	 */
@@ -437,8 +436,8 @@ public class FCSProcessor extends Processor {
 	 * I: unsigned integer;
 	 * F: single-precision IEEE floating point;
 	 * D: double-precision IEEE floating point;
-	 * A: ASCII
-	 * @return datatype of the measurements ("I", "F", "D", "A"), or "N" if not defined
+	 * A: ASCII.
+	 * @return datatype of the measurements ("I", "F", "D", "A"), or "N" if not defined.
 	 */
 	private String datatype() {
 		String datatype = "N";
@@ -449,12 +448,12 @@ public class FCSProcessor extends Processor {
 	}
 	
 	/**
-	 * Return the endianity of the data bytes, one of "L", "B", "U"
+	 * Return the endianity of the data bytes, one of "L", "B", "U".
 	 * L: little endian (1,2,3,4);
-	 * B: big endian (4,3,2,1)
-	 * U: unsupported (3,4,1,2) 
-	 * N: not defined
-	 * @return endianity of the data bytes ("L", "B", "U"), or "N" if not defined
+	 * B: big endian (4,3,2,1);
+	 * U: unsupported (3,4,1,2); 
+	 * N: not defined.
+	 * @return endianity of the data bytes ("L", "B", "U"), or "N" if not defined.
 	 */
 	private String endianity() {
 		String datatype = "N";
@@ -471,8 +470,11 @@ public class FCSProcessor extends Processor {
 		return datatype;
 	}
 
-	// Parameter class to store parameter attributes
-	public class Parameter {
+	/**
+	 * Parameter class to store parameter attributes.
+	 * @author Aaron Ponti
+	 */
+	private class Parameter {
 		public String name;
 		public int range;
 		public int bits;

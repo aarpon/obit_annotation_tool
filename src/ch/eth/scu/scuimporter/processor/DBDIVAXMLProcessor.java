@@ -21,8 +21,8 @@ public class DBDIVAXMLProcessor extends Processor {
 	private ArrayList<Experiment> experiments = new ArrayList<Experiment>();
 
 	/**
-	 * 
-	 * @param filename
+	 * Constructor
+	 * @param filename Name with full path of the file to be opened.
 	 * @throws ParserConfigurationException 
 	 */
 	public DBDIVAXMLProcessor(String filename) throws ParserConfigurationException {
@@ -47,18 +47,19 @@ public class DBDIVAXMLProcessor extends Processor {
 	}
 	
 	/**
-	 * Return information about the Processor
+	 * Information regarding the file format.
+	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
 		return "BD BioSciences FACSDiva\u2122 Software";
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Parses the file to extract data and metadata. 
+	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
-	public boolean parse() {
+	public boolean parse() throws IOException {
 
 		// Check the parser
 		if (parser == null) {
@@ -87,7 +88,8 @@ public class DBDIVAXMLProcessor extends Processor {
 	}
 
 	/**
-	 * 
+	 * Return a String representation of the DBDIVAXMLProcessor.
+	 * @return String containing a description of the DBDIVAXMLProcessor. 
 	 */
 	public String toString() {
 		String str = "XML file: " + filename + (" (version: " + version + ", " +
@@ -99,8 +101,8 @@ public class DBDIVAXMLProcessor extends Processor {
 	}
 
 	/**
-	 * Parse and extract relevant information from the XML file
-	 * @return true if the parsing was successful, false otherwise
+	 * Parse and extract relevant information from the XML file.
+	 * @return true if the parsing was successful, false otherwise.
 	 */
 	private boolean processDoc() {
 
@@ -140,17 +142,18 @@ public class DBDIVAXMLProcessor extends Processor {
 	}
 
 	/**
-	 * Class that represents an experiment parsed from the XML
+	 * Class that represents an experiment parsed from the XML.
 	 * @author Aaron Ponti
 	 *
 	 */
-	public class Experiment {
+	private class Experiment {
 
 		private String name;
 		private String date;
 		private String owner_name;
 
-		/* An Experiment can contain TRAYS that in turn contain SPECIMENs which contain TUBEs,
+		/* 
+		 * An Experiment can contain TRAYS that in turn contain SPECIMENs which contain TUBEs,
 		 * or directly SPECIMENs containing TUBEs.
 		 */
 		private ArrayList<Tray> trays = new ArrayList<Tray>();
@@ -158,7 +161,7 @@ public class DBDIVAXMLProcessor extends Processor {
 
 		/**
 		 * Constructor
-		 * @param expNode
+		 * @param expNode DOM node that refers to an Experiment.
 		 */
 		public Experiment(org.w3c.dom.Node expNode) {
 
@@ -201,10 +204,11 @@ public class DBDIVAXMLProcessor extends Processor {
 		}
 
 		/**
-		 * Return summary of the extracted Experiment node
+		 * Return summary of the extracted Experiment node.
+		 * @return string with a summary of the Experiment info.
 		 */
 		public String toString() {
-			String str =  "Experiment: " + name + " (owner: " + owner_name + ", " +
+			String str =  "[ Experiment ], name: " + name + " (owner: " + owner_name + ", " +
 					"date: " + date + ").\n";
 			for ( Tray t : trays) {
 				str += t.toString() + "\n";
@@ -216,10 +220,11 @@ public class DBDIVAXMLProcessor extends Processor {
 		}
 
 		/**
-		 * Accessory function to repeat a String n times: repeat( "abc", 2 ) => "abcabc"
-		 * @param str	String to be repeated
-		 * @param n		Number of times to repeat the String
-		 * @return		The repeated String
+		 * Accessory function to repeat a String n times: repeat( "abc", 2 ) => "abcabc".
+		 * @param str	String to be repeated.
+		 * @param n		Number of times to repeat the String.
+		 * @return		The repeated String.
+		 * TODO Extract this into some util package.
 		 */
 		private String repeat(String str, int n){
 			StringBuilder ret = new StringBuilder();
@@ -230,11 +235,10 @@ public class DBDIVAXMLProcessor extends Processor {
 		}
 
 		/**
-		 * 
+		 * Class that represents a tray parsed from the XML.
 		 * @author Aaron Ponti
-		 *
 		 */
-		public class Tray {
+		private class Tray {
 
 			public String name;
 			public String tray_type;
@@ -243,6 +247,10 @@ public class DBDIVAXMLProcessor extends Processor {
 			public String orientation;
 			private ArrayList<Specimen> specimens = new ArrayList<Specimen>();
 
+			/**
+			 * Constructor
+			 * @param trayNode DOM node that refers to a Tray.
+			 */
 			public Tray(org.w3c.dom.Node trayNode) {
 
 				// Get the attributes
@@ -277,10 +285,11 @@ public class DBDIVAXMLProcessor extends Processor {
 			}
 
 			/**
-			 * 
+			 * Return summary of the extracted Tray node.
+			 * @return string with a summary of the Tray info.
 			 */
 			public String toString() {
-				String str =  "|__Tray, name: " + name + " (type: " + tray_type + ", rows: " +
+				String str =  "|__[ Tray ], name: " + name + " (type: " + tray_type + ", rows: " +
 						rows + ", cols: " + cols + ", orientation: " + orientation + ")\n";
 				for ( Specimen s : specimens) {
 					str += s.toString() + "\n";
@@ -291,19 +300,30 @@ public class DBDIVAXMLProcessor extends Processor {
 		}
 
 		/**
-		 * A specimen can be a child of a Tray or directly of an Experiment
+		 * A specimen can be a child of a Tray or directly of an Experiment.
 		 * @author Aaron Ponti
-		 *
 		 */
-		public class Specimen {
+		private class Specimen {
 
 			private String name;
 			private int level;
 			
 			private ArrayList<Tube> tubes = new ArrayList<Tube>();
 
-			public Specimen(org.w3c.dom.Node specimenNode, int level) {
+			/**
+			 * Constructor.
+			 * @param specimenNode DOM node that refers to a Specimen.
+			 * @param level 1 if the Specimen is a child of an Experiment, 
+			 * 		  		2 if it is the child of a Tray
+			 * @throws IllegalArgumentException
+			 */
+			public Specimen(org.w3c.dom.Node specimenNode, int level) throws IllegalArgumentException {
 
+				// Check the level
+				if (level < 1 || level > 2) {
+					throw new IllegalArgumentException("Error: level must be either 1 or 2.");
+				}
+				
 				// Store the level
 				this.level = level;
 				
@@ -334,10 +354,11 @@ public class DBDIVAXMLProcessor extends Processor {
 			}
 			
 			/**
-			 * 
+			 * Return summary of the extracted Specimen node.
+			 * @return string with a summary of the Specimen info.
 			 */
 			public String toString() {
-				String str =  "|" + repeat("__", level) + " Specimen: " + name + "\n";
+				String str =  "|" + repeat("__", level) + "[ Specimen ], name: " + name + "\n";
 				for ( Tube t : tubes) {
 					str += t.toString() + "\n";
 				}
@@ -346,23 +367,31 @@ public class DBDIVAXMLProcessor extends Processor {
 		}
 
 		/**
-		 * 
+		 * Class that represents a tube parsed from the XML.
 		 * @author Aaron Ponti
-		 *
 		 */
-		public class Tube {
+		private class Tube {
 
 			private String name;
 			private String date;
 			private int level;
 			private String dataFilename;
 			
-			/**
-			 * Constructor
-			 * @param tubeNode
-			 */
-			public Tube(org.w3c.dom.Node tubeNode, int level) {
 
+			/**
+			 * Constructor.
+			 * @param tubeNode DOM node that refers to a Tube.
+			 * @param level 2 if the parent Specimen is a child of an Experiment, 
+			 * 		  		3 if the parent Specimen is a child of a Tray.
+			 * @throws IllegalArgumentException
+			 */
+			public Tube(org.w3c.dom.Node tubeNode, int level) throws IllegalArgumentException{
+
+				// Check the level
+				if (level < 1 || level > 3) {
+					throw new IllegalArgumentException("Error: level must be either 2 or 3.");
+				}
+				
 				// Store the level
 				this.level = level;
 				
@@ -397,8 +426,12 @@ public class DBDIVAXMLProcessor extends Processor {
 
 			}
 			
+			/**
+			 * Return summary of the extracted Tube node.
+			 * @return string with a summary of the Tube info.
+			 */
 			public String toString() {
-				String str =  "|" + repeat("__", level) + "Tube: " + name + " (date: " + date + 
+				String str =  "|" + repeat("__", level) + "[ Tube ], name: " + name + " (date: " + date + 
 						", file name: " + dataFilename + ")";
 				return str;
 			}
