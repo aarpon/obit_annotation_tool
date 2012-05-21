@@ -7,9 +7,8 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 /**
- * 
+ * Parses "BD BioSciences FACSDivaª Software" XML files.
  * @author Aaron Ponti
- *
  */
 public class DBDIVAXMLProcessor extends Processor {
 

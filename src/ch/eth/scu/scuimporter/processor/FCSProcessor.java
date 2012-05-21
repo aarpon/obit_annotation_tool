@@ -4,9 +4,12 @@ import java.io.*;
 import java.util.*;
 
 /**
+ * FCSProcessor parses "Data File Standard for Flow Cytometry, Version FCS3.0" files.
+ * 
+ * Parsing is currently not complete. Only the information needed to add the file to
+ * OpenBIS is extracted.
  * 
  * @author Aaron Ponti
- *
  */
 public class FCSProcessor extends Processor {
 
@@ -22,10 +25,11 @@ public class FCSProcessor extends Processor {
 	long OTHERbegin = 0L;
 	boolean valid = false;
 	char DELIMITER;
+	private ArrayList<Parameter> parameters = new ArrayList<Parameter>();
 	
-	Map<String, String> TEXTMapStandard = new HashMap<String, String>();
-	Map<String, String> TEXTMapCustom = new HashMap<String, String>();
-	Map<String, String> DATAMap = new HashMap<String, String>();
+	Map<String, String> TEXTMapStandard = new LinkedHashMap<String, String>();
+	Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
+	Map<String, String> DATAMap = new LinkedHashMap<String, String>();
 
 	/**
 	 * Constructor 
@@ -61,10 +65,9 @@ public class FCSProcessor extends Processor {
 			parseText();
 			
 			// Process the parameters
-			// TODO Complete or remove.
 			processParameters();
 
-			// Read the DATA
+			// Read the DATA (events)
 			parseData();
 
 			// Read the ANALYSIS
@@ -105,6 +108,7 @@ public class FCSProcessor extends Processor {
 					OTHERbegin    + ".\n" +
 					"DELIMITER: (char) "  + (int)DELIMITER + "\n\n";  
 
+			// Output the list of standard key-value pairs
 			Set<String> keySet = TEXTMapStandard.keySet();
 			
 			str += "Standard TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
@@ -113,6 +117,7 @@ public class FCSProcessor extends Processor {
 				str += ( key + ": " + TEXTMapStandard.get(key) + "\n" );  
 			}
 
+			// Output the list of custom key-value pairs 
 			keySet = TEXTMapCustom.keySet();
 			
 			str += "\n\n";
@@ -122,6 +127,17 @@ public class FCSProcessor extends Processor {
 				str += ( key + ": " + TEXTMapCustom.get(key) + "\n" );  
 			}
 			
+			// Output the list of parameters (and their attributes)
+			str += "\n\n";
+			str += "Parameters and their attributes:\n\n";
+
+			for (Parameter p : parameters ) {
+				str += ( "Parameter: " + p.name + ", range: " + p.range + 
+						", bits: " + p.bits + ", decade: " + p.decade + ", " +
+						"log: " + p.log + ", logzero: " + p.logzero + 
+						", gain: " + p.gain + "\n");
+			}
+
 			return str;
 
 		} else {
@@ -232,7 +248,7 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * Parse the DATA segment.
+	 * Parse the DATA (events) segment.
 	 * @return true if the parsing was successful (or no data was present), false otherwise
 	 * @throws IOException
 	 */
@@ -339,27 +355,59 @@ public class FCSProcessor extends Processor {
 	 * Process the parameters.
 	 * @return 	true if there were parameters and they could be processed successfully,
 	 * 			false otherwise.
-	 * TODO	Either complete or remove.
 	 */
 	private boolean processParameters() {
-		
+
 		// Number of parameters
-		int numParameters = 0;
-		if (TEXTMapStandard.containsKey("$PAR")) {
-			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
-		} else {
-			// No parameters
+		int numParameters = numParameters();
+		if (numParameters == 0) {
 			return false;
 		}
-		
-		// Now go over the parameters and extract all info
-		for (int i=0; i < numParameters; i++) {
+
+		// Now go over the parameters and extract all info.
+		// Mind that parameter count starts at 1.
+		for (int i = 1; i <= numParameters; i++) {
 			
+			// New Parameter
+			Parameter param = new Parameter();
+
+			// Name
+			param.name  = TEXTMapStandard.get("$P" + i + "N");
+			
+			// Range
+			param.range = Integer.parseInt(TEXTMapStandard.get("$P" + i + "R"));
+			
+			// Bits
+			param.bits  = Integer.parseInt(TEXTMapStandard.get("$P" + i + "B"));
+			
+			// Linear or logarithmic amplifiers?
+			String decade = TEXTMapStandard.get("$P" + i + "E");
+			String decadeParts[] = decade.split(",");
+			param.decade = Float.parseFloat(decadeParts[0]);
+			float value  = Float.parseFloat(decadeParts[1]);
+			if (param.decade == 0.0) {
+				// Amplification is linear or undefined
+				param.log = 0.0f;
+				param.logzero = 0.0f;
+			} else {
+				param.log = 1.0f;
+				if (value == 0.0) {
+					param.logzero = 1.0f;
+				} else {
+					param.logzero = value;
+				}
+			}
+			
+			// Gain
+			param.gain = Float.parseFloat(TEXTMapStandard.get("$P" + i + "G"));
+
+			// Add the Parameter
+			parameters.add(param);
 		}
-		return true;
 		
+		return true;
 	}
-	
+
 	/**
 	 * Return the number of parameters in the dataset.
 	 * @return number of parameters.
@@ -421,6 +469,20 @@ public class FCSProcessor extends Processor {
 			}
 		}
 		return datatype;
+	}
+
+	// Parameter class to store parameter attributes
+	public class Parameter {
+		public String name;
+		public int range;
+		public int bits;
+		public float decade;
+		public float log;
+		public float logzero;
+		public float gain;
+		
+		public Parameter() {
+		}
 	}
 	
 }
