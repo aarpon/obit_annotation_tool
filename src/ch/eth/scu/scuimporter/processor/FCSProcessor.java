@@ -42,6 +42,7 @@ public class FCSProcessor extends Processor {
 	 * Information regarding the file format.
 	 * @return descriptive String for the Processor.
 	 */
+	@Override
 	public String info() {
 		return "Data File Standard for Flow Cytometry, Version FCS3.0.";
 	}
@@ -51,6 +52,7 @@ public class FCSProcessor extends Processor {
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
+	@Override
 	public boolean parse() throws IOException {
 
 		try {

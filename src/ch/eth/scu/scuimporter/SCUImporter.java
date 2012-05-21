@@ -41,7 +41,7 @@ public class SCUImporter {
 			
 			filename = "/work/fcs/Kymb 090512 Experiment Export/Kymb 090512.xml";
 			
-			DBDIVAXMLProcessor fcsxmlProcessor = new DBDIVAXMLProcessor(filename);
+			BDDIVAXMLProcessor fcsxmlProcessor = new BDDIVAXMLProcessor(filename);
 			System.out.println(fcsxmlProcessor.info());
 			System.out.println("");
 

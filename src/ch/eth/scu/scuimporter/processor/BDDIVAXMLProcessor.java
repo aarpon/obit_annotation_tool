@@ -10,7 +10,7 @@ import org.xml.sax.SAXException;
  * Parses "BD BioSciences FACSDivaª Software" XML files.
  * @author Aaron Ponti
  */
-public class DBDIVAXMLProcessor extends Processor {
+public class BDDIVAXMLProcessor extends Processor {
 
 	/* Instance variables */
 	private String filename;
@@ -25,7 +25,7 @@ public class DBDIVAXMLProcessor extends Processor {
 	 * @param filename Name with full path of the file to be opened.
 	 * @throws ParserConfigurationException 
 	 */
-	public DBDIVAXMLProcessor(String filename) throws ParserConfigurationException {
+	public BDDIVAXMLProcessor(String filename) throws ParserConfigurationException {
 
 		// Set the filename
 		this.filename = filename;
@@ -50,6 +50,7 @@ public class DBDIVAXMLProcessor extends Processor {
 	 * Information regarding the file format.
 	 * @return descriptive String for the Processor.
 	 */
+	@Override
 	public String info() {
 		return "BD BioSciences FACSDiva\u2122 Software";
 	}
@@ -59,6 +60,7 @@ public class DBDIVAXMLProcessor extends Processor {
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
+	@Override
 	public boolean parse() throws IOException {
 
 		// Check the parser
