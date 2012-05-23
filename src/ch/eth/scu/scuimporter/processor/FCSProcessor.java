@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class FCSProcessor extends Processor {
 
-	/* Instance variables */
+	/* Private instance variables */
 	private String filename;
 	RandomAccessFile in = null;
 	long TEXTbegin = 0L;
@@ -24,11 +24,23 @@ public class FCSProcessor extends Processor {
 	long ANALYSISend = 0L;
 	long OTHERbegin = 0L;
 	char DELIMITER;
-	private ArrayList<Parameter> parameters = new ArrayList<Parameter>();
+
+	/* Public instance variables */
 	
-	Map<String, String> TEXTMapStandard = new LinkedHashMap<String, String>();
-	Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
-	Map<String, String> DATAMap = new LinkedHashMap<String, String>();
+	/**
+	 * ArrayList of Parameter's
+	 */
+	public ArrayList<Parameter> parameters = new ArrayList<Parameter>();
+	
+	/**
+	 * String-to-string map of key-value pairs for the standard FCS 3.0 keywords
+	 */
+	public Map<String, String> TEXTMapStandard = new LinkedHashMap<String, String>();
+
+	/**
+	 * String-to-string map of key-value pairs for custom FCS 3.0 keywords
+	 */
+	public Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
 
 	/**
 	 * Constructor 
@@ -39,7 +51,7 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
-	 * Information regarding the file format.
+	 * Return information regarding the file format.
 	 * @return descriptive String for the Processor.
 	 */
 	@Override
