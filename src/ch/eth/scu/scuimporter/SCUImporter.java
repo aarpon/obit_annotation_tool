@@ -1,5 +1,6 @@
 package ch.eth.scu.scuimporter;
 import java.io.IOException;
+import java.nio.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -33,6 +34,10 @@ public class SCUImporter {
 
 			fcsProcessor.parse();
 			System.out.println(fcsProcessor);
+			
+			System.out.println("First two data values:");
+			System.out.println(((FloatBuffer) fcsProcessor.DATA).get());
+			System.out.println(((FloatBuffer) fcsProcessor.DATA).get());
 			break;
 			
 		case 2:

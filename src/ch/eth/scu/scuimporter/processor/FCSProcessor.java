@@ -1,6 +1,7 @@
 package ch.eth.scu.scuimporter.processor;
 
 import java.io.*;
+import java.nio.*;
 import java.util.*;
 
 /**
@@ -42,6 +43,12 @@ public class FCSProcessor extends Processor {
 	 */
 	public Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
 
+	/**
+	 * DATA segment (linear array), one of IntBuffer, FloatBuffer, DoubleBuffer, CharBuffer
+	 * TODO Reformat in a more useful way (in a matrix [events x parameters], and correct type) 
+	 */
+	public Buffer DATA = null;
+	
 	/**
 	 * Constructor 
 	 * @param filename Name with full path of the file to be opened.
@@ -282,15 +289,9 @@ public class FCSProcessor extends Processor {
 		// Seek to the beginning of the data offset
 		in.seek(dataOffset);
 		
-		// To read the data in the correct format we need to know the
-		// number of parameters, the number of events, the datatype and
-		// the endianity.
-		int nParameters   = numParameters();
-		int nEvents       = numEvents();
-		String datatype   = datatype();
-		String endianity  = endianity();
-		
-		return true;
+		// Read and store the data
+		return readDataBlock();
+
 	}
 
 	/**
@@ -484,6 +485,66 @@ public class FCSProcessor extends Processor {
 		return datatype;
 	}
 
+	/**
+	 * Reads and stores the data segment 
+	 * @return true if reading the data segment was successful, flase otherwise
+	 * TODO Use tge information about the type of data
+	 */
+	private boolean readDataBlock() {
+		
+		// To read the data in the correct format we need to know the
+		// number of parameters, the number of events, the datatype and
+		// the endianity.
+		int nParameters   = numParameters();
+		int nEvents       = numEvents();
+		String datatype   = datatype();
+		String endianity  = endianity();
+		
+		// Endianity
+		ByteOrder endian;
+		if (endianity.equals("L")) {
+			endian = ByteOrder.LITTLE_ENDIAN;
+		} else if (endianity.equals("B")) {
+			endian = ByteOrder.BIG_ENDIAN;
+		} else {
+			System.out.println("Unknown endianity!");
+			return false;
+		}
+		
+		// Allocate a (byte) buffer to hold the data segment
+		int size = (int) (DATAend - DATAbegin + 1);
+		byte[] recordBuffer = new byte[size];
+
+		// Create a ByteBuffer wrapped around the byte array that 
+		// reads with the desired endianity
+		ByteBuffer record = ByteBuffer.wrap(recordBuffer);
+		record.order(endian);
+		
+		// Read
+		try {
+			in.read(recordBuffer);
+		} catch (IOException e) {
+			System.out.println("Could not read the data segment from file!");
+			return false;
+		}
+		
+		// Read the data with the correct endianity and data type
+		if (datatype.equals("I")) {
+			DATA = record.asIntBuffer(); 
+		} else if (datatype.equals("F")) {
+			DATA = record.asFloatBuffer();
+		} else if (datatype.equals("D")) {
+			DATA = record.asDoubleBuffer();			
+		} else if (datatype.equals("A")) {
+			DATA = record.asCharBuffer();
+		} else { 
+			System.out.println("Unknown data type!");
+			return false;
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Parameter class to store parameter attributes.
 	 * @author Aaron Ponti
