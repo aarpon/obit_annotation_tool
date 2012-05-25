@@ -28,14 +28,14 @@ public class SCUImporter {
 			filename = "/work/fcs/Kymb 090512 Experiment Export/108725.fcs";
 			//String filename = "/work/fcs/Kymb 090512 FCS EXport/96 Well - V bottom/Specimen_001_A10_A10.fcs";
 			
-			FCSProcessor fcsProcessor = new FCSProcessor(filename);
+			FCSProcessor fcsProcessor = new FCSProcessor(filename, true);
 			System.out.println(fcsProcessor.info() );
 			System.out.println("");
 
 			fcsProcessor.parse();
 			System.out.println(fcsProcessor);
 			
-			System.out.println("First two data values:");
+			System.out.println("First data value for the first two parameters (row-major order):");
 			System.out.println(((FloatBuffer) fcsProcessor.DATA).get());
 			System.out.println(((FloatBuffer) fcsProcessor.DATA).get());
 			break;

@@ -7,8 +7,12 @@ import java.util.*;
 /**
  * FCSProcessor parses "Data File Standard for Flow Cytometry, Version FCS3.0" files.
  * 
- * Parsing is currently not complete. Only the information needed to add the file to
- * OpenBIS is extracted.
+ * Parsing is currently not complete:
+ * 		- additional byte buffer manipulation needed for datatype "A" (ASCII)
+ * 		- only one DATA segment per file is processed (since apparently no vendor
+ * 			makes use of the possibility to store more than experiment per file)
+ * 		- ANALYSIS segment is not parsed
+ * 		- OTHER text segment is not parsed
  * 
  * @author Aaron Ponti
  */
@@ -16,14 +20,15 @@ public class FCSProcessor extends Processor {
 
 	/* Private instance variables */
 	private String filename;
+	private boolean enableDataParsing; 
 	RandomAccessFile in = null;
-	long TEXTbegin = 0L;
-	long TEXTend   = 0L;
-	long DATAbegin = 0L;
-	long DATAend = 0L;
-	long ANALYSISbegin = 0L;
-	long ANALYSISend = 0L;
-	long OTHERbegin = 0L;
+	int TEXTbegin = 0;
+	int TEXTend   = 0;
+	int DATAbegin = 0;
+	int DATAend = 0;
+	int ANALYSISbegin = 0;
+	int ANALYSISend = 0;
+	int OTHERbegin = 0;
 	char DELIMITER;
 
 	/* Public instance variables */
@@ -53,8 +58,9 @@ public class FCSProcessor extends Processor {
 	 * Constructor 
 	 * @param filename Name with full path of the file to be opened.
 	 */
-	public FCSProcessor(String filename) {
+	public FCSProcessor(String filename, boolean parseData) {
 		this.filename = filename;
+		this.enableDataParsing = parseData;
 	}
 
 	/**
@@ -88,13 +94,15 @@ public class FCSProcessor extends Processor {
 			// Process the parameters
 			processParameters();
 
-			// Read the DATA (events)
-			parseData();
+			if (enableDataParsing == true ) {
+				// Read the DATA (events)
+				parseData();
 
-			// Read the ANALYSIS
-			parseAnalysis();
-
-			// Read the ANALYSIS
+				// Read the ANALYSIS (if present)
+				parseAnalysis();
+			}
+			
+			// Read the OTHER text segment (if present)
 			parseOther();
 			
 		} finally {
@@ -251,7 +259,7 @@ public class FCSProcessor extends Processor {
 	private boolean parseText() throws IOException  {
 		// Read the TEXT segment
 		in.seek(TEXTbegin);
-		int LEN = (int)(TEXTend - TEXTbegin + 1); // TEXT cannot be longer than 99,999,999 bytes
+		int LEN = (TEXTend - TEXTbegin + 1); // TEXT cannot be longer than 99,999,999 bytes
 		byte[] bText = new byte[LEN];
 		in.read(bText);
 		
@@ -320,7 +328,7 @@ public class FCSProcessor extends Processor {
 	 */
 	private void swapOffsetsIfNeeded() {
 		if (TEXTbegin > DATAbegin) {
-			long tmp;
+			int tmp;
 			tmp = TEXTbegin;
 			TEXTbegin = DATAbegin;
 			DATAbegin = tmp;
@@ -486,6 +494,26 @@ public class FCSProcessor extends Processor {
 	}
 
 	/**
+	 * Return the data acquisition mode, one of "C", "L", "U".
+	 * C: One correlated multivariate histogram stored as a multidimensional array;
+	 * L: list mode: for each event, the value of each parameter is stored in the order in which the parameters are described. 
+	 * U: Uncorrelated univariate histograms: there can be more than one univariate histogram per data set. 
+	 * N: not defined.
+	 * @return acquisition mode of the data ("C", "L", "U"), or "N" if not defined.
+	 */
+	private String mode() {
+		if (TEXTMapStandard.containsKey("$MODE")) {
+			String mode = TEXTMapStandard.get("$MODE");
+			if ( mode.equals("C") || mode.equals("L") || mode.equals("U") ) {
+				return mode;
+			} else {
+				return "N";
+			}
+		}
+		return "N";
+	}
+	
+	/**
 	 * Reads and stores the data segment 
 	 * @return true if reading the data segment was successful, flase otherwise
 	 * TODO Use tge information about the type of data
@@ -499,6 +527,7 @@ public class FCSProcessor extends Processor {
 		int nEvents       = numEvents();
 		String datatype   = datatype();
 		String endianity  = endianity();
+		String mode       = mode();
 		
 		// Endianity
 		ByteOrder endian;
@@ -512,7 +541,7 @@ public class FCSProcessor extends Processor {
 		}
 		
 		// Allocate a (byte) buffer to hold the data segment
-		int size = (int) (DATAend - DATAbegin + 1);
+		int size = (DATAend - DATAbegin + 1);
 		byte[] recordBuffer = new byte[size];
 
 		// Create a ByteBuffer wrapped around the byte array that 
@@ -529,6 +558,8 @@ public class FCSProcessor extends Processor {
 		}
 		
 		// Read the data with the correct endianity and data type
+		// TODO In particular for datatype = 'A', additional handling
+		// will be necessary
 		if (datatype.equals("I")) {
 			DATA = record.asIntBuffer(); 
 		} else if (datatype.equals("F")) {
@@ -536,6 +567,8 @@ public class FCSProcessor extends Processor {
 		} else if (datatype.equals("D")) {
 			DATA = record.asDoubleBuffer();			
 		} else if (datatype.equals("A")) {
+			System.out.println("Data is stored with ASCII-encoded integer value." +
+					"Additional processing is required which is not implemented yet!" );
 			DATA = record.asCharBuffer();
 		} else { 
 			System.out.println("Unknown data type!");
