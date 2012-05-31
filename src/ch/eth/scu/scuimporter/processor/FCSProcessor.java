@@ -121,12 +121,20 @@ public class FCSProcessor extends Processor {
 		return true;
 
 	}
-	
+
 	/**
-	 * Return a String representation of the FCSProcessor.
-	 * @return String containing a description of the FCSProcessor. 
+	 * Return the file name of associated to the FCSProcessor.
+	 * @return String containing the file name associated to the FCSProcessor. 
 	 */
 	public String toString() {
+		return (new File(filename)).getName();
+	}
+	
+	/**
+	 * Return the parsed FCSProcessor metadata information.
+	 * @return String containing the metadata of the FCSProcessor. 
+	 */
+	public String metadataDump() {
 		String str = 
 				"Valid FCS3.0 file with TEXT: "     + 
 						TEXTbegin     + " - " + TEXTend     + ", DATA: " +

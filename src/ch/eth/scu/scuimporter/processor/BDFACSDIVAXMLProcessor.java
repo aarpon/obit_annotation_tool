@@ -7,15 +7,15 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen;
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Tray;
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen.Tube;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Tray;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube;
 
 /**
  * This Processor parses "BD BioSciences FACSDiva" XML files.
  * @author Aaron Ponti
  */
-public class BDDIVAXMLProcessor extends Processor {
+public class BDFACSDIVAXMLProcessor extends Processor {
 
 	/* Private instance variables */
 	private String filename;
@@ -35,7 +35,7 @@ public class BDDIVAXMLProcessor extends Processor {
 	 * Constructor
 	 * @param filename Name with full path of the file to be opened.
 	 */
-	public BDDIVAXMLProcessor(String filename) {
+	public BDFACSDIVAXMLProcessor(String filename) {
 
 		// Set the filename
 		this.filename = filename;
@@ -294,7 +294,7 @@ public class BDDIVAXMLProcessor extends Processor {
 		 * @return String representation of the Experiment node.
 		 */
 		public String toString() {
-			String str =  "[Ex] " + name;
+			String str =  "[Experiment] " + name;
 			return str;
 		}
 
@@ -388,7 +388,7 @@ public class BDDIVAXMLProcessor extends Processor {
 			 * @return String representation of the Tray node.
 			 */
 			public String toString() {
-				String str =  "[Tr] " + name;
+				String str =  "[Tray] " + name;
 				return str;
 			}
 
@@ -461,7 +461,7 @@ public class BDDIVAXMLProcessor extends Processor {
 			 * @return String representation of the Specimen node.
 			 */
 			public String toString() {
-				String str =  "[Sp] " + name;
+				String str =  "[Specimen] " + name;
 				return str;
 			}
 
@@ -541,7 +541,7 @@ public class BDDIVAXMLProcessor extends Processor {
 				 * @return String representation of the Tube node.
 				 */
 				public String toString() {
-					String str =  "[Tb] " + name;
+					String str =  "[Tube] " + name;
 					return str;
 				}
 

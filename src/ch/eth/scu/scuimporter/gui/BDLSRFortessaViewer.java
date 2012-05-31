@@ -17,11 +17,11 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor;
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment;
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen;
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen.Tube;
-import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Tray;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube;
+import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Tray;
 import ch.eth.scu.scuimporter.processor.FCSProcessor;
 
 import java.awt.Dimension;
@@ -43,7 +43,7 @@ import javax.swing.Action;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDDIVAXMLViewer extends JPanel
+public class BDLSRFortessaViewer extends JPanel
                       implements TreeSelectionListener {
     /**
 	 * 
@@ -58,10 +58,12 @@ public class BDDIVAXMLViewer extends JPanel
     private JSplitPane splitPane;
     private JPopupMenu popupMenu;
     
-    private BDDIVAXMLProcessor processor;
+    private BDFACSDIVAXMLProcessor xmlprocessor = null;
+    private FCSProcessor fcsprocessor = null;
+    
     private final Action openAction = new OpenAction();
 
-    public BDDIVAXMLViewer() {
+    public BDLSRFortessaViewer() {
 
     	// Add a layout manager
     	setLayout(new GridLayout(1,1));
@@ -106,24 +108,35 @@ public class BDDIVAXMLViewer extends JPanel
         JMenuItem mntmOpenFile = new JMenuItem("Open file...");
         mntmOpenFile.setAction(openAction);
         popupMenu.add(mntmOpenFile);
+        
+        // Add initial info to the html pane
+        htmlPane.setText("\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
+        		"XML files with the associated 'Data File Standard " + 
+        		"for Flow Cytometry, Version FCS3.0' files generated " +
+        		"by the BD LSRFortessa flow cytometer." );
     }
 
-    /** Parse the selected BD DIVA XML file. */
-    public boolean parse() {
+    /**
+     *  Parse the selected XML file. 
+     */
+    public boolean parseXML() {
 
         // Process the file
-    	processor = null;
 		try {
-			processor = new BDDIVAXMLProcessor(file.getCanonicalPath());
+			xmlprocessor = new BDFACSDIVAXMLProcessor(file.getCanonicalPath());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println(e);
+			htmlPane.setText("Invalid file!");
+			xmlprocessor = null;
 			return false;
 		}
-		processor.parse();
+		if (xmlprocessor.parse() == false ) {
+			htmlPane.setText("Could not parse file!");
+			xmlprocessor = null;
+			return false;
+		}
  
         // Create the root node
-        rootNode = new DefaultMutableTreeNode(processor);
+        rootNode = new DefaultMutableTreeNode(xmlprocessor);
         
         // Add all the children
         createNodes(rootNode);
@@ -135,6 +148,53 @@ public class BDDIVAXMLViewer extends JPanel
 
         // Listen for when the selection changes.
         tree.addTreeSelectionListener(this);
+        
+        // Make sure the other processor is null
+        fcsprocessor = null;
+        
+        // Clean the html pane
+        htmlPane.setText("");
+        
+    	return true;
+    }
+
+    /**
+     *  Parse the selected FCS file. 
+     */
+    public boolean parseFCS() {
+        
+    	// Process the file
+		try {
+			fcsprocessor = new FCSProcessor(file.getCanonicalPath(), false);
+		} catch (IOException e) {
+			htmlPane.setText("Invalid file!");
+			fcsprocessor = null;
+			return false;
+		}
+		try {
+			fcsprocessor.parse();
+		} catch (IOException e) {
+			htmlPane.setText("Could not parse file!");
+			fcsprocessor = null;
+			return false;
+		}
+ 
+        // Create the root node
+        rootNode = new DefaultMutableTreeNode(fcsprocessor);
+
+        // Create a tree that allows one selection at a time.
+        tree.setModel(new DefaultTreeModel(rootNode));
+        tree.getSelectionModel().setSelectionMode(
+        		TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        // Listen for when the selection changes.
+        tree.addTreeSelectionListener(this);
+ 
+        // Display the metadata in the html pane
+        htmlPane.setText(fcsprocessor.metadataDump());
+
+        // Make sure the other processor is null
+        xmlprocessor = null;
         
     	return true;
     }
@@ -152,30 +212,30 @@ public class BDDIVAXMLViewer extends JPanel
         
         // Print the attributes
         String className = nodeInfo.getClass().getName();
-        if (className.endsWith("BDDIVAXMLProcessor")) {
+        if (className.endsWith("BDFACSDIVAXMLProcessor")) {
         	htmlPane.setText(
-        			((BDDIVAXMLProcessor) 
+        			((BDFACSDIVAXMLProcessor) 
         					nodeInfo).attributesToString().replace(
         							", ", "\n"));
         } else if (className.endsWith("Experiment")) { 
         	htmlPane.setText(
-        			((BDDIVAXMLProcessor.Experiment) 
+        			((BDFACSDIVAXMLProcessor.Experiment) 
         					nodeInfo).attributesToString().replace(
         							", ", "\n"));
         } else if (className.endsWith("Tray")) { 
         	htmlPane.setText(
-        			((BDDIVAXMLProcessor.Experiment.Tray) 
+        			((BDFACSDIVAXMLProcessor.Experiment.Tray) 
         					nodeInfo).attributesToString().replace(
         							", ", "\n"));
         } else if (className.endsWith("Specimen")) { 
         	htmlPane.setText(
-        			((BDDIVAXMLProcessor.Experiment.Specimen) 
+        			((BDFACSDIVAXMLProcessor.Experiment.Specimen) 
         					nodeInfo).attributesToString().replace(
         							", ", "\n"));
         } else if (className.endsWith("Tube")) {
         	// Cast
-        	BDDIVAXMLProcessor.Experiment.Specimen.Tube tube = 
-        			(BDDIVAXMLProcessor.Experiment.Specimen.Tube) nodeInfo;
+        	BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube tube = 
+        			(BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube) nodeInfo;
         	// Display attributes
         	String out = tube.attributesToString().replace(", ", "\n");
         	// Parse the fcs file and dump its metadata
@@ -183,12 +243,18 @@ public class BDDIVAXMLViewer extends JPanel
         	FCSProcessor fcs = new FCSProcessor(fcsFile, false);
         	try {
 				fcs.parse();
-				out += "\n\n" + fcs.toString();
+				out += "\n\n" + fcs.metadataDump();
 			} catch (IOException e1) {
 				out += "\n\nCould not parse file " + fcsFile + ".";
 			}
         	// Display
         	htmlPane.setText(out);
+        } else if (className.endsWith("FCSProcessor")) {
+        	// Strictly speaking there is nothing to do, but we
+        	// refresh the display in case.
+        	if (fcsprocessor != null) {
+        		htmlPane.setText(fcsprocessor.metadataDump());
+        	}
         } else {
         	htmlPane.setText("");
         }
@@ -200,7 +266,7 @@ public class BDDIVAXMLViewer extends JPanel
         DefaultMutableTreeNode specimen = null;
         DefaultMutableTreeNode tube = null;
 
-        for (Experiment e : processor.experiments) {
+        for (Experiment e : xmlprocessor.experiments) {
 
         	// Add the experiments
         	experiment = new DefaultMutableTreeNode(e);
@@ -262,11 +328,11 @@ public class BDDIVAXMLViewer extends JPanel
         }
 
         // Create and set up the window.
-        JFrame frame = new JFrame("BD DIVA XML File Viewer");
+        JFrame frame = new JFrame("BD LSRFortessa Experiment Viewer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Add content to the window.
-        frame.getContentPane().add(new BDDIVAXMLViewer());
+        frame.getContentPane().add(new BDLSRFortessaViewer());
 
         // Display the window.
         frame.pack();
@@ -309,7 +375,7 @@ public class BDDIVAXMLViewer extends JPanel
 		public OpenAction() {
 			putValue(NAME, "Open file...");
 			putValue(SHORT_DESCRIPTION, 
-					"Open and parse a BD DIVA XML project file.");
+					"Open and parse a BD LSR Fortessa files.");
 		}
 		
 		public void actionPerformed(ActionEvent e) {
@@ -319,7 +385,7 @@ public class BDDIVAXMLViewer extends JPanel
 			
 			// Filters
 			FileFilter filter = new FileNameExtensionFilter(
-					"BD DIVA XML Files", "xml" );
+					"BD LSRFortessa files (*.xml, *.fcs)", "xml", "fcs" );
             fc.setAcceptAllFileFilterUsed(false);
             fc.addChoosableFileFilter(filter);
 			
@@ -327,9 +393,19 @@ public class BDDIVAXMLViewer extends JPanel
 			int returnVal = fc.showOpenDialog(htmlPane);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
-	            if (parse() == false) {
-	            	file = null;
-	            }
+				int dotPos = file.getName().lastIndexOf(".");
+				String extension = file.getName().substring(dotPos);
+				if (extension.equalsIgnoreCase(".xml")) {
+					if (parseXML() == false) {
+						file = null;
+					}
+				} else if (extension.equalsIgnoreCase(".fcs")) {
+					if (parseFCS() == false) {
+						file = null;
+					}
+				} else {
+					System.err.println("Unknown extension!");
+				}
 	        } else {
 	        	file = null;
 	            return;
