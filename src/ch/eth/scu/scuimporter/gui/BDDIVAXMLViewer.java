@@ -1,6 +1,7 @@
-package ch.eth.scu.scuimporter;
+package ch.eth.scu.scuimporter.gui;
 
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -9,18 +10,34 @@ import javax.swing.UIManager;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor;
 import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment;
 import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen;
 import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen.Tube;
 import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Tray;
+import ch.eth.scu.scuimporter.processor.FCSProcessor;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+
+import javax.swing.JPopupMenu;
+import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JMenuItem;
+import javax.swing.AbstractAction;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.Action;
 
 /**
  * Simple graphical viewer for the BDDIVAXMLProcessor
@@ -31,32 +48,29 @@ public class BDDIVAXMLViewer extends JPanel
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -3780551586693882867L;
+	private static final long serialVersionUID = 1L;
 	private JEditorPane htmlPane;
     private JTree tree;
+    private File file;
+    private DefaultMutableTreeNode rootNode;
+    private JScrollPane treeView;
+    private JScrollPane htmlView;
+    private JSplitPane splitPane;
+    private JPopupMenu popupMenu;
     
     private BDDIVAXMLProcessor processor;
+    private final Action openAction = new OpenAction();
 
     public BDDIVAXMLViewer() {
+
+    	// Add a layout manager
+    	setLayout(new GridLayout(1,1));
+    	
+        // Create the root node
+        rootNode = new DefaultMutableTreeNode("Right-click to pick a file...");
         
-    	// Set the layout
-    	super(new GridLayout(1,2));
-
-    	// TODO The user should pick the file from a menu
-        String filename = "/work/fcs/Kymb 090512 Experiment Export/Kymb 090512.xml";
-
-        // Process the file
-		processor = new BDDIVAXMLProcessor(filename);
-		processor.parse();
- 
-        // Create the root node (file name)
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(processor);
-        
-        // Add all the children
-        createNodes(top);
-
         // Create a tree that allows one selection at a time.
-        tree = new JTree(top);
+        tree = new JTree(rootNode);
         tree.getSelectionModel().setSelectionMode(
         		TreeSelectionModel.SINGLE_TREE_SELECTION);
 
@@ -64,28 +78,67 @@ public class BDDIVAXMLViewer extends JPanel
         tree.addTreeSelectionListener(this);
 
         // Create the scroll pane and add the tree to it. 
-        JScrollPane treeView = new JScrollPane(tree);
-
+        treeView = new JScrollPane(tree);
+        
         // Create the HTML viewing pane.
         htmlPane = new JEditorPane();
         htmlPane.setEditable(false);
-        JScrollPane htmlView = new JScrollPane(htmlPane);
+        htmlView = new JScrollPane(htmlPane);
 
         // Add the scroll panes to a split pane.
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setTopComponent(treeView);
         splitPane.setBottomComponent(htmlView);
 
-        Dimension minimumSize = new Dimension(800, 600);
-        htmlView.setMinimumSize(minimumSize);
-        treeView.setMinimumSize(minimumSize);
+        // Set sizes
+        setPreferredSize(new Dimension(1000, 600));
+        htmlView.setMinimumSize(new Dimension(700, 600));
+        treeView.setMinimumSize(new Dimension(300, 600));
         splitPane.setDividerLocation(300); 
-        splitPane.setPreferredSize(new Dimension(800, 600));
+        splitPane.setPreferredSize(new Dimension(1000, 600));
 
         // Add split pane to this panel.
         add(splitPane);
+        
+        // Add popup menu with Open file action
+        popupMenu = new JPopupMenu();
+        addPopup(tree, popupMenu);
+        JMenuItem mntmOpenFile = new JMenuItem("Open file...");
+        mntmOpenFile.setAction(openAction);
+        popupMenu.add(mntmOpenFile);
     }
 
+    /** Parse the selected BD DIVA XML file. */
+    public boolean parse() {
+
+        // Process the file
+    	processor = null;
+		try {
+			processor = new BDDIVAXMLProcessor(file.getCanonicalPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.err.println(e);
+			return false;
+		}
+		processor.parse();
+ 
+        // Create the root node
+        rootNode = new DefaultMutableTreeNode(processor);
+        
+        // Add all the children
+        createNodes(rootNode);
+
+        // Create a tree that allows one selection at a time.
+        tree.setModel(new DefaultTreeModel(rootNode));
+        tree.getSelectionModel().setSelectionMode(
+        		TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        // Listen for when the selection changes.
+        tree.addTreeSelectionListener(this);
+        
+    	return true;
+    }
+    
     /** Required by TreeSelectionListener interface. */
     public void valueChanged(TreeSelectionEvent e) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -102,25 +155,42 @@ public class BDDIVAXMLViewer extends JPanel
         if (className.endsWith("BDDIVAXMLProcessor")) {
         	htmlPane.setText(
         			((BDDIVAXMLProcessor) 
-        					nodeInfo).attributesToString());
+        					nodeInfo).attributesToString().replace(
+        							", ", "\n"));
         } else if (className.endsWith("Experiment")) { 
         	htmlPane.setText(
         			((BDDIVAXMLProcessor.Experiment) 
-        					nodeInfo).attributesToString());
+        					nodeInfo).attributesToString().replace(
+        							", ", "\n"));
         } else if (className.endsWith("Tray")) { 
         	htmlPane.setText(
         			((BDDIVAXMLProcessor.Experiment.Tray) 
-        					nodeInfo).attributesToString());
+        					nodeInfo).attributesToString().replace(
+        							", ", "\n"));
         } else if (className.endsWith("Specimen")) { 
         	htmlPane.setText(
         			((BDDIVAXMLProcessor.Experiment.Specimen) 
-        					nodeInfo).attributesToString());
-        } else if (className.endsWith("Tube")) { 
-        	htmlPane.setText(
-        			((BDDIVAXMLProcessor.Experiment.Specimen.Tube) 
-        					nodeInfo).attributesToString());
+        					nodeInfo).attributesToString().replace(
+        							", ", "\n"));
+        } else if (className.endsWith("Tube")) {
+        	// Cast
+        	BDDIVAXMLProcessor.Experiment.Specimen.Tube tube = 
+        			(BDDIVAXMLProcessor.Experiment.Specimen.Tube) nodeInfo;
+        	// Display attributes
+        	String out = tube.attributesToString().replace(", ", "\n");
+        	// Parse the fcs file and dump its metadata
+        	String fcsFile = file.getParent() + File.separator + tube.dataFilename;
+        	FCSProcessor fcs = new FCSProcessor(fcsFile, false);
+        	try {
+				fcs.parse();
+				out += "\n\n" + fcs.toString();
+			} catch (IOException e1) {
+				out += "\n\nCould not parse file " + fcsFile + ".";
+			}
+        	// Display
+        	htmlPane.setText(out);
         } else {
-        	htmlPane.setText("No attributes.");
+        	htmlPane.setText("");
         }
     }
     
@@ -212,4 +282,58 @@ public class BDDIVAXMLViewer extends JPanel
             }
         });
     }
+    
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
+	
+	// Open file action
+	private class OpenAction extends AbstractAction {
+		
+		private static final long serialVersionUID = 1L;
+
+		public OpenAction() {
+			putValue(NAME, "Open file...");
+			putValue(SHORT_DESCRIPTION, 
+					"Open and parse a BD DIVA XML project file.");
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			
+			//Create a file chooser
+			final JFileChooser fc = new JFileChooser();
+			
+			// Filters
+			FileFilter filter = new FileNameExtensionFilter(
+					"BD DIVA XML Files", "xml" );
+            fc.setAcceptAllFileFilterUsed(false);
+            fc.addChoosableFileFilter(filter);
+			
+			// Get a file from an open dialog
+			int returnVal = fc.showOpenDialog(htmlPane);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				file = fc.getSelectedFile();
+	            if (parse() == false) {
+	            	file = null;
+	            }
+	        } else {
+	        	file = null;
+	            return;
+	        }
+		}
+	}
 }

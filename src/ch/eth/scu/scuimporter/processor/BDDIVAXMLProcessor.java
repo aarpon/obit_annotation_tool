@@ -84,7 +84,7 @@ public class BDDIVAXMLProcessor extends Processor {
 			doc = parser.parse(file);
 			//doc.getDocumentElement().normalize();
 		} catch (SAXException se) {
-			se.printStackTrace();
+			System.out.println("The file appears to be contain invalid XML.");
 			doc = null;
 			return false;
 		} catch (IOException ioe) {

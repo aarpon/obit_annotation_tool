@@ -111,9 +111,8 @@ public class FCSProcessor extends Processor {
 			if (in != null) { 
 				try { 
 					in.close();
-					System.out.println("File closed.");
 				} catch (Exception e) {
-
+					// Silent
 				}
 			}
 
