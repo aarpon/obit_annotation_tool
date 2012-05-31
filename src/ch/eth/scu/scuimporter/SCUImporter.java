@@ -16,7 +16,7 @@ public class SCUImporter {
 	public static void main(String[] args) throws IOException, ParserConfigurationException {
 		// TODO Auto-generated method stub
 
-		int test = 1;
+		int test = 2;
 		String filename;
 		
 		switch (test) {
@@ -42,7 +42,7 @@ public class SCUImporter {
 			
 		case 2:
 			
-			// Test the FCSXMLProcessor
+			// Test the BDDIVAXMLProcessor
 			
 			filename = "/work/fcs/Kymb 090512 Experiment Export/Kymb 090512.xml";
 			
@@ -51,7 +51,7 @@ public class SCUImporter {
 			System.out.println("");
 
 			fcsxmlProcessor.parse();
-			System.out.println(fcsxmlProcessor);
+			System.out.println(fcsxmlProcessor.treeView());
 			break;
 
 		default:

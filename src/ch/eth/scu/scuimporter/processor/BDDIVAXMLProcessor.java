@@ -2,12 +2,17 @@ package ch.eth.scu.scuimporter.processor;
 
 import java.io.*;
 import java.util.*;
+
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen;
+import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Tray;
+import ch.eth.scu.scuimporter.processor.BDDIVAXMLProcessor.Experiment.Specimen.Tube;
+
 /**
- * This Processor parses "BD BioSciences FACSDivaª Software" XML files.
+ * This Processor parses "BD BioSciences FACSDiva" XML files.
  * @author Aaron Ponti
  */
 public class BDDIVAXMLProcessor extends Processor {
@@ -98,11 +103,67 @@ public class BDDIVAXMLProcessor extends Processor {
 	 * @return String containing a description of the DBDIVAXMLProcessor. 
 	 */
 	public String toString() {
-		String str = "XML file: " + filename + (" (version: " + version + ", " +
-				"release version: " + releaseVersion + ")\n\n");
-		for ( Experiment e : experiments) {
-			str += e.toString() + "\n";
+		return (new File(filename)).getName();
+	}
+
+	/**
+	 * Return a String with the Processor attributes
+	 * @return Comma-separated String with attribute key: value pairs.
+	 */
+	public String attributesToString() {
+		String str =  "full filename: " + filename + ", " + 
+				"version: " + version + ", " + 
+				"release version: " + releaseVersion;
+		return str;
+	}
+
+	/**
+	 * Return a textual tree representation of the DBDIVAXMLProcessor 
+	 * @return String containing a tree representation of the DBDIVAXMLProcessor
+	 */	
+	public String treeView() {
+
+		String str = "[XML file] " + toString() + " (" +
+				attributesToString() + ").\n|\n";        
+
+		for (Experiment e : experiments) {
+
+			str +=  "[ Experiment ], name: " + e.name + " (" +
+					e.attributesToString() + ").\n";
+
+			for (Tray t : e.trays) {
+
+				str +=  "|__[ Tray ], name: " + t.name + " (" +
+						t.attributesToString() + ").\n";
+
+				for (Specimen s : t.specimens) {
+
+					str +=  "|____[ Specimen ], name: " + s.name + " (" +
+							s.attributesToString() + ").\n";
+
+					for (Tube tb : s.tubes) {
+
+						str +=  "|______[ Tube ], name: " + tb.name + " (" +
+								tb.attributesToString() + ").\n";
+					}
+				}
+
+			}
+
+			for (Specimen s : e.specimens) {
+
+				str +=  "|__[ Specimen ], name: " + s.name + "(" +
+						s.attributesToString() + ").\n";
+
+				for (Tube tb : s.tubes) {
+
+					str +=  "|____[ Tube ], name: " + tb.name + " (" +
+							tb.attributesToString() + ").\n";
+				}
+			}
+
 		}
+		
 		return str;
 	}
 
@@ -171,8 +232,8 @@ public class BDDIVAXMLProcessor extends Processor {
 		 */
 		public String owner_name;
 
-		// An Experiment can contain TRAYS that in turn contain SPECIMENs which contain TUBEs,
-		// or directly SPECIMENs containing TUBEs.
+		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
+		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
 		/**
 		 * ArrayList of Tray's
@@ -218,8 +279,8 @@ public class BDDIVAXMLProcessor extends Processor {
 
 				} else if (n.getNodeName().equals("specimen")) {
 
-					// Specimen (level 1, since it is a child of an Experiment)  
-					specimens.add(new Specimen(n, 1));
+					// Specimen  
+					specimens.add(new Specimen(n));
 
 				} else {
 
@@ -229,35 +290,23 @@ public class BDDIVAXMLProcessor extends Processor {
 		}
 
 		/**
-		 * Return summary of the extracted Experiment node.
-		 * @return string with a summary of the Experiment info.
+		 * Return a String representation of the extracted Experiment node.
+		 * @return String representation of the Experiment node.
 		 */
 		public String toString() {
-			String str =  "[ Experiment ], name: " + name + " (owner: " + owner_name + ", " +
-					"date: " + date + ").\n";
-			for ( Tray t : trays) {
-				str += t.toString() + "\n";
-			}
-			for ( Specimen s : specimens) {
-				str += s.toString() + "\n";
-			}
+			String str =  "[Ex] " + name;
 			return str;
 		}
 
 		/**
-		 * Accessory function to repeat a String n times: repeat( "abc", 2 ) => "abcabc".
-		 * @param str	String to be repeated.
-		 * @param n		Number of times to repeat the String.
-		 * @return		The repeated String.
-		 * TODO Extract this into some util package.
+		 * Return a String with the Experiment attributes
+		 * @return Comma-separated String with attribute key: value pairs.
 		 */
-		private String repeat(String str, int n){
-			StringBuilder ret = new StringBuilder();
-			for(int i = 0;i < n;i++) {
-				ret.append(str);
-			}
-			return ret.toString();
-		}
+		public String attributesToString() {
+			String str =  "owner: " + owner_name + ", " + 
+					"date: " + date;
+			return str;
+		}		
 
 		/**
 		 * Class that represents a tray parsed from the XML.
@@ -283,7 +332,7 @@ public class BDDIVAXMLProcessor extends Processor {
 			public String rows;
 
 			/**
-			 * Number of cols (String)
+			 * Number of columns (String)
 			 */
 			public String cols;
 
@@ -322,8 +371,8 @@ public class BDDIVAXMLProcessor extends Processor {
 
 					if (n.getNodeName().equals("specimen")) {
 
-						// Specimen (level 2, since it is a child of a Tray)  
-						specimens.add(new Specimen(n, 2));
+						// Specimen  
+						specimens.add(new Specimen(n));
 
 					} else {
 
@@ -335,18 +384,25 @@ public class BDDIVAXMLProcessor extends Processor {
 			}
 
 			/**
-			 * Return summary of the extracted Tray node.
-			 * @return string with a summary of the Tray info.
+			 * Return a String representation of the extracted Tray node.
+			 * @return String representation of the Tray node.
 			 */
 			public String toString() {
-				String str =  "|__[ Tray ], name: " + name + " (type: " + tray_type + ", rows: " +
-						rows + ", cols: " + cols + ", orientation: " + orientation + ")\n";
-				for ( Specimen s : specimens) {
-					str += s.toString() + "\n";
-				}
+				String str =  "[Tr] " + name;
 				return str;
 			}
 
+			/**
+			 * Return a String with the Tray attributes
+			 * @return Comma-separated String with attribute key: value pairs.
+			 */
+			public String attributesToString() {
+				String str =  "type: " + tray_type + ", " + 
+						"rows: " + rows + ", " +
+						"columns: " + cols + ", " +
+						"orientation: " + orientation;
+				return str;
+			}
 		}
 
 		/**
@@ -355,9 +411,6 @@ public class BDDIVAXMLProcessor extends Processor {
 		 * @author Aaron Ponti
 		 */
 		public class Specimen {
-
-			/* Private instance variables */
-			private int level;
 
 			/* Public instance variables */
 
@@ -374,19 +427,8 @@ public class BDDIVAXMLProcessor extends Processor {
 			/**
 			 * Constructor.
 			 * @param specimenNode DOM node that refers to a Specimen.
-			 * @param level 1 if the Specimen is a child of an Experiment, 
-			 * 		  		2 if it is the child of a Tray
-			 * @throws IllegalArgumentException
 			 */
-			public Specimen(org.w3c.dom.Node specimenNode, int level) throws IllegalArgumentException {
-
-				// Check the level
-				if (level < 1 || level > 2) {
-					throw new IllegalArgumentException("Error: level must be either 1 or 2.");
-				}
-
-				// Store the level
-				this.level = level;
+			public Specimen(org.w3c.dom.Node specimenNode) {
 
 				// Get the attributes
 				NamedNodeMap attrs = specimenNode.getAttributes();
@@ -404,7 +446,7 @@ public class BDDIVAXMLProcessor extends Processor {
 					if (n.getNodeName().equals("tube")) {
 
 						// Tray
-						tubes.add(new Tube(n, level + 1));
+						tubes.add(new Tube(n));
 
 					} else {
 
@@ -415,16 +457,23 @@ public class BDDIVAXMLProcessor extends Processor {
 			}
 
 			/**
-			 * Return summary of the extracted Specimen node.
-			 * @return string with a summary of the Specimen info.
+			 * Return a String representation of the extracted Specimen node.
+			 * @return String representation of the Specimen node.
 			 */
 			public String toString() {
-				String str =  "|" + repeat("__", level) + "[ Specimen ], name: " + name + "\n";
-				for ( Tube t : tubes) {
-					str += t.toString() + "\n";
-				}
+				String str =  "[Sp] " + name;
 				return str;
-			}		
+			}
+
+			/**
+			 * Return a String with the Specimen attributes
+			 * @return Comma-separated String with attribute key: value pairs.
+			 */
+			public String attributesToString() {
+				String str =  "no attributes";
+				return str;
+			}
+
 
 			/**
 			 * Class that represents a tube parsed from the XML.
@@ -432,9 +481,6 @@ public class BDDIVAXMLProcessor extends Processor {
 			 * @author Aaron Ponti
 			 */
 			public class Tube {
-
-				/* Private instance variables */
-				private int level;
 
 				/* Public instance variables */  		
 
@@ -456,19 +502,8 @@ public class BDDIVAXMLProcessor extends Processor {
 				/**
 				 * Constructor.
 				 * @param tubeNode DOM node that refers to a Tube.
-				 * @param level 2 if the parent Specimen is a child of an Experiment, 
-				 * 		  		3 if the parent Specimen is a child of a Tray.
-				 * @throws IllegalArgumentException
 				 */
-				public Tube(org.w3c.dom.Node tubeNode, int level) throws IllegalArgumentException{
-
-					// Check the level
-					if (level < 1 || level > 3) {
-						throw new IllegalArgumentException("Error: level must be either 2 or 3.");
-					}
-
-					// Store the level
-					this.level = level;
+				public Tube(org.w3c.dom.Node tubeNode) {
 
 					// Get the attributes
 					NamedNodeMap attrs = tubeNode.getAttributes();
@@ -502,12 +537,21 @@ public class BDDIVAXMLProcessor extends Processor {
 				}
 
 				/**
-				 * Return summary of the extracted Tube node.
-				 * @return string with a summary of the Tube info.
+				 * Return a String representation of the extracted Tube node.
+				 * @return String representation of the Tube node.
 				 */
 				public String toString() {
-					String str =  "|" + repeat("__", level) + "[ Tube ], name: " + name + " (date: " + date + 
-							", file name: " + dataFilename + ")";
+					String str =  "[Tb] " + name;
+					return str;
+				}
+
+				/**
+				 * Return a String with the Tube attributes
+				 * @return Comma-separated String with attribute key: value pairs.
+				 */
+				public String attributesToString() {
+					String str =  "date: " + date + ", " + 
+							"file name: " + dataFilename;
 					return str;
 				}
 			}
