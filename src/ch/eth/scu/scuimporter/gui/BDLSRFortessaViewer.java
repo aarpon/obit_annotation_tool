@@ -322,9 +322,13 @@ public class BDLSRFortessaViewer extends JPanel
     private static void createAndShowGUI() {
     	// Try to use the system look and feel
         try {
-        	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        	if (System.getProperty("os.name").equals("Mac OS X")) {
+        		UIManager.setLookAndFeel(ch.randelshofer.quaqua.QuaquaManager.getLookAndFeel());
+        	} else {
+        		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        	}
         } catch (Exception e) {
-        	System.err.println("Couldn't use system look and feel.");
+        	System.err.println("Couldn't set system look and feel.");
         }
 
         // Create and set up the window.
