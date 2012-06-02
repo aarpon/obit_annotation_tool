@@ -353,6 +353,7 @@ public class BDLSRFortessaViewer extends JPanel
         });
     }
     
+    // Add a pop-up menu
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
@@ -382,9 +383,15 @@ public class BDLSRFortessaViewer extends JPanel
 					"Open and parse a BD LSR Fortessa files.");
 		}
 		
+		// User chose Open file on the context menu
 		public void actionPerformed(ActionEvent e) {
 			
-			//Create a file chooser
+			// React to the context menu
+			if (!e.getActionCommand().equals("Open file...")) {
+				return;
+			}
+			
+			// Create a file chooser
 			final JFileChooser fc = new JFileChooser();
 			
 			// Filters
