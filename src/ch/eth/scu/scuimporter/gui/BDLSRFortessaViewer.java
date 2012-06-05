@@ -106,6 +106,9 @@ implements ActionListener, TreeSelectionListener {
 				"for Flow Cytometry, Version FCS3.0' files generated " +
 				"by the BD LSRFortessa flow cytometer.");
 		
+		// Set default close operation 
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		// Adapt size and make visible 
 		pack();
 		setVisible(true);

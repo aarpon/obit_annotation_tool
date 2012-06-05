@@ -8,6 +8,25 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SCUImporter/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/System/Library/Java"/>
+	<classpathentry kind="lib" path="dss_lib/cglib-nodep.jar"/>
+	<classpathentry kind="lib" path="dss_lib/cisd-args4j.jar"/>
+	<classpathentry kind="lib" path="dss_lib/cisd-base.jar"/>
+	<classpathentry kind="lib" path="dss_lib/commons-codec.jar"/>
+	<classpathentry kind="lib" path="dss_lib/commons-httpclient.jar"/>
+	<classpathentry kind="lib" path="dss_lib/commons-io.jar"/>
+	<classpathentry kind="lib" path="dss_lib/commons-lang.jar"/>
+	<classpathentry kind="lib" path="dss_lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="dss_lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="dss_lib/dss_client.jar"/>
+	<classpathentry kind="lib" path="dss_lib/geronimo-stax-api_1.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="dss_lib/jline.jar"/>
+	<classpathentry kind="lib" path="dss_lib/jython.jar"/>
+	<classpathentry kind="lib" path="dss_lib/log4j.jar"/>
+	<classpathentry kind="lib" path="dss_lib/poi-3.7-20101029.jar"/>
+	<classpathentry kind="lib" path="dss_lib/poi-ooxml-3.7-20101029.jar"/>
+	<classpathentry kind="lib" path="dss_lib/poi-ooxml-schemas-3.7-20101029.jar"/>
+	<classpathentry kind="lib" path="dss_lib/spring.jar"/>
+	<classpathentry kind="lib" path="dss_lib/stream-supporting-httpinvoker.jar"/>
+	<classpathentry kind="lib" path="dss_lib/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
