@@ -21,10 +21,8 @@ import java.io.IOException;
  * @author Aaron Ponti
  */
 public class BDLSRFortessaViewer extends JFrame
-implements ActionListener, TreeSelectionListener {
-	/**
-	 * 
-	 */
+	implements ActionListener, TreeSelectionListener {
+
 	private static final long serialVersionUID = 1L;
 	private JEditorPane htmlPane;
 	private JTree tree;
