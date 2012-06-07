@@ -23,8 +23,10 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Role;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.io.File;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -45,16 +47,21 @@ public class OpenBISClient extends JFrame
 	private DefaultMutableTreeNode rootNode;
 	private JTree tree;
 	private JScrollPane treeView;
+	private JButton pickDirButton;
+	private JLabel dirLabel;
+	private String defaultRootNodeString = "Please login to openBIS...";
 	
 	private final static String openBISURL = "https://openbis-scu.ethz.ch/openbis/";
 
+	private File selectedDirectory;
+	
 	/**
 	 * Constructor
 	 */
 	public OpenBISClient() {
 
 		// Call the frame's constructor
-		super("openBIS client");
+		super("Single-Cell Unit openBIS importer");
 
 		// Try to use the system look and feel
 		try {
@@ -67,10 +74,23 @@ public class OpenBISClient extends JFrame
 			System.err.println("Couldn't set system look and feel.");
 		}
 
-		setLayout(new GridLayout(1, 1, 0, 0));
+		Container verticalBox = Box.createVerticalBox();
+
+		dirLabel = new JLabel("Please choose your experiment");
+		verticalBox.add(dirLabel);
+		
+		pickDirButton = new JButton("Pick a directory...");
+		pickDirButton.setActionCommand("Pick");
+		pickDirButton.setPreferredSize(new Dimension(600, 30));
+		pickDirButton.setMaximumSize(new Dimension(600, 30));
+		pickDirButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { pickDir(); }
+        });
+		verticalBox.add(pickDirButton);
 		
 		// Create the root node
-		rootNode = new DefaultMutableTreeNode("Please login...");
+		rootNode = new DefaultMutableTreeNode(defaultRootNodeString);
+		
 		
 		// Create a tree that allows one selection at a time.
 		tree = new JTree(rootNode);
@@ -79,19 +99,23 @@ public class OpenBISClient extends JFrame
 
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
-
+		
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
-		add(treeView);
+		verticalBox.add(treeView);
 			
 		// Add menu
 		JMenu menu = new JMenu("File");
 		menu.add(makeMenuItem("Log in"));
 		menu.add(makeMenuItem("Log out"));
+		menu.addSeparator();
 		menu.add(makeMenuItem("Quit"));
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
+		
+		// Add box
+		add(verticalBox, BorderLayout.CENTER);
 		
 		// Set exit on close
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -151,8 +175,8 @@ public class OpenBISClient extends JFrame
 			return false;
 		}
 
-		// Fill in the user interface with the obtained data
-		fillUIWithOpenBISData();
+		// Fill in the tree view with the openBIS data
+		fillTreeViewWithOpenBISData();
 		
 		return true;
 	}
@@ -188,6 +212,7 @@ public class OpenBISClient extends JFrame
 	public boolean logout() {
 		if (facade != null) {
 			facade.logout();
+			clearTreeView();
 			return true;
 		}
 		return false;
@@ -230,11 +255,25 @@ public class OpenBISClient extends JFrame
 	}
 	
 	/**
-	 * Fill the UI elements with the data obtained from openBIS
-	 * @param spaceIndex: index of the space in the JComboBox.
-	 * @param projectIndex: index of the project in the JComboBox
+	 * Clear the tree view
 	 */
-	private void fillUIWithOpenBISData() {
+	private void clearTreeView() {
+
+		// Create the root node
+		rootNode = new DefaultMutableTreeNode(defaultRootNodeString);
+
+		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);		
+	}
+	
+	/**
+	 * Fill the tree view with the data obtained from openBIS
+	 */
+	private void fillTreeViewWithOpenBISData() {
 
 		DefaultMutableTreeNode space = null;
 		DefaultMutableTreeNode project = null;
@@ -295,6 +334,25 @@ public class OpenBISClient extends JFrame
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
 
+	}
+
+	/**
+	 * Asks the user to pick a directory to be transferred
+	 */
+	private void pickDir() {
+
+		// Create a file chooser
+		final JFileChooser fc = new JFileChooser();
+
+		// Only directories
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+		// Get a file from an open dialog
+		int returnVal = fc.showOpenDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			selectedDirectory = fc.getSelectedFile();
+			pickDirButton.setText(selectedDirectory.toString());
+		}
 	}
 
 	protected class SpaceWrapper {
