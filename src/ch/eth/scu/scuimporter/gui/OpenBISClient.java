@@ -2,18 +2,28 @@ package ch.eth.scu.scuimporter.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Role;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
 /**
@@ -22,18 +32,20 @@ import java.awt.GridLayout;
  * @author Aaron Ponti
  *
  */
-public class OpenBISClient extends JFrame implements ActionListener {
+public class OpenBISClient extends JFrame 
+	implements ActionListener, TreeSelectionListener {
 
 	private static final long serialVersionUID = 1L;
 
 	private String userName = "";
 	private String userPassword = "";
 	private int timeout = 60000;
-	IOpenbisServiceFacade facade = null;
+	private IOpenbisServiceFacade facade;
 	
-	private JLabel labelSpaces, labelProjects, labelExperiments;
-	private JComboBox comboSpaces, comboProjects, comboExperiments;
-
+	private DefaultMutableTreeNode rootNode;
+	private JTree tree;
+	private JScrollPane treeView;
+	
 	private final static String openBISURL = "https://openbis-scu.ethz.ch/openbis/";
 
 	/**
@@ -55,29 +67,23 @@ public class OpenBISClient extends JFrame implements ActionListener {
 			System.err.println("Couldn't set system look and feel.");
 		}
 
-		setLayout(new GridLayout(6, 1, 0, 0));
+		setLayout(new GridLayout(1, 1, 0, 0));
 		
-		labelSpaces = new JLabel("Spaces");
-		add(labelSpaces);
+		// Create the root node
+		rootNode = new DefaultMutableTreeNode("Please login...");
 		
-		comboSpaces = new JComboBox();
-		comboSpaces.setEnabled(false);
-		add(comboSpaces);
-		
-		labelProjects = new JLabel("Projects");
-		add(labelProjects);
-		
-		comboProjects = new JComboBox();
-		comboProjects.setEnabled(false);
-		add(comboProjects);
-		
-		labelExperiments = new JLabel("Experiments");
-		add(labelExperiments);
-		
-		comboExperiments = new JComboBox();
-		comboExperiments.setEnabled(false);
-		add(comboExperiments);
+		// Create a tree that allows one selection at a time.
+		tree = new JTree(rootNode);
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
+
+		// Create the scroll pane and add the tree to it. 
+		treeView = new JScrollPane(tree);
+		add(treeView);
+			
 		// Add menu
 		JMenu menu = new JMenu("File");
 		menu.add(makeMenuItem("Log in"));
@@ -90,7 +96,17 @@ public class OpenBISClient extends JFrame implements ActionListener {
 		// Set exit on close
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+		// Make sure to logout when exiting 
+		addWindowListener(new WindowAdapter() {
+	        @Override
+	        public void windowClosing(WindowEvent e) {
+	        	logout();
+	        	System.exit(0);
+	        }
+	    });
+
 		// Set up the frame
+		setMinimumSize(new Dimension(300, 600));
 		pack();
 		setVisible(true);
 		
@@ -125,9 +141,11 @@ public class OpenBISClient extends JFrame implements ActionListener {
 
 		// Try logging in with current credentials
 		try {
-			facade = OpenbisServiceFacadeFactory.tryCreate(userName, userPassword, openBISURL, timeout);
+			facade = OpenbisServiceFacadeFactory.tryCreate(
+					userName, userPassword, openBISURL, timeout);
 		} catch (UserFailureException e) {
-			JOptionPane.showMessageDialog(this, "Login failed. Please try again.");
+			JOptionPane.showMessageDialog(this,
+					"Login failed. Please try again.");
 			userName = "";
 			userPassword = "";
 			return false;
@@ -137,22 +155,6 @@ public class OpenBISClient extends JFrame implements ActionListener {
 		fillUIWithOpenBISData();
 		
 		return true;
-	}
-
-	/**
-	 * Return a list of spaces with projects
-	 * @return list of spaces with projects and role assignments
-	 */
-	public List<SpaceWithProjectsAndRoleAssignments> getSpaces() {
-		if (facade == null) {
-			// Use this syntax to prevent error from Javadoc
-			List<SpaceWithProjectsAndRoleAssignments> l = Collections.emptyList();
-			return l;
-
-			// Note: Javadoc gives an error on this (valid) syntax:
-			// return (Collections.<SpaceWithProjectsAndRoleAssignments>emptyList());
-		}
-		return (facade.getSpacesWithProjects());
 	}
 
 	/**
@@ -218,44 +220,99 @@ public class OpenBISClient extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Fill the UI elements with the data obtained from openBIS 
+	 * Called when selection in the Tree View is changed.
+	 * @param e A TreeSelectionEvent
+	 */
+	@Override
+	public void valueChanged(TreeSelectionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * Fill the UI elements with the data obtained from openBIS
+	 * @param spaceIndex: index of the space in the JComboBox.
+	 * @param projectIndex: index of the project in the JComboBox
 	 */
 	private void fillUIWithOpenBISData() {
+
+		DefaultMutableTreeNode space = null;
+		DefaultMutableTreeNode project = null;
+		DefaultMutableTreeNode experiment = null;
 		
-		// Fill in the spaces combo box
-		List<SpaceWithProjectsAndRoleAssignments> spaces = getSpaces(); 
-		DefaultComboBoxModel dcm = new DefaultComboBoxModel();
-		for(SpaceWithProjectsAndRoleAssignments s : spaces) {
-		    dcm.addElement(s.getCode());
-		}
-		comboSpaces.setModel(dcm);
-		comboSpaces.setEnabled(true);
-		
-		// Fill in the projects combo box
-		if (spaces.size() == 0) {
+		// Do we have a connection with openBIS?
+		if (facade == null) {
 			return;
 		}
-		List<Project> projects = spaces.get(0).getProjects();
-		dcm = new DefaultComboBoxModel();
-		for(Project p : projects) {
-		    dcm.addElement(p.getCode());
-		}
-		comboProjects.setModel(dcm);
-		comboProjects.setEnabled(true);
 		
-		// Now fill in the experiments combo box
-		List<String> expId = new ArrayList<String>();
-		System.out.println("Getting experiments from " + spaces.get(0).getCode() + "/" + projects.get(0).getCode());
-		expId.add(spaces.get(0).getCode() + "/" + projects.get(0).getCode());
-		try {
-			List<Experiment> exp = facade.getExperiments(expId);
-			for (Experiment e : exp) {
-				dcm.addElement(e.getCode());
+		// TODO Check that the session is still open
+
+		// Set the root of the tree
+		rootNode = new DefaultMutableTreeNode(userName);
+		
+		// Get spaces
+		List<SpaceWithProjectsAndRoleAssignments> spaces =
+				facade.getSpacesWithProjects();
+
+		for (SpaceWithProjectsAndRoleAssignments s : spaces) {
+		    
+			// Add the space
+			SpaceWrapper spaceWrapper = new SpaceWrapper(s);
+			space = new DefaultMutableTreeNode(spaceWrapper);
+			rootNode.add(space);
+		    
+			// Get the projects for current space
+			List<Project> projects = s.getProjects();
+			
+			for (Project p : projects) {
+			    
+				// Add the project
+				project = new DefaultMutableTreeNode(p.getCode());
+				space.add(project);
+				
+				List<String> expId = new ArrayList<String>();
+				expId.add(p.getIdentifier());
+				List<Experiment> experiments = 
+						facade.listExperimentsForProjects(expId);
+				
+				for (Experiment e : experiments) {
+
+					// Add the experiment
+					experiment = new DefaultMutableTreeNode(e.getCode());
+					project.add(experiment);				
+				
+				}
+				
 			}
-			comboExperiments.setModel(dcm);
-			comboExperiments.setEnabled(true);		
-		} catch ( UserFailureException u ) {
-			System.out.println("No experiments found with ID " + expId);
+		    
+		}
+		
+		// Update the view
+		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
+
+	}
+
+	protected class SpaceWrapper {
+
+		private SpaceWithProjectsAndRoleAssignments s;
+
+		protected SpaceWrapper(SpaceWithProjectsAndRoleAssignments s) {
+			this.s = s;
+		}
+		
+		@Override
+		public String toString() {
+			Set<Role> roles = s.getRoles(userName);
+			String rolesStr = ", roles: ";
+			for (Role r : roles) {
+				rolesStr += ( r + "; " ); 
+			}
+			return new String( s.getCode() + rolesStr );
 		}
 	}
 	
@@ -272,5 +329,4 @@ public class OpenBISClient extends JFrame implements ActionListener {
 			}
 		});
 	}
-
 }

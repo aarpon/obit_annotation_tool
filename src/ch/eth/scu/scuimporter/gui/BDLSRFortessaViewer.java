@@ -200,6 +200,7 @@ public class BDLSRFortessaViewer extends JFrame
 	 * Called when selection in the Tree View is changed.
 	 * @param e A TreeSelectionEvent
 	 */
+	@Override
 	public void valueChanged(TreeSelectionEvent e) {
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)
 				tree.getLastSelectedPathComponent();
