@@ -2,6 +2,7 @@ package ch.eth.scu.scuimporter.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 
 /**
@@ -34,7 +36,7 @@ import java.io.File;
  * @author Aaron Ponti
  *
  */
-public class OpenBISClient extends JFrame 
+public class OpenBISImporter extends JFrame 
 	implements ActionListener, TreeSelectionListener {
 
 	private static final long serialVersionUID = 1L;
@@ -55,10 +57,12 @@ public class OpenBISClient extends JFrame
 
 	private File selectedDirectory;
 	
+	private boolean isLoggedIn = false;
+	
 	/**
 	 * Constructor
 	 */
-	public OpenBISClient() {
+	public OpenBISImporter() {
 
 		// Call the frame's constructor
 		super("Single-Cell Unit openBIS importer");
@@ -91,7 +95,6 @@ public class OpenBISClient extends JFrame
 		// Create the root node
 		rootNode = new DefaultMutableTreeNode(defaultRootNodeString);
 		
-		
 		// Create a tree that allows one selection at a time.
 		tree = new JTree(rootNode);
 		tree.getSelectionModel().setSelectionMode(
@@ -103,16 +106,9 @@ public class OpenBISClient extends JFrame
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
 		verticalBox.add(treeView);
-			
-		// Add menu
-		JMenu menu = new JMenu("File");
-		menu.add(makeMenuItem("Log in"));
-		menu.add(makeMenuItem("Log out"));
-		menu.addSeparator();
-		menu.add(makeMenuItem("Quit"));
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(menu);
-		setJMenuBar(menuBar);
+
+		// Add menus
+		addMenus();
 		
 		// Add box
 		add(verticalBox, BorderLayout.CENTER);
@@ -129,30 +125,43 @@ public class OpenBISClient extends JFrame
 	        }
 	    });
 
-		// Set up the frame
+		// Set up the frame and center on screen
 		setMinimumSize(new Dimension(300, 600));
 		pack();
+		setLocationRelativeTo(null);
 		setVisible(true);
 		
 		// Ask the user to login
 		login();
 	}
+	
+	private void addMenus() {
+		JMenu fileMenu = new JMenu("openBIS");
+		fileMenu.add(makeMenuItem("Log in", KeyEvent.VK_I));
+		fileMenu.add(makeMenuItem("Log out", KeyEvent.VK_O));
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.add(fileMenu);
+		setJMenuBar(menuBar);
+	}
+	
 	/**
 	 * Create menu entries
 	 * @param String to be displayed for the menu entry
 	 * @return a JMenuItem to be added to the menubar
 	 */
-	private JMenuItem makeMenuItem(String name) {
+	private JMenuItem makeMenuItem(String name, int accelerator) {
 		JMenuItem m = new JMenuItem(name);
+		m.setAccelerator(KeyStroke.getKeyStroke(accelerator,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		m.setActionCommand(name);
 		m.addActionListener(this);
 		return m;
 	}
 
-
 	/**
 	 * Login to openBIS. Credentials provided by the user through a dialog.
-	 * @return true if login was successful, false otherwise.
+	 * @return true if login was successful (or if already logged in), 
+	 * false otherwise.
 	 */
 	public boolean login() {
 
@@ -163,6 +172,11 @@ public class OpenBISClient extends JFrame
 			}
 		}
 
+		// Are we already logged in?
+		if (isLoggedIn == true) {
+			return true;
+		}
+		
 		// Try logging in with current credentials
 		try {
 			facade = OpenbisServiceFacadeFactory.tryCreate(
@@ -175,6 +189,9 @@ public class OpenBISClient extends JFrame
 			return false;
 		}
 
+		// Set isLoggedIn to true
+		isLoggedIn = true;
+		
 		// Fill in the tree view with the openBIS data
 		fillTreeViewWithOpenBISData();
 		
@@ -210,7 +227,7 @@ public class OpenBISClient extends JFrame
 	 * @return true if logging out was successful, false otherwise.
 	 */
 	public boolean logout() {
-		if (facade != null) {
+		if (facade != null && isLoggedIn == true) {
 			facade.logout();
 			clearTreeView();
 			return true;
@@ -225,17 +242,9 @@ public class OpenBISClient extends JFrame
 
 		// React to the context menu
 		if (e.getActionCommand().equals("Log in")) {
-			if (login() == true) {
-				System.out.println("Login successful.");
-			} else {
-				System.out.println("Login failed.");
-			}
+			login();
 		} else if (e.getActionCommand().equals("Log out")) {
-			if (logout() == true) {
-				System.out.println("Log out successful.");
-			} else {
-				System.out.println("Log out failed.");
-			}
+			logout();
 		} else if (e.getActionCommand().equals("Quit")) {
 			logout();
 			System.exit(0);
@@ -251,7 +260,6 @@ public class OpenBISClient extends JFrame
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/**
@@ -365,12 +373,7 @@ public class OpenBISClient extends JFrame
 		
 		@Override
 		public String toString() {
-			Set<Role> roles = s.getRoles(userName);
-			String rolesStr = ", roles: ";
-			for (Role r : roles) {
-				rolesStr += ( r + "; " ); 
-			}
-			return new String( s.getCode() + rolesStr );
+			return s.getCode();
 		}
 	}
 	
@@ -381,9 +384,11 @@ public class OpenBISClient extends JFrame
 	public static void main(String[] args) {
 		// Schedule a job for the event dispatch thread:
 		// creating and showing this application's GUI.
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				new OpenBISClient();
+				new OpenBISImporter();
 			}
 		});
 	}
