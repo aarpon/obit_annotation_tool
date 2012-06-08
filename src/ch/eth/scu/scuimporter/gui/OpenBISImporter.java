@@ -314,7 +314,8 @@ public class OpenBISImporter extends JFrame
 			for (Project p : projects) {
 			    
 				// Add the project
-				project = new DefaultMutableTreeNode(p.getCode());
+				ProjectWrapper projectWrapper = new ProjectWrapper(p);
+				project = new DefaultMutableTreeNode(projectWrapper);
 				space.add(project);
 				
 				List<String> expId = new ArrayList<String>();
@@ -325,8 +326,9 @@ public class OpenBISImporter extends JFrame
 				for (Experiment e : experiments) {
 
 					// Add the experiment
-					experiment = new DefaultMutableTreeNode(e.getCode());
-					project.add(experiment);				
+					ExperimentWrapper experimentWrapper = new ExperimentWrapper(e);
+					experiment = new DefaultMutableTreeNode(experimentWrapper);
+					project.add(experiment);
 				
 				}
 				
@@ -373,10 +375,37 @@ public class OpenBISImporter extends JFrame
 		
 		@Override
 		public String toString() {
-			return s.getCode();
+			return new String( "[space] " + s.getCode());
 		}
 	}
-	
+
+	protected class ProjectWrapper {
+
+		private Project p;
+
+		protected ProjectWrapper(Project p) {
+			this.p = p;
+		}
+		
+		@Override
+		public String toString() {
+			return new String( "[project] " + p.getCode());
+		}
+	}
+
+	protected class ExperimentWrapper {
+
+		private Experiment e;
+
+		protected ExperimentWrapper(Experiment e) {
+			this.e = e;
+		}
+		
+		@Override
+		public String toString() {
+			return new String( "[experiment] " + e.getCode());
+		}
+	}	
 	/**
 	 * Program entry point
 	 * @param args Ignored
