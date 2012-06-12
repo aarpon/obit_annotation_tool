@@ -1,4 +1,4 @@
-package ch.eth.scu.scuimporter.gui;
+package ch.eth.scu.scuimporter.gui.panels;
 
 import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment;

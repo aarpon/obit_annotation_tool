@@ -36,8 +36,8 @@ public class OpenBISLoginDialog extends JDialog {
 		setLayout(gridBagLayout);
 		
 		// Add the SCU OpenBIS logo at the top
-		JLabel labelLogo = new JLabel(
-				new ImageIcon(this.getClass().getResource("login.png")));
+		JLabel labelLogo = new JLabel(new ImageIcon(
+				this.getClass().getResource("resources/login.png")));
 		GridBagConstraints logoConstraints = new GridBagConstraints();
 		logoConstraints.anchor = GridBagConstraints.NORTHWEST;
 		logoConstraints.gridx = 0;
