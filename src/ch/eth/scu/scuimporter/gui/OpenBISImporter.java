@@ -7,7 +7,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -22,7 +21,6 @@ import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Role;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
@@ -131,10 +129,12 @@ public class OpenBISImporter extends JFrame
 		setMinimumSize(new Dimension(300, 600));
 		pack();
 		setLocationRelativeTo(null);
-		setVisible(true);
 		
 		// Ask the user to login
 		login();
+
+		// Make window visible
+		setVisible(true);
 	}
 	
 	private void addMenus() {
@@ -208,13 +208,10 @@ public class OpenBISImporter extends JFrame
 
 		// Modal dialog: stops here until the dialog is disposed
 		// (when a username and password have been provided)
-		credentialsDialog = new OpenBISLoginDialog(null);
-		if (credentialsDialog.areCredentialsSet() == true) {
-			userName = credentialsDialog.getUsername();
-			userPassword = credentialsDialog.getPassword();
-			return true;
-		}
-		return false;		
+		credentialsDialog = new OpenBISLoginDialog(this);
+		userName = credentialsDialog.getUsername();
+		userPassword = credentialsDialog.getPassword();
+		return true;
 	}
 
 	/**

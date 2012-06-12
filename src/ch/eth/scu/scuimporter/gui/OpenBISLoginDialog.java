@@ -1,65 +1,107 @@
 package ch.eth.scu.scuimporter.gui;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
+import javax.swing.*;
+
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
-
+/**
+ * SCU openBIS login dialog
+ * @author Aaron Ponti
+ *
+ */
 public class OpenBISLoginDialog extends JDialog {
-
+	
+	/* Private instance variables */
 	private static final long serialVersionUID = 1L;
-	private JLabel headerLabel;
-	private CredentialsPanel credentialsPanel;
-	private JButton loginButton;
-	private boolean credentialsSet = false;
+
+	private JTextField txtUsername;
+	private JPasswordField pwdPassword;
 
 	/**
 	 * Constructor
 	 * @param owner parent window
 	 */
 	public OpenBISLoginDialog(Window owner) {
-
+		
 		// Make the dialog modal
 		setModal(true);
-
-		// Header
-		headerLabel = new JLabel(
+		
+		// Create a GridBagLayout
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		setLayout(gridBagLayout);
+		
+		// Add the SCU OpenBIS logo at the top
+		JLabel labelLogo = new JLabel(
 				new ImageIcon(this.getClass().getResource("login.png")));
-		headerLabel.setSize(new Dimension(500, 200));
+		GridBagConstraints logoConstraints = new GridBagConstraints();
+		logoConstraints.anchor = GridBagConstraints.NORTHWEST;
+		logoConstraints.gridx = 0;
+		logoConstraints.gridy = 0;
+		add(labelLogo, logoConstraints);
+		
+		// Add a label for the user name
+		JLabel labelUsername = new JLabel("User name");
+		GridBagConstraints usernameCnstr = new GridBagConstraints();
+		usernameCnstr.gridx = 0;
+		usernameCnstr.gridy = 1;
+		usernameCnstr.insets = new Insets(10, 0, 0, 0);	
+		add(labelUsername, usernameCnstr);
 
-		// Add the widgets
-		setLayout(new GridLayout(3, 1, 0, 0));
-		add(headerLabel);
-		credentialsPanel = new CredentialsPanel(); 
-		add(credentialsPanel);
-		loginButton = new JButton("Login");
+		// Create a text field for the user name
+		txtUsername = new JTextField();
+		txtUsername.setHorizontalAlignment(JTextField.CENTER);
+		GridBagConstraints txtUsernameCnstr = new GridBagConstraints();
+		txtUsernameCnstr.fill = GridBagConstraints.HORIZONTAL;
+		txtUsernameCnstr.gridx = 0;
+		txtUsernameCnstr.gridy = 2;
+		txtUsernameCnstr.ipady = 10;
+		txtUsernameCnstr.insets = new Insets(5, 30, 0, 30);	
+		add(txtUsername, txtUsernameCnstr);
+		
+		// Add a label for the password
+		JLabel labelPassword = new JLabel("Password");
+		GridBagConstraints passwordCnstr = new GridBagConstraints();
+		passwordCnstr.gridx = 0;
+		passwordCnstr.gridy = 3;
+		passwordCnstr.insets = new Insets(10, 0, 0, 0);	
+		add(labelPassword, passwordCnstr);
+		
+		// Create a field for the user password
+		pwdPassword = new JPasswordField();
+		pwdPassword.setHorizontalAlignment(JPasswordField.CENTER);
+		GridBagConstraints pwdPasswordCnstr = new GridBagConstraints();
+		pwdPasswordCnstr.fill = GridBagConstraints.HORIZONTAL;
+		pwdPasswordCnstr.gridx = 0;
+		pwdPasswordCnstr.gridy = 4;
+		pwdPasswordCnstr.ipady = 10;
+		pwdPasswordCnstr.insets = new Insets(5, 30, 0, 30);	
+		add(pwdPassword, pwdPasswordCnstr);
+
+		// Create a login button
+		JButton loginButton = new JButton("Login");
+		GridBagConstraints loginButtonCnstr = new GridBagConstraints();
+		loginButtonCnstr.fill = GridBagConstraints.HORIZONTAL;
+		loginButtonCnstr.gridx = 0;
+		loginButtonCnstr.gridy = 5;
+		loginButtonCnstr.ipady = 15;
+		loginButtonCnstr.insets = new Insets(10, 3, 3, 3);
 		loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	if (getUsername().equals("") == false && 
             			getPassword().equals("") == false) {
-            		credentialsSet = true;
             		setVisible(false);
             		dispose();
             	}
             }
         });
-		add(loginButton);
+		add(loginButton, loginButtonCnstr);
 		
-		// Make the login button react to enter key
+		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(loginButton);
 
 		// Display the dialog
@@ -67,22 +109,15 @@ public class OpenBISLoginDialog extends JDialog {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		setVisible(true);
+		
 	}
 
-	/**
-	 * Check if the credentials were entered
-	 * @return true if the credentials were entered, false otherwise
-	 */
-	public boolean areCredentialsSet() {
-		return credentialsSet;
-	}
-	
 	/**
 	 * Get the entered user name
 	 * @return user name entered in the dialog 
 	 */
 	public String getUsername() {
-		return credentialsPanel.userField.getText();
+		return txtUsername.getText();
 	}
 	
 	/**
@@ -90,47 +125,7 @@ public class OpenBISLoginDialog extends JDialog {
 	 * @return password entered in the dialog 
 	 */
 	public String getPassword() {
-		return (new String(credentialsPanel.passField.getPassword()));
+		return (new String(pwdPassword.getPassword()));
 	}
 	
-	/**
-	 * TODO Replace this with a better layout
-	 */
-	private class CredentialsPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-
-		private JTextField userField;
-		private JPasswordField passField;
-		
-		GridBagConstraints constraints = new GridBagConstraints();
-
-		private CredentialsPanel() {
-
-			GridBagLayout gridbagLayout = new GridBagLayout(); 
-			setLayout(gridbagLayout);
-
-			Border padding = BorderFactory.createEmptyBorder(20,20,5,20);
-			setBorder(padding);
-
-			userField = new JTextField();
-			passField = new JPasswordField();
-
-			constraints.fill = GridBagConstraints.BOTH;
-			constraints.weighty = 1.0;
-			constraints.weightx = 1.0;
-
-			constraints.weightx = 0.2;
-			addGB(new JLabel("User name:"), 0, 0);
-			addGB(new JLabel("Password:"), 0, 1);
-			constraints.weightx = 0.8;
-			addGB(userField, 1, 0);
-			addGB(passField, 1, 1);
-		}
-		
-		void addGB(Component component, int x, int y) {
-			constraints.gridx = x;
-			constraints.gridy = y;
-			add(component, constraints);
-		}
-	}
 }
