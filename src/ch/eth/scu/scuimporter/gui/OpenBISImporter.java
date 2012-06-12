@@ -12,6 +12,8 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.metal.OceanTheme;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -59,6 +61,8 @@ public class OpenBISImporter extends JFrame
 	
 	private boolean isLoggedIn = false;
 	
+	private OpenBISLoginDialog credentialsDialog;
+	
 	/**
 	 * Constructor
 	 */
@@ -67,15 +71,13 @@ public class OpenBISImporter extends JFrame
 		// Call the frame's constructor
 		super("Single-Cell Unit openBIS importer");
 
-		// Try to use the system look and feel
+		// Try to use the cross-platform look and feel
 		try {
-			if (System.getProperty("os.name").equals("Mac OS X")) {
-				UIManager.setLookAndFeel(ch.randelshofer.quaqua.QuaquaManager.getLookAndFeel());
-			} else {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
+			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			MetalLookAndFeel.setCurrentTheme(new OceanTheme());
+			UIManager.setLookAndFeel(new MetalLookAndFeel()); 
 		} catch (Exception e) {
-			System.err.println("Couldn't set system look and feel.");
+			System.err.println("Couldn't set look and feel.");
 		}
 
 		Container verticalBox = Box.createVerticalBox();
@@ -204,22 +206,15 @@ public class OpenBISImporter extends JFrame
 	 */
 	private boolean askForCredentials() {
 
-		// Create a login dialog
-		JTextField userField = new JTextField();
-		JPasswordField passField = new JPasswordField();
-		String message = "Please enter your user name and password.";
-		int result = JOptionPane.showOptionDialog(this,
-				new Object[] { message, userField, passField },
-				"Login", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE,
-				null, null, null);
-		if (result == JOptionPane.OK_OPTION) {
-			userName = userField.getText();
-			userPassword = new String(passField.getPassword());
+		// Modal dialog: stops here until the dialog is disposed
+		// (when a username and password have been provided)
+		credentialsDialog = new OpenBISLoginDialog(null);
+		if (credentialsDialog.areCredentialsSet() == true) {
+			userName = credentialsDialog.getUsername();
+			userPassword = credentialsDialog.getPassword();
 			return true;
-		} else {
-			return false;
 		}
+		return false;		
 	}
 
 	/**
@@ -230,6 +225,7 @@ public class OpenBISImporter extends JFrame
 		if (facade != null && isLoggedIn == true) {
 			facade.logout();
 			clearTreeView();
+			isLoggedIn = false;
 			return true;
 		}
 		return false;
