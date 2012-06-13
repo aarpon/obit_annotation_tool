@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -26,10 +25,11 @@ public class OpenBISLoginDialog extends JDialog {
 	 * Constructor
 	 * @param owner parent window
 	 */
-	public OpenBISLoginDialog(Window owner) {
+	public OpenBISLoginDialog() {
 		
-		// Make the dialog modal
+		// Make the dialog modal and not resizable
 		setModal(true);
+		setResizable(false);
 		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();

@@ -20,7 +20,7 @@ import java.io.IOException;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDLSRFortessaViewer extends JFrame
+public class BDLSRFortessaViewer extends JPanel
 	implements ActionListener, TreeSelectionListener {
 
 	private static final long serialVersionUID = 1L;
@@ -30,8 +30,6 @@ public class BDLSRFortessaViewer extends JFrame
 	private DefaultMutableTreeNode rootNode;
 	private JScrollPane treeView;
 	private JScrollPane htmlView;
-	private JSplitPane splitPane;
-
 	private BDFACSDIVAXMLProcessor xmlprocessor = null;
 	private FCSProcessor fcsprocessor = null;
 
@@ -40,21 +38,9 @@ public class BDLSRFortessaViewer extends JFrame
 	 */
 	public BDLSRFortessaViewer() {
 		
-		super("BD LSRFortessa Experiment Viewer");
-		
-		// Add a layout manager
-		setLayout(new GridLayout(1,1));
-
-		// Try to use the system look and feel
-		try {
-			if (System.getProperty("os.name").equals("Mac OS X")) {
-				UIManager.setLookAndFeel(ch.randelshofer.quaqua.QuaquaManager.getLookAndFeel());
-			} else {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
-		} catch (Exception e) {
-			System.err.println("Couldn't set system look and feel.");
-		}
+		// Create a GridBagLayout
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		setLayout(gridBagLayout);
 		
 		// Create the root node
 		rootNode = new DefaultMutableTreeNode("Pick a file...");
@@ -70,46 +56,38 @@ public class BDLSRFortessaViewer extends JFrame
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
 
+		// Add to the layout
+		GridBagConstraints treeViewCnstr = new GridBagConstraints();
+		treeViewCnstr.fill = GridBagConstraints.BOTH;
+		treeViewCnstr.gridx = 0;
+		treeViewCnstr.gridy = 0;
+		treeViewCnstr.weightx = 1.0;
+		treeViewCnstr.weighty = 1.0;
+		treeViewCnstr.gridwidth = 1;
+		treeViewCnstr.gridheight = 1;
+		add(treeView, treeViewCnstr);
+
 		// Create the HTML viewing pane.
 		htmlPane = new JEditorPane();
 		htmlPane.setEditable(false);
 		htmlView = new JScrollPane(htmlPane);
 
-		// Add the scroll panes to a split pane.
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setTopComponent(treeView);
-		splitPane.setBottomComponent(htmlView);
-
-		// Set sizes
-		setPreferredSize(new Dimension(1000, 600));
-		htmlView.setMinimumSize(new Dimension(700, 600));
-		treeView.setMinimumSize(new Dimension(300, 600));
-		splitPane.setDividerLocation(300); 
-		splitPane.setPreferredSize(new Dimension(1000, 600));
-
-		// Add split pane to this panel.
-		add(splitPane);
-
-		// Add menu
-		JMenu menu = new JMenu("File");
-		menu.add(makeMenuItem("Open"));
-		menu.add(makeMenuItem("Quit"));
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(menu);
-		setJMenuBar(menuBar);
+		// Add to the layout
+		GridBagConstraints htmlViewCnstr = new GridBagConstraints();
+		htmlViewCnstr.fill = GridBagConstraints.BOTH;
+		htmlViewCnstr.gridx = 1;
+		htmlViewCnstr.gridy = 0;
+		htmlViewCnstr.weightx = 1.0;
+		htmlViewCnstr.weighty = 1.0;
+		htmlViewCnstr.gridwidth = 1;
+		htmlViewCnstr.gridheight = 1;
+		add(htmlView, htmlViewCnstr);
 
 		// Add initial info to the html pane
 		htmlPane.setText("\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
 				"XML files with the associated 'Data File Standard " + 
 				"for Flow Cytometry, Version FCS3.0' files generated " +
 				"by the BD LSRFortessa flow cytometer.");
-		
-		// Set default close operation 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		// Adapt size and make visible 
-		pack();
-		setVisible(true);
 
 	}
 
@@ -327,36 +305,6 @@ public class BDLSRFortessaViewer extends JFrame
 		// React to the context menu
 		if (e.getActionCommand().equals("Open")) {
 
-			// Create a file chooser
-			final JFileChooser fc = new JFileChooser();
-
-			// Filters
-			FileFilter filter = new FileNameExtensionFilter(
-					"BD LSRFortessa files (*.xml, *.fcs)", "xml", "fcs");
-			fc.setAcceptAllFileFilterUsed(false);
-			fc.addChoosableFileFilter(filter);
-
-			// Get a file from an open dialog
-			int returnVal = fc.showOpenDialog(htmlPane);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				file = fc.getSelectedFile();
-				int dotPos = file.getName().lastIndexOf(".");
-				String extension = file.getName().substring(dotPos);
-				if (extension.equalsIgnoreCase(".xml")) {
-					if (parseXML() == false) {
-						file = null;
-					}
-				} else if (extension.equalsIgnoreCase(".fcs")) {
-					if (parseFCS() == false) {
-						file = null;
-					}
-				} else {
-					System.err.println("Unknown extension!");
-				}
-			} else {
-				file = null;
-				return;
-			}
 		} else if (e.getActionCommand().equals("Quit")) {
 			System.exit(0);
 		} else {
@@ -365,29 +313,40 @@ public class BDLSRFortessaViewer extends JFrame
 	}
 
 	/**
-	 * Create menu entries
-	 * @param String to be displayed for the menu entry
-	 * @return a JMenuItem to be added to the menubar
+	 * Asks the user to pick a file to be parsed
 	 */
-	private JMenuItem makeMenuItem(String name) {
-		JMenuItem m = new JMenuItem(name);
-		m.setActionCommand(name);
-		m.addActionListener(this);
-		return m;
-	}
-	
-	/**
-	 * Program entry point
-	 * @param args Ignored
-	 */
-	public static void main(String[] args) {
-		// Schedule a job for the event dispatch thread:
-		// creating and showing this application's GUI.
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new BDLSRFortessaViewer();
+	public void pickFile() {
+
+		// Create a file chooser
+		final JFileChooser fc = new JFileChooser();
+
+		// Filters
+		FileFilter filter = new FileNameExtensionFilter(
+				"BD LSRFortessa files (*.xml, *.fcs)", "xml", "fcs");
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(filter);
+
+		// Get a file from an open dialog
+		int returnVal = fc.showOpenDialog(htmlPane);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			file = fc.getSelectedFile();
+			int dotPos = file.getName().lastIndexOf(".");
+			String extension = file.getName().substring(dotPos);
+			if (extension.equalsIgnoreCase(".xml")) {
+				if (parseXML() == false) {
+					file = null;
+				}
+			} else if (extension.equalsIgnoreCase(".fcs")) {
+				if (parseFCS() == false) {
+					file = null;
+				}
+			} else {
+				System.err.println("Unknown extension!");
 			}
-		});
+		} else {
+			file = null;
+			return;
+		}
 	}
 
 }
