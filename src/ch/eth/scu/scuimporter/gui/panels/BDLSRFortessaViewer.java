@@ -30,6 +30,7 @@ public class BDLSRFortessaViewer extends JPanel
 	private DefaultMutableTreeNode rootNode;
 	private JScrollPane treeView;
 	private JScrollPane htmlView;
+	private JLabel metadataView;
 	private BDFACSDIVAXMLProcessor xmlprocessor = null;
 	private FCSProcessor fcsprocessor = null;
 
@@ -62,11 +63,26 @@ public class BDLSRFortessaViewer extends JPanel
 		treeViewCnstr.gridx = 0;
 		treeViewCnstr.gridy = 0;
 		treeViewCnstr.weightx = 1.0;
-		treeViewCnstr.weighty = 1.0;
+		treeViewCnstr.weighty = 0.5;
 		treeViewCnstr.gridwidth = 1;
 		treeViewCnstr.gridheight = 1;
 		add(treeView, treeViewCnstr);
 
+		// Add a simple label
+		metadataView = new JLabel("Metadata viewer");
+		metadataView.setVerticalAlignment(SwingConstants.TOP);
+
+		// Add to the layout
+		GridBagConstraints metadataViewCnstr = new GridBagConstraints();
+		metadataViewCnstr.fill = GridBagConstraints.BOTH;
+		metadataViewCnstr.gridx = 0;
+		metadataViewCnstr.gridy = 1;
+		metadataViewCnstr.weightx = 1.0;
+		metadataViewCnstr.weighty = 0.0;
+		metadataViewCnstr.gridwidth = 1;
+		metadataViewCnstr.gridheight = 1;
+		add(metadataView, metadataViewCnstr);
+		
 		// Create the HTML viewing pane.
 		htmlPane = new JEditorPane();
 		htmlPane.setEditable(false);
@@ -75,10 +91,10 @@ public class BDLSRFortessaViewer extends JPanel
 		// Add to the layout
 		GridBagConstraints htmlViewCnstr = new GridBagConstraints();
 		htmlViewCnstr.fill = GridBagConstraints.BOTH;
-		htmlViewCnstr.gridx = 1;
-		htmlViewCnstr.gridy = 0;
+		htmlViewCnstr.gridx = 0;
+		htmlViewCnstr.gridy = 2;
 		htmlViewCnstr.weightx = 1.0;
-		htmlViewCnstr.weighty = 1.0;
+		htmlViewCnstr.weighty = 0.5;
 		htmlViewCnstr.gridwidth = 1;
 		htmlViewCnstr.gridheight = 1;
 		add(htmlView, htmlViewCnstr);
@@ -88,7 +104,10 @@ public class BDLSRFortessaViewer extends JPanel
 				"XML files with the associated 'Data File Standard " + 
 				"for Flow Cytometry, Version FCS3.0' files generated " +
 				"by the BD LSRFortessa flow cytometer.");
-
+		
+		// Set sizes
+		setMinimumSize(new Dimension(300, 400));
+		setPreferredSize(new Dimension(300, 400));
 	}
 
 	/**

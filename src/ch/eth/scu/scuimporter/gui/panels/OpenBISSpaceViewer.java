@@ -20,6 +20,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -82,6 +83,9 @@ public class OpenBISSpaceViewer extends JPanel
 		treeViewConstraints.fill = GridBagConstraints.BOTH;
 		add(treeView, treeViewConstraints);
 
+		// Set sizes
+		setMinimumSize(new Dimension(300, 400));
+		setPreferredSize(new Dimension(300, 400));
 	}
 	
 	/**
@@ -188,7 +192,7 @@ public class OpenBISSpaceViewer extends JPanel
 		DefaultMutableTreeNode experiment = null;
 		
 		// Do we have a connection with openBIS?
-		if (facade == null) {
+		if (facade == null || isLoggedIn == false) {
 			return;
 		}
 		

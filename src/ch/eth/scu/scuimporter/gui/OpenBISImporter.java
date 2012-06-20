@@ -29,6 +29,8 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	private JLabel metadataEditor;
+	private JEditorPane outputPane; 
+	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
 	private BDLSRFortessaViewer fortessaViewer;
 	
@@ -42,9 +44,15 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 
 		// Try to use the cross-platform look and feel
 		try {
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			MetalLookAndFeel.setCurrentTheme(new OceanTheme());
-			UIManager.setLookAndFeel(new MetalLookAndFeel()); 
+			if (System.getProperty("os.name").equals("Mac OS X")) {
+				UIManager.setLookAndFeel(
+						ch.randelshofer.quaqua.QuaquaManager.getLookAndFeel()
+		        );
+			} else {
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+				MetalLookAndFeel.setCurrentTheme(new OceanTheme());
+				UIManager.setLookAndFeel(new MetalLookAndFeel());
+			}
 		} catch (Exception e) {
 			System.err.println("Couldn't set look and feel.");
 		}
@@ -59,11 +67,26 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		fortessaViewerConstraints.fill = GridBagConstraints.BOTH;
 		fortessaViewerConstraints.gridwidth = 1;
 		fortessaViewerConstraints.gridheight = 1;
-		fortessaViewerConstraints.weightx = 1.0;
+		fortessaViewerConstraints.weightx = 0.33;
 		fortessaViewerConstraints.weighty = 1.0;
 		fortessaViewerConstraints.gridx = 0;
 		fortessaViewerConstraints.gridy = 0;
 		add(fortessaViewer, fortessaViewerConstraints);
+
+		metadataEditor = new JLabel("Metadata editor");
+		metadataEditor.setVerticalAlignment(SwingConstants.TOP);
+		metadataEditor.setMinimumSize(new Dimension(300,600));
+		metadataEditor.setPreferredSize(new Dimension(300,600));
+		GridBagConstraints metadataEditorConstraints = new GridBagConstraints();
+		metadataEditorConstraints.anchor = GridBagConstraints.NORTHWEST;
+		metadataEditorConstraints.fill = GridBagConstraints.BOTH;
+		metadataEditorConstraints.gridwidth = 1;
+		metadataEditorConstraints.gridheight = 1;
+		metadataEditorConstraints.weightx = 0.33;
+		metadataEditorConstraints.weighty = 1.0;
+		metadataEditorConstraints.gridx = 1;
+		metadataEditorConstraints.gridy = 0;
+		add(metadataEditor, metadataEditorConstraints);
 		
 		spaceViewer = new OpenBISSpaceViewer();
 		GridBagConstraints spaceViewerConstraints = new GridBagConstraints();
@@ -71,23 +94,28 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		spaceViewerConstraints.fill = GridBagConstraints.BOTH;
 		spaceViewerConstraints.gridwidth = 1;
 		spaceViewerConstraints.gridheight = 1;
-		spaceViewerConstraints.weightx = 1.0;
+		spaceViewerConstraints.weightx = 0.33;
 		spaceViewerConstraints.weighty = 1.0;
-		spaceViewerConstraints.gridx = 1;
+		spaceViewerConstraints.gridx = 2;
 		spaceViewerConstraints.gridy = 0;
 		add(spaceViewer, spaceViewerConstraints);
 
-		metadataEditor = new JLabel("Metadata editor");
-		GridBagConstraints metadataEditorConstraints = new GridBagConstraints();
-		metadataEditorConstraints.anchor = GridBagConstraints.NORTHWEST;
-		metadataEditorConstraints.fill = GridBagConstraints.BOTH;
-		metadataEditorConstraints.gridwidth = 2;
-		metadataEditorConstraints.gridheight = 1;
-		metadataEditorConstraints.weightx = 1.0;
-		metadataEditorConstraints.weighty = 1.0;
-		metadataEditorConstraints.gridx = 0;
-		metadataEditorConstraints.gridy = 1;
-		add(metadataEditor, metadataEditorConstraints);
+		// Create the HTML viewing pane.
+		outputPane = new JEditorPane();
+		outputPane.setEditable(false);
+		outputPane.setText("Ready");
+		outputWindow = new JScrollPane(outputPane);
+
+		GridBagConstraints outputWindowConstraints = new GridBagConstraints();
+		outputWindowConstraints.anchor = GridBagConstraints.NORTHWEST;
+		outputWindowConstraints.fill = GridBagConstraints.BOTH;
+		outputWindowConstraints.gridwidth = 3;
+		outputWindowConstraints.gridheight = 1;
+		outputWindowConstraints.weightx = 1.0;
+		outputWindowConstraints.weighty = 0.2;
+		outputWindowConstraints.gridx = 0;
+		outputWindowConstraints.gridy = 1;
+		add(outputWindow, outputWindowConstraints);
 		
 		// Add menus
 		addMenus();
@@ -108,7 +136,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		setMinimumSize(new Dimension(1200, 800));
 		pack();
 		setLocationRelativeTo(null);
-		setResizable(false);
+		setResizable(true);
 		
 		// Ask the user to login
 		spaceViewer.login();
