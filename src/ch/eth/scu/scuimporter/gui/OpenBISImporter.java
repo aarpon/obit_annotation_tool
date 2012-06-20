@@ -13,9 +13,8 @@ import javax.swing.plaf.metal.OceanTheme;
 import ch.eth.scu.scuimporter.gui.panels.BDLSRFortessaViewer;
 import ch.eth.scu.scuimporter.gui.panels.OpenBISSpaceViewer;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 
 /**
@@ -33,6 +32,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
 	private BDLSRFortessaViewer fortessaViewer;
+	private JToolBar toolBar;
 	
 	/**
 	 * Constructor
@@ -57,69 +57,34 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 			System.err.println("Couldn't set look and feel.");
 		}
 
-		// Create a GridBagLayout
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		setLayout(gridBagLayout);
-
+		// Add a BorderLayout
+		setLayout(new BorderLayout());
+		
+		// Create a toolbar
+		toolBar = new JToolBar("Tools");
+		toolBar.setFloatable(false);
+		addButtons();
+		add(toolBar, BorderLayout.NORTH);
+		
 		fortessaViewer = new BDLSRFortessaViewer();
-		GridBagConstraints fortessaViewerConstraints = new GridBagConstraints();
-		fortessaViewerConstraints.anchor = GridBagConstraints.NORTHWEST;
-		fortessaViewerConstraints.fill = GridBagConstraints.BOTH;
-		fortessaViewerConstraints.gridwidth = 1;
-		fortessaViewerConstraints.gridheight = 1;
-		fortessaViewerConstraints.weightx = 0.33;
-		fortessaViewerConstraints.weighty = 1.0;
-		fortessaViewerConstraints.gridx = 0;
-		fortessaViewerConstraints.gridy = 0;
-		add(fortessaViewer, fortessaViewerConstraints);
-
+		add(fortessaViewer, BorderLayout.WEST);
+		
 		metadataEditor = new JLabel("Metadata editor");
 		metadataEditor.setVerticalAlignment(SwingConstants.TOP);
-		metadataEditor.setMinimumSize(new Dimension(300,600));
-		metadataEditor.setPreferredSize(new Dimension(300,600));
-		GridBagConstraints metadataEditorConstraints = new GridBagConstraints();
-		metadataEditorConstraints.anchor = GridBagConstraints.NORTHWEST;
-		metadataEditorConstraints.fill = GridBagConstraints.BOTH;
-		metadataEditorConstraints.gridwidth = 1;
-		metadataEditorConstraints.gridheight = 1;
-		metadataEditorConstraints.weightx = 0.33;
-		metadataEditorConstraints.weighty = 1.0;
-		metadataEditorConstraints.gridx = 1;
-		metadataEditorConstraints.gridy = 0;
-		add(metadataEditor, metadataEditorConstraints);
-		
+		metadataEditor.setMinimumSize(new Dimension(400,600));
+		metadataEditor.setPreferredSize(new Dimension(400,600));
+		add(metadataEditor, BorderLayout.CENTER);
+
 		spaceViewer = new OpenBISSpaceViewer();
-		GridBagConstraints spaceViewerConstraints = new GridBagConstraints();
-		spaceViewerConstraints.anchor = GridBagConstraints.NORTHWEST;
-		spaceViewerConstraints.fill = GridBagConstraints.BOTH;
-		spaceViewerConstraints.gridwidth = 1;
-		spaceViewerConstraints.gridheight = 1;
-		spaceViewerConstraints.weightx = 0.33;
-		spaceViewerConstraints.weighty = 1.0;
-		spaceViewerConstraints.gridx = 2;
-		spaceViewerConstraints.gridy = 0;
-		add(spaceViewer, spaceViewerConstraints);
+		add(spaceViewer, BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
 		outputPane = new JEditorPane();
 		outputPane.setEditable(false);
 		outputPane.setText("Ready");
 		outputWindow = new JScrollPane(outputPane);
+		add(outputWindow, BorderLayout.SOUTH);
 
-		GridBagConstraints outputWindowConstraints = new GridBagConstraints();
-		outputWindowConstraints.anchor = GridBagConstraints.NORTHWEST;
-		outputWindowConstraints.fill = GridBagConstraints.BOTH;
-		outputWindowConstraints.gridwidth = 3;
-		outputWindowConstraints.gridheight = 1;
-		outputWindowConstraints.weightx = 1.0;
-		outputWindowConstraints.weighty = 0.2;
-		outputWindowConstraints.gridx = 0;
-		outputWindowConstraints.gridy = 1;
-		add(outputWindow, outputWindowConstraints);
-		
-		// Add menus
-		addMenus();
-		
 		// Set exit on close
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -133,46 +98,16 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 	    });
 
 		// Set up the frame and center on screen
-		setMinimumSize(new Dimension(1200, 800));
+		//setMinimumSize(new Dimension(1200, 800));
 		pack();
 		setLocationRelativeTo(null);
-		setResizable(true);
+		setResizable(false);
 		
 		// Ask the user to login
 		spaceViewer.login();
 
 		// Make window visible
 		setVisible(true);
-	}
-	
-	private void addMenus() {
-		JMenuBar menuBar = new JMenuBar();
-		JMenu mainMenu = new JMenu("Importer");
-		mainMenu.add(makeMenuItem("Quit", KeyEvent.VK_Q));
-		menuBar.add(mainMenu);
-		JMenu fileMenu = new JMenu("File");
-		fileMenu.add(makeMenuItem("Pick file", KeyEvent.VK_F));
-		fileMenu.add(makeMenuItem("Pick directory", KeyEvent.VK_D));
-		menuBar.add(fileMenu);
-		JMenu openBISMenu = new JMenu("openBIS");
-		openBISMenu.add(makeMenuItem("Log in", KeyEvent.VK_I));
-		openBISMenu.add(makeMenuItem("Log out", KeyEvent.VK_O));
-		menuBar.add(openBISMenu);
-		setJMenuBar(menuBar);
-	}
-	
-	/**
-	 * Create menu entries
-	 * @param String to be displayed for the menu entry
-	 * @return a JMenuItem to be added to the menubar
-	 */
-	private JMenuItem makeMenuItem(String name, int accelerator) {
-		JMenuItem m = new JMenuItem(name);
-		m.setAccelerator(KeyStroke.getKeyStroke(accelerator,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-		m.setActionCommand(name);
-		m.addActionListener(this);
-		return m;
 	}
 
 	/**
@@ -190,11 +125,67 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		} else if (e.getActionCommand().equals("Pick directory")) {
 			System.out.println("Not implemented.");
 		} else if (e.getActionCommand().equals("Quit")) {
-			spaceViewer.logout();
-			System.exit(0);
+	        if (JOptionPane.showConfirmDialog(this, 
+	        		"Do you really want to quit?", "Question",
+	        		JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+	        	spaceViewer.logout();
+	        	System.exit(0);
+	        }
 		} else {
 			return;
 		}
+	}
+
+	/**
+	 * Add buttons to the toolbar
+	 */
+	private void addButtons() {
+
+		// Quit
+        toolBar.add(createButton("resources/quit.png", "Quit",
+        		"Quit", "Quit the application"));
+
+        toolBar.addSeparator();
+
+        // Log in
+        toolBar.add(createButton("resources/login.png", "Log in",
+        		"Log in", "Log in to openBIS"));
+
+        // Log out
+        toolBar.add(createButton("resources/logout.png", "Log out",
+        		"Log out", "Log out from openBIS"));
+
+        toolBar.addSeparator();
+
+        // Pick file
+        toolBar.add(createButton("resources/fileopen.png", "Pick file",
+        		"Pick file", "Pick a file to add to openBIS"));
+
+        // Log out
+        toolBar.add(createButton("resources/diropen.png", "Pick dir",
+        		"Log directory", "Pick a directory to add to openBIS"));
+     }
+	
+	/**
+	 * Create an action button to be added to the toolbar
+	 * @param imgLocation		relative path to the image
+	 * @param actionCommand		command to be used 
+	 * @param toolTipText		tooltip String for the button 
+	 * @return a JButton ready to be added to the toolbar
+	 */
+	private JButton createButton(	String imgLocation,
+									String text,
+									String actionCommand,
+									String toolTipText) {
+
+		// Create, initialize and the button.
+		JButton button = new JButton(text);
+		button.setActionCommand(actionCommand);
+		button.setToolTipText(toolTipText);
+		button.addActionListener(this);
+		button.setIcon(new ImageIcon(
+					this.getClass().getResource(imgLocation)));
+		return button;
 	}
 
 	/**
@@ -204,8 +195,6 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 	public static void main(String[] args) {
 		// Schedule a job for the event dispatch thread:
 		// creating and showing this application's GUI.
-		//System.setProperty("apple.laf.useScreenMenuBar", "true");
-
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				new OpenBISImporter();

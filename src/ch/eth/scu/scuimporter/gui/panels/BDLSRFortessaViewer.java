@@ -27,6 +27,7 @@ public class BDLSRFortessaViewer extends JPanel
 	private JEditorPane htmlPane;
 	private JTree tree;
 	private File file;
+	private JLabel title;
 	private DefaultMutableTreeNode rootNode;
 	private JScrollPane treeView;
 	private JScrollPane htmlView;
@@ -42,6 +43,21 @@ public class BDLSRFortessaViewer extends JPanel
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);
+
+		// Common constraints
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		constraints.fill = GridBagConstraints.BOTH;
+		
+		// Add a title JLabel
+		title = new JLabel("Data viewer");
+
+		// Add the tree viewer to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		add(title, constraints);
 		
 		// Create the root node
 		rootNode = new DefaultMutableTreeNode("Pick a file...");
@@ -58,30 +74,26 @@ public class BDLSRFortessaViewer extends JPanel
 		treeView = new JScrollPane(tree);
 
 		// Add to the layout
-		GridBagConstraints treeViewCnstr = new GridBagConstraints();
-		treeViewCnstr.fill = GridBagConstraints.BOTH;
-		treeViewCnstr.gridx = 0;
-		treeViewCnstr.gridy = 0;
-		treeViewCnstr.weightx = 1.0;
-		treeViewCnstr.weighty = 0.5;
-		treeViewCnstr.gridwidth = 1;
-		treeViewCnstr.gridheight = 1;
-		add(treeView, treeViewCnstr);
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.5;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		add(treeView, constraints);
 
 		// Add a simple label
 		metadataView = new JLabel("Metadata viewer");
 		metadataView.setVerticalAlignment(SwingConstants.TOP);
 
 		// Add to the layout
-		GridBagConstraints metadataViewCnstr = new GridBagConstraints();
-		metadataViewCnstr.fill = GridBagConstraints.BOTH;
-		metadataViewCnstr.gridx = 0;
-		metadataViewCnstr.gridy = 1;
-		metadataViewCnstr.weightx = 1.0;
-		metadataViewCnstr.weighty = 0.0;
-		metadataViewCnstr.gridwidth = 1;
-		metadataViewCnstr.gridheight = 1;
-		add(metadataView, metadataViewCnstr);
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		add(metadataView, constraints);
 		
 		// Create the HTML viewing pane.
 		htmlPane = new JEditorPane();
@@ -89,15 +101,13 @@ public class BDLSRFortessaViewer extends JPanel
 		htmlView = new JScrollPane(htmlPane);
 
 		// Add to the layout
-		GridBagConstraints htmlViewCnstr = new GridBagConstraints();
-		htmlViewCnstr.fill = GridBagConstraints.BOTH;
-		htmlViewCnstr.gridx = 0;
-		htmlViewCnstr.gridy = 2;
-		htmlViewCnstr.weightx = 1.0;
-		htmlViewCnstr.weighty = 0.5;
-		htmlViewCnstr.gridwidth = 1;
-		htmlViewCnstr.gridheight = 1;
-		add(htmlView, htmlViewCnstr);
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.5;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		add(htmlView, constraints);
 
 		// Add initial info to the html pane
 		htmlPane.setText("\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
@@ -106,8 +116,8 @@ public class BDLSRFortessaViewer extends JPanel
 				"by the BD LSRFortessa flow cytometer.");
 		
 		// Set sizes
-		setMinimumSize(new Dimension(300, 400));
-		setPreferredSize(new Dimension(300, 400));
+		setMinimumSize(new Dimension(400, 800));
+		setPreferredSize(new Dimension(400, 800));
 	}
 
 	/**

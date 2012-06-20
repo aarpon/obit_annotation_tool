@@ -40,6 +40,7 @@ public class OpenBISSpaceViewer extends JPanel
 	private int timeout = 60000;
 	private IOpenbisServiceFacade facade;
 	
+	private JLabel title;
 	private DefaultMutableTreeNode rootNode;
 	private JTree tree;
 	private JScrollPane treeView;
@@ -59,6 +60,21 @@ public class OpenBISSpaceViewer extends JPanel
 		// Set a grid bag layout
 		setLayout(new GridBagLayout());
 
+		// Common constraints
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		constraints.fill = GridBagConstraints.BOTH;
+		
+		// Add a title JLabel
+		title = new JLabel("openBIS viewer");
+
+		// Add the tree viewer to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		add(title, constraints);
+		
 		// Create the root node for the tree
 		rootNode = new DefaultMutableTreeNode(defaultRootNodeString);
 		
@@ -74,18 +90,15 @@ public class OpenBISSpaceViewer extends JPanel
 		treeView = new JScrollPane(tree);
 		
 		// Add the tree viewer to the layout
-		GridBagConstraints treeViewConstraints = new GridBagConstraints();
-		treeViewConstraints.anchor = GridBagConstraints.NORTHWEST;
-		treeViewConstraints.gridx = 0;
-		treeViewConstraints.gridy = 0;
-		treeViewConstraints.weightx = 1.0;
-		treeViewConstraints.weighty = 1.0;
-		treeViewConstraints.fill = GridBagConstraints.BOTH;
-		add(treeView, treeViewConstraints);
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		add(treeView, constraints);
 
 		// Set sizes
-		setMinimumSize(new Dimension(300, 400));
-		setPreferredSize(new Dimension(300, 400));
+		setMinimumSize(new Dimension(400, 800));
+		setPreferredSize(new Dimension(400, 800));
 	}
 	
 	/**
