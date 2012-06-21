@@ -11,6 +11,7 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.OceanTheme;
 
 import ch.eth.scu.scuimporter.gui.panels.BDLSRFortessaViewer;
+import ch.eth.scu.scuimporter.gui.panels.MetadataEditor;
 import ch.eth.scu.scuimporter.gui.panels.OpenBISSpaceViewer;
 
 import java.awt.BorderLayout;
@@ -27,7 +28,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private JLabel metadataEditor;
+	private MetadataEditor metadataEditor;
 	private JEditorPane outputPane; 
 	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
@@ -69,10 +70,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		fortessaViewer = new BDLSRFortessaViewer();
 		add(fortessaViewer, BorderLayout.WEST);
 		
-		metadataEditor = new JLabel("Metadata editor");
-		metadataEditor.setVerticalAlignment(SwingConstants.TOP);
-		metadataEditor.setMinimumSize(new Dimension(400,600));
-		metadataEditor.setPreferredSize(new Dimension(400,600));
+		metadataEditor = new MetadataEditor();
 		add(metadataEditor, BorderLayout.CENTER);
 
 		spaceViewer = new OpenBISSpaceViewer();
