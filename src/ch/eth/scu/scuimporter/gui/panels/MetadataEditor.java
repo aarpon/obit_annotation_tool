@@ -4,23 +4,18 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
 
 /**
- * Graphical user interface to log in to openBIS and choose where to store
- * acquired datasets.
+ * Metadata editor panel.
  * @author Aaron Ponti
  *
  */
 public class MetadataEditor extends JPanel {
+
+	private static final long serialVersionUID = 1L;
 
 	private JButton uploadButton;
 	
