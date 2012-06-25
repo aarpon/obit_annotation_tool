@@ -1,4 +1,4 @@
-package ch.eth.scu.scuimporter.gui;
+package ch.eth.scu.scuimporter.gui.dialogs;
 
 import javax.swing.*;
 
@@ -37,7 +37,7 @@ public class OpenBISLoginDialog extends JDialog {
 		
 		// Add the SCU OpenBIS logo at the top
 		JLabel labelLogo = new JLabel(new ImageIcon(
-				this.getClass().getResource("resources/logo.png")));
+				this.getClass().getResource("../resources/logo.png")));
 		GridBagConstraints logoConstraints = new GridBagConstraints();
 		logoConstraints.anchor = GridBagConstraints.NORTHWEST;
 		logoConstraints.gridx = 0;
