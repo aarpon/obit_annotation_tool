@@ -7,8 +7,8 @@ import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Specim
 import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Tray;
 import ch.eth.scu.scuimporter.processor.FCSProcessor;
 
-import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
@@ -20,104 +20,30 @@ import java.io.IOException;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDLSRFortessaViewer extends JPanel
+public class BDLSRFortessaViewer extends AbstractViewer
 	implements ActionListener, TreeSelectionListener {
 
 	private static final long serialVersionUID = 1L;
-	private JEditorPane htmlPane;
-	private JTree tree;
-	private File file;
-	private JLabel title;
-	private DefaultMutableTreeNode rootNode;
-	private JScrollPane treeView;
-	private JScrollPane htmlView;
-	private JLabel metadataView;
+
+	// Processors
 	private BDFACSDIVAXMLProcessor xmlprocessor = null;
 	private FCSProcessor fcsprocessor = null;
 
+	private File file;
+	
 	/**
 	 * Constructor
 	 */
 	public BDLSRFortessaViewer() {
 		
-		// Create a GridBagLayout
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		setLayout(gridBagLayout);
-
-		// Common constraints
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.anchor = GridBagConstraints.NORTHWEST;
-		constraints.fill = GridBagConstraints.BOTH;
+		// Call the AbstractViewer's constructor (to create the panel)
+		super();
 		
-		// Add a title JLabel
-		title = new JLabel("Data viewer");
-
-		// Add the tree viewer to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		add(title, constraints);
-		
-		// Create the root node
-		rootNode = new DefaultMutableTreeNode("Pick a file...");
-
-		// Create a tree that allows one selection at a time.
-		tree = new JTree(rootNode);
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-
-		// Create the scroll pane and add the tree to it. 
-		treeView = new JScrollPane(tree);
-
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.5;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		add(treeView, constraints);
-
-		// Add a simple label
-		metadataView = new JLabel("Metadata viewer");
-		metadataView.setVerticalAlignment(SwingConstants.TOP);
-
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 2;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		add(metadataView, constraints);
-		
-		// Create the HTML viewing pane.
-		htmlPane = new JEditorPane();
-		htmlPane.setEditable(false);
-		htmlView = new JScrollPane(htmlPane);
-
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 3;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.5;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		add(htmlView, constraints);
-
 		// Add initial info to the html pane
 		htmlPane.setText("\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
 				"XML files with the associated 'Data File Standard " + 
 				"for Flow Cytometry, Version FCS3.0' files generated " +
 				"by the BD LSRFortessa flow cytometer.");
-		
-		// Set sizes
-		setMinimumSize(new Dimension(400, 800));
-		setPreferredSize(new Dimension(400, 800));
 	}
 
 	/**
@@ -272,7 +198,7 @@ public class BDLSRFortessaViewer extends JPanel
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	private void createNodes(DefaultMutableTreeNode top) {
+	protected void createNodes(DefaultMutableTreeNode top) {
 		DefaultMutableTreeNode experiment = null;
 		DefaultMutableTreeNode tray = null;
 		DefaultMutableTreeNode specimen = null;
@@ -327,18 +253,11 @@ public class BDLSRFortessaViewer extends JPanel
 	}
 
 	/**
-	 *  User chose Open or Quit on the context menu
+	 *  React to actions
+	 *  @param e An ActionEvent 
 	 */
 	public void actionPerformed(ActionEvent e) {
-
-		// React to the context menu
-		if (e.getActionCommand().equals("Open")) {
-
-		} else if (e.getActionCommand().equals("Quit")) {
-			System.exit(0);
-		} else {
-			return;
-		}
+		return;
 	}
 
 	/**
@@ -378,4 +297,10 @@ public class BDLSRFortessaViewer extends JPanel
 		}
 	}
 
+	/**
+	 * Asks the user to pick a directory to be processed
+	 */
+	public void pickDir() {
+		// Not implemented yet.
+	}
 }

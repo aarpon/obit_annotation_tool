@@ -28,5 +28,6 @@
 	<classpathentry kind="lib" path="dss_lib/spring.jar"/>
 	<classpathentry kind="lib" path="dss_lib/stream-supporting-httpinvoker.jar"/>
 	<classpathentry kind="lib" path="dss_lib/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/ij.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

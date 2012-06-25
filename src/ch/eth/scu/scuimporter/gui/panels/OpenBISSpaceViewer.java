@@ -17,6 +17,7 @@ import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 
@@ -46,7 +47,8 @@ public class OpenBISSpaceViewer extends JPanel
 	private JScrollPane treeView;
 	private String defaultRootNodeString = "Please login to openBIS...";
 	
-	private final static String openBISURL = "https://openbis-scu.ethz.ch/openbis/";
+	//private final static String openBISURL = "https://openbis-scu.ethz.ch/openbis/";
+	private final static String openBISURL = "https://sprint-openbis.ethz.ch:8446/openbis";
 
 	private boolean isLoggedIn = false;
 	
@@ -203,6 +205,7 @@ public class OpenBISSpaceViewer extends JPanel
 		DefaultMutableTreeNode space = null;
 		DefaultMutableTreeNode project = null;
 		DefaultMutableTreeNode experiment = null;
+		DefaultMutableTreeNode sample = null;
 		
 		// Do we have a connection with openBIS?
 		if (facade == null || isLoggedIn == false) {
@@ -213,13 +216,13 @@ public class OpenBISSpaceViewer extends JPanel
 
 		// Set the root of the tree
 		rootNode = new DefaultMutableTreeNode(userName);
-		
+
 		// Get spaces
 		List<SpaceWithProjectsAndRoleAssignments> spaces =
 				facade.getSpacesWithProjects();
 
 		for (SpaceWithProjectsAndRoleAssignments s : spaces) {
-		    
+
 			// Add the space
 			SpaceWrapper spaceWrapper = new SpaceWrapper(s);
 			space = new DefaultMutableTreeNode(spaceWrapper);
@@ -234,7 +237,8 @@ public class OpenBISSpaceViewer extends JPanel
 				ProjectWrapper projectWrapper = new ProjectWrapper(p);
 				project = new DefaultMutableTreeNode(projectWrapper);
 				space.add(project);
-				
+
+				// Get the experiments
 				List<String> expId = new ArrayList<String>();
 				expId.add(p.getIdentifier());
 				List<Experiment> experiments = 
@@ -247,6 +251,19 @@ public class OpenBISSpaceViewer extends JPanel
 					experiment = new DefaultMutableTreeNode(experimentWrapper);
 					project.add(experiment);
 				
+					// Get the samples for the experiment
+					List<String> sampleId = new ArrayList<String>();
+					sampleId.add(e.getIdentifier());
+					List<Sample> samples = 
+							facade.listSamplesForExperiments(sampleId);
+					
+					for (Sample sm : samples) {
+						
+						// Add the sample
+						SampleWrapper sampleWrapper = new SampleWrapper(sm);
+						sample = new DefaultMutableTreeNode(sampleWrapper);
+						experiment.add(sample);
+					}
 				}
 				
 			}
@@ -321,6 +338,25 @@ public class OpenBISSpaceViewer extends JPanel
 		}
 	}
 
+	/**
+	 * Wraps the Sample class to overload its toString() method
+	 * @author Aaron Ponti
+	 *
+	 */
+	protected class SampleWrapper {
+
+		private Sample s;
+
+		protected SampleWrapper(Sample s) {
+			this.s = s;
+		}
+		
+		@Override
+		public String toString() {
+			return new String( "[sample] " + s.getCode());
+		}
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub

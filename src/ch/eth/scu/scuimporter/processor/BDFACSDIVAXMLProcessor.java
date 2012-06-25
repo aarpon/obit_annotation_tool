@@ -12,10 +12,10 @@ import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Tray;
 import ch.eth.scu.scuimporter.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube;
 
 /**
- * This Processor parses "BD BioSciences FACSDiva" XML files.
+ * BDFACSDIVAXMLProcessor parses "BD BioSciences FACSDiva" XML files.
  * @author Aaron Ponti
  */
-public class BDFACSDIVAXMLProcessor extends Processor {
+public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private String filename;
@@ -60,7 +60,6 @@ public class BDFACSDIVAXMLProcessor extends Processor {
 	 * Return information regarding the file format.
 	 * @return descriptive String for the Processor.
 	 */
-	@Override
 	public String info() {
 		return "BD BioSciences FACSDiva\u2122 Software";
 	}

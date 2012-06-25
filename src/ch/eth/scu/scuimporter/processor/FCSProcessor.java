@@ -16,7 +16,7 @@ import java.util.*;
  * 
  * @author Aaron Ponti
  */
-public class FCSProcessor extends Processor {
+public class FCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private String filename;
@@ -67,7 +67,6 @@ public class FCSProcessor extends Processor {
 	 * Return information regarding the file format.
 	 * @return descriptive String for the Processor.
 	 */
-	@Override
 	public String info() {
 		return "Data File Standard for Flow Cytometry, Version FCS3.0.";
 	}

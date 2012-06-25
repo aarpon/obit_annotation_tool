@@ -4,7 +4,7 @@ package ch.eth.scu.scuimporter.processor;
  * Abstract base class for file processors. Actual implementations must extend this class.
  * @author Aaron Ponti
  */
-abstract public class Processor {
+abstract public class AbstractProcessor {
 
 	/**
 	 * Parses the file to extract data and metadata. 

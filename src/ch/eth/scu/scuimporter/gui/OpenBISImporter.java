@@ -2,7 +2,6 @@ package ch.eth.scu.scuimporter.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -10,13 +9,13 @@ import javax.swing.*;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.OceanTheme;
 
+import ch.eth.scu.scuimporter.gui.panels.AbstractViewer;
 import ch.eth.scu.scuimporter.gui.panels.BDLSRFortessaViewer;
+import ch.eth.scu.scuimporter.gui.panels.LeicaSP5Viewer;
 import ch.eth.scu.scuimporter.gui.panels.MetadataEditor;
 import ch.eth.scu.scuimporter.gui.panels.OpenBISSpaceViewer;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -32,13 +31,13 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 	private JEditorPane outputPane; 
 	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
-	private BDLSRFortessaViewer fortessaViewer;
+	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
 	
 	/**
 	 * Constructor
 	 */
-	public OpenBISImporter() {
+	public OpenBISImporter(String acqStation) {
 
 		// Call the frame's constructor
 		super("Single-Cell Unit openBIS importer");
@@ -67,8 +66,15 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		addButtons();
 		add(toolBar, BorderLayout.NORTH);
 		
-		fortessaViewer = new BDLSRFortessaViewer();
-		add(fortessaViewer, BorderLayout.WEST);
+		if (acqStation.equals("LSRFortessa")) {
+			metadataViewer = new BDLSRFortessaViewer();
+		} else if (acqStation.equals("LeicaSP5")) {
+			metadataViewer = new LeicaSP5Viewer();
+		} else {
+			System.err.println("Unknown acquisition station! Aborting.");
+			System.exit(1);
+		}
+		add(metadataViewer, BorderLayout.WEST);
 		
 		metadataEditor = new MetadataEditor();
 		add(metadataEditor, BorderLayout.CENTER);
@@ -119,7 +125,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		} else if (e.getActionCommand().equals("Log out")) {
 			spaceViewer.logout();
 		} else if (e.getActionCommand().equals("Pick file")) {
-			fortessaViewer.pickFile();
+			metadataViewer.pickFile();
 		} else if (e.getActionCommand().equals("Pick directory")) {
 			System.out.println("Not implemented.");
 		} else if (e.getActionCommand().equals("Quit")) {
@@ -195,7 +201,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				new OpenBISImporter();
+				new OpenBISImporter("LSRFortessa");
 			}
 		});
 	}
