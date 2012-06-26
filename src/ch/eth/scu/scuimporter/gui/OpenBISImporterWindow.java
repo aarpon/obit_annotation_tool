@@ -23,7 +23,7 @@ import java.awt.BorderLayout;
  * @author Aaron Ponti
  *
  */
-public class OpenBISImporter extends JFrame implements ActionListener {
+public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,7 +37,7 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 	/**
 	 * Constructor
 	 */
-	public OpenBISImporter(String acqStation) {
+	public OpenBISImporterWindow(String acqStation) {
 
 		// Call the frame's constructor
 		super("Single-Cell Unit openBIS importer");
@@ -192,17 +192,4 @@ public class OpenBISImporter extends JFrame implements ActionListener {
 		return button;
 	}
 
-	/**
-	 * Program entry point
-	 * @param args Ignored
-	 */
-	public static void main(String[] args) {
-		// Schedule a job for the event dispatch thread:
-		// creating and showing this application's GUI.
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new OpenBISImporter("LSRFortessa");
-			}
-		});
-	}
 }
