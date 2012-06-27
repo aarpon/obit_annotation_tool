@@ -14,8 +14,10 @@ import ch.eth.scu.scuimporter.gui.panels.BDLSRFortessaViewer;
 import ch.eth.scu.scuimporter.gui.panels.LeicaSP5Viewer;
 import ch.eth.scu.scuimporter.gui.panels.MetadataEditor;
 import ch.eth.scu.scuimporter.gui.panels.OpenBISSpaceViewer;
+import ch.eth.scu.scuimporter.properties.AppProperties;
 
 import java.awt.BorderLayout;
+import java.util.Properties;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -37,7 +39,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	/**
 	 * Constructor
 	 */
-	public OpenBISImporterWindow(String acqStation) {
+	public OpenBISImporterWindow() {
 
 		// Call the frame's constructor
 		super("Single-Cell Unit openBIS importer");
@@ -49,7 +51,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 						ch.randelshofer.quaqua.QuaquaManager.getLookAndFeel()
 		        );
 			} else {
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+				UIManager.setLookAndFeel(
+						UIManager.getCrossPlatformLookAndFeelClassName());
 				MetalLookAndFeel.setCurrentTheme(new OceanTheme());
 				UIManager.setLookAndFeel(new MetalLookAndFeel());
 			}
@@ -57,6 +60,10 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 			System.err.println("Couldn't set look and feel.");
 		}
 
+		// Get the application properties
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		String acqStation = appProperties.getProperty("AcquisitionStation");
+		
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
 		

@@ -1,6 +1,19 @@
 package ch.eth.scu.scuimporter;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import ch.eth.scu.scuimporter.gui.OpenBISImporterWindow;
+import ch.eth.scu.scuimporter.gui.dialogs.openBISImporterAdminDialog;
+import ch.eth.scu.scuimporter.properties.AppProperties;
 
 /**
  * SCUImporter is an application to drive the import of data from the 
@@ -15,29 +28,43 @@ public class SCUImporter {
 	 */
 	public static void main(String[] args) {
 
-		// Check whether we should start in administrator mode
+		// Initialize boolean mode to false
+		boolean adminMode = false;
+		
+		// Check whether the user asked to start in administrator mode
 		if (args.length > 0) {
 			if (args[0].equals("--admin")) {
-				System.out.println("Startin in administration mode. "
-						+ " Just kidding.");
+				adminMode = true;
+				System.out.println("Starting in admin mode.");
 			}
 		}
+
+		// Check whether we need to set up the application (first-time run)
+		// TODO Do not run this automatically!
+		if (AppProperties.propertiesFileExists() == false) {
+			adminMode = true;
+		}
+
+		// If needed, start the administrator dialog (modal)
+		if (adminMode == true) {
+			JOptionPane.showMessageDialog(null,
+				    "The administrator panel will now launch. " +
+			"Please make sure to have administrator rights.",
+				    "First-time setup",
+				    JOptionPane.WARNING_MESSAGE);
+			new openBISImporterAdminDialog();
+		}
 		
-		// Open the main window			
+		// Open the main window
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
 			public void run() {
 
-				// One of "LSRFortessa" and "LeicaSP5". This will later
-				// be obtained from the application properties set in
-				// the --admin mode.
-				String acqStation = "LSRFortessa";
-
-				new OpenBISImporterWindow(acqStation);
+				new OpenBISImporterWindow();
 			}
 		
 		});
 	
 	}
-
+	
 }

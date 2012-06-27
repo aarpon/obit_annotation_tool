@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -53,11 +55,17 @@ public class LeicaLifProcessor extends AbstractProcessor {
 		// Try to open the image file
 		try {
 		      reader.setId(filename);
-		} catch (FormatException exc) {
-			System.out.println(exc.getMessage());
+		} catch (FormatException e) {
+			JOptionPane.showMessageDialog(null,
+				    "Could not open file. Error was: " + e.getMessage(),
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
 			return false;
-		} catch (IOException exc) {
-			System.out.println(exc.getMessage());
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null,
+				    "Could not open file. Error was: " + e.getMessage(),
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		
