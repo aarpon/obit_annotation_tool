@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="/Users/pontia/Desktop/scuOpenBISImporter2.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/SCUImporter/scuOpenBISImporter.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <jar path="/Users/pontia/Desktop/scuOpenBISImporter.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/SCUImporter/scuOpenBISImporter.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <manifest generateManifest="false" mainClassHandleIdentifier="=SCUImporter/src&lt;ch.eth.scu.scuimporter{SCUImporter.java[SCUImporter" manifestLocation="/SCUImporter/scuOpenBISImporter.manifest" manifestVersion="1.0" reuseManifest="true" saveManifest="true" usesManifest="true">
@@ -11,9 +11,7 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <file path="/SCUImporter/.classpath"/>
         <javaElement handleIdentifier="=SCUImporter/src"/>
-        <folder path="/SCUImporter/dss_lib"/>
         <folder path="/SCUImporter/lib"/>
     </selectedElements>
 </jardesc>

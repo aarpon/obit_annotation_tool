@@ -540,7 +540,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				 * @return String representation of the Tube node.
 				 */
 				public String toString() {
-					String str =  "[Tube] " + name;
+					String str =  "[Tube] " + name + "   (" + dataFilename + ")";
 					return str;
 				}
 

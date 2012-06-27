@@ -8,11 +8,11 @@ import java.util.*;
  * FCSProcessor parses "Data File Standard for Flow Cytometry, Version FCS3.0" files.
  * 
  * Parsing is currently not complete:
- * 		- additional byte buffer manipulation needed for datatype "A" (ASCII)
- * 		- only one DATA segment per file is processed (since apparently no vendor
- * 			makes use of the possibility to store more than experiment per file)
- * 		- ANALYSIS segment is not parsed
- * 		- OTHER text segment is not parsed
+ * 	 - additional byte buffer manipulation needed for datatype "A" (ASCII)
+ * 	 - only one DATA segment per file is processed (since apparently no vendor
+ * 	   makes use of the possibility to store more than experiment per file)
+ * 	 - ANALYSIS segment is not parsed
+ *   - OTHER text segment is not parsed
  * 
  * @author Aaron Ponti
  */
@@ -521,8 +521,8 @@ public class FCSProcessor extends AbstractProcessor {
 	
 	/**
 	 * Reads and stores the data segment 
-	 * @return true if reading the data segment was successful, flase otherwise
-	 * TODO Use tge information about the type of data
+	 * @return true if reading the data segment was successful, false otherwise
+	 * TODO Use the information about the type of data
 	 */
 	private boolean readDataBlock() {
 		
