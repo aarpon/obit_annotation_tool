@@ -138,7 +138,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		} else if (e.getActionCommand().equals("Quit")) {
 	        if (JOptionPane.showConfirmDialog(this, 
 	        		"Do you really want to quit?", "Question",
-	        		JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+	        		JOptionPane.YES_NO_OPTION,
+	        		JOptionPane.QUESTION_MESSAGE) == 
+	        		JOptionPane.YES_OPTION) {
 	        	spaceViewer.logout();
 	        	System.exit(0);
 	        }
