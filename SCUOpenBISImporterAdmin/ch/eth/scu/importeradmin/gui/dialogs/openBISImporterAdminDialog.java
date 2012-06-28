@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.dialogs;
+package ch.eth.scu.importeradmin.gui.dialogs;
 
 import javax.swing.*;
 
