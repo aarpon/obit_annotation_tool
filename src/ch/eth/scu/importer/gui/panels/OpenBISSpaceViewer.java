@@ -24,6 +24,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -75,6 +76,7 @@ public class OpenBISSpaceViewer extends JPanel
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
 		add(title, constraints);
 		
 		// Create the root node for the tree

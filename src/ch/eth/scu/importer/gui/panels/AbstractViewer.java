@@ -3,6 +3,7 @@ package ch.eth.scu.importer.gui.panels;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -84,6 +85,7 @@ abstract public class AbstractViewer extends JPanel
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
 		add(title, constraints);
 		
 		// Create the root node

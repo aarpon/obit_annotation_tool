@@ -6,8 +6,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.*;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.plaf.metal.OceanTheme;
 
 import ch.eth.scu.importer.gui.panels.AbstractViewer;
 import ch.eth.scu.importer.gui.panels.BDLSRFortessaViewer;
@@ -17,6 +15,7 @@ import ch.eth.scu.importer.gui.panels.OpenBISSpaceViewer;
 import ch.eth.scu.importer.properties.AppProperties;
 
 import java.awt.BorderLayout;
+import java.awt.Insets;
 import java.util.Properties;
 
 /**
@@ -29,7 +28,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	private MetadataEditor metadataEditor;
-	private JEditorPane outputPane; 
+	private JTextArea outputPane; 
 	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
 	private AbstractViewer metadataViewer;
@@ -45,19 +44,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// Call the frame's constructor
 		super("Single-Cell Unit openBIS Importer v" + version);
 
-		// Try to use the cross-platform look and feel
+		// Use the system default look-and-feel
 		try {
-			if (System.getProperty("os.name").equals("Mac OS X")) {
-				UIManager.setLookAndFeel(
-						ch.randelshofer.quaqua.QuaquaManager.getLookAndFeel()
-		        );
-			} else {
-				UIManager.setLookAndFeel(
-						UIManager.getCrossPlatformLookAndFeelClassName());
-				MetalLookAndFeel.setCurrentTheme(new OceanTheme());
-				UIManager.setLookAndFeel(new MetalLookAndFeel());
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err.println("Couldn't set look and feel.");
 		}
@@ -92,7 +81,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		add(spaceViewer, BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
-		outputPane = new JEditorPane();
+		outputPane = new JTextArea();
+		outputPane.setRows(5);
 		outputPane.setEditable(false);
 		outputPane.setText("Ready");
 		outputWindow = new JScrollPane(outputPane);
@@ -111,7 +101,6 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	    });
 
 		// Set up the frame and center on screen
-		//setMinimumSize(new Dimension(1200, 800));
 		pack();
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -196,6 +185,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Create, initialize and the button.
 		JButton button = new JButton(text);
+		button.setMargin(new Insets(3, 3, 3, 3));
+		button.setBorderPainted(false);
 		button.setActionCommand(actionCommand);
 		button.setToolTipText(toolTipText);
 		button.addActionListener(this);
