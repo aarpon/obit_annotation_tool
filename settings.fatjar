@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Thu Jun 28 09:39:38 CEST 2012
+onejar.license.required=false
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=true
+jarname=dist/SCUOpenBISImporter.jar
+manifest.mergeall=true
+manifest.mainclass=ch.eth.scu.importer.SCUImporter
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=

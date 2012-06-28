@@ -23,7 +23,7 @@
 	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.7-20101029.jar"/>
 	<classpathentry kind="lib" path="lib/quaqua.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SCUImporter/lib"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SCUOpenBISImporter/lib"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/spring.jar"/>

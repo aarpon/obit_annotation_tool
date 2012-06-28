@@ -1,4 +1,6 @@
-ch.eth.scu.scuimporter
-ch.eth.scu.scuimporter.gui
-ch.eth.scu.scuimporter.gui.panels
-ch.eth.scu.scuimporter.processor
+ch.eth.scu.importer
+ch.eth.scu.importer.gui
+ch.eth.scu.importer.gui.dialogs
+ch.eth.scu.importer.gui.panels
+ch.eth.scu.importer.processor
+ch.eth.scu.importer.properties
