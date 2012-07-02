@@ -1,4 +1,5 @@
 ch.eth.scu.importer
+ch.eth.scu.importer.common.logger
 ch.eth.scu.importer.common.properties
 ch.eth.scu.importer.gui
 ch.eth.scu.importer.gui.dialogs

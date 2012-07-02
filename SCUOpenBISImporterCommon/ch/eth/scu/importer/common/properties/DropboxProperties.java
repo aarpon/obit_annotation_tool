@@ -10,7 +10,6 @@ import java.util.Properties;
 /**
  * DropBoxProperties reads and writes properties to be used in the dropbox script
  * @author Aaron Ponti
- *
  */
 public class DropboxProperties {
 

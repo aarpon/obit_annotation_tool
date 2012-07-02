@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * openBIS login dialog
@@ -20,6 +22,8 @@ public class OpenBISLoginDialog extends JDialog {
 
 	private JTextField txtUsername;
 	private JPasswordField pwdPassword;
+	private boolean userInterrupted = false;
+
 
 	/**
 	 * Constructor
@@ -103,6 +107,15 @@ public class OpenBISLoginDialog extends JDialog {
 		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(loginButton);
 
+		// Make sure to react correctly in case the user just closes the
+		// login window without trying to log in
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				userInterrupted = true;
+				setVisible(false);
+			}
+		});
+		
 		// Display the dialog
 		pack();
 		setLocationRelativeTo(null);
@@ -125,6 +138,14 @@ public class OpenBISLoginDialog extends JDialog {
 	 */
 	public String getPassword() {
 		return (new String(pwdPassword.getPassword()));
+	}
+
+	/**
+	 * Check whether the user interrupted the login process by closing the dialog
+	 * @return true if the user interrupted the login, false otherwise
+	 */
+	public boolean interrupted() {
+		return userInterrupted;
 	}
 	
 }

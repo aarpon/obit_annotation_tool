@@ -12,7 +12,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.springframework.remoting.RemoteConnectFailureException;
+
 import ch.eth.scu.importer.gui.dialogs.OpenBISLoginDialog;
+import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
@@ -37,6 +40,7 @@ public class OpenBISSpaceViewer extends JPanel
 
 	private static final long serialVersionUID = 1L;
 
+	private String openBISURL = "";
 	private String userName = "";
 	private String userPassword = "";
 	private int timeout = 60000;
@@ -47,9 +51,6 @@ public class OpenBISSpaceViewer extends JPanel
 	private JTree tree;
 	private JScrollPane treeView;
 	private String defaultRootNodeString = "Please login to openBIS...";
-	
-	//private final static String openBISURL = "https://openbis-scu.ethz.ch/openbis/";
-	private final static String openBISURL = "https://sprint-openbis.ethz.ch:8446/openbis";
 
 	private boolean isLoggedIn = false;
 	
@@ -58,8 +59,11 @@ public class OpenBISSpaceViewer extends JPanel
 	/**
 	 * Constructor
 	 */
-	public OpenBISSpaceViewer() {
+	public OpenBISSpaceViewer(String openBISURL) {
 
+		// Set the URL
+		this.openBISURL = openBISURL;
+		
 		// Set a grid bag layout
 		setLayout(new GridBagLayout());
 
@@ -123,6 +127,9 @@ public class OpenBISSpaceViewer extends JPanel
 		// Modal dialog: stops here until the dialog is disposed
 		// (when a username and password have been provided)
 		loginDialog = new OpenBISLoginDialog();
+		if (loginDialog.interrupted() == true) {
+			return false;
+		}
 		userName = loginDialog.getUsername();
 		userPassword = loginDialog.getPassword();
 		return true;
@@ -156,6 +163,15 @@ public class OpenBISSpaceViewer extends JPanel
 					"Login failed. Please try again.");
 			userName = "";
 			userPassword = "";
+			facade = null;
+			return false;
+		} catch (RemoteConnectFailureException e) {
+			JOptionPane.showMessageDialog(this,
+					"Could not connect to openBIS.\n" + 
+			"The server appears to be down.\n" +
+							"Please try again later.",	
+					"Connection error",
+					JOptionPane.ERROR_MESSAGE);
 			facade = null;
 			return false;
 		}
@@ -215,6 +231,19 @@ public class OpenBISSpaceViewer extends JPanel
 		}
 		
 		// TODO Check that the session is still open
+		try {
+			facade.checkSession();
+		} catch ( InvalidSessionException e ) {
+			JOptionPane.showMessageDialog(this,
+					"The openBIS session is no longer valid!\n" + 
+			"Please try logging in again.",	
+					"Session error",
+					JOptionPane.ERROR_MESSAGE);
+			facade = null;
+			isLoggedIn = false;
+			clearTreeView();
+			return;
+		}
 
 		// Set the root of the tree
 		rootNode = new DefaultMutableTreeNode(userName);

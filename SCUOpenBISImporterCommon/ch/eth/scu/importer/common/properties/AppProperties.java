@@ -8,9 +8,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Commodity class to manage the SCUOpenBISImporter properties
+ * Commodity class to manage the SCUOpenBISImporter application properties
  * @author Aaron Ponti
- *
  */
 public class AppProperties {
 
@@ -72,7 +71,8 @@ public class AppProperties {
 	 * Write the properties to disk 
 	 * @return true if the properties were saved successfully, false otherwise
 	 */
-	static public boolean writePropertiesToFile(String acqStation, String incomingDir) {
+	static public boolean writePropertiesToFile(String openBISURL, 
+			String acqStation, String incomingDir) {
 
 		// Make sure the Properties file exists
 		if (AppProperties.propertiesFileExists() == false) {
@@ -87,6 +87,8 @@ public class AppProperties {
 		applicationProperties.setProperty(
 				"PropertyFileVersion", propertiesVersion );
 		applicationProperties.setProperty(
+				"OpenBISURL", openBISURL);
+		applicationProperties.setProperty(
 				"AcquisitionStation", acqStation);
 		applicationProperties.setProperty(
 				"DatamoverIncomingDir", incomingDir);		
@@ -94,7 +96,8 @@ public class AppProperties {
 		// Save to file
 		try {
 			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
-			applicationProperties.store(out, "Default Properties Set");
+			applicationProperties.store(out, 
+					"SCUOpenBISImporter Default Properties Set");
 			out.close();
 		} catch (IOException e) {
 			System.err.println("Could not write to file " +
@@ -211,10 +214,16 @@ public class AppProperties {
 		applicationProperties.setProperty(
 				"PropertyFileVersion", propertiesVersion );
 		applicationProperties.setProperty(
-				"AcquisitionStation", "");
+				"OpenBISURL", 
+				DefaultProperties.defaultValueForProperty("OpenBISURL"));		
 		applicationProperties.setProperty(
-				"DatamoverIncomingDir", "");
+				"AcquisitionStation",
+				DefaultProperties.defaultValueForProperty("AcquisitionStation"));
+		applicationProperties.setProperty(
+				"DatamoverIncomingDir",
+				DefaultProperties.defaultValueForProperty("DatamoverIncomingDir"));
 		return applicationProperties;
-
 	}
+
 }
+

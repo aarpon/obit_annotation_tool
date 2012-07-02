@@ -4,7 +4,6 @@ import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.OpenBISImporterWindow;
-import ch.eth.scu.importeradmin.gui.dialogs.openBISImporterAdminDialog;
 
 /**
  * SCUImporter is an application to drive the import of data from the 

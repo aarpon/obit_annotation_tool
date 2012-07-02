@@ -77,7 +77,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		metadataEditor = new MetadataEditor();
 		add(metadataEditor, BorderLayout.CENTER);
 
-		spaceViewer = new OpenBISSpaceViewer();
+		String openBISURL = appProperties.getProperty("OpenBISURL");
+		spaceViewer = new OpenBISSpaceViewer(openBISURL);
 		add(spaceViewer, BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
@@ -88,15 +89,12 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		outputWindow = new JScrollPane(outputPane);
 		add(outputWindow, BorderLayout.SOUTH);
 
-		// Set exit on close
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		// Make sure to logout when exiting 
+		// We do not want the window to close without some clean up
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 	        @Override
 	        public void windowClosing(WindowEvent e) {
-	        	spaceViewer.logout();
-	        	System.exit(0);
+	        	QuitApplication();
 	        }
 	    });
 
@@ -128,15 +126,10 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		} else if (e.getActionCommand().equals("Pick directory")) {
 			System.out.println("Not implemented.");
 		} else if (e.getActionCommand().equals("Quit")) {
-	        if (JOptionPane.showConfirmDialog(this, 
-	        		"Do you really want to quit?", "Question",
-	        		JOptionPane.YES_NO_OPTION,
-	        		JOptionPane.QUESTION_MESSAGE) == 
-	        		JOptionPane.YES_OPTION) {
-	        	spaceViewer.logout();
-	        	System.exit(0);
-	        }
+				QuitApplication();
 		} else {
+			outputPane.append("Action command: " + e.getActionCommand() + 
+					" from "  + e.getSource().getClass() + "\n");
 			return;
 		}
 	}
@@ -194,5 +187,19 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 					this.getClass().getResource(imgLocation)));
 		return button;
 	}
+	
+	/**
+	 * Quits the application properly
+	 */
+	private void QuitApplication() {
+        if (JOptionPane.showConfirmDialog(this, 
+        		"Do you really want to quit?", "Question",
+        		JOptionPane.YES_NO_OPTION,
+        		JOptionPane.QUESTION_MESSAGE) == 
+        		JOptionPane.YES_OPTION) {
+        	spaceViewer.logout();
+        	System.exit(0);
+        }
+   }
 
 }
