@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.properties;
+package ch.eth.scu.importer.common.properties;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,7 +72,7 @@ public class AppProperties {
 	 * Write the properties to disk 
 	 * @return true if the properties were saved successfully, false otherwise
 	 */
-	static public boolean savePropertiesToFile(String acqStation, String incomingDir) {
+	static public boolean writePropertiesToFile(String acqStation, String incomingDir) {
 
 		// Make sure the Properties file exists
 		if (AppProperties.propertiesFileExists() == false) {
@@ -91,7 +91,7 @@ public class AppProperties {
 		applicationProperties.setProperty(
 				"DatamoverIncomingDir", incomingDir);		
 
-		// Save to file!
+		// Save to file
 		try {
 			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
 			applicationProperties.store(out, "Default Properties Set");

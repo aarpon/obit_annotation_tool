@@ -7,12 +7,12 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.panels.AbstractViewer;
 import ch.eth.scu.importer.gui.panels.BDLSRFortessaViewer;
 import ch.eth.scu.importer.gui.panels.LeicaSP5Viewer;
 import ch.eth.scu.importer.gui.panels.MetadataEditor;
 import ch.eth.scu.importer.gui.panels.OpenBISSpaceViewer;
-import ch.eth.scu.importer.properties.AppProperties;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -113,8 +113,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	}
 
 	/**
-	 *  Implements the actionPerformed callback.
-	 *  @param ActionEvent
+	 * Implements the actionPerformed callback.
+	 * @param e The ActionEvent 
 	 */
 	public void actionPerformed(ActionEvent e) {
 

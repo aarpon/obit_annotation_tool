@@ -2,7 +2,7 @@ package ch.eth.scu.importeradmin.gui.dialogs;
 
 import javax.swing.*;
 
-import ch.eth.scu.importer.properties.AppProperties;
+import ch.eth.scu.importer.common.properties.AppProperties;
 
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
@@ -173,7 +173,7 @@ public class openBISImporterAdminDialog extends JDialog
 
 	/**
 	 * Implement the actionPerformed method
-	 * @param ActionEvent 
+	 * @param e The ActionEvent 
 	 */	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -211,7 +211,7 @@ public class openBISImporterAdminDialog extends JDialog
 		}
 		
 		// Save the properties to file
-		return AppProperties.savePropertiesToFile(selAcqStation, selIncomingDir);
+		return AppProperties.writePropertiesToFile(selAcqStation, selIncomingDir);
 	}
 	
 }

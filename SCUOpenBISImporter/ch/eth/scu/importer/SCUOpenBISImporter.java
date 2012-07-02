@@ -2,8 +2,8 @@ package ch.eth.scu.importer;
 
 import javax.swing.JOptionPane;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.OpenBISImporterWindow;
-import ch.eth.scu.importer.properties.AppProperties;
 import ch.eth.scu.importeradmin.gui.dialogs.openBISImporterAdminDialog;
 
 /**

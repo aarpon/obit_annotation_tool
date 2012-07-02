@@ -23,7 +23,6 @@ public class OpenBISLoginDialog extends JDialog {
 
 	/**
 	 * Constructor
-	 * @param owner parent window
 	 */
 	public OpenBISLoginDialog() {
 		
