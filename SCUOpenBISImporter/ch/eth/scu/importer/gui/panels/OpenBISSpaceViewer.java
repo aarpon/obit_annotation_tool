@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
@@ -14,6 +15,8 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.springframework.remoting.RemoteConnectFailureException;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.properties.DropboxProperties;
 import ch.eth.scu.importer.gui.dialogs.OpenBISLoginDialog;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
@@ -56,13 +59,22 @@ public class OpenBISSpaceViewer extends JPanel
 	
 	private OpenBISLoginDialog loginDialog;
 	
+	// Reference to the DropboxProperties object
+	private DropboxProperties dropboxProperties;
+	
 	/**
 	 * Constructor
 	 */
-	public OpenBISSpaceViewer(String openBISURL) {
+	public OpenBISSpaceViewer(DropboxProperties dropboxProperties) {
 
+		// Get the openBIS URL from the appProperties
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		
 		// Set the URL
-		this.openBISURL = openBISURL;
+		this.openBISURL = appProperties.getProperty("OpenBISURL");
+		
+		// Set the reference to the MetadataEditor
+		this.dropboxProperties = dropboxProperties;
 		
 		// Set a grid bag layout
 		setLayout(new GridBagLayout());
@@ -115,7 +127,23 @@ public class OpenBISSpaceViewer extends JPanel
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		// TODO Auto-generated method stub
+		
+		// Get the selected tree node
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                tree.getLastSelectedPathComponent();
+		if (node == null) {
+			return;
+		}
+		
+		// Get the object stored at that nose
+		Object nodeInfo = node.getUserObject();
+		
+		// Make sure it is an experiment
+		if (nodeInfo instanceof ExperimentWrapper) {
+			// Update the DropboxProperties
+			dropboxProperties.add("Experiment", 
+					((ExperimentWrapper) nodeInfo).getIdentifier());
+		}
 	}
 
 	/**
@@ -329,6 +357,11 @@ public class OpenBISSpaceViewer extends JPanel
 		public String toString() {
 			return new String( "[space] " + s.getCode());
 		}
+		
+		public String getIdentifier() {
+			return s.getCode();
+		}
+		
 	}
 
 	/**
@@ -348,6 +381,11 @@ public class OpenBISSpaceViewer extends JPanel
 		public String toString() {
 			return new String( "[project] " + p.getCode());
 		}
+		
+		public String getIdentifier() {
+			return p.getIdentifier();
+		}
+		
 	}
 
 	/**
@@ -366,6 +404,10 @@ public class OpenBISSpaceViewer extends JPanel
 		@Override
 		public String toString() {
 			return new String( "[experiment] " + e.getCode());
+		}
+
+		public String getIdentifier() {
+			return e.getIdentifier();
 		}
 	}
 
@@ -386,6 +428,11 @@ public class OpenBISSpaceViewer extends JPanel
 		public String toString() {
 			return new String( "[sample] " + s.getCode());
 		}
+
+		public String getIdentifier() {
+			return s.getIdentifier();
+		}
+
 	}
 	
 	@Override

@@ -8,6 +8,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.properties.DropboxProperties;
 import ch.eth.scu.importer.gui.panels.AbstractViewer;
 import ch.eth.scu.importer.gui.panels.BDLSRFortessaViewer;
 import ch.eth.scu.importer.gui.panels.LeicaSP5Viewer;
@@ -33,6 +34,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private OpenBISSpaceViewer spaceViewer;
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
+	private DropboxProperties dropboxProperties;
 	
 	private static final String version = "0.0.0";
 	
@@ -53,7 +55,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Get the application properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();
-		String acqStation = appProperties.getProperty("AcquisitionStation");
+		
+		// Get the Dropbox properties
+		dropboxProperties = new DropboxProperties();
 		
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
@@ -63,7 +67,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		toolBar.setFloatable(false);
 		addButtons();
 		add(toolBar, BorderLayout.NORTH);
-		
+
+		String acqStation = appProperties.getProperty("AcquisitionStation");	
 		if (acqStation.equals("LSRFortessa")) {
 			metadataViewer = new BDLSRFortessaViewer();
 		} else if (acqStation.equals("LeicaSP5")) {
@@ -74,11 +79,10 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		}
 		add(metadataViewer, BorderLayout.WEST);
 		
-		metadataEditor = new MetadataEditor();
+		metadataEditor = new MetadataEditor(dropboxProperties);
 		add(metadataEditor, BorderLayout.CENTER);
 
-		String openBISURL = appProperties.getProperty("OpenBISURL");
-		spaceViewer = new OpenBISSpaceViewer(openBISURL);
+		spaceViewer = new OpenBISSpaceViewer(dropboxProperties);
 		add(spaceViewer, BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
@@ -98,6 +102,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	        }
 	    });
 
+		// Add observers to dropboxProperties
+		dropboxProperties.addObserver(metadataEditor);
+		
 		// Set up the frame and center on screen
 		pack();
 		setLocationRelativeTo(null);

@@ -1,5 +1,6 @@
 package ch.eth.scu.importer.common.properties;
 
+import java.util.Observable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,7 +12,7 @@ import java.util.Properties;
  * DropBoxProperties reads and writes properties to be used in the dropbox script
  * @author Aaron Ponti
  */
-public class DropboxProperties {
+public class DropboxProperties extends Observable {
 
 	private File dropboxIncomingFile;
 
@@ -65,7 +66,12 @@ public class DropboxProperties {
 	 * Add a String-String key-value pair to the properties
 	 */
 	public void add(String key, String value) {
+		// Set the property
 		dropboxProperties.setProperty(key, value);
+		
+		// Notify observers that a key was set 
+		setChanged();
+		notifyObservers(key);
 	}
 
 	/**
