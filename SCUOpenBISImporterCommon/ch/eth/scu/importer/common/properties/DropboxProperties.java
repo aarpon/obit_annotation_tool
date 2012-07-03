@@ -13,35 +13,47 @@ import java.util.Properties;
  */
 public class DropboxProperties {
 
+	private File dropboxIncomingFile;
+
 	private Properties dropboxProperties;
 	
 	public DropboxProperties() {
 	
+		// Read the application properties
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		
+		// TODO Check that the folder exists!
+		
+		// Store the folder
+		this.dropboxIncomingFile = new File(
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + "dropbox.cfg");
+		
 		// Create an empty Properties object
 		dropboxProperties = new Properties();
 	
 	}
 	
 	/**
-	 * Read the properties from a specified file
+	 * Read the dropbox properties file
 	 * @return a Properties object
 	 */
-	public Properties readPropertiesFromFile(File file) {
+	public Properties readPropertiesFromFile() {
 		
 		// Open file
 		FileInputStream in;
 		try {
-			in = new FileInputStream(file);
+			in = new FileInputStream(dropboxIncomingFile);
 			try {
 				dropboxProperties = new Properties();
 				dropboxProperties.load(in);
 				in.close();
 			} catch (IOException e) {
-				System.err.println("Could not read from specified file.");
+				System.err.println("Could not read from dropbox properties file.");
 				return dropboxProperties;
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println("Could not read from specified file.");
+			System.err.println("Could not read from dropbox properties file.");
 			return dropboxProperties;
 		}
 		
@@ -55,19 +67,28 @@ public class DropboxProperties {
 	public void add(String key, String value) {
 		dropboxProperties.setProperty(key, value);
 	}
+
+	/**
+	 * Add a String-String key-value pair to the properties
+	 * @return String containing the value, or null if the key-value pair does
+	 * not exist.
+	 */
+	public String get(String key) {
+		return dropboxProperties.getProperty(key);
+	}
 	
 	/**
-	 * Write the stored properties to a specified file
+	 * Write the stored properties to the dropbox properties file
 	 * @return true if writing the file was successful, false otherwise.
 	 */
-	public boolean writePropertiesToFile(File file) {
+	public boolean writePropertiesToFile() {
 		
 		try {
-			FileOutputStream out = new FileOutputStream(file);
+			FileOutputStream out = new FileOutputStream(dropboxIncomingFile);
 			dropboxProperties.store(out, "Dropbox properties");
 			out.close();
 		} catch (IOException e) {
-			System.err.println("Could not write to specified file.");
+			System.err.println("Could not write to dropbox properties file.");
 			return false;
 		}
 		
