@@ -18,7 +18,7 @@ import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.
 public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
-	private String filename;
+	private String xmlFilename;
 	private String version;
 	private String releaseVersion;
 	private DocumentBuilder parser = null;
@@ -38,13 +38,13 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	public BDFACSDIVAXMLProcessor(String filename) {
 
 		// Set the filename
-		this.filename = filename;
+		this.xmlFilename = filename;
 
 		// Instantiate the factory
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setIgnoringComments(true); 	// Ignore comments 
 		factory.setCoalescing(true); 		// Convert CDATA to Text nodes 
-		factory.setNamespaceAware(false); 	// No namespaces
+		factory.setNamespaceAware(false); 	// No name spaces
 		factory.setValidating(false);		// Don't validate DTD
 
 		// Create and store a parser
@@ -79,7 +79,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 		// Parse the file
 		try {
-			File file = new File(filename);		
+			File file = new File(xmlFilename);		
 			doc = parser.parse(file);
 			//doc.getDocumentElement().normalize();
 		} catch (SAXException se) {
@@ -102,7 +102,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 * @return String containing a description of the DBDIVAXMLProcessor. 
 	 */
 	public String toString() {
-		return (new File(filename)).getName();
+		return (new File(xmlFilename)).getName();
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 * @return Comma-separated String with attribute key: value pairs.
 	 */
 	public String attributesToString() {
-		String str =  "full filename: " + filename + ", " + 
+		String str =  "full filename: " + xmlFilename + ", " + 
 				"version: " + version + ", " + 
 				"release version: " + releaseVersion;
 		return str;
@@ -499,6 +499,11 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				public String dataFilename;
 
 				/**
+				 * Name with full path of the fcs file associated with the Tube    
+				 */
+				public String fullDataFilename;
+				
+				/**
 				 * Constructor.
 				 * @param tubeNode DOM node that refers to a Tube.
 				 */
@@ -526,6 +531,12 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 							// Tube file name
 							dataFilename = n.getTextContent();
+							
+							// Store also the full file name for quick retrieval
+							File path = new File(xmlFilename);
+							fullDataFilename = ( path.getParent() + 
+									File.separator + 
+									dataFilename ).toString();
 
 						} else {
 

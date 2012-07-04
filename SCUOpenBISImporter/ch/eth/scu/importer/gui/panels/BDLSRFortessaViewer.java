@@ -1,5 +1,6 @@
 package ch.eth.scu.importer.gui.panels;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment;
@@ -9,12 +10,13 @@ import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.
 
 import java.awt.event.*;
 
-import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
-import javax.swing.filechooser.*;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Properties;
+import java.io.FileFilter;
 
 /**
  * Simple graphical viewer for the BDDIVAXMLProcessor
@@ -25,11 +27,10 @@ public class BDLSRFortessaViewer extends AbstractViewer
 
 	private static final long serialVersionUID = 1L;
 
-	// Processors
-	private BDFACSDIVAXMLProcessor xmlprocessor = null;
-	private FCSProcessor fcsprocessor = null;
-
-	private File file;
+	// The valueChanged() method is fired twice when selection is changed in 
+	// a JTree, so we keep track of the last processed node to avoid parsing
+	// the same FCS file twice every time the node is changed.
+	private String lastSelectedNode;
 	
 	/**
 	 * Constructor
@@ -40,20 +41,23 @@ public class BDLSRFortessaViewer extends AbstractViewer
 		super();
 		
 		// Add initial info to the html pane
-		htmlPane.setText("\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
+		htmlPane.setText(
+				"\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
 				"XML files with the associated 'Data File Standard " + 
 				"for Flow Cytometry, Version FCS3.0' files generated " +
-				"by the BD LSRFortessa flow cytometer.");
+				"by the BD LSRFortessa flow cytometer.");	
 	}
 
 	/**
-	 *  Parse the selected XML file. 
+	 *  Parse the selected XML file and appends the resulting tree to the root
 	 */
-	public boolean parseXML() {
+	public boolean parseXML(File subfolder, File xmlFile) {
 
 		// Process the file
+		BDFACSDIVAXMLProcessor xmlprocessor;
 		try {
-			xmlprocessor = new BDFACSDIVAXMLProcessor(file.getCanonicalPath());
+			xmlprocessor = new BDFACSDIVAXMLProcessor(
+					xmlFile.getCanonicalPath());
 		} catch (IOException e) {
 			htmlPane.setText("Invalid file!");
 			xmlprocessor = null;
@@ -65,67 +69,14 @@ public class BDLSRFortessaViewer extends AbstractViewer
 			return false;
 		}
 
-		// Create the root node
-		rootNode = new DefaultMutableTreeNode(xmlprocessor);
-
+		// Add the processor as new child of root
+		DefaultMutableTreeNode folderNode = 
+				new DefaultMutableTreeNode(xmlprocessor);
+		rootNode.add(folderNode);
+		
 		// Add all the children
-		createNodes(rootNode);
-
-		// Create a tree that allows one selection at a time.
-		tree.setModel(new DefaultTreeModel(rootNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-
-		// Make sure the other processor is null
-		fcsprocessor = null;
-
-		// Clean the html pane
-		htmlPane.setText("");
-
-		return true;
-	}
-
-	/**
-	 *  Parse the selected FCS file. 
-	 */
-	public boolean parseFCS() {
-
-		// Process the file
-		try {
-			fcsprocessor = new FCSProcessor(file.getCanonicalPath(), false);
-		} catch (IOException e) {
-			htmlPane.setText("Invalid file!");
-			fcsprocessor = null;
-			return false;
-		}
-		try {
-			fcsprocessor.parse();
-		} catch (IOException e) {
-			htmlPane.setText("Could not parse file!");
-			fcsprocessor = null;
-			return false;
-		}
-
-		// Create the root node
-		rootNode = new DefaultMutableTreeNode(fcsprocessor);
-
-		// Create a tree that allows one selection at a time.
-		tree.setModel(new DefaultTreeModel(rootNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-
-		// Display the metadata in the html pane
-		htmlPane.setText(fcsprocessor.metadataDump());
-
-		// Make sure the other processor is null
-		xmlprocessor = null;
-
+		createNodes(folderNode, xmlprocessor);
+		
 		return true;
 	}
 
@@ -140,7 +91,15 @@ public class BDLSRFortessaViewer extends AbstractViewer
 		if (node == null) {
 			return;
 		}
-
+		
+		// The valuedChanged() method is called twice when the a node is
+		// chosen in the tree. Workaround: do not process the same node 
+		// twice in a row  
+		if (node.toString().equals(lastSelectedNode)) {
+			return;
+		}
+		lastSelectedNode = node.toString();
+		
 		// Get the node object
 		Object nodeInfo = node.getUserObject();
 
@@ -173,7 +132,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 			// Display attributes
 			String out = tube.attributesToString().replace(", ", "\n");
 			// Parse the fcs file and dump its metadata
-			String fcsFile = file.getParent() + File.separator + tube.dataFilename;
+			String fcsFile = tube.fullDataFilename;
 			FCSProcessor fcs = new FCSProcessor(fcsFile, false);
 			try {
 				fcs.parse();
@@ -183,12 +142,6 @@ public class BDLSRFortessaViewer extends AbstractViewer
 			}
 			// Display
 			htmlPane.setText(out);
-		} else if (className.endsWith("FCSProcessor")) {
-			// Strictly speaking there is nothing to do, but we
-			// refresh the display in case.
-			if (fcsprocessor != null) {
-				htmlPane.setText(fcsprocessor.metadataDump());
-			}
 		} else {
 			htmlPane.setText("");
 		}
@@ -198,7 +151,8 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	protected void createNodes(DefaultMutableTreeNode top) {
+	protected void createNodes(DefaultMutableTreeNode top,
+			BDFACSDIVAXMLProcessor xmlprocessor) {
 		DefaultMutableTreeNode experiment = null;
 		DefaultMutableTreeNode tray = null;
 		DefaultMutableTreeNode specimen = null;
@@ -261,46 +215,60 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	}
 
 	/**
-	 * Asks the user to pick a file to be parsed
+	 * Scan the datamover incoming folder
 	 */
-	public void pickFile() {
+	public void scan() {
+		
+		// Get the datamover incoming folder from the application properties
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		File dropboxIncomingFolder = new File(
+				appProperties.getProperty("DatamoverIncomingDir"));
+		
+		// Get a list of all subfolders
+		File[] rootSubFolders = dropboxIncomingFolder.listFiles(
+				new FileFilter() {
+					public boolean accept(File file) {
+						return file.isDirectory();
+					}
+				});
 
-		// Create a file chooser
-		final JFileChooser fc = new JFileChooser();
+		// Prepare a new root node for the Tree
+		rootNode = new DefaultMutableTreeNode("/");
 
-		// Filters
-		FileFilter filter = new FileNameExtensionFilter(
-				"BD LSRFortessa files (*.xml, *.fcs)", "xml", "fcs");
-		fc.setAcceptAllFileFilterUsed(false);
-		fc.addChoosableFileFilter(filter);
-
-		// Get a file from an open dialog
-		int returnVal = fc.showOpenDialog(htmlPane);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			file = fc.getSelectedFile();
-			int dotPos = file.getName().lastIndexOf(".");
-			String extension = file.getName().substring(dotPos);
-			if (extension.equalsIgnoreCase(".xml")) {
-				if (parseXML() == false) {
-					file = null;
-				}
-			} else if (extension.equalsIgnoreCase(".fcs")) {
-				if (parseFCS() == false) {
-					file = null;
-				}
+		// Go over all folders and check that there is an xml file inside
+		for (File subfolder : rootSubFolders) {
+			File[] xmlFiles = subfolder.listFiles(
+					new FilenameFilter() {
+						public boolean accept(File file, String name) {
+							return name.toLowerCase().endsWith(".xml");
+						}
+					});
+			
+			// Make sure there is only one xml file per folder
+			if (xmlFiles.length == 0) {
+				System.err.println("No xml found in folder " + subfolder + 
+						". Skipping.");
+			} else if (xmlFiles.length > 1) {
+				System.err.println("Only on xml expected! Skipping folder " +
+			subfolder + ".");
 			} else {
-				System.err.println("Unknown extension!");
+				// And now parse the file and append the results to the Tree
+				// under current folder node
+				parseXML(subfolder, xmlFiles[0]);
 			}
-		} else {
-			file = null;
-			return;
 		}
+		
+		// Create a tree that allows one selection at a time.
+		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
+
+		// Clean the html pane
+		htmlPane.setText("");
+		
 	}
 
-	/**
-	 * Asks the user to pick a directory to be processed
-	 */
-	public void pickDir() {
-		// Not implemented yet.
-	}
 }

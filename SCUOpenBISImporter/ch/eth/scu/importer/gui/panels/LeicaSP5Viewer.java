@@ -1,14 +1,15 @@
 package ch.eth.scu.importer.gui.panels;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processor.LeicaLifProcessor;
 
 import java.awt.event.*;
-import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
-import javax.swing.filechooser.*;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Properties;
 
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
@@ -22,10 +23,10 @@ public class LeicaSP5Viewer extends AbstractViewer
 
 	private static final long serialVersionUID = 1L;
 
-	// Processors
-	private LeicaLifProcessor leicalifprocessor = null;
-
-	private File file;
+	// The valueChanged() method is fired twice when selection is changed in 
+	// a JTree, so we keep track of the last processed node to avoid processing
+	// the same node twice in a row.
+	private String lastSelectedNode;
 	
 	/**
 	 * Constructor
@@ -40,11 +41,12 @@ public class LeicaSP5Viewer extends AbstractViewer
 	}
 
 	/**
-	 *  Parse the selected XML file. 
+	 *  Parse the selected LIF file. 
 	 */
-	public boolean parse() {
+	public boolean parse(File file) {
 
 		// Process the file
+		LeicaLifProcessor leicalifprocessor;
 		try {
 			leicalifprocessor = new LeicaLifProcessor(file.getCanonicalPath());
 		} catch (IOException e) {
@@ -68,24 +70,13 @@ public class LeicaSP5Viewer extends AbstractViewer
 			return false;
 		}
 
-		// Create the root node
-		rootNode = new DefaultMutableTreeNode(leicalifprocessor);
-
-		// Add all the children
-		createNodes(rootNode);
-
-		// Create a tree that allows one selection at a time.
-		tree.setModel(new DefaultTreeModel(rootNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-
-		// Clean the html pane
-		htmlPane.setText("");
-
-		return true;
+		// Add the processor as new child of root
+		DefaultMutableTreeNode lifFileNode = 
+				new DefaultMutableTreeNode(leicalifprocessor);
+		rootNode.add(lifFileNode);
+		
+		createNodes(lifFileNode, leicalifprocessor);
+		return true;		
 	}
 
 	/**
@@ -100,6 +91,14 @@ public class LeicaSP5Viewer extends AbstractViewer
 			return;
 		}
 
+		// The valuedChanged() method is called twice when the a node is
+		// chosen in the tree. Workaround: do not process the same node 
+		// twice in a row  
+		if (node.toString().equals(lastSelectedNode)) {
+			return;
+		}
+		lastSelectedNode = node.toString();
+		
 		// Get the node object
 		Object nodeInfo = node.getUserObject();
 		
@@ -119,23 +118,6 @@ public class LeicaSP5Viewer extends AbstractViewer
 	}
 
 	/**
-	 * Create the nodes for the tree
-	 * @param top Root node
-	 */
-	protected void createNodes(DefaultMutableTreeNode top) {
-		DefaultMutableTreeNode imageDescriptor = null;
-		
-		for (LeicaLifProcessor.ImageDescriptor d : 
-			leicalifprocessor.imageDescriptors) {
-
-			// Add the experiments
-			imageDescriptor = new DefaultMutableTreeNode(d);
-			top.add(imageDescriptor);
-
-		}
-	}
-
-	/**
 	 *  React to actions
 	 *  @param e An ActionEvent 
 	 */
@@ -144,35 +126,61 @@ public class LeicaSP5Viewer extends AbstractViewer
 	}
 
 	/**
-	 * Asks the user to pick a file to be parsed
+	 * Scans the datamover incoming directory for datasets to be processed
 	 */
-	public void pickFile() {
-
-		// Create a file chooser
-		final JFileChooser fc = new JFileChooser();
-
-		// Filters
-		FileFilter filter = new FileNameExtensionFilter(
-				"Leica LIF files (*.lif)", "lif");
-		fc.setAcceptAllFileFilterUsed(false);
-		fc.addChoosableFileFilter(filter);
-
-		// Get a file from an open dialog
-		int returnVal = fc.showOpenDialog(htmlPane);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			file = fc.getSelectedFile();
-			if (parse() == false) {
-				file = null;
-			}
-		} else {
-			file = null;
-			return;
-		}
-	}
-
-	@Override
-	public void pickDir() {
-		// TODO Auto-generated method stub
+	public void scan() {
 		
+		// Get the datamover incoming folder from the application properties
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		File dropboxIncomingFolder = new File(
+				appProperties.getProperty("DatamoverIncomingDir"));
+
+		// Prepare a new root node for the Tree
+		rootNode = new DefaultMutableTreeNode("/");
+
+		// We only consider lif files in the root
+		File[] lifFiles = dropboxIncomingFolder.listFiles(
+				new FilenameFilter() {
+					public boolean accept(File file, String name) {
+						return name.toLowerCase().endsWith(".lif");
+					}
+				});
+		
+		// Now parse the lif files and append the results to the Tree
+		// under the root node
+		for (File lifFile : lifFiles) {
+			parse(lifFile);
+		}
+		
+		// Create a tree that allows one selection at a time.
+		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
+
+		// Clean the html pane
+		htmlPane.setText("");
+		
+	}
+	
+	/**
+	 * Create the nodes for the tree
+	 * @param top Root node
+	 */
+	protected void createNodes(DefaultMutableTreeNode lifFileNode,
+			LeicaLifProcessor leicalifprocessor) {
+		
+		DefaultMutableTreeNode imageDescriptor = null;
+		
+		for (LeicaLifProcessor.ImageDescriptor d : 
+			leicalifprocessor.imageDescriptors) {
+
+			// Add the experiments
+			imageDescriptor = new DefaultMutableTreeNode(d);
+			lifFileNode.add(imageDescriptor);
+
+		}
 	}
 }

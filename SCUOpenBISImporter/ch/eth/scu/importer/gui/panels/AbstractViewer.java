@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
@@ -35,32 +34,9 @@ abstract public class AbstractViewer extends JPanel
 	protected JLabel metadataView;
 	
 	/**
-	 * Create the nodes for the tree
-	 * @param top Root node
+	 * Scans the datamover incoming directory for datasets to be processed
 	 */
-	protected abstract void createNodes(DefaultMutableTreeNode top);
-
-	/**
-	 * Implement the actionPerformed method.
-	 * @param e An ActionEvent
-	 */
-	abstract public void actionPerformed(ActionEvent e);
-	
-	/**
-	 * Called when selection in the Tree View is changed.
-	 * @param e A TreeSelectionEvent
-	 */
-	abstract public void valueChanged(TreeSelectionEvent e); 
-	
-	/**
-	 * Asks the user to pick a file to be parsed
-	 */
-	abstract public void pickFile();
-
-	/**
-	 * Asks the user to pick a directory to be processed
-	 */
-	abstract public void pickDir();
+	abstract public void scan();
 	
 	/**
 	 * Constructor
@@ -88,17 +64,9 @@ abstract public class AbstractViewer extends JPanel
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(title, constraints);
 		
-		// Create the root node
-		rootNode = new DefaultMutableTreeNode("Pick a file...");
-
-		// Create a tree that allows one selection at a time.
-		tree = new JTree(rootNode);
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-
+		// Initialize the Tree
+		clearTree();
+		
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
 
@@ -144,5 +112,24 @@ abstract public class AbstractViewer extends JPanel
 		// Set sizes
 		setMinimumSize(new Dimension(400, 800));
 		setPreferredSize(new Dimension(400, 800));
+	}
+	
+	/**
+	 * Initialized the Tree. If a Tree already existed, it is cleared
+	 * and replaced.
+	 */
+	protected void clearTree() {
+
+		// Create the root node
+		rootNode = new DefaultMutableTreeNode("No data found.");
+
+		// Create a tree that allows one selection at a time.
+		tree = new JTree(rootNode);
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
+
 	}
 }

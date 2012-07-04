@@ -113,6 +113,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// Ask the user to login
 		spaceViewer.login();
 
+		// Scan the datamover incoming folder for datasets
+		metadataViewer.scan();
+		
 		// Make window visible
 		setVisible(true);
 	}
@@ -128,10 +131,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 			spaceViewer.login();
 		} else if (e.getActionCommand().equals("Log out")) {
 			spaceViewer.logout();
-		} else if (e.getActionCommand().equals("Pick file")) {
-			metadataViewer.pickFile();
-		} else if (e.getActionCommand().equals("Pick directory")) {
-			System.out.println("Not implemented.");
+		} else if (e.getActionCommand().equals("Scan")) {
+			metadataViewer.scan();
 		} else if (e.getActionCommand().equals("Quit")) {
 				QuitApplication();
 		} else {
@@ -162,13 +163,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
         toolBar.addSeparator();
 
-        // Pick file
-        toolBar.add(createButton("fileopen.png", "Pick file",
-        		"Pick file", "Pick a file to add to openBIS"));
-
-        // Log out
-        toolBar.add(createButton("diropen.png", "Pick dir",
-        		"Log directory", "Pick a directory to add to openBIS"));
+        // Scan incoming file
+        toolBar.add(createButton("fileopen.png", "Scan",
+        		"Scan", "Scan data mover incoming folder"));
      }
 	
 	/**

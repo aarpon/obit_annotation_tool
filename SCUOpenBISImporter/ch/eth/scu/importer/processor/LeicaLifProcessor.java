@@ -1,5 +1,6 @@
 package ch.eth.scu.importer.processor;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,12 +101,7 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	}
 
 	public String toString() {
-		return filename;
-		/*String str = "";
-		for (int i = 0; i < imageDescriptors.size(); i++) {
-			str += imageDescriptors.get(i).summary() + "\n";
-		}
-		return str;*/
+		return (new File(filename)).getName();
 	}
 	
 	/**
