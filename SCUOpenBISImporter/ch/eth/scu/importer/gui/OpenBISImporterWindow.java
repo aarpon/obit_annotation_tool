@@ -22,7 +22,6 @@ import java.util.Properties;
 /**
  * Main window of the SCUOpenBISImporter application.
  * @author Aaron Ponti
- *
  */
 public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
@@ -180,7 +179,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 									String actionCommand,
 									String toolTipText) {
 
-		// Create, initialize and the button.
+		// Create, initialize and return the button.
 		JButton button = new JButton(text);
 		button.setMargin(new Insets(3, 3, 3, 3));
 		button.setBorderPainted(false);

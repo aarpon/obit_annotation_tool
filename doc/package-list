@@ -1,9 +1,6 @@
 ch.eth.scu.importer
-ch.eth.scu.importer.common.logger
-ch.eth.scu.importer.common.properties
 ch.eth.scu.importer.gui
+ch.eth.scu.importer.gui.components
 ch.eth.scu.importer.gui.dialogs
 ch.eth.scu.importer.gui.panels
 ch.eth.scu.importer.processor
-ch.eth.scu.importeradmin
-ch.eth.scu.importeradmin.gui.dialogs

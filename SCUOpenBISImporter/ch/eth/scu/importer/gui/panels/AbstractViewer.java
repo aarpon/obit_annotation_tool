@@ -4,18 +4,19 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
+
+import ch.eth.scu.importer.gui.components.CustomTree;
+import ch.eth.scu.importer.gui.components.RootNode;
 
 /**
  * Abstract viewer for processors
@@ -26,7 +27,7 @@ abstract public class AbstractViewer extends JPanel
 
 	protected static final long serialVersionUID = 1L;
 	protected JEditorPane htmlPane;
-	protected JTree tree;
+	protected CustomTree tree;
 	protected JLabel title;
 	protected DefaultMutableTreeNode rootNode;
 	protected JScrollPane treeView;
@@ -121,13 +122,13 @@ abstract public class AbstractViewer extends JPanel
 	protected void clearTree() {
 
 		// Create the root node
-		rootNode = new DefaultMutableTreeNode("No data found.");
+		rootNode = new RootNode("No data found.");
 
 		// Create a tree that allows one selection at a time.
-		tree = new JTree(rootNode);
+		tree = new CustomTree(rootNode);
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
+		
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
 

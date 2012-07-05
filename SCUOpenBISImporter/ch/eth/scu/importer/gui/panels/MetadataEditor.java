@@ -16,13 +16,13 @@ import ch.eth.scu.importer.common.properties.DropboxProperties;
 /**
  * Metadata editor panel.
  * @author Aaron Ponti
- *
  */
 public class MetadataEditor extends JPanel implements Observer, ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
 	private JButton uploadButton;
+	private JLabel labelDataValue;
 	private JLabel labelExpValue;
 	
 	private DropboxProperties dropboxProperties;
@@ -63,16 +63,37 @@ public class MetadataEditor extends JPanel implements Observer, ActionListener {
 		add(firstSpacer, constraints);
 		
 		// Add a JLabel for the experiment selection title
-		JLabel labelExpTitle = new JLabel("Select an experiment to upload to...");
+		JLabel labelExpTitle = new JLabel("Data item");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
 		add(labelExpTitle, constraints);
 
 		// Add a JLabel for the experiment value
-		labelExpValue = new JLabel("");
-		labelExpValue.setAlignmentX(CENTER_ALIGNMENT);
+		labelDataValue = new JLabel("undefined");
+		labelDataValue.setAlignmentX(CENTER_ALIGNMENT);
 		constraints.gridx = 0;
 		constraints.gridy = 3;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		add(labelDataValue, constraints);
+		
+		// Add a spacer
+		JLabel openBISExpLabel = new JLabel("OpenBIS experiment");
+		constraints.anchor = GridBagConstraints.CENTER;
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridx = 0;
+		constraints.gridy = 4;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		add(openBISExpLabel, constraints);
+
+		// Add a JLabel for the experiment value
+		labelExpValue = new JLabel("undefined");
+		labelExpValue.setAlignmentX(CENTER_ALIGNMENT);
+		constraints.gridx = 0;
+		constraints.gridy = 5;
 		add(labelExpValue, constraints);
 		
 		// Add a spacer
@@ -80,7 +101,7 @@ public class MetadataEditor extends JPanel implements Observer, ActionListener {
 		constraints.anchor = GridBagConstraints.CENTER;
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = 6;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		constraints.gridheight = GridBagConstraints.REMAINDER;
@@ -92,7 +113,7 @@ public class MetadataEditor extends JPanel implements Observer, ActionListener {
 		constraints.anchor = GridBagConstraints.SOUTHWEST;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.gridx = 0;
-		constraints.gridy = 5;
+		constraints.gridy = 7;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		uploadButton.addActionListener(this);

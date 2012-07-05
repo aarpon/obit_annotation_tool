@@ -1,6 +1,13 @@
 package ch.eth.scu.importer.gui.panels;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.gui.components.ExperimentNode;
+import ch.eth.scu.importer.gui.components.Node;
+import ch.eth.scu.importer.gui.components.RootNode;
+import ch.eth.scu.importer.gui.components.SpecimenNode;
+import ch.eth.scu.importer.gui.components.TrayNode;
+import ch.eth.scu.importer.gui.components.TubeNode;
+import ch.eth.scu.importer.gui.components.XMLNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment;
@@ -69,13 +76,13 @@ public class BDLSRFortessaViewer extends AbstractViewer
 			return false;
 		}
 
-		// Add the processor as new child of root
-		DefaultMutableTreeNode folderNode = 
-				new DefaultMutableTreeNode(xmlprocessor);
-		rootNode.add(folderNode);
+		// Add the processor as new child of current folder node
+		XMLNode xmlNode = 
+				new XMLNode(xmlprocessor);
+		rootNode.add(xmlNode);
 		
 		// Add all the children
-		createNodes(folderNode, xmlprocessor);
+		createNodes(xmlNode, xmlprocessor);
 		
 		return true;
 	}
@@ -86,8 +93,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-				tree.getLastSelectedPathComponent();
+		Node node = (Node) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
 		}
@@ -151,35 +157,35 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	protected void createNodes(DefaultMutableTreeNode top,
+	protected void createNodes(Node top,
 			BDFACSDIVAXMLProcessor xmlprocessor) {
-		DefaultMutableTreeNode experiment = null;
-		DefaultMutableTreeNode tray = null;
-		DefaultMutableTreeNode specimen = null;
-		DefaultMutableTreeNode tube = null;
+		ExperimentNode experiment = null;
+		TrayNode tray = null;
+		SpecimenNode specimen = null;
+		TubeNode tube = null;
 
 		for (Experiment e : xmlprocessor.experiments) {
 
 			// Add the experiments
-			experiment = new DefaultMutableTreeNode(e);
+			experiment = new ExperimentNode(e);
 			top.add(experiment);
 
 			for (Tray t : e.trays) {
 
 				// Add the trays
-				tray = new DefaultMutableTreeNode(t);
+				tray = new TrayNode(t);
 				experiment.add(tray);
 
 				for (Specimen s : t.specimens) {
 
 					// Add the specimens
-					specimen = new DefaultMutableTreeNode(s);
+					specimen = new SpecimenNode(s);
 					tray.add(specimen);
 
 					for (Tube tb : s.tubes) {
 
 						// Add the tubes
-						tube = new DefaultMutableTreeNode(tb);
+						tube = new TubeNode(tb);
 						specimen.add(tube);
 					}
 
@@ -190,13 +196,13 @@ public class BDLSRFortessaViewer extends AbstractViewer
 			for (Specimen s : e.specimens) {
 
 				// Add the specimens
-				specimen = new DefaultMutableTreeNode(s);
+				specimen = new SpecimenNode(s);
 				experiment.add(specimen);
 
 				for (Tube tb : s.tubes) {
 
 					// Add the tubes
-					tube = new DefaultMutableTreeNode(tb);
+					tube = new TubeNode(tb);
 					specimen.add(tube);
 				}
 
@@ -233,7 +239,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 				});
 
 		// Prepare a new root node for the Tree
-		rootNode = new DefaultMutableTreeNode("/");
+		rootNode = new RootNode("/");
 
 		// Go over all folders and check that there is an xml file inside
 		for (File subfolder : rootSubFolders) {

@@ -13,7 +13,6 @@ import java.awt.event.WindowEvent;
 /**
  * openBIS login dialog
  * @author Aaron Ponti
- *
  */
 public class OpenBISLoginDialog extends JDialog {
 	

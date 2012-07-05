@@ -9,7 +9,6 @@ import ch.eth.scu.importer.gui.OpenBISImporterWindow;
  * SCUImporter is an application to drive the import of data from the 
  * acquisition stations into openBIS.
  * @author Aaron Ponti
- *
  */
 public class SCUOpenBISImporter {
 

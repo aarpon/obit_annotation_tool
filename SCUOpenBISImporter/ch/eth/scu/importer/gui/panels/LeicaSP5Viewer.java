@@ -1,6 +1,10 @@
 package ch.eth.scu.importer.gui.panels;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.gui.components.ImageNode;
+import ch.eth.scu.importer.gui.components.Node;
+import ch.eth.scu.importer.gui.components.RootNode;
+import ch.eth.scu.importer.gui.components.SubImageNode;
 import ch.eth.scu.importer.processor.LeicaLifProcessor;
 
 import java.awt.event.*;
@@ -71,8 +75,8 @@ public class LeicaSP5Viewer extends AbstractViewer
 		}
 
 		// Add the processor as new child of root
-		DefaultMutableTreeNode lifFileNode = 
-				new DefaultMutableTreeNode(leicalifprocessor);
+		ImageNode lifFileNode = 
+				new ImageNode(leicalifprocessor);
 		rootNode.add(lifFileNode);
 		
 		createNodes(lifFileNode, leicalifprocessor);
@@ -85,8 +89,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-				tree.getLastSelectedPathComponent();
+		Node node = (Node) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
 		}
@@ -136,7 +139,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 				appProperties.getProperty("DatamoverIncomingDir"));
 
 		// Prepare a new root node for the Tree
-		rootNode = new DefaultMutableTreeNode("/");
+		rootNode = new RootNode("/");
 
 		// We only consider lif files in the root
 		File[] lifFiles = dropboxIncomingFolder.listFiles(
@@ -172,13 +175,13 @@ public class LeicaSP5Viewer extends AbstractViewer
 	protected void createNodes(DefaultMutableTreeNode lifFileNode,
 			LeicaLifProcessor leicalifprocessor) {
 		
-		DefaultMutableTreeNode imageDescriptor = null;
+		SubImageNode imageDescriptor = null;
 		
 		for (LeicaLifProcessor.ImageDescriptor d : 
 			leicalifprocessor.imageDescriptors) {
 
 			// Add the experiments
-			imageDescriptor = new DefaultMutableTreeNode(d);
+			imageDescriptor = new SubImageNode(d);
 			lifFileNode.add(imageDescriptor);
 
 		}

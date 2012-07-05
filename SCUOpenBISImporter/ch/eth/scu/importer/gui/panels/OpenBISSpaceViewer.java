@@ -36,7 +36,6 @@ import java.awt.Insets;
  * Graphical user interface to log in to openBIS and choose where to store
  * acquired datasets.
  * @author Aaron Ponti
- *
  */
 public class OpenBISSpaceViewer extends JPanel 
 	implements ActionListener, TreeSelectionListener {

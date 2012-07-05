@@ -18,7 +18,6 @@ import loci.plugins.util.LociPrefs;
 
 /**
  * LeicaLifProcessor parses Leica LIF files.
- * 
  * @author Aaron Ponti
  */
 public class LeicaLifProcessor extends AbstractProcessor {

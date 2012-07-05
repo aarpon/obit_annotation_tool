@@ -19,7 +19,6 @@ import java.util.Properties;
 /**
  * SCUOpenBISImporter administrator Dialog
  * @author Aaron Ponti
- *
  */
 public class openBISImporterAdminDialog extends JDialog {
 	
