@@ -38,6 +38,7 @@ public class DefaultProperties {
 		if (property.equals("OpenBISURL")) {
 			options.add("https://openbis-scu.ethz.ch/openbis");
 			options.add("https://sprint-openbis.ethz.ch:8446/openbis/");
+			options.add("https://openbis-csb.ethz.ch/openbis");		
 		} else if (property.equals("AcquisitionStation")) {
 			options.add("LSRFortessa");
 			options.add("LeicaSP5");
