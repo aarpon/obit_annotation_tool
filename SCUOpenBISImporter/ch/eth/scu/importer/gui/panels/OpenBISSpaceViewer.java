@@ -116,8 +116,8 @@ public class OpenBISSpaceViewer extends JPanel
 		add(treeView, constraints);
 
 		// Set sizes
-		setMinimumSize(new Dimension(400, 800));
-		setPreferredSize(new Dimension(400, 800));
+		setMinimumSize(new Dimension(400, 700));
+		setPreferredSize(new Dimension(400, 700));
 	}
 	
 	/**
