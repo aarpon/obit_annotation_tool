@@ -16,4 +16,8 @@ public class SpecimenNode extends Node{
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(getClass().getResource("specimen.png"));
 	}
+
+	public String getTooltip() {
+		return "Specimen";
+	}
 }

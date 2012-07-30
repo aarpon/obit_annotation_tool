@@ -16,4 +16,8 @@ public class XMLNode extends Node{
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(getClass().getResource("xml.png"));
 	}
+	
+	public String getTooltip() {
+		return "XML file";
+	}
 }

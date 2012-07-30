@@ -16,4 +16,8 @@ public class TubeNode extends Node{
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(getClass().getResource("tube.png"));
 	}
+	
+	public String getTooltip() {
+		return "Tube";
+	}
 }

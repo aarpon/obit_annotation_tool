@@ -16,4 +16,8 @@ public class SubImageNode extends Node{
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(getClass().getResource("subimage.png"));
 	}
+	
+	public String getTooltip() {
+		return "Sub-image";
+	}
 }

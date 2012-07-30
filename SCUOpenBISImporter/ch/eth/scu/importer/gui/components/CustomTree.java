@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.gui.components;
 
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import ch.eth.scu.importer.gui.components.CustomTreeCellRenderer;
@@ -19,7 +20,10 @@ public class CustomTree extends JTree {
 		super(node);
 		
 		// Set the custom renderer
-	    setCellRenderer(new CustomTreeCellRenderer());	
+	    setCellRenderer(new CustomTreeCellRenderer());
+	    
+	    // TooltipManager
+	    ToolTipManager.sharedInstance().registerComponent(this); 
 		
 	}
 }

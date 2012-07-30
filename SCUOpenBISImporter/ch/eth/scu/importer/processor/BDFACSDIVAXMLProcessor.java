@@ -293,8 +293,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		 * @return String representation of the Experiment node.
 		 */
 		public String toString() {
-			String str =  "[Experiment] " + name;
-			return str;
+			return name;
 		}
 
 		/**
@@ -387,8 +386,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			 * @return String representation of the Tray node.
 			 */
 			public String toString() {
-				String str =  "[Tray] " + name;
-				return str;
+				return name;
 			}
 
 			/**
@@ -460,8 +458,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			 * @return String representation of the Specimen node.
 			 */
 			public String toString() {
-				String str =  "[Specimen] " + name;
-				return str;
+				return name;
 			}
 
 			/**
@@ -551,7 +548,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				 * @return String representation of the Tube node.
 				 */
 				public String toString() {
-					String str =  "[Tube] " + name + "   (" + dataFilename + ")";
+					String str =  name + "   (" + dataFilename + ")";
 					return str;
 				}
 

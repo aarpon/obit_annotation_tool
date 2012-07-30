@@ -16,4 +16,8 @@ public class TrayNode extends Node{
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(getClass().getResource("plate.png"));
 	}
+	
+	public String getTooltip() {
+		return "Tray";
+	}
 }

@@ -16,4 +16,8 @@ public class ImageNode extends Node{
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(getClass().getResource("image.png"));
 	}
+	
+	public String getTooltip() {
+		return "Image";
+	}
 }
