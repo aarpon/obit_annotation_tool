@@ -1,7 +1,6 @@
 package ch.eth.scu.importer.gui.components;
 import java.awt.Component;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
@@ -37,8 +36,8 @@ public class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
 
 		// Override the icon with the Node's one and add the custom
 		// tool-tip text
-		if ((value != null) && (value instanceof Node) ) {
-			Node node = (Node) value;
+		if ((value != null) && (value instanceof CustomTreeNode) ) {
+			CustomTreeNode node = (CustomTreeNode) value;
 			setIcon(node.getIcon());
 			setToolTipText(node.getTooltip());
 		}

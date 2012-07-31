@@ -22,7 +22,7 @@ public class CustomTree extends JTree {
 		// Set the custom renderer
 	    setCellRenderer(new CustomTreeCellRenderer());
 	    
-	    // TooltipManager
+	    // Tooltip manager
 	    ToolTipManager.sharedInstance().registerComponent(this); 
 		
 	}

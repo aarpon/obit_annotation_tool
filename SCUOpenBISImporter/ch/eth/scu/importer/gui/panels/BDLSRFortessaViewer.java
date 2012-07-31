@@ -2,7 +2,7 @@ package ch.eth.scu.importer.gui.panels;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.components.ExperimentNode;
-import ch.eth.scu.importer.gui.components.Node;
+import ch.eth.scu.importer.gui.components.CustomTreeNode;
 import ch.eth.scu.importer.gui.components.RootNode;
 import ch.eth.scu.importer.gui.components.SpecimenNode;
 import ch.eth.scu.importer.gui.components.TrayNode;
@@ -11,9 +11,9 @@ import ch.eth.scu.importer.gui.components.XMLNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment;
-import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen;
-import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Tray;
-import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Specimen;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Tray;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Tube;
 
 import java.awt.event.*;
 
@@ -78,7 +78,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 
 		// Add the processor as new child of current folder node
 		XMLNode xmlNode = 
-				new XMLNode(xmlprocessor);
+				new XMLNode(xmlprocessor, xmlprocessor.getType());
 		rootNode.add(xmlNode);
 		
 		// Add all the children
@@ -93,7 +93,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		Node node = (Node) tree.getLastSelectedPathComponent();
+		CustomTreeNode node = (CustomTreeNode) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
 		}
@@ -123,18 +123,18 @@ public class BDLSRFortessaViewer extends AbstractViewer
 									", ", "\n"));
 		} else if (className.endsWith("Tray")) { 
 			htmlPane.setText(
-					((BDFACSDIVAXMLProcessor.Experiment.Tray) 
+					((BDFACSDIVAXMLProcessor.Tray) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.endsWith("Specimen")) { 
 			htmlPane.setText(
-					((BDFACSDIVAXMLProcessor.Experiment.Specimen) 
+					((BDFACSDIVAXMLProcessor.Specimen) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.endsWith("Tube")) {
 			// Cast
-			BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube tube = 
-					(BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube) nodeInfo;
+			BDFACSDIVAXMLProcessor.Tube tube = 
+					(BDFACSDIVAXMLProcessor.Tube) nodeInfo;
 			// Display attributes
 			String out = tube.attributesToString().replace(", ", "\n");
 			// Parse the fcs file and dump its metadata
@@ -157,7 +157,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	protected void createNodes(Node top,
+	protected void createNodes(CustomTreeNode top,
 			BDFACSDIVAXMLProcessor xmlprocessor) {
 		ExperimentNode experiment = null;
 		TrayNode tray = null;
@@ -167,25 +167,25 @@ public class BDLSRFortessaViewer extends AbstractViewer
 		for (Experiment e : xmlprocessor.experiments) {
 
 			// Add the experiments
-			experiment = new ExperimentNode(e);
+			experiment = new ExperimentNode(e, e.getType());
 			top.add(experiment);
 
 			for (Tray t : e.trays) {
 
 				// Add the trays
-				tray = new TrayNode(t);
+				tray = new TrayNode(t, t.getType());
 				experiment.add(tray);
 
 				for (Specimen s : t.specimens) {
 
 					// Add the specimens
-					specimen = new SpecimenNode(s);
+					specimen = new SpecimenNode(s, s.getType());
 					tray.add(specimen);
 
 					for (Tube tb : s.tubes) {
 
 						// Add the tubes
-						tube = new TubeNode(tb);
+						tube = new TubeNode(tb, tb.getType());
 						specimen.add(tube);
 					}
 
@@ -196,13 +196,13 @@ public class BDLSRFortessaViewer extends AbstractViewer
 			for (Specimen s : e.specimens) {
 
 				// Add the specimens
-				specimen = new SpecimenNode(s);
+				specimen = new SpecimenNode(s, s.getType());
 				experiment.add(specimen);
 
 				for (Tube tb : s.tubes) {
 
 					// Add the tubes
-					tube = new TubeNode(tb);
+					tube = new TubeNode(tb, tb.getType());
 					specimen.add(tube);
 				}
 
@@ -239,7 +239,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 				});
 
 		// Prepare a new root node for the Tree
-		rootNode = new RootNode("/");
+		rootNode = new RootNode("/", "root");
 
 		// Go over all folders and check that there is an xml file inside
 		for (File subfolder : rootSubFolders) {
@@ -274,7 +274,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 
 		// Clean the html pane
 		htmlPane.setText("");
-		
+	
 	}
 
 }

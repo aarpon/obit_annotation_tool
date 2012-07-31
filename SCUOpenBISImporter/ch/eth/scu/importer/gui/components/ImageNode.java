@@ -5,12 +5,12 @@ package ch.eth.scu.importer.gui.components;
  * Node types
  * @author Aaron Ponti 
  */
-public class ImageNode extends Node{
+public class ImageNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public ImageNode(Object object) {
-		super(object);
+	public ImageNode(Object object, String type) {
+		super(object, type);
 	}
 
 	public javax.swing.Icon getIcon() {

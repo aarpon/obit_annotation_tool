@@ -2,7 +2,7 @@ package ch.eth.scu.importer.gui.panels;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.components.ImageNode;
-import ch.eth.scu.importer.gui.components.Node;
+import ch.eth.scu.importer.gui.components.CustomTreeNode;
 import ch.eth.scu.importer.gui.components.RootNode;
 import ch.eth.scu.importer.gui.components.SubImageNode;
 import ch.eth.scu.importer.processor.LeicaLifProcessor;
@@ -76,7 +76,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 
 		// Add the processor as new child of root
 		ImageNode lifFileNode = 
-				new ImageNode(leicalifprocessor);
+				new ImageNode(leicalifprocessor, leicalifprocessor.getType());
 		rootNode.add(lifFileNode);
 		
 		createNodes(lifFileNode, leicalifprocessor);
@@ -89,7 +89,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		Node node = (Node) tree.getLastSelectedPathComponent();
+		CustomTreeNode node = (CustomTreeNode) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
 		}
@@ -139,7 +139,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 				appProperties.getProperty("DatamoverIncomingDir"));
 
 		// Prepare a new root node for the Tree
-		rootNode = new RootNode("/");
+		rootNode = new RootNode("/", "root");
 
 		// We only consider lif files in the root
 		File[] lifFiles = dropboxIncomingFolder.listFiles(
@@ -172,7 +172,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	protected void createNodes(DefaultMutableTreeNode lifFileNode,
+	protected void createNodes(CustomTreeNode lifFileNode,
 			LeicaLifProcessor leicalifprocessor) {
 		
 		SubImageNode imageDescriptor = null;
@@ -181,7 +181,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 			leicalifprocessor.imageDescriptors) {
 
 			// Add the experiments
-			imageDescriptor = new SubImageNode(d);
+			imageDescriptor = new SubImageNode(d, "metadata");
 			lifFileNode.add(imageDescriptor);
 
 		}

@@ -16,6 +16,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import ch.eth.scu.importer.gui.components.CustomTree;
+import ch.eth.scu.importer.gui.components.CustomTreeToXML;
 import ch.eth.scu.importer.gui.components.RootNode;
 
 /**
@@ -122,7 +123,7 @@ abstract public class AbstractViewer extends JPanel
 	protected void clearTree() {
 
 		// Create the root node
-		rootNode = new RootNode("No data found.");
+		rootNode = new RootNode("No data found.", "root");
 
 		// Create a tree that allows one selection at a time.
 		tree = new CustomTree(rootNode);
@@ -133,4 +134,18 @@ abstract public class AbstractViewer extends JPanel
 		tree.addTreeSelectionListener(this);
 
 	}
+	
+
+	/**
+	 * Create and save an XML representation of the JTree to file
+	 * @param filename Filename with full path 
+	 * @return true if the XML file could be saved, false otherwise
+	 */	
+	public boolean saveToXML(String filename) {
+		
+		CustomTreeToXML treeToXML = new CustomTreeToXML(tree);
+		return (treeToXML.saveToFile(filename));
+	
+	}
+
 }

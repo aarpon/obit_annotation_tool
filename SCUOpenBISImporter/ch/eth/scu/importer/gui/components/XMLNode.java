@@ -5,12 +5,12 @@ package ch.eth.scu.importer.gui.components;
  * Node types
  * @author Aaron Ponti 
  */
-public class XMLNode extends Node{
+public class XMLNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public XMLNode(Object object) {
-		super(object);
+	public XMLNode(Object object, String type) {
+		super(object, type);
 	}
 
 	public javax.swing.Icon getIcon() {

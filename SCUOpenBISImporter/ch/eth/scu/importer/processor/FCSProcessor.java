@@ -128,6 +128,15 @@ public class FCSProcessor extends AbstractProcessor {
 	public String toString() {
 		return (new File(filename)).getName();
 	}
+
+	/**
+	 * Return a simplified class name to use in XML.
+	 * @return simplified class name.
+	 */
+	@Override
+	public String getType() {
+		return "fcs";
+	}	
 	
 	/**
 	 * Return the parsed FCSProcessor metadata information.
@@ -600,6 +609,6 @@ public class FCSProcessor extends AbstractProcessor {
 		public Parameter() {
 		}
 	}
-	
+
 }
 

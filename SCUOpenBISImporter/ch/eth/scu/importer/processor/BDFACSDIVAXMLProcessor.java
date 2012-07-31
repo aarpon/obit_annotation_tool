@@ -7,10 +7,6 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen;
-import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Tray;
-import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.Experiment.Specimen.Tube;
-
 /**
  * BDFACSDIVAXMLProcessor parses "BD BioSciences FACSDiva" XML files.
  * @author Aaron Ponti
@@ -105,6 +101,15 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		return (new File(xmlFilename)).getName();
 	}
 
+	/**
+	 * Return a simplified class name to use in XML.
+	 * @return simplified class name.
+	 */
+	@Override
+	public String getType() {
+		return "BDFACSDIVA";
+	}	
+	
 	/**
 	 * Return a String with the Processor attributes
 	 * @return Comma-separated String with attribute key: value pairs.
@@ -212,7 +217,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 *
 	 */
-	public class Experiment {
+	public class Experiment extends BDFACSDIVAXMLProcessor.XMLNode {
 
 		/* Public instance variables */
 
@@ -297,6 +302,15 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}
 
 		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplidied class name.
+		 */
+		@Override		
+		public String getType() {
+			return "Experiment";
+		}
+		
+		/**
 		 * Return a String with the Experiment attributes
 		 * @return Comma-separated String with attribute key: value pairs.
 		 */
@@ -304,266 +318,301 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			String str =  "owner: " + owner_name + ", " + 
 					"date: " + date;
 			return str;
-		}		
-
-		/**
-		 * Class that represents a tray parsed from the XML.
-		 * @author Aaron Ponti
-		 */
-		public class Tray {
-
-			/* Public instance variables */
-
-			/** 
-			 * Tray name
-			 */
-			public String name;
-
-			/** 
-			 * Tray type
-			 */
-			public String tray_type;
-
-			/**
-			 * Number of rows (String)
-			 */
-			public String rows;
-
-			/**
-			 * Number of columns (String)
-			 */
-			public String cols;
-
-			/**
-			 * Tray orientation
-			 */			
-			public String orientation;
-
-			/**
-			 * ArrayList of Specimen's
-			 */
-			public ArrayList<Specimen> specimens = new ArrayList<Specimen>();
-
-			/**
-			 * Constructor
-			 * @param trayNode DOM node that refers to a Tray.
-			 */
-			public Tray(org.w3c.dom.Node trayNode) {
-
-				// Get the attributes
-				NamedNodeMap attrs = trayNode.getAttributes();
-
-				name        = attrs.getNamedItem("name").getNodeValue();
-				tray_type   = attrs.getNamedItem("tray_type").getNodeValue();;
-				rows        = attrs.getNamedItem("rows").getNodeValue();
-				cols        = attrs.getNamedItem("cols").getNodeValue();
-				orientation = attrs.getNamedItem("Orientation").getNodeValue();
-
-				// Get children
-				NodeList children = trayNode.getChildNodes();
-
-				// Process them
-				for ( int i = 0; i < children.getLength(); i++ ) {
-
-					Node n = children.item(i);
-
-					if (n.getNodeName().equals("specimen")) {
-
-						// Specimen  
-						specimens.add(new Specimen(n));
-
-					} else {
-
-						// Skip
-					}
-
-				}
-
-			}
-
-			/**
-			 * Return a String representation of the extracted Tray node.
-			 * @return String representation of the Tray node.
-			 */
-			public String toString() {
-				return name;
-			}
-
-			/**
-			 * Return a String with the Tray attributes
-			 * @return Comma-separated String with attribute key: value pairs.
-			 */
-			public String attributesToString() {
-				String str =  "type: " + tray_type + ", " + 
-						"rows: " + rows + ", " +
-						"columns: " + cols + ", " +
-						"orientation: " + orientation;
-				return str;
-			}
-		}
-
-		/**
-		 * Class that represents a specimen parsed from the XML.
-		 * A Specimen can be a child of a Tray or directly of an Experiment.
-		 * @author Aaron Ponti
-		 */
-		public class Specimen {
-
-			/* Public instance variables */
-
-			/**
-			 * Specimen name
-			 */
-			public String name;
-
-			/**
-			 * ArrayList of Tube's
-			 */			
-			public ArrayList<Tube> tubes = new ArrayList<Tube>();
-
-			/**
-			 * Constructor.
-			 * @param specimenNode DOM node that refers to a Specimen.
-			 */
-			public Specimen(org.w3c.dom.Node specimenNode) {
-
-				// Get the attributes
-				NamedNodeMap attrs = specimenNode.getAttributes();
-
-				name = attrs.getNamedItem("name").getNodeValue();
-
-				// Get children
-				NodeList children = specimenNode.getChildNodes();
-
-				// Process them
-				for ( int i = 0; i < children.getLength(); i++ ) {
-
-					Node n = children.item(i);
-
-					if (n.getNodeName().equals("tube")) {
-
-						// Tray
-						tubes.add(new Tube(n));
-
-					} else {
-
-						// Skip
-					}
-				}
-
-			}
-
-			/**
-			 * Return a String representation of the extracted Specimen node.
-			 * @return String representation of the Specimen node.
-			 */
-			public String toString() {
-				return name;
-			}
-
-			/**
-			 * Return a String with the Specimen attributes
-			 * @return Comma-separated String with attribute key: value pairs.
-			 */
-			public String attributesToString() {
-				String str =  "no attributes";
-				return str;
-			}
-
-
-			/**
-			 * Class that represents a tube parsed from the XML.
-			 * A Tube is always a child of a Specimen.
-			 * @author Aaron Ponti
-			 */
-			public class Tube {
-
-				/* Public instance variables */  		
-
-				/**
-				 * Tube name
-				 */
-				public String name;
-
-				/**
-				 * Date of the acquisition of Tube
-				 */
-				public String date;
-
-				/**
-				 * Name of the fcs file associated with the Tube 
-				 */				
-				public String dataFilename;
-
-				/**
-				 * Name with full path of the fcs file associated with the Tube    
-				 */
-				public String fullDataFilename;
-				
-				/**
-				 * Constructor.
-				 * @param tubeNode DOM node that refers to a Tube.
-				 */
-				public Tube(org.w3c.dom.Node tubeNode) {
-
-					// Get the attributes
-					NamedNodeMap attrs = tubeNode.getAttributes();
-
-					name = attrs.getNamedItem("name").getNodeValue();
-
-					// Get children
-					NodeList children = tubeNode.getChildNodes();
-
-					// Process them
-					for ( int i = 0; i < children.getLength(); i++ ) {
-
-						Node n = children.item(i);
-
-						if (n.getNodeName().equals("date")) {
-
-							// Tube date
-							date = n.getTextContent();
-
-						} else if (n.getNodeName().equals("data_filename")) {
-
-							// Tube file name
-							dataFilename = n.getTextContent();
-							
-							// Store also the full file name for quick retrieval
-							File path = new File(xmlFilename);
-							fullDataFilename = ( path.getParent() + 
-									File.separator + 
-									dataFilename ).toString();
-
-						} else {
-
-							// Skip
-						}
-					}
-
-				}
-
-				/**
-				 * Return a String representation of the extracted Tube node.
-				 * @return String representation of the Tube node.
-				 */
-				public String toString() {
-					String str =  name + "   (" + dataFilename + ")";
-					return str;
-				}
-
-				/**
-				 * Return a String with the Tube attributes
-				 * @return Comma-separated String with attribute key: value pairs.
-				 */
-				public String attributesToString() {
-					String str =  "date: " + date + ", " + 
-							"file name: " + dataFilename;
-					return str;
-				}
-			}
 		}
 
 	}
 
+	/**
+	 * Class that represents a tube parsed from the XML.
+	 * A Tube is always a child of a Specimen.
+	 * @author Aaron Ponti
+	 */
+	public class Tube extends BDFACSDIVAXMLProcessor.XMLNode {
+	
+		/* Public instance variables */  		
+	
+		/**
+		 * Tube name
+		 */
+		public String name;
+	
+		/**
+		 * Date of the acquisition of Tube
+		 */
+		public String date;
+	
+		/**
+		 * Name of the fcs file associated with the Tube 
+		 */				
+		public String dataFilename;
+	
+		/**
+		 * Name with full path of the fcs file associated with the Tube    
+		 */
+		public String fullDataFilename;
+		
+		/**
+		 * Constructor.
+		 * @param tubeNode DOM node that refers to a Tube.
+		 */
+		public Tube(org.w3c.dom.Node tubeNode) {
+	
+			// Get the attributes
+			NamedNodeMap attrs = tubeNode.getAttributes();
+	
+			name = attrs.getNamedItem("name").getNodeValue();
+	
+			// Get children
+			NodeList children = tubeNode.getChildNodes();
+	
+			// Process them
+			for ( int i = 0; i < children.getLength(); i++ ) {
+	
+				Node n = children.item(i);
+	
+				if (n.getNodeName().equals("date")) {
+	
+					// Tube date
+					date = n.getTextContent();
+	
+				} else if (n.getNodeName().equals("data_filename")) {
+	
+					// Tube file name
+					dataFilename = n.getTextContent();
+					
+					// Store also the full file name for quick retrieval
+					File path = new File(xmlFilename);
+					fullDataFilename = ( path.getParent() + 
+							File.separator + 
+							dataFilename ).toString();
+	
+				} else {
+	
+					// Skip
+				}
+			}
+	
+		}
+	
+		/**
+		 * Return a String representation of the extracted Tube node.
+		 * @return String representation of the Tube node.
+		 */
+		public String toString() {
+			String str =  name + "   (" + dataFilename + ")";
+			return str;
+		}
+	
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplidied class name.
+		 */
+		@Override		
+		public String getType() {
+			return "Tube";
+		}
+		
+		/**
+		 * Return a String with the Tube attributes
+		 * @return Comma-separated String with attribute key: value pairs.
+		 */
+		public String attributesToString() {
+			String str =  "date: " + date + ", " + 
+					"file name: " + dataFilename;
+			return str;
+		}
+	}
+
+	/**
+	 * Abstract class that represents a node parsed from the XML.
+	 * Experiment, Specimen, Tray, Tube extend Node.
+	 * @author Aaron Ponti
+	 */
+	abstract public class XMLNode {
+		abstract public String getType();
+		}
+
+	/**
+	 * Class that represents a specimen parsed from the XML.
+	 * A Specimen can be a child of a Tray or directly of an Experiment.
+	 * @author Aaron Ponti
+	 */
+	public class Specimen extends BDFACSDIVAXMLProcessor.XMLNode  {
+	
+		/* Public instance variables */
+	
+		/**
+		 * Specimen name
+		 */
+		public String name;
+	
+		/**
+		 * ArrayList of Tube's
+		 */			
+		public ArrayList<Tube> tubes = new ArrayList<Tube>();
+	
+		/**
+		 * Constructor.
+		 * @param specimenNode DOM node that refers to a Specimen.
+		 */
+		public Specimen(org.w3c.dom.Node specimenNode) {
+	
+			// Get the attributes
+			NamedNodeMap attrs = specimenNode.getAttributes();
+	
+			name = attrs.getNamedItem("name").getNodeValue();
+	
+			// Get children
+			NodeList children = specimenNode.getChildNodes();
+	
+			// Process them
+			for ( int i = 0; i < children.getLength(); i++ ) {
+	
+				Node n = children.item(i);
+	
+				if (n.getNodeName().equals("tube")) {
+	
+					// Tray
+					tubes.add(new Tube(n));
+	
+				} else {
+	
+					// Skip
+				}
+			}
+	
+		}
+	
+		/**
+		 * Return a String representation of the extracted Specimen node.
+		 * @return String representation of the Specimen node.
+		 */
+		public String toString() {
+			return name;
+		}
+	
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplidied class name.
+		 */
+		@Override		
+		public String getType() {
+			return "Specimen";
+		}
+		
+		/**
+		 * Return a String with the Specimen attributes
+		 * @return Comma-separated String with attribute key: value pairs.
+		 */
+		public String attributesToString() {
+			String str =  "no attributes";
+			return str;
+		}
+	}
+
+	/**
+	 * Class that represents a tray parsed from the XML.
+	 * @author Aaron Ponti
+	 */
+	public class Tray extends BDFACSDIVAXMLProcessor.XMLNode  {
+	
+		/* Public instance variables */
+	
+		/** 
+		 * Tray name
+		 */
+		public String name;
+	
+		/** 
+		 * Tray type
+		 */
+		public String tray_type;
+	
+		/**
+		 * Number of rows (String)
+		 */
+		public String rows;
+	
+		/**
+		 * Number of columns (String)
+		 */
+		public String cols;
+	
+		/**
+		 * Tray orientation
+		 */			
+		public String orientation;
+	
+		/**
+		 * ArrayList of Specimen's
+		 */
+		public ArrayList<Specimen> specimens = new ArrayList<Specimen>();
+	
+		/**
+		 * Constructor
+		 * @param trayNode DOM node that refers to a Tray.
+		 */
+		public Tray(org.w3c.dom.Node trayNode) {
+	
+			// Get the attributes
+			NamedNodeMap attrs = trayNode.getAttributes();
+	
+			name        = attrs.getNamedItem("name").getNodeValue();
+			tray_type   = attrs.getNamedItem("tray_type").getNodeValue();;
+			rows        = attrs.getNamedItem("rows").getNodeValue();
+			cols        = attrs.getNamedItem("cols").getNodeValue();
+			orientation = attrs.getNamedItem("Orientation").getNodeValue();
+	
+			// Get children
+			NodeList children = trayNode.getChildNodes();
+	
+			// Process them
+			for ( int i = 0; i < children.getLength(); i++ ) {
+	
+				Node n = children.item(i);
+	
+				if (n.getNodeName().equals("specimen")) {
+	
+					// Specimen  
+					specimens.add(new Specimen(n));
+	
+				} else {
+	
+					// Skip
+				}
+	
+			}
+	
+		}
+	
+		/**
+		 * Return a String representation of the extracted Tray node.
+		 * @return String representation of the Tray node.
+		 */
+		public String toString() {
+			return name;
+		}
+	
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplified class name.
+		 */
+		@Override		
+		public String getType() {
+			return "Tray";
+		}
+		
+		/**
+		 * Return a String with the Tray attributes
+		 * @return Comma-separated String with attribute key: value pairs.
+		 */
+		public String attributesToString() {
+			String str =  "type: " + tray_type + ", " + 
+					"rows: " + rows + ", " +
+					"columns: " + cols + ", " +
+					"orientation: " + orientation;
+			return str;
+		}
+	}
+	
 }

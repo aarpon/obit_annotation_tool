@@ -5,12 +5,12 @@ package ch.eth.scu.importer.gui.components;
  * Node types
  * @author Aaron Ponti 
  */
-public class SpecimenNode extends Node{
+public class SpecimenNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public SpecimenNode(Object object) {
-		super(object);
+	public SpecimenNode(Object object, String type) {
+		super(object, type);
 	}
 
 	public javax.swing.Icon getIcon() {

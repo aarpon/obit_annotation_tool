@@ -20,4 +20,11 @@ abstract public class AbstractProcessor {
 	 */
 	abstract public String info();
 	
+	/**
+	 * Type of the processor (to be used in the JTree)
+	 * @return String type of the processor.
+	 */
+	abstract public String getType();
+	
+	
 }

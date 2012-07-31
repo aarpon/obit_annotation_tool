@@ -102,6 +102,15 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	public String toString() {
 		return (new File(filename)).getName();
 	}
+
+	/**
+	 * Return a simplified class name to use in XML.
+	 * @return simplidied class name.
+	 */
+	@Override	
+	public String getType() {
+		return "LeicaLIF";
+	}
 	
 	/**
 	 * Simple class to store image information
@@ -147,6 +156,14 @@ public class LeicaLifProcessor extends AbstractProcessor {
 		 */
 		public String toString() {
 			return name;
+		}
+		
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplidied class name.
+		 */
+		public String getType() {
+			return "metadata";
 		}
 		
 		/**
