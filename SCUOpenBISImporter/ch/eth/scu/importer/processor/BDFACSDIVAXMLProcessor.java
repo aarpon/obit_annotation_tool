@@ -1,5 +1,7 @@
 package ch.eth.scu.importer.processor;
 
+import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
+
 import java.io.*;
 import java.util.*;
 
@@ -15,17 +17,16 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private String xmlFilename;
-	private String version;
-	private String releaseVersion;
 	private DocumentBuilder parser = null;
 	private Document doc = null;
 
 	/* Public instance variables */
+	public XMLFileDescriptor xmlFile;
 
 	/**
 	 * ArrayList of Experiment's
 	 */
-	public ArrayList<Experiment> experiments = new ArrayList<Experiment>();
+	//protected ArrayList<Experiment> experiments = new ArrayList<Experiment>();
 
 	/**
 	 * Constructor
@@ -75,11 +76,10 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 		// Parse the file
 		try {
-			File file = new File(xmlFilename);		
-			doc = parser.parse(file);
+			doc = parser.parse(new File(xmlFilename));
 			//doc.getDocumentElement().normalize();
 		} catch (SAXException se) {
-			System.out.println("The file appears to be contain invalid XML.");
+			System.out.println("The file appears to contain invalid XML.");
 			doc = null;
 			return false;
 		} catch (IOException ioe) {
@@ -89,7 +89,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}	
 
 		// Extract info
-		return processDoc();
+		xmlFile = new XMLFileDescriptor(new File(xmlFilename).getName(),doc);
+		return xmlFile.success;
 
 	}
 
@@ -109,132 +110,136 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	public String getType() {
 		return "BDFACSDIVA";
 	}	
-	
-	/**
-	 * Return a String with the Processor attributes
-	 * @return Comma-separated String with attribute key: value pairs.
-	 */
-	public String attributesToString() {
-		String str =  "full filename: " + xmlFilename + ", " + 
-				"version: " + version + ", " + 
-				"release version: " + releaseVersion;
-		return str;
-	}
 
 	/**
 	 * Return a textual tree representation of the DBDIVAXMLProcessor 
 	 * @return String containing a tree representation of the DBDIVAXMLProcessor
 	 */	
 	public String treeView() {
+		return xmlFile.treeView();
+	}
 
-		String str = "[XML file] " + toString() + " (" +
-				attributesToString() + ").\n|\n";        
+	/**
+	 * Class that represents the full XML file.
+	 * @author Aaron Ponti
+	 *
+	 */
+	public class XMLFileDescriptor extends AbstractDescriptor {
+		
+		public boolean success = false;
+		public ArrayList<ExperimentDescriptor> experiments = new ArrayList<ExperimentDescriptor>();
+		
+		public XMLFileDescriptor(String name, Document doc) {
+			this.name = name;
+			success = processDoc(doc);
+		}
 
-		for (Experiment e : experiments) {
+		@Override
+		public String getType() {
+			return "XMLFile";
+		}
+		
+		/**
+		 * Parse and extract relevant information from the XML file.
+		 * @return true if the parsing was successful, false otherwise.
+		 */
+		private boolean processDoc(Document doc) {
 
-			str +=  "[ Experiment ], name: " + e.name + " (" +
-					e.attributesToString() + ").\n";
+			// Nothing to parse, return
+			if (doc == null) {
+				System.out.println("Document not parsed. Aborting.");
+				return false;
+			}
 
-			for (Tray t : e.trays) {
+			// Get the root node
+			Node rootNode = doc.getDocumentElement();
 
-				str +=  "|__[ Tray ], name: " + t.name + " (" +
-						t.attributesToString() + ").\n";
+			// Store the version information
+			attributes.put("version", 
+					rootNode.getAttributes().getNamedItem("version").getNodeValue());
+			attributes.put("releaseVersion",
+					rootNode.getAttributes().getNamedItem("release_version").getNodeValue());
 
-				for (Specimen s : t.specimens) {
+			// Get children
+			NodeList children = rootNode.getChildNodes();
 
-					str +=  "|____[ Specimen ], name: " + s.name + " (" +
+			// Process them
+			for ( int i = 0; i < children.getLength(); i++ ) {
+
+				Node n = children.item(i);
+
+				if (n.getNodeName().equals("experiment")) {
+
+					// Tray
+					experiments.add(new ExperimentDescriptor(n));
+
+				} else {
+
+					// Skip
+				}
+			}
+
+			return true;
+		}
+		
+		/**
+		 * Return a textual tree representation of the XML file
+		 * @return String containing a tree representation of the XML file
+		 */	
+		protected String treeView() {
+
+			String str = "[XML file] " + toString() + " (" +
+					attributesToString() + ").\n|\n";        
+
+			for (ExperimentDescriptor e : experiments) {
+
+				str +=  "[ Experiment ], name: " + e.getName() + " (" +
+						e.attributesToString() + ").\n";
+
+				for (TrayDescriptor t : e.trays) {
+
+					str +=  "|__[ Tray ], name: " + t.getName() + " (" +
+							t.attributesToString() + ").\n";
+
+					for (SpecimenDescriptor s : t.specimens) {
+
+						str +=  "|____[ Specimen ], name: " + s.getName() + " (" +
+								s.attributesToString() + ").\n";
+
+						for (TubeDescriptor tb : s.tubes) {
+
+							str +=  "|______[ Tube ], name: " + tb.getName() + " (" +
+									tb.attributesToString() + ").\n";
+						}
+					}
+
+				}
+
+				for (SpecimenDescriptor s : e.specimens) {
+
+					str +=  "|__[ Specimen ], name: " + s.getName() + "(" +
 							s.attributesToString() + ").\n";
 
-					for (Tube tb : s.tubes) {
+					for (TubeDescriptor tb : s.tubes) {
 
-						str +=  "|______[ Tube ], name: " + tb.name + " (" +
+						str +=  "|____[ Tube ], name: " + tb.getName() + " (" +
 								tb.attributesToString() + ").\n";
 					}
 				}
 
 			}
-
-			for (Specimen s : e.specimens) {
-
-				str +=  "|__[ Specimen ], name: " + s.name + "(" +
-						s.attributesToString() + ").\n";
-
-				for (Tube tb : s.tubes) {
-
-					str +=  "|____[ Tube ], name: " + tb.name + " (" +
-							tb.attributesToString() + ").\n";
-				}
-			}
-
+			
+			return str;
 		}
-		
-		return str;
+
 	}
-
-	/**
-	 * Parse and extract relevant information from the XML file.
-	 * @return true if the parsing was successful, false otherwise.
-	 */
-	private boolean processDoc() {
-
-		// Nothing to parse, return
-		if (doc == null) {
-			System.out.println("Document not parsed. Aborting.");
-			return false;
-		}
-
-		// Get the root node
-		Node rootNode = doc.getDocumentElement();
-
-		// Get the version information
-		this.version = rootNode.getAttributes().getNamedItem("version").getNodeValue();
-		this.releaseVersion = rootNode.getAttributes().getNamedItem("release_version").getNodeValue();
-
-		// Get children
-		NodeList children = rootNode.getChildNodes();
-
-		// Process them
-		for ( int i = 0; i < children.getLength(); i++ ) {
-
-			Node n = children.item(i);
-
-			if (n.getNodeName().equals("experiment")) {
-
-				// Tray
-				experiments.add(new Experiment(n));
-
-			} else {
-
-				// Skip
-			}
-		}
-
-		return true;
-	}
-
+	
 	/**
 	 * Class that represents an experiment parsed from the XML.
 	 * @author Aaron Ponti
 	 *
 	 */
-	public class Experiment extends BDFACSDIVAXMLProcessor.XMLNode {
-
-		/* Public instance variables */
-
-		/**
-		 * Experiment name
-		 */
-		public String name;
-
-		/**
-		 * Experiment date
-		 */
-		public String date;
-
-		/**
-		 * Experiment's owner name
-		 */
-		public String owner_name;
+	public class ExperimentDescriptor extends AbstractDescriptor {
 
 		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
@@ -242,18 +247,18 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		/**
 		 * ArrayList of Tray's
 		 */
-		public ArrayList<Tray> trays = new ArrayList<Tray>();
+		public ArrayList<TrayDescriptor> trays = new ArrayList<TrayDescriptor>();
 
 		/**
 		 * ArrayList of Specimen's
 		 */
-		public ArrayList<Specimen> specimens = new ArrayList<Specimen>();
+		public ArrayList<SpecimenDescriptor> specimens = new ArrayList<SpecimenDescriptor>();
 
 		/**
 		 * Constructor
 		 * @param expNode DOM node that refers to an Experiment.
 		 */
-		public Experiment(org.w3c.dom.Node expNode) {
+		public ExperimentDescriptor(org.w3c.dom.Node expNode) {
 
 			// Get the experiment name
 			this.name = expNode.getAttributes().getNamedItem("name").getNodeValue();
@@ -269,22 +274,22 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				if (n.getNodeName().equals("date")) {
 
 					// Experiment date
-					date = n.getTextContent();
+					attributes.put("date", n.getTextContent());
 
 				} else if (n.getNodeName().equals("owner_name")) {
 
 					// Experiment owner
-					owner_name = n.getTextContent();
+					attributes.put("owner_name", n.getTextContent());
 
 				} else if (n.getNodeName().equals("tray")) {
 
 					// Tray
-					trays.add(new Tray(n));
+					trays.add(new TrayDescriptor(n));
 
 				} else if (n.getNodeName().equals("specimen")) {
 
 					// Specimen  
-					specimens.add(new Specimen(n));
+					specimens.add(new SpecimenDescriptor(n));
 
 				} else {
 
@@ -294,32 +299,14 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}
 
 		/**
-		 * Return a String representation of the extracted Experiment node.
-		 * @return String representation of the Experiment node.
-		 */
-		public String toString() {
-			return name;
-		}
-
-		/**
 		 * Return a simplified class name to use in XML.
-		 * @return simplidied class name.
+		 * @return simplified class name.
 		 */
 		@Override		
 		public String getType() {
 			return "Experiment";
 		}
 		
-		/**
-		 * Return a String with the Experiment attributes
-		 * @return Comma-separated String with attribute key: value pairs.
-		 */
-		public String attributesToString() {
-			String str =  "owner: " + owner_name + ", " + 
-					"date: " + date;
-			return str;
-		}
-
 	}
 
 	/**
@@ -327,35 +314,13 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 * A Tube is always a child of a Specimen.
 	 * @author Aaron Ponti
 	 */
-	public class Tube extends BDFACSDIVAXMLProcessor.XMLNode {
-	
-		/* Public instance variables */  		
-	
-		/**
-		 * Tube name
-		 */
-		public String name;
-	
-		/**
-		 * Date of the acquisition of Tube
-		 */
-		public String date;
-	
-		/**
-		 * Name of the fcs file associated with the Tube 
-		 */				
-		public String dataFilename;
-	
-		/**
-		 * Name with full path of the fcs file associated with the Tube    
-		 */
-		public String fullDataFilename;
+	public class TubeDescriptor extends AbstractDescriptor {
 		
 		/**
 		 * Constructor.
 		 * @param tubeNode DOM node that refers to a Tube.
 		 */
-		public Tube(org.w3c.dom.Node tubeNode) {
+		public TubeDescriptor(org.w3c.dom.Node tubeNode) {
 	
 			// Get the attributes
 			NamedNodeMap attrs = tubeNode.getAttributes();
@@ -373,18 +338,19 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				if (n.getNodeName().equals("date")) {
 	
 					// Tube date
-					date = n.getTextContent();
+					attributes.put("date", n.getTextContent());
 	
 				} else if (n.getNodeName().equals("data_filename")) {
 	
 					// Tube file name
-					dataFilename = n.getTextContent();
+					attributes.put("dataFilename", n.getTextContent());
 					
 					// Store also the full file name for quick retrieval
 					File path = new File(xmlFilename);
-					fullDataFilename = ( path.getParent() + 
+					attributes.put("fullDataFilename",
+							( path.getParent() + 
 							File.separator + 
-							dataFilename ).toString();
+							attributes.get("dataFilename").toString()));
 	
 				} else {
 	
@@ -398,8 +364,9 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		 * Return a String representation of the extracted Tube node.
 		 * @return String representation of the Tube node.
 		 */
+		@Override
 		public String toString() {
-			String str =  name + "   (" + dataFilename + ")";
+			String str =  name + "   (" + attributes.get("dataFilename") + ")";
 			return str;
 		}
 	
@@ -412,50 +379,27 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			return "Tube";
 		}
 		
-		/**
-		 * Return a String with the Tube attributes
-		 * @return Comma-separated String with attribute key: value pairs.
-		 */
-		public String attributesToString() {
-			String str =  "date: " + date + ", " + 
-					"file name: " + dataFilename;
-			return str;
-		}
 	}
-
-	/**
-	 * Abstract class that represents a node parsed from the XML.
-	 * Experiment, Specimen, Tray, Tube extend Node.
-	 * @author Aaron Ponti
-	 */
-	abstract public class XMLNode {
-		abstract public String getType();
-		}
 
 	/**
 	 * Class that represents a specimen parsed from the XML.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
 	 * @author Aaron Ponti
 	 */
-	public class Specimen extends BDFACSDIVAXMLProcessor.XMLNode  {
+	public class SpecimenDescriptor extends AbstractDescriptor {
 	
 		/* Public instance variables */
 	
 		/**
-		 * Specimen name
-		 */
-		public String name;
-	
-		/**
 		 * ArrayList of Tube's
 		 */			
-		public ArrayList<Tube> tubes = new ArrayList<Tube>();
+		public ArrayList<TubeDescriptor> tubes = new ArrayList<TubeDescriptor>();
 	
 		/**
 		 * Constructor.
 		 * @param specimenNode DOM node that refers to a Specimen.
 		 */
-		public Specimen(org.w3c.dom.Node specimenNode) {
+		public SpecimenDescriptor(org.w3c.dom.Node specimenNode) {
 	
 			// Get the attributes
 			NamedNodeMap attrs = specimenNode.getAttributes();
@@ -473,7 +417,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				if (n.getNodeName().equals("tube")) {
 	
 					// Tray
-					tubes.add(new Tube(n));
+					tubes.add(new TubeDescriptor(n));
 	
 				} else {
 	
@@ -484,14 +428,6 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}
 	
 		/**
-		 * Return a String representation of the extracted Specimen node.
-		 * @return String representation of the Specimen node.
-		 */
-		public String toString() {
-			return name;
-		}
-	
-		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplidied class name.
 		 */
@@ -499,69 +435,43 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Specimen";
 		}
-		
-		/**
-		 * Return a String with the Specimen attributes
-		 * @return Comma-separated String with attribute key: value pairs.
-		 */
-		public String attributesToString() {
-			String str =  "no attributes";
-			return str;
-		}
+
 	}
 
 	/**
 	 * Class that represents a tray parsed from the XML.
 	 * @author Aaron Ponti
 	 */
-	public class Tray extends BDFACSDIVAXMLProcessor.XMLNode  {
+	public class TrayDescriptor extends AbstractDescriptor {
 	
 		/* Public instance variables */
-	
-		/** 
-		 * Tray name
-		 */
-		public String name;
-	
-		/** 
-		 * Tray type
-		 */
-		public String tray_type;
-	
-		/**
-		 * Number of rows (String)
-		 */
-		public String rows;
-	
-		/**
-		 * Number of columns (String)
-		 */
-		public String cols;
-	
-		/**
-		 * Tray orientation
-		 */			
-		public String orientation;
 	
 		/**
 		 * ArrayList of Specimen's
 		 */
-		public ArrayList<Specimen> specimens = new ArrayList<Specimen>();
+		public ArrayList<SpecimenDescriptor> specimens = new ArrayList<SpecimenDescriptor>();
 	
 		/**
 		 * Constructor
 		 * @param trayNode DOM node that refers to a Tray.
 		 */
-		public Tray(org.w3c.dom.Node trayNode) {
+		public TrayDescriptor(org.w3c.dom.Node trayNode) {
 	
 			// Get the attributes
 			NamedNodeMap attrs = trayNode.getAttributes();
-	
-			name        = attrs.getNamedItem("name").getNodeValue();
-			tray_type   = attrs.getNamedItem("tray_type").getNodeValue();;
-			rows        = attrs.getNamedItem("rows").getNodeValue();
-			cols        = attrs.getNamedItem("cols").getNodeValue();
-			orientation = attrs.getNamedItem("Orientation").getNodeValue();
+
+			// Name
+			this.name = attrs.getNamedItem("name").getNodeValue();
+
+			// Store the other attributes
+			attributes.put("tray_type", 
+					attrs.getNamedItem("tray_type").getNodeValue());
+			attributes.put("rows", 
+					attrs.getNamedItem("rows").getNodeValue());
+			attributes.put("cols", 
+					attrs.getNamedItem("cols").getNodeValue());
+			attributes.put("orientation", 
+					attrs.getNamedItem("Orientation").getNodeValue());
 	
 			// Get children
 			NodeList children = trayNode.getChildNodes();
@@ -574,7 +484,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 				if (n.getNodeName().equals("specimen")) {
 	
 					// Specimen  
-					specimens.add(new Specimen(n));
+					specimens.add(new SpecimenDescriptor(n));
 	
 				} else {
 	
@@ -586,14 +496,6 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}
 	
 		/**
-		 * Return a String representation of the extracted Tray node.
-		 * @return String representation of the Tray node.
-		 */
-		public String toString() {
-			return name;
-		}
-	
-		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
 		 */
@@ -601,18 +503,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Tray";
 		}
-		
-		/**
-		 * Return a String with the Tray attributes
-		 * @return Comma-separated String with attribute key: value pairs.
-		 */
-		public String attributesToString() {
-			String str =  "type: " + tray_type + ", " + 
-					"rows: " + rows + ", " +
-					"columns: " + cols + ", " +
-					"orientation: " + orientation;
-			return str;
-		}
+
 	}
 	
 }

@@ -1,4 +1,6 @@
-package ch.eth.scu.importer.gui.components;
+package ch.eth.scu.importer.gui.components.viewers;
+
+import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different
@@ -9,8 +11,9 @@ public class DefaultNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public DefaultNode(Object object, String type) {
-		super(object, type);
+	public DefaultNode(AbstractDescriptor object) {
+		super(object);
+		this.type = object.getType();
 	}
 
 	public javax.swing.Icon getIcon() {

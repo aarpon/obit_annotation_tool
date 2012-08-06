@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.panels;
+package ch.eth.scu.importer.gui.panels.openbis;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

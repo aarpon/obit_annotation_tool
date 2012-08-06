@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.panels;
+package ch.eth.scu.importer.gui.panels.viewers;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -15,9 +15,10 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
-import ch.eth.scu.importer.gui.components.CustomTree;
-import ch.eth.scu.importer.gui.components.CustomTreeToXML;
-import ch.eth.scu.importer.gui.components.RootNode;
+import ch.eth.scu.importer.gui.components.viewers.CustomTree;
+import ch.eth.scu.importer.gui.components.viewers.CustomTreeToXML;
+import ch.eth.scu.importer.gui.components.viewers.RootNode;
+import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
 
 /**
  * Abstract viewer for processors
@@ -123,7 +124,7 @@ abstract public class AbstractViewer extends JPanel
 	protected void clearTree() {
 
 		// Create the root node
-		rootNode = new RootNode("No data found.", "root");
+		rootNode = new RootNode(new RootDescriptor("/"));
 
 		// Create a tree that allows one selection at a time.
 		tree = new CustomTree(rootNode);

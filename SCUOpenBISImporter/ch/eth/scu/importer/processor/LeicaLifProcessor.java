@@ -3,10 +3,9 @@ package ch.eth.scu.importer.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-
 import javax.swing.JOptionPane;
 
+import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -25,11 +24,13 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	/* Private instance variables */
 	private String filename;
 	private ImageProcessorReader reader;
+
+	/* Public instance variables */
+	public ImageDescriptor image;
 	
 	/**
-	 * ArrayList of ImageDescriptor's
+	 * ArrayList of SubImage's
 	 */
-	public List<ImageDescriptor> imageDescriptors;
 	
 	/**
 	 * Constructor 
@@ -41,6 +42,9 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	
 	@Override
 	public boolean parse() throws DependencyException, ServiceException {
+
+		// Create a new image
+		image = new ImageDescriptor(filename);
 
 		// Create the reader
 		reader = new ImageProcessorReader(
@@ -72,15 +76,10 @@ public class LeicaLifProcessor extends AbstractProcessor {
 		// Number of series
 		int numSeries = reader.getSeriesCount();
 		
-		// Get all dataset information
-		imageDescriptors = new ArrayList<ImageDescriptor>(numSeries);
-		
-		// Go over all datasets and extract relevant metadata
-		for (int i = 0; i < reader.getSeriesCount(); i++) {
+		// Get and store all subimages
+		for (int i = 0; i < numSeries; i++) {
 			reader.setSeries(i);
-			imageDescriptors.add( 
-					new ImageDescriptor(
-					omexmlMeta.getImageName(i),
+			image.addSubImage(new SubImageDescriptor(omexmlMeta.getImageName(i),
 					reader.getSizeX(), reader.getSizeY(), reader.getSizeZ(),
 					reader.getSizeC( ), reader.getSizeT( ), 
 					loci.formats.FormatTools.getPixelTypeString(
@@ -113,67 +112,75 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	}
 	
 	/**
-	 * Simple class to store image information
+	 * Image class
 	 * @author Aaron Ponti
 	 *
 	 */
-	public class ImageDescriptor {
+	public class ImageDescriptor extends AbstractDescriptor {
+
+		/**
+		 * SubImages
+		 */
+		public ArrayList<SubImageDescriptor> subImages = new ArrayList<SubImageDescriptor>();
+
+		/**
+		 * Constructor
+		 */
+		public ImageDescriptor(String filename) {
+			this.name = new File(filename).getName();	
+		}
 		
-		/** Protected instance variables */
-		protected int sizeX;
-		protected int sizeY;
-		protected int sizeZ;
-		protected int sizeC;
-		protected int sizeT;
-		protected String name;
-		protected String datatype;
+		/**
+		 * Add a subimage
+		 */		
+		public void addSubImage(SubImageDescriptor subImage) {
+			subImages.add(subImage);
+		}
+
+		/**
+		 * Return a simplified class name to use in the viewers.
+		 * @return simplified class name.
+		 */
+		@Override		
+		public String getType() {
+			return "Image";
+		}
+	}
+
+	/**
+	 * SubImage class
+	 * @author Aaron Ponti
+	 *
+	 */
+	public class SubImageDescriptor extends AbstractDescriptor {
 		
 		/**
 		 * Constructor
-		 * @param name      image name
-		 * @param sizeX		image size in X direction
-		 * @param sizeY		image size in Y direction
-		 * @param sizeZ		image size in Z direction
-		 * @param sizeC		number of channels
-		 * @param sizeT		number of time points
-		 * @param datatype	image data type
 		 */
-		public ImageDescriptor(String name, int sizeX, int sizeY, int sizeZ,
+		public SubImageDescriptor(String name, int sizeX, int sizeY, int sizeZ,
 				int sizeC, int sizeT, String datatype) {
 			
+			// Set the name
 			this.name = name;
-			this.sizeX = sizeX;
-			this.sizeY = sizeY;
-			this.sizeZ = sizeZ;
-			this.sizeC = sizeC;
-			this.sizeT = sizeT;
-			this.datatype = datatype;
+			
+			// Set the attributes
+			attributes.put("sizeX", new Integer(sizeX).toString());
+			attributes.put("sizeY", new Integer(sizeY).toString());
+			attributes.put("sizeZ", new Integer(sizeZ).toString());
+			attributes.put("sizeC", new Integer(sizeC).toString());
+			attributes.put("sizeT", new Integer(sizeT).toString());
+			attributes.put("datatype", datatype);
+			
 		}
-		
+
 		/**
-		 * Class toString() method
-		 * @return a String representation of the object
+		 * Return a simplified class name to use in the viewers.
+		 * @return simplified class name.
 		 */
-		public String toString() {
-			return name;
-		}
-		
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplidied class name.
-		 */
+		@Override		
 		public String getType() {
-			return "metadata";
-		}
-		
-		/**
-		 * Return a String with the Image attributes
-		 * @return Comma-separated String with attribute key: value pairs.
-		 */		
-		public String attributesToString() {
-			return ("name: " + name + ", x: " + sizeX + ", y: " + sizeY + 
-					", z: " + sizeZ + ", c: " + sizeC + ", t: " + sizeT + 
-					", data type: " + datatype);
+			return "SubImage";
 		}
 	}
+	
 }

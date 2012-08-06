@@ -1,11 +1,14 @@
-package ch.eth.scu.importer.gui.panels;
+package ch.eth.scu.importer.gui.panels.viewers;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.components.ImageNode;
-import ch.eth.scu.importer.gui.components.CustomTreeNode;
-import ch.eth.scu.importer.gui.components.RootNode;
-import ch.eth.scu.importer.gui.components.SubImageNode;
+import ch.eth.scu.importer.gui.components.viewers.CustomTreeNode;
+import ch.eth.scu.importer.gui.components.viewers.ImageNode;
+import ch.eth.scu.importer.gui.components.viewers.RootNode;
+import ch.eth.scu.importer.gui.components.viewers.SubImageNode;
+import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
 import ch.eth.scu.importer.processor.LeicaLifProcessor;
+import ch.eth.scu.importer.processor.LeicaLifProcessor.ImageDescriptor;
+import ch.eth.scu.importer.processor.LeicaLifProcessor.SubImageDescriptor;
 
 import java.awt.event.*;
 import javax.swing.tree.*;
@@ -75,11 +78,10 @@ public class LeicaSP5Viewer extends AbstractViewer
 		}
 
 		// Add the processor as new child of root
-		ImageNode lifFileNode = 
-				new ImageNode(leicalifprocessor, leicalifprocessor.getType());
-		rootNode.add(lifFileNode);
+		ImageNode lifImageNode = new ImageNode(leicalifprocessor.image);
+		rootNode.add(lifImageNode);
 		
-		createNodes(lifFileNode, leicalifprocessor);
+		createNodes(lifImageNode, leicalifprocessor.image);
 		return true;		
 	}
 
@@ -107,14 +109,13 @@ public class LeicaSP5Viewer extends AbstractViewer
 		
 		// Dump attributes to the html pane 
 		String className = nodeInfo.getClass().getName();
-		if (className.endsWith("LeicaLifProcessor")) {
+		if (className.endsWith("$ImageDescriptor")) {
 			htmlPane.setText(
-					((LeicaLifProcessor) nodeInfo).toString());
-		} else if (className.endsWith("LeicaLifProcessor$ImageDescriptor")) {
+					((ImageDescriptor) nodeInfo).toString());
+		} else if (className.endsWith("$SubImageDescriptor")) {
 			htmlPane.setText(
-					((LeicaLifProcessor.ImageDescriptor) 
-							nodeInfo).attributesToString().replace(
-									", ", "\n"));
+					((SubImageDescriptor)nodeInfo).attributesToString().replace(
+							", ", "\n"));
 		} else {
 			htmlPane.setText("");
 		}
@@ -139,7 +140,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 				appProperties.getProperty("DatamoverIncomingDir"));
 
 		// Prepare a new root node for the Tree
-		rootNode = new RootNode("/", "root");
+		rootNode = new RootNode(new RootDescriptor("/"));
 
 		// We only consider lif files in the root
 		File[] lifFiles = dropboxIncomingFolder.listFiles(
@@ -172,17 +173,15 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	protected void createNodes(CustomTreeNode lifFileNode,
-			LeicaLifProcessor leicalifprocessor) {
+	protected void createNodes(CustomTreeNode lifImageNode, ImageDescriptor image) {
 		
-		SubImageNode imageDescriptor = null;
+		SubImageNode subImageNode = null;
 		
-		for (LeicaLifProcessor.ImageDescriptor d : 
-			leicalifprocessor.imageDescriptors) {
+		for (SubImageDescriptor d : image.subImages) {
 
 			// Add the experiments
-			imageDescriptor = new SubImageNode(d, "metadata");
-			lifFileNode.add(imageDescriptor);
+			subImageNode = new SubImageNode(d);
+			lifImageNode.add(subImageNode);
 
 		}
 	}

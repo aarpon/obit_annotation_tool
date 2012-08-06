@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.components;
+package ch.eth.scu.importer.gui.components.viewers;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;

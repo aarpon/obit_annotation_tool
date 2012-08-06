@@ -9,11 +9,13 @@ import javax.swing.*;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DropboxProperties;
-import ch.eth.scu.importer.gui.panels.AbstractViewer;
-import ch.eth.scu.importer.gui.panels.BDLSRFortessaViewer;
-import ch.eth.scu.importer.gui.panels.LeicaSP5Viewer;
-import ch.eth.scu.importer.gui.panels.MetadataEditor;
-import ch.eth.scu.importer.gui.panels.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.panels.editors.AbstractEditor;
+import ch.eth.scu.importer.gui.panels.editors.BDLSRFortessaEditor;
+import ch.eth.scu.importer.gui.panels.editors.LeicaSP5Editor;
+import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
+import ch.eth.scu.importer.gui.panels.viewers.BDLSRFortessaViewer;
+import ch.eth.scu.importer.gui.panels.viewers.LeicaSP5Viewer;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -27,7 +29,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private MetadataEditor metadataEditor;
+	private AbstractEditor metadataEditor;
 	private JTextArea outputPane; 
 	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
@@ -67,6 +69,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		addButtons();
 		add(toolBar, BorderLayout.NORTH);
 
+		// Add the viewer
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
 		if (acqStation.equals("LSRFortessa")) {
 			metadataViewer = new BDLSRFortessaViewer();
@@ -78,7 +81,15 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		}
 		add(metadataViewer, BorderLayout.WEST);
 		
-		metadataEditor = new MetadataEditor(dropboxProperties);
+		// Add the editor
+		if (acqStation.equals("LSRFortessa")) {
+			metadataEditor = new BDLSRFortessaEditor(dropboxProperties);
+		} else if (acqStation.equals("LeicaSP5")) {
+			metadataEditor = new LeicaSP5Editor(dropboxProperties);
+		} else {
+			System.err.println("Unknown acquisition station! Aborting.");
+			System.exit(1);
+		}
 		add(metadataEditor, BorderLayout.CENTER);
 
 		spaceViewer = new OpenBISSpaceViewer(dropboxProperties);

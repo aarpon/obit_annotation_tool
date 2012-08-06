@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.panels;
+package ch.eth.scu.importer.gui.panels.editors;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -17,7 +17,7 @@ import ch.eth.scu.importer.common.properties.DropboxProperties;
  * Metadata editor panel.
  * @author Aaron Ponti
  */
-public class MetadataEditor extends JPanel implements Observer, ActionListener {
+public class BDLSRFortessaEditor extends AbstractEditor implements Observer, ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,7 +30,7 @@ public class MetadataEditor extends JPanel implements Observer, ActionListener {
 	/**
 	 * Constructor
 	 */
-	public MetadataEditor(DropboxProperties dropboxProperties) {
+	public BDLSRFortessaEditor(DropboxProperties dropboxProperties) {
 
 		// Store the DropboxProperties object
 		this.dropboxProperties = dropboxProperties;
@@ -172,5 +172,11 @@ public class MetadataEditor extends JPanel implements Observer, ActionListener {
 				uploadButton.setEnabled(true);
 			}
 		}
+	}
+
+	@Override
+	public boolean uploadToOpenBIS() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }
