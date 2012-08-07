@@ -9,9 +9,7 @@ import javax.swing.*;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DropboxProperties;
-import ch.eth.scu.importer.gui.panels.editors.AbstractEditor;
-import ch.eth.scu.importer.gui.panels.editors.BDLSRFortessaEditor;
-import ch.eth.scu.importer.gui.panels.editors.LeicaSP5Editor;
+import ch.eth.scu.importer.gui.panels.editors.EditorContainer;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
 import ch.eth.scu.importer.gui.panels.viewers.BDLSRFortessaViewer;
@@ -29,7 +27,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private AbstractEditor metadataEditor;
+	private EditorContainer editorContainer;
 	private JTextArea outputPane; 
 	private JScrollPane outputWindow;
 	private OpenBISSpaceViewer spaceViewer;
@@ -82,15 +80,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		add(metadataViewer, BorderLayout.WEST);
 		
 		// Add the editor
-		if (acqStation.equals("LSRFortessa")) {
-			metadataEditor = new BDLSRFortessaEditor(dropboxProperties);
-		} else if (acqStation.equals("LeicaSP5")) {
-			metadataEditor = new LeicaSP5Editor(dropboxProperties);
-		} else {
-			System.err.println("Unknown acquisition station! Aborting.");
-			System.exit(1);
-		}
-		add(metadataEditor, BorderLayout.CENTER);
+		editorContainer = new EditorContainer();
+		add(editorContainer, BorderLayout.CENTER);
 
 		spaceViewer = new OpenBISSpaceViewer(dropboxProperties);
 		add(spaceViewer, BorderLayout.EAST);
@@ -112,9 +103,6 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	        }
 	    });
 
-		// Add observers to dropboxProperties
-		dropboxProperties.addObserver(metadataEditor);
-		
 		// Set up the frame and center on screen
 		pack();
 		setLocationRelativeTo(null);
@@ -185,10 +173,10 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	 * @param toolTipText		tooltip String for the button 
 	 * @return a JButton ready to be added to the toolbar
 	 */
-	private JButton createButton(	String imgLocation,
-									String text,
-									String actionCommand,
-									String toolTipText) {
+	private JButton createButton( String imgLocation,
+								  String text,
+								  String actionCommand,
+								  String toolTipText) {
 
 		// Create, initialize and return the button.
 		JButton button = new JButton(text);
