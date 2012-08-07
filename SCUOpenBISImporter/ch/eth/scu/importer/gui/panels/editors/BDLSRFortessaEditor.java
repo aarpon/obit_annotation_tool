@@ -6,7 +6,10 @@ import java.util.Observable;
 
 import javax.swing.tree.TreeModel;
 
+import ch.eth.scu.importer.gui.components.viewers.CustomTreeNode;
+import ch.eth.scu.importer.gui.components.viewers.RootNode;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
 import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
 
 /**
@@ -41,11 +44,45 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 	 */
 	public void render() {
 
+		// Make sure both viewers have completed their models
 		if (dataViewer.isReady() == false || openBISViewer.isReady() == false) {
-			System.out.println("Noth both viewers ready.");
 			return;
 		}
-		System.out.println("Both viewers ready.");
+		
+		// We get the models
+		TreeModel dataModel = dataViewer.getDataModel();
+		TreeModel openBISModel = openBISViewer.getDataModel();
+		
+		// We extract all experiments from the data model
+		RootNode dataRoot = (RootNode) dataModel.getRoot();
+
+		// First level are the XML files 
+		int m = dataRoot.getChildCount();
+		for (int i = 0; i < m; i++) {
+			CustomTreeNode dataXmlNode = (CustomTreeNode) dataRoot.getChildAt(i);
+			int n = dataXmlNode.getChildCount();
+			for (int j = 0; j < n; j++) {
+				CustomTreeNode dataExpNode = (CustomTreeNode) dataXmlNode.getChildAt(j);
+				System.out.println(dataExpNode + ": " + dataExpNode.getType() );
+			}
+		}
+		
+		// We extract all experiments from the data model
+		CustomOpenBISNode openBISRoot = 
+				(CustomOpenBISNode) openBISModel.getRoot();
+
+		// First level are spaces 
+		m = openBISRoot.getChildCount();
+		for (int i = 0; i < m; i++) {
+			CustomOpenBISNode openBISSpaceNode = 
+					(CustomOpenBISNode) openBISRoot.getChildAt(i);
+			int n = openBISSpaceNode.getChildCount();
+			for (int j = 0; j < n; j++) {
+				CustomOpenBISNode openBISProjectNode = (CustomOpenBISNode) openBISSpaceNode.getChildAt(j);
+				System.out.println(openBISProjectNode);
+			}
+		}
+		
 	}
 
 	@Override

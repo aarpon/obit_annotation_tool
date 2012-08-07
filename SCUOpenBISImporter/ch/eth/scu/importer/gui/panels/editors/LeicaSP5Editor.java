@@ -32,11 +32,10 @@ public class LeicaSP5Editor extends AbstractEditor {
 	 */
 	public void render() {
 
+		// Make sure both viewers have completed their data model
 		if (dataViewer.isReady() == false || openBISViewer.isReady() == false) {
-			System.out.println("Noth both viewers ready.");
 			return;
 		}
-		System.out.println("Both viewers ready.");
 	}
 	
 	/**
