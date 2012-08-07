@@ -28,8 +28,6 @@ import loci.common.services.ServiceException;
 public class LeicaSP5Viewer extends AbstractViewer
 	implements ActionListener, TreeSelectionListener {
 
-	private static final long serialVersionUID = 1L;
-
 	// The valueChanged() method is fired twice when selection is changed in 
 	// a JTree, so we keep track of the last processed node to avoid processing
 	// the same node twice in a row.
@@ -166,6 +164,13 @@ public class LeicaSP5Viewer extends AbstractViewer
 
 		// Clean the html pane
 		htmlPane.setText("");
+		
+		// Set isReady to true
+		isReady = true;
+		
+		// Notify observers that the scanning is done 
+		setChanged();
+		notifyObservers();
 		
 	}
 	

@@ -77,14 +77,10 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);
 		}
-		add(metadataViewer, BorderLayout.WEST);
+		add(metadataViewer.getPanel(), BorderLayout.WEST);
 		
-		// Add the editor
-		editorContainer = new EditorContainer();
-		add(editorContainer, BorderLayout.CENTER);
-
 		spaceViewer = new OpenBISSpaceViewer(dropboxProperties);
-		add(spaceViewer, BorderLayout.EAST);
+		add(spaceViewer.getPanel(), BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
 		outputPane = new JTextArea();
@@ -94,6 +90,16 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		outputWindow = new JScrollPane(outputPane);
 		add(outputWindow, BorderLayout.SOUTH);
 
+		// Add the editor: it is important to create this object as the last
+		// one, since it requires non-null references to both the metadata and
+		// the openBIS viewers!
+		editorContainer = new EditorContainer(metadataViewer, spaceViewer);
+		add(editorContainer, BorderLayout.CENTER);
+
+		// Add observers to the viewers
+		metadataViewer.addObserver(editorContainer.getEditor());
+		spaceViewer.addObserver(editorContainer.getEditor());
+		
 		// We do not want the window to close without some clean up
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {

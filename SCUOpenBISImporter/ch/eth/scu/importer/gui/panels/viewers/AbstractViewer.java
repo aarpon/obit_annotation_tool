@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.util.Observable;
 
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
@@ -13,6 +14,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 import ch.eth.scu.importer.gui.components.viewers.CustomTree;
@@ -24,10 +26,10 @@ import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
  * Abstract viewer for processors
  * @author Aaron Ponti
  */
-abstract public class AbstractViewer extends JPanel
+abstract public class AbstractViewer extends Observable
 	implements ActionListener, TreeSelectionListener {
 
-	protected static final long serialVersionUID = 1L;
+	protected JPanel panel;
 	protected JEditorPane htmlPane;
 	protected CustomTree tree;
 	protected JLabel title;
@@ -35,9 +37,11 @@ abstract public class AbstractViewer extends JPanel
 	protected JScrollPane treeView;
 	protected JScrollPane htmlView;
 	protected JLabel metadataView;
+	protected boolean isReady = false;
 	
 	/**
-	 * Scans the datamover incoming directory for datasets to be processed
+	 * Scans the datamover incoming directory for datasets to be processed.
+	 * At the end of scanning, the function MUST set isReady to true.
 	 */
 	abstract public void scan();
 	
@@ -47,9 +51,12 @@ abstract public class AbstractViewer extends JPanel
 	 */
 	public AbstractViewer() {
 		
+		// Create a new JPanel
+		panel = new JPanel();
+		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		setLayout(gridBagLayout);
+		panel.setLayout(gridBagLayout);
 
 		// Common constraints
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -65,7 +72,7 @@ abstract public class AbstractViewer extends JPanel
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
-		add(title, constraints);
+		panel.add(title, constraints);
 		
 		// Initialize the Tree
 		clearTree();
@@ -80,7 +87,7 @@ abstract public class AbstractViewer extends JPanel
 		constraints.weighty = 0.5;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		add(treeView, constraints);
+		panel.add(treeView, constraints);
 
 		// Add a simple label
 		metadataView = new JLabel("Metadata viewer");
@@ -93,7 +100,7 @@ abstract public class AbstractViewer extends JPanel
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		add(metadataView, constraints);
+		panel.add(metadataView, constraints);
 		
 		// Create the HTML viewing pane.
 		htmlPane = new JEditorPane();
@@ -107,18 +114,25 @@ abstract public class AbstractViewer extends JPanel
 		constraints.weighty = 0.5;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		add(htmlView, constraints);
+		panel.add(htmlView, constraints);
 
 		// Add initial info to the html pane
 		htmlPane.setText("");
 		
 		// Set sizes
-		setMinimumSize(new Dimension(400, 700));
-		setPreferredSize(new Dimension(400, 700));
+		panel.setMinimumSize(new Dimension(400, 700));
+		panel.setPreferredSize(new Dimension(400, 700));
 	}
 	
 	/**
-	 * Initialized the Tree. If a Tree already existed, it is cleared
+	 * Return the Tree's data model.
+	 */
+	public TreeModel getDataModel() {
+		return tree.getModel();
+	}
+
+	/**
+	 * Initialize the Tree. If a Tree already exists, it is cleared
 	 * and replaced.
 	 */
 	protected void clearTree() {
@@ -135,7 +149,6 @@ abstract public class AbstractViewer extends JPanel
 		tree.addTreeSelectionListener(this);
 
 	}
-	
 
 	/**
 	 * Create and save an XML representation of the JTree to file
@@ -149,4 +162,17 @@ abstract public class AbstractViewer extends JPanel
 	
 	}
 
+	/**
+	 * Returns true if the viewer has completed creation of the data model
+	 * @return true if the data model is complete, false otherwise
+	 */
+	public boolean isReady() { return isReady; }
+	
+	/**
+	 * Return the reference to the JPanel to be added to a container component
+	 * @return JPanel reference
+	 */
+	public JPanel getPanel() {
+		return panel;
+	}
 }

@@ -1,13 +1,50 @@
 package ch.eth.scu.importer.gui.panels.editors;
 
+import java.awt.event.ActionListener;
+import java.util.Observer;
+
 import javax.swing.JPanel;
+
+import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
 
 /**
  * Abstract editor for processors
  * @author Aaron Ponti
  */
-abstract public class AbstractEditor extends JPanel {
+abstract public class AbstractEditor implements ActionListener, Observer {
 
-	private static final long serialVersionUID = 1L;
+	protected JPanel panel;
+	
+	protected AbstractViewer dataViewer;
+	protected OpenBISSpaceViewer openBISViewer;
+	
+	/**
+	 * Constructor
+	 * @param dataViewer Reference to the viewer
+	 * @param openBISViewer Reference to the openBIS viewer
+	 */
+	public AbstractEditor(AbstractViewer dataViewer, 
+			OpenBISSpaceViewer openBISViewer) {
+		
+		panel = new JPanel();
+		
+		this.dataViewer = dataViewer;
+		this.openBISViewer = openBISViewer;
+	}
+	
+	/**
+	 * Function that creates and render all required widgets when both data 
+	 * and openBIS viewers have notified that their data model is ready. 
+	 */
+	abstract public void render();
+	
+	/**
+	 * Return the reference to the JPanel to be added to a container component
+	 * @return JPanel reference
+	 */
+	public JPanel getPanel() {
+		return panel;
+	}
 
 }

@@ -11,6 +11,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
 
 public class EditorContainer extends JPanel implements ActionListener {
 
@@ -22,7 +24,8 @@ public class EditorContainer extends JPanel implements ActionListener {
 	/**
 	 * Constructor
 	 */
-	public EditorContainer() {
+	public EditorContainer(AbstractViewer dataViewer, 
+			OpenBISSpaceViewer openBISViewer) {
 		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -49,9 +52,9 @@ public class EditorContainer extends JPanel implements ActionListener {
 		// Add the actual editor
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
 		if (acqStation.equals("LSRFortessa")) {
-			metadataEditor = new BDLSRFortessaEditor();
+			metadataEditor = new BDLSRFortessaEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("LeicaSP5")) {
-			metadataEditor = new LeicaSP5Editor();
+			metadataEditor = new LeicaSP5Editor(dataViewer, openBISViewer);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);
@@ -60,7 +63,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		add(metadataEditor, constraints);
+		add(metadataEditor.getPanel(), constraints);
 		
 		// Add an upload button
 		uploadButton = new JButton("Upload to openBIS");
@@ -83,5 +86,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 			System.out.println(
 					"File written to disk (TODO: Use the output pane).");
 		}
-    }	
+    }
+	
+	/**
+	 * Return a reference to the contained editor
+	 * @return a reference to the editor
+	 */
+	public AbstractEditor getEditor() {
+		return metadataEditor;
+	}
 }

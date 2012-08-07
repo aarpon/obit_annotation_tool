@@ -34,8 +34,6 @@ import java.io.FileFilter;
 public class BDLSRFortessaViewer extends AbstractViewer
 	implements ActionListener, TreeSelectionListener {
 
-	private static final long serialVersionUID = 1L;
-
 	// The valueChanged() method is fired twice when selection is changed in 
 	// a JTree, so we keep track of the last processed node to avoid parsing
 	// the same FCS file twice every time the node is changed.
@@ -277,7 +275,13 @@ public class BDLSRFortessaViewer extends AbstractViewer
 
 		// Clean the html pane
 		htmlPane.setText("");
+		
+		// Set isReady to true
+		isReady = true;
 	
+		// Notify observers that the scanning is done 
+		setChanged();
+		notifyObservers();		
 	}
 
 }

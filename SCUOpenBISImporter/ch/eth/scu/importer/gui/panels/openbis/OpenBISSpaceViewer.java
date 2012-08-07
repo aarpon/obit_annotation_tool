@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 import java.util.Properties;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.springframework.remoting.RemoteConnectFailureException;
@@ -37,11 +39,11 @@ import java.awt.Insets;
  * acquired datasets.
  * @author Aaron Ponti
  */
-public class OpenBISSpaceViewer extends JPanel 
+public class OpenBISSpaceViewer extends Observable
 	implements ActionListener, TreeSelectionListener {
 
-	private static final long serialVersionUID = 1L;
-
+	protected JPanel panel;
+	
 	private String openBISURL = "";
 	private String userName = "";
 	private String userPassword = "";
@@ -58,6 +60,8 @@ public class OpenBISSpaceViewer extends JPanel
 	
 	private OpenBISLoginDialog loginDialog;
 	
+	private boolean isReady = false;
+	
 	// Reference to the DropboxProperties object
 	private DropboxProperties dropboxProperties;
 	
@@ -66,6 +70,9 @@ public class OpenBISSpaceViewer extends JPanel
 	 */
 	public OpenBISSpaceViewer(DropboxProperties dropboxProperties) {
 
+		// Create a panel
+		panel = new JPanel();
+		
 		// Get the openBIS URL from the appProperties
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		
@@ -76,7 +83,7 @@ public class OpenBISSpaceViewer extends JPanel
 		this.dropboxProperties = dropboxProperties;
 		
 		// Set a grid bag layout
-		setLayout(new GridBagLayout());
+		panel.setLayout(new GridBagLayout());
 
 		// Common constraints
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -92,7 +99,7 @@ public class OpenBISSpaceViewer extends JPanel
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
-		add(title, constraints);
+		panel.add(title, constraints);
 		
 		// Create the root node for the tree
 		rootNode = new DefaultMutableTreeNode(defaultRootNodeString);
@@ -113,11 +120,11 @@ public class OpenBISSpaceViewer extends JPanel
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		add(treeView, constraints);
+		panel.add(treeView, constraints);
 
 		// Set sizes
-		setMinimumSize(new Dimension(400, 700));
-		setPreferredSize(new Dimension(400, 700));
+		panel.setMinimumSize(new Dimension(400, 700));
+		panel.setPreferredSize(new Dimension(400, 700));
 	}
 	
 	/**
@@ -186,14 +193,14 @@ public class OpenBISSpaceViewer extends JPanel
 			facade = OpenbisServiceFacadeFactory.tryCreate(
 					userName, userPassword, openBISURL, timeout);
 		} catch (UserFailureException e) {
-			JOptionPane.showMessageDialog(this,
+			JOptionPane.showMessageDialog(this.panel,
 					"Login failed. Please try again.");
 			userName = "";
 			userPassword = "";
 			facade = null;
 			return false;
 		} catch (RemoteConnectFailureException e) {
-			JOptionPane.showMessageDialog(this,
+			JOptionPane.showMessageDialog(this.panel,
 					"Could not connect to openBIS.\n" + 
 			"The server appears to be down.\n" +
 							"Please try again later.",	
@@ -224,6 +231,13 @@ public class OpenBISSpaceViewer extends JPanel
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Return the Tree's data model.
+	 */
+	public TreeModel getDataModel() {
+		return tree.getModel();
 	}
 	
 	/**
@@ -261,7 +275,7 @@ public class OpenBISSpaceViewer extends JPanel
 		try {
 			facade.checkSession();
 		} catch ( InvalidSessionException e ) {
-			JOptionPane.showMessageDialog(this,
+			JOptionPane.showMessageDialog(this.panel,
 					"The openBIS session is no longer valid!\n" + 
 			"Please try logging in again.",	
 					"Session error",
@@ -336,6 +350,12 @@ public class OpenBISSpaceViewer extends JPanel
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
 		
+		// Set isReady to true
+		isReady = true;
+		
+		// Notify observers that the scanning is done 
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
@@ -433,11 +453,25 @@ public class OpenBISSpaceViewer extends JPanel
 		}
 
 	}
+
+	/**
+	 * Returns true if the viewer has completed creation of the data model
+	 * @return true if the data model is complete, false otherwise
+	 */
+	public boolean isReady() { return isReady; }
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		
-	}	
+	}
+	
+	/**
+	 * Return the reference to the JPanel to be added to a container component
+	 * @return JPanel reference
+	 */
+	public JPanel getPanel() {
+		return panel;
+	}
 
 }
