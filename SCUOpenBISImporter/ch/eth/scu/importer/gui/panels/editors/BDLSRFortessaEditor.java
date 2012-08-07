@@ -1,13 +1,22 @@
 package ch.eth.scu.importer.gui.panels.editors;
 
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
 
-import ch.eth.scu.importer.gui.components.viewers.CustomTreeNode;
+import ch.eth.scu.importer.gui.components.viewers.ExperimentNode;
 import ch.eth.scu.importer.gui.components.viewers.RootNode;
+import ch.eth.scu.importer.gui.components.viewers.XMLNode;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
 import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
@@ -18,6 +27,8 @@ import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
  */
 public class BDLSRFortessaEditor extends AbstractEditor {
 
+	protected List<ExperimentNode> experiments = new ArrayList<ExperimentNode>();
+	
 	/**
 	 * Constructor
 	 */
@@ -27,6 +38,10 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 		// Store the reference to the data and openBIS viewers
 		super(dataViewer, openBISViewer);
 		
+		// Create a GridBagLayout
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		panel.setLayout(gridBagLayout);
+
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
 		panel.setPreferredSize(new Dimension(400, 700));
@@ -48,40 +63,119 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 		if (dataViewer.isReady() == false || openBISViewer.isReady() == false) {
 			return;
 		}
+
+		// Constraints
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
 		
 		// We get the models
 		TreeModel dataModel = dataViewer.getDataModel();
 		TreeModel openBISModel = openBISViewer.getDataModel();
-		
-		// We extract all experiments from the data model
-		RootNode dataRoot = (RootNode) dataModel.getRoot();
 
-		// First level are the XML files 
-		int m = dataRoot.getChildCount();
-		for (int i = 0; i < m; i++) {
-			CustomTreeNode dataXmlNode = (CustomTreeNode) dataRoot.getChildAt(i);
-			int n = dataXmlNode.getChildCount();
-			for (int j = 0; j < n; j++) {
-				CustomTreeNode dataExpNode = (CustomTreeNode) dataXmlNode.getChildAt(j);
-				System.out.println(dataExpNode + ": " + dataExpNode.getType() );
-			}
-		}
+		// We extract all projects from the openBIS model and create a list
+		// with which we will then create JComboBox associated to each project
+		// from the data model
+		List<String> projectNames = new ArrayList<String>();
 		
-		// We extract all experiments from the data model
 		CustomOpenBISNode openBISRoot = 
 				(CustomOpenBISNode) openBISModel.getRoot();
 
-		// First level are spaces 
-		m = openBISRoot.getChildCount();
-		for (int i = 0; i < m; i++) {
+		// First level are spaces (which we do not need)
+		int openBISNChildren = openBISRoot.getChildCount();
+		
+		for (int i = 0; i < openBISNChildren; i++) {
+			
+			// Get the Space
 			CustomOpenBISNode openBISSpaceNode = 
 					(CustomOpenBISNode) openBISRoot.getChildAt(i);
+			
+			// Go over the child Projects
 			int n = openBISSpaceNode.getChildCount();
+			
 			for (int j = 0; j < n; j++) {
-				CustomOpenBISNode openBISProjectNode = (CustomOpenBISNode) openBISSpaceNode.getChildAt(j);
-				System.out.println(openBISProjectNode);
+				
+				// Get the node
+				CustomOpenBISNode openBISProjectNode = 
+						(CustomOpenBISNode) openBISSpaceNode.getChildAt(j);
+				
+				// Add it to the list
+				projectNames.add(openBISProjectNode.toString());
+
 			}
 		}
+
+		// We extract all experiments from the data model
+		RootNode dataRoot = (RootNode) dataModel.getRoot();
+
+		// Keep track of the Y position in the layout
+		int yPos = 0;
+		
+		// First level are the XML files 
+		int dataNChildren = dataRoot.getChildCount();
+		
+		for (int i = 0; i < dataNChildren; i++) {
+			
+			// Get the XMLNode
+			XMLNode dataXmlNode = (XMLNode) dataRoot.getChildAt(i);
+			
+			// Create a label for the XML file
+			constraints.insets = new Insets(10, 10, 10, 10);
+			constraints.weightx = 1;
+			constraints.weighty = 0;
+			constraints.gridx = 0;
+			constraints.gridy = yPos++;
+			panel.add(new JLabel(dataXmlNode.toString()), constraints);
+			
+			// Now go over the children (Experiments)
+			int n = dataXmlNode.getChildCount();
+			
+			for (int j = 0; j < n; j++) {
+				
+				// Get the Experiment node
+				ExperimentNode dataExpNode = 
+						(ExperimentNode) dataXmlNode.getChildAt(j);
+				
+				// Store the reference to the ExperimentNode
+				experiments.add(dataExpNode);
+				
+				// Create a label for the experiment
+				constraints.insets = new Insets(0, 20, 0, 20);
+				constraints.weightx = 1;
+				constraints.weighty = 0;
+				constraints.gridx = 0;
+				constraints.gridy = yPos++;
+				panel.add(new JLabel(dataExpNode.toString()), constraints);
+				
+				// Add a JComboBox with the Project options
+				JComboBox projCombo = new JComboBox(projectNames.toArray());
+				//projectCombos.add(projCombo);
+				projCombo.setSelectedIndex(0);
+				projCombo.addActionListener(new ActionListener() {
+		            public void actionPerformed(ActionEvent e) {
+		        		if (e.getActionCommand().equals("comboBoxChanged")) {
+		        			// TODO Map this to the ExperimentNode object
+		        			System.out.println((String)
+		        					((JComboBox) e.getSource()).getSelectedItem());
+		        		}
+		            }
+		        });
+				constraints.insets = new Insets(0, 20, 0, 20);
+				constraints.weightx = 1;
+				constraints.weighty = 0;
+				constraints.gridx = 0;
+				constraints.gridy = yPos++;
+				panel.add(projCombo, constraints);
+
+			}
+		}
+		
+		// Add a spacer
+		constraints.gridx = 0;
+		constraints.gridy = yPos;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		panel.add(new JLabel(""), constraints);
 		
 	}
 
