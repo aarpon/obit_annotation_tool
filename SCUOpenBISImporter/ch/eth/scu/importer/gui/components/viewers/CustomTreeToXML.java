@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,6 +18,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
 
 
 /**
@@ -102,13 +105,30 @@ public class CustomTreeToXML {
      * @return an XML node
      */
     protected Element createElement(CustomTreeNode node) {
-        final Object data = node.getUserObject();
+        final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
         String tagName = node.getType();
         String tagAttr = data.toString();
         Element element;
         try {
+        	
+        	// Create the element
         	element = document.createElement(tagName);
+        	
+        	// Store all node attributes
+        	Map<String, String> attributes = data.getAttributes();
+        	for (String key: attributes.keySet() ) {
+        		String value = attributes.get(key);
+        		element.setAttribute(key, value);
+        	}
+        	
+        	// Store the openBIS code and identifier as attributes 
+        	element.setAttribute("openBISCode", data.getOpenBISICode());
+        	element.setAttribute("openBISIdentifier", 
+        			data.getOpenBISIdentifier());
+
+        	// Set the name as an attribute as well
         	element.setAttribute("name", tagAttr);
+
         } catch (DOMException e) {
         	System.err.println("Element with name " + tagName + 
         			" could not be created.");

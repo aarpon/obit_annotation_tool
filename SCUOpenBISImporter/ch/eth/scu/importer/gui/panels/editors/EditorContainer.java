@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -21,11 +23,18 @@ public class EditorContainer extends JPanel implements ActionListener {
 	private AbstractEditor metadataEditor;
 	private JButton uploadButton;
 
+	protected AbstractViewer dataViewer;
+	protected OpenBISSpaceViewer openBISViewer;
+	
 	/**
 	 * Constructor
 	 */
 	public EditorContainer(AbstractViewer dataViewer, 
 			OpenBISSpaceViewer openBISViewer) {
+		
+		// Store the references
+		this.dataViewer = dataViewer;
+		this.openBISViewer = openBISViewer;
 		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -67,7 +76,6 @@ public class EditorContainer extends JPanel implements ActionListener {
 		
 		// Add an upload button
 		uploadButton = new JButton("Upload to openBIS");
-		uploadButton.setEnabled(false);
 		constraints.gridx = 0;
 		constraints.gridy = 2;
 		constraints.weightx = 1.0;
@@ -83,8 +91,22 @@ public class EditorContainer extends JPanel implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == uploadButton) {
-			System.out.println(
-					"File written to disk (TODO: Use the output pane).");
+			// Get the application properties
+			Properties appProperties = AppProperties.readPropertiesFromFile();
+			// TODO - Correct XML file name!
+			File xmlFile = new File(
+					appProperties.getProperty("DatamoverIncomingDir") + 
+					File.separator + "properties.xml");
+			try {
+				dataViewer.saveToXML(xmlFile.getCanonicalPath());
+				System.out.println(
+						"File written to disk (TODO: Use the output pane).");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				System.err.println(
+						"Could not write xml file to disk (TODO: Use the output pane).");
+			}
 		}
     }
 	
