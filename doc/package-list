@@ -1,6 +1,12 @@
 ch.eth.scu.importer
 ch.eth.scu.importer.gui
-ch.eth.scu.importer.gui.components
 ch.eth.scu.importer.gui.dialogs
-ch.eth.scu.importer.gui.panels
+ch.eth.scu.importer.gui.editors
+ch.eth.scu.importer.gui.openbis
+ch.eth.scu.importer.gui.viewers
+ch.eth.scu.importer.gui.viewers.model
+ch.eth.scu.importer.gui.viewers.renderer
 ch.eth.scu.importer.processor
+ch.eth.scu.importer.processor.model
+ch.eth.scu.importeradmin
+ch.eth.scu.importeradmin.gui.dialogs

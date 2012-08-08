@@ -596,7 +596,7 @@ public class OpenBISSpaceViewer extends Observable
 
 		/**
 		 * Constructor 
-		 * @param e Experiment object
+		 * @param s Sample object
 		 */		
 		public OpenBISSampleNode(Sample s) {
 			super(s);

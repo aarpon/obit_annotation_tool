@@ -36,7 +36,7 @@ public class CustomTreeToXML {
 
 	/**
 	 * Constructor
-	 * @param rootNode Root node of the JTree
+	 * @param tree Custom JTree
 	 */
 	public CustomTreeToXML(CustomTree tree) {
 
@@ -86,7 +86,7 @@ public class CustomTreeToXML {
 	
 	/**
 	 * Save the XML document to file
-	 * @param filename File name with full path
+	 * @param outputDirectory Directory where XML property files are saved
 	 * @return true if saving was successful, false otherwise
 	 */
 	public boolean saveToFile(String outputDirectory) {

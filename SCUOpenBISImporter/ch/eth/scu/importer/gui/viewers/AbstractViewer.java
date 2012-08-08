@@ -152,7 +152,7 @@ abstract public class AbstractViewer extends Observable
 
 	/**
 	 * Create and save an XML representation of the JTree to file
-	 * @param filename Filename with full path 
+	 * @param outputDirectory Directory where XML property files are saved 
 	 * @return true if the XML file could be saved, false otherwise
 	 */	
 	public boolean saveToXML(String outputDirectory) {
