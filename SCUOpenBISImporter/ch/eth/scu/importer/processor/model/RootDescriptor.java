@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.descriptors;
+package ch.eth.scu.importer.processor.model;
 
 public class RootDescriptor extends AbstractDescriptor{
 

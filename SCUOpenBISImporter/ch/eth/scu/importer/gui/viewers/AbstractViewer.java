@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.panels.viewers;
+package ch.eth.scu.importer.gui.viewers;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -17,10 +17,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
-import ch.eth.scu.importer.gui.components.viewers.CustomTree;
-import ch.eth.scu.importer.gui.components.viewers.CustomTreeToXML;
-import ch.eth.scu.importer.gui.components.viewers.RootNode;
-import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
+import ch.eth.scu.importer.gui.viewers.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.renderer.CustomTree;
+import ch.eth.scu.importer.gui.viewers.renderer.CustomTreeToXML;
+import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 /**
  * Abstract viewer for processors

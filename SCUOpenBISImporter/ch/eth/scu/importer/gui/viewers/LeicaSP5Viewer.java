@@ -1,14 +1,14 @@
-package ch.eth.scu.importer.gui.panels.viewers;
+package ch.eth.scu.importer.gui.viewers;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.components.viewers.CustomTreeNode;
-import ch.eth.scu.importer.gui.components.viewers.ImageNode;
-import ch.eth.scu.importer.gui.components.viewers.RootNode;
-import ch.eth.scu.importer.gui.components.viewers.SubImageNode;
-import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
+import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.model.ImageNode;
+import ch.eth.scu.importer.gui.viewers.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.model.SubImageNode;
 import ch.eth.scu.importer.processor.LeicaLifProcessor;
 import ch.eth.scu.importer.processor.LeicaLifProcessor.ImageDescriptor;
 import ch.eth.scu.importer.processor.LeicaLifProcessor.SubImageDescriptor;
+import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 import java.awt.event.*;
 import javax.swing.tree.*;

@@ -1,10 +1,10 @@
-package ch.eth.scu.importer.gui.components.viewers;
+package ch.eth.scu.importer.gui.viewers.renderer;
 
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import ch.eth.scu.importer.gui.components.viewers.CustomTreeCellRenderer;
+import ch.eth.scu.importer.gui.viewers.renderer.CustomTreeCellRenderer;
 
 /**
  * Custom JTree that uses a customized renderer

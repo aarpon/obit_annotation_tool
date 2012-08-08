@@ -1,10 +1,10 @@
-package ch.eth.scu.importer.gui.panels.editors;
+package ch.eth.scu.importer.gui.editors;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
-import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
+import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.AbstractViewer;
 
 /**
  * Metadata editor panel.

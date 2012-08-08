@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.panels.editors;
+package ch.eth.scu.importer.gui.editors;
 
 import java.awt.event.ActionListener;
 import java.util.Observable;
@@ -6,8 +6,8 @@ import java.util.Observer;
 
 import javax.swing.JPanel;
 
-import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
+import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.AbstractViewer;
 
 /**
  * Abstract editor for processors

@@ -1,20 +1,20 @@
-package ch.eth.scu.importer.gui.panels.viewers;
+package ch.eth.scu.importer.gui.viewers;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.components.viewers.CustomTreeNode;
-import ch.eth.scu.importer.gui.components.viewers.ExperimentNode;
-import ch.eth.scu.importer.gui.components.viewers.RootNode;
-import ch.eth.scu.importer.gui.components.viewers.SpecimenNode;
-import ch.eth.scu.importer.gui.components.viewers.TrayNode;
-import ch.eth.scu.importer.gui.components.viewers.TubeNode;
-import ch.eth.scu.importer.gui.components.viewers.XMLFileNode;
-import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
+import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.model.ExperimentNode;
+import ch.eth.scu.importer.gui.viewers.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.model.SpecimenNode;
+import ch.eth.scu.importer.gui.viewers.model.TrayNode;
+import ch.eth.scu.importer.gui.viewers.model.TubeNode;
+import ch.eth.scu.importer.gui.viewers.model.XMLFileNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.ExperimentDescriptor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.SpecimenDescriptor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.TrayDescriptor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.TubeDescriptor;
+import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 import java.awt.event.*;
 

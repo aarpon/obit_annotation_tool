@@ -1,6 +1,6 @@
 package ch.eth.scu.importer.processor;
 
-import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 
 import java.io.*;
 import java.util.*;
@@ -17,17 +17,11 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private String xmlFilename;
-	private String outputName;
 	private DocumentBuilder parser = null;
 	private Document doc = null;
 
 	/* Public instance variables */
 	public XMLFileDescriptor xmlFile;
-
-	/**
-	 * ArrayList of Experiment's
-	 */
-	//protected ArrayList<Experiment> experiments = new ArrayList<Experiment>();
 
 	/**
 	 * Constructor

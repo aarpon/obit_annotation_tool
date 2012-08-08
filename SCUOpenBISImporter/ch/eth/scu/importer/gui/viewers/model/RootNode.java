@@ -1,6 +1,6 @@
-package ch.eth.scu.importer.gui.components.viewers;
+package ch.eth.scu.importer.gui.viewers.model;
 
-import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different

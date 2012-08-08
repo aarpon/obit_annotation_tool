@@ -9,11 +9,11 @@ import javax.swing.*;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DropboxProperties;
-import ch.eth.scu.importer.gui.panels.editors.EditorContainer;
-import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
-import ch.eth.scu.importer.gui.panels.viewers.BDLSRFortessaViewer;
-import ch.eth.scu.importer.gui.panels.viewers.LeicaSP5Viewer;
+import ch.eth.scu.importer.gui.editors.EditorContainer;
+import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.BDLSRFortessaViewer;
+import ch.eth.scu.importer.gui.viewers.LeicaSP5Viewer;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;

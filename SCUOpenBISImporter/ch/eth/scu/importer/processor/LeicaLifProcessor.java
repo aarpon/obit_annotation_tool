@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
-import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;

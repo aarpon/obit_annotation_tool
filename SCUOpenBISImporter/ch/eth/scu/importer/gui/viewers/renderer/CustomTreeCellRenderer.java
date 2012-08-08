@@ -1,7 +1,9 @@
-package ch.eth.scu.importer.gui.components.viewers;
+package ch.eth.scu.importer.gui.viewers.renderer;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
+
+import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
 
 /**
  * Custom Cell Renderer that adapts to individual Node implementations
