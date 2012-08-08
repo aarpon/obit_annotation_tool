@@ -2,7 +2,6 @@ package ch.eth.scu.importer.gui.panels.editors;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.util.Observable;
 
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
@@ -45,8 +44,4 @@ public class LeicaSP5Editor extends AbstractEditor {
 	public void actionPerformed(ActionEvent e) {
     }
 
-	@Override
-	public void update(Observable obs, Object arg) {
-		render();
-	}
 }

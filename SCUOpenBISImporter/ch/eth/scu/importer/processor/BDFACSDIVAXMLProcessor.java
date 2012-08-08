@@ -17,6 +17,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private String xmlFilename;
+	private String outputName;
 	private DocumentBuilder parser = null;
 	private Document doc = null;
 
@@ -89,7 +90,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}	
 
 		// Extract info
-		xmlFile = new XMLFileDescriptor(new File(xmlFilename).getName(),doc);
+		xmlFile = new XMLFileDescriptor(xmlFilename,doc);
 		return xmlFile.success;
 
 	}
@@ -130,10 +131,32 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		public ArrayList<ExperimentDescriptor> experiments = new ArrayList<ExperimentDescriptor>();
 		
 		public XMLFileDescriptor(String name, Document doc) {
-			this.name = name;
+			
+			// Set the descriptor name
+			this.name = (new File(name)).getName();
+			
+			// Set the output name
+			String outputNameFile = (new File(name)).getParent();
+			int indx = outputNameFile.lastIndexOf(File.separator);
+			if (indx != -1) {
+				outputNameFile = outputNameFile.substring(indx + 1);
+			}
+			this.outputName = outputNameFile + "_properties.xml";
+
+			// Process the document
 			success = processDoc(doc);
 		}
 
+		/**
+		 * Get XML output name
+		 * 
+		 * This is the name of the XML output file where to save the data model
+		 * @return the name of the XML output file 
+		 */
+		public String getOutputName() {
+			return outputName;
+		}
+		
 		@Override
 		public String getType() {
 			return "XMLFile";

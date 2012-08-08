@@ -1,9 +1,11 @@
 package ch.eth.scu.importer.gui.components.viewers;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,34 +31,56 @@ import ch.eth.scu.importer.gui.descriptors.AbstractDescriptor;
  */
 public class CustomTreeToXML {
 
-	private DocumentBuilder builder;
-	private Document document;
-	
+	Map<String, Document> documents = new Hashtable<String, Document>();
+
 	/**
 	 * Constructor
 	 * @param rootNode Root node of the JTree
 	 */
 	public CustomTreeToXML(CustomTree tree) {
 
+		DocumentBuilder builder;
+		Document document = null;
+
 		// Get the root node of the JTree
 		CustomTreeNode rootNode = 
 				(CustomTreeNode) tree.getModel().getRoot();
 		
-		// Create a Document
-		try {
-			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			document = builder.newDocument();
+		// We create and save an XML file for each top-level children in the
+		// data model. The name of the XML file is obtained from the top node.
+		
+		// Get all children of the rootNode
+		int nTopLevelChildren = rootNode.getChildCount();
+		
+		for (int i = 0; i < nTopLevelChildren; i++) {
+
+			// Get current child
+			CustomTreeNode topNode = (CustomTreeNode) rootNode.getChildAt(i);
 			
-			Element root = document.createElement("xml");
-			root.setAttribute("version", "1");
-
-			addNode(root, rootNode);
+			// Construct the file name (the key for the map)
+			String key = 
+					((AbstractDescriptor) topNode.getUserObject()).getOutputName();
+ 
+			// Now build the XML document
+			try {
+				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				document = builder.newDocument();
 				
-			document.appendChild(root);
+				Element root = document.createElement("xml");
+				root.setAttribute("version", "1");
 
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+				addNode(document, root, topNode);
+					
+				document.appendChild(root);
+
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			}
+			
+			// Store the document
+			documents.put(key, document);
 		}
+
 	}
 	
 	/**
@@ -64,18 +88,27 @@ public class CustomTreeToXML {
 	 * @param filename File name with full path
 	 * @return true if saving was successful, false otherwise
 	 */
-	public boolean saveToFile(String filename) {
+	public boolean saveToFile(String outputDirectory) {
 
-		try {
-			Transformer t = TransformerFactory.newInstance().newTransformer();
-			OutputStream outputStream = new FileOutputStream(filename);
-			t.transform(new DOMSource(document), new StreamResult(outputStream));
-		} catch (TransformerException e) {
-			e.printStackTrace();
-			return false;
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return false;
+		for (String key: documents.keySet()) {
+			
+			// Build the filename
+			String filename = outputDirectory + File.separator + key;
+		
+			try {
+				Document document = (Document) documents.get(key);
+				Transformer t = 
+						TransformerFactory.newInstance().newTransformer();
+				OutputStream outputStream = new FileOutputStream(filename);
+				t.transform(new DOMSource(document), 
+						new StreamResult(outputStream));
+			} catch (TransformerException e) {
+				e.printStackTrace();
+				return false;
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return false;
+			}
 		}
 		
 		return true;
@@ -86,16 +119,17 @@ public class CustomTreeToXML {
 	 * @param parentNode	The XML parent node to which to append current
 	 * @param treeNode		The JTree node to append
 	 */
-    protected void addNode(Element parentNode, CustomTreeNode treeNode) {
+    protected void addNode(Document document, Element parentNode,
+    		CustomTreeNode treeNode) {
     	// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
     	// This causes a warning in Java > 5.
     	@SuppressWarnings("unchecked")
         Enumeration<CustomTreeNode> children = treeNode.children();
         while (children.hasMoreElements()) {
             final CustomTreeNode node = children.nextElement();
-            final Element element = createElement(node);
+            final Element element = createElement(document, node);
             parentNode.appendChild(element);
-            addNode(element, node);
+            addNode(document, element, node);
         }
     }
 
@@ -104,7 +138,7 @@ public class CustomTreeToXML {
      * @param node JTree node from which an XML node is to be created  
      * @return an XML node
      */
-    protected Element createElement(CustomTreeNode node) {
+    protected Element createElement(Document document, CustomTreeNode node) {
         final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
         String tagName = node.getType();
         String tagAttr = data.toString();

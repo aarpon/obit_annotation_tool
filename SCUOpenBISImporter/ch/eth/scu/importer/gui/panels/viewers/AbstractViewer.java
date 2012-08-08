@@ -155,10 +155,10 @@ abstract public class AbstractViewer extends Observable
 	 * @param filename Filename with full path 
 	 * @return true if the XML file could be saved, false otherwise
 	 */	
-	public boolean saveToXML(String filename) {
+	public boolean saveToXML(String outputDirectory) {
 		
 		CustomTreeToXML treeToXML = new CustomTreeToXML(tree);
-		return (treeToXML.saveToFile(filename));
+		return (treeToXML.saveToFile(outputDirectory));
 	
 	}
 

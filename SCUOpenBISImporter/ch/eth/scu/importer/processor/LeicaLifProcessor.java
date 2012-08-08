@@ -127,7 +127,15 @@ public class LeicaLifProcessor extends AbstractProcessor {
 		 * Constructor
 		 */
 		public ImageDescriptor(String filename) {
-			this.name = new File(filename).getName();	
+			this.name = new File(filename).getName();
+			
+			// Set the output name
+			String outputNameFile = (new File(name)).getName();
+			int indx = outputNameFile.lastIndexOf(".");
+			if (indx != -1) {
+				outputNameFile = outputNameFile.substring(0, indx);
+			}
+			this.outputName = outputNameFile + "_properties.xml";
 		}
 		
 		/**

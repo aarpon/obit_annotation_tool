@@ -7,7 +7,7 @@ import ch.eth.scu.importer.gui.components.viewers.RootNode;
 import ch.eth.scu.importer.gui.components.viewers.SpecimenNode;
 import ch.eth.scu.importer.gui.components.viewers.TrayNode;
 import ch.eth.scu.importer.gui.components.viewers.TubeNode;
-import ch.eth.scu.importer.gui.components.viewers.XMLNode;
+import ch.eth.scu.importer.gui.components.viewers.XMLFileNode;
 import ch.eth.scu.importer.gui.descriptors.RootDescriptor;
 import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
@@ -77,8 +77,8 @@ public class BDLSRFortessaViewer extends AbstractViewer
 		}
 
 		// Add the processor as new child of current folder node
-		XMLNode xmlNode = 
-				new XMLNode(xmlprocessor.xmlFile);
+		XMLFileNode xmlNode = 
+				new XMLFileNode(xmlprocessor.xmlFile);
 		rootNode.add(xmlNode);
 		
 		// Add all the children

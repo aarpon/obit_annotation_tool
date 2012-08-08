@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -16,7 +15,7 @@ import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.gui.components.viewers.ExperimentNode;
 import ch.eth.scu.importer.gui.components.viewers.RootNode;
-import ch.eth.scu.importer.gui.components.viewers.XMLNode;
+import ch.eth.scu.importer.gui.components.viewers.XMLFileNode;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
 import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
@@ -65,6 +64,13 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 			return;
 		}
 
+		// If we are repainting this panel, let's make sure we delete the
+		// child components already displayed.
+		if (panel.getComponentCount() > 0) {
+			panel.removeAll();
+			panel.revalidate(); 
+		}
+		
 		// Constraints
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
@@ -125,7 +131,7 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 		for (int i = 0; i < dataNChildren; i++) {
 			
 			// Get the XMLNode
-			XMLNode dataXmlNode = (XMLNode) dataRoot.getChildAt(i);
+			XMLFileNode dataXmlNode = (XMLFileNode) dataRoot.getChildAt(i);
 			
 			// Create a label for the XML file
 			constraints.insets = new Insets(10, 10, 10, 10);
@@ -216,11 +222,11 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
 		
-	}
-
-	@Override
-	public void update(Observable obs, Object arg) {
-		render();
+		// In case this was called when then window was already visible (i.e.
+		// if the login failed the first time and this panel was drawn without
+		// children)
+		panel.revalidate();
+		
 	}
 	
 	/**
@@ -230,11 +236,11 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 	 *
 	 */
 	protected class Glue {
-		protected XMLNode xmlNode;
+		protected XMLFileNode xmlNode;
 		protected ExperimentNode expNode;
 		protected CustomOpenBISNode projNode;
 		
-		protected Glue(XMLNode xmlNode, ExperimentNode expNode,
+		protected Glue(XMLFileNode xmlNode, ExperimentNode expNode,
 				CustomOpenBISNode projNode) {
 			this.xmlNode = xmlNode;
 			this.expNode = expNode;

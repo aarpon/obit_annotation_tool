@@ -4,8 +4,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -90,6 +88,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 	 * @param e The ActionEvent object
 	 */
 	public void actionPerformed(ActionEvent e) {
+		
 		if (e.getSource() == uploadButton) {
 			
 			// Make sure all models are ready
@@ -100,20 +99,11 @@ public class EditorContainer extends JPanel implements ActionListener {
 
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
-			// TODO - Correct XML file name!
-			File xmlFile = new File(
-					appProperties.getProperty("DatamoverIncomingDir") + 
-					File.separator + "properties.xml");
-			try {
-				dataViewer.saveToXML(xmlFile.getCanonicalPath());
-				System.out.println(
-						"File written to disk (TODO: Use the output pane).");
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				System.err.println(
-						"Could not write xml file to disk (TODO: Use the output pane).");
-			}
+			String outputDirectory = 
+					appProperties.getProperty("DatamoverIncomingDir");
+			dataViewer.saveToXML(outputDirectory);
+			System.out.println(
+					"File written to disk (TODO: Use the output pane).");
 		}
     }
 	

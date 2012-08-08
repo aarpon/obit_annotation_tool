@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.gui.panels.editors;
 
 import java.awt.event.ActionListener;
+import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JPanel;
@@ -32,7 +33,15 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 		this.dataViewer = dataViewer;
 		this.openBISViewer = openBISViewer;
 	}
-	
+
+	/**
+	 * Observer update method
+	 * @param obs Observable object
+	 * @param arg Argument
+	 */
+	public void update(Observable obs, Object arg) {
+		render();
+	}	
 	/**
 	 * Function that creates and render all required widgets when both data 
 	 * and openBIS viewers have notified that their data model is ready. 

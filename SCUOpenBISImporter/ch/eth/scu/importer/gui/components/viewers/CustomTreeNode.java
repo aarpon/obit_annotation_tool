@@ -24,6 +24,6 @@ public abstract class CustomTreeNode extends DefaultMutableTreeNode{
 	
 	public String getType() { return type; }
 
-	public String getTooltip() { return ""; } 
+	public String getTooltip() { return ""; }
 	
 }
