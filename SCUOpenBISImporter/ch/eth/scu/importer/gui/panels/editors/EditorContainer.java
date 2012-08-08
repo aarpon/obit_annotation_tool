@@ -91,6 +91,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == uploadButton) {
+			
+			// Make sure all models are ready
+			if (!dataViewer.isReady() || !openBISViewer.isReady()) {
+				System.out.println("Data models not ready (TODO: Use the output pane).");
+				return;
+			}
+
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
 			// TODO - Correct XML file name!
