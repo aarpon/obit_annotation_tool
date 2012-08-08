@@ -378,6 +378,8 @@ public class OpenBISSpaceViewer extends Observable
 		
 		abstract public String toString();
 		
+		abstract public String getCode();
+		
 		abstract public String getIdentifier();
 	}
 	
@@ -414,6 +416,17 @@ public class OpenBISSpaceViewer extends Observable
 		@Override
 		public String toString() { return name; }
 
+		/**
+		 * Root code (custom)
+		 * @return String openBIS code of the root object (set to "ROOT")
+		 */
+		@Override
+		public String getCode() { return "ROOT"; }
+
+		/**
+		 * Root identifier (custom)
+		 * @return String openBIS identifier of the root object (set to "/")
+		 */
 		@Override
 		public String getIdentifier() { return "/"; }
 		
@@ -453,6 +466,14 @@ public class OpenBISSpaceViewer extends Observable
 		@Override
 		public String toString() { return ("[space] " + s.getCode()); }
 
+		
+		/**
+		 * Space code
+		 * @return Space code
+		 */			
+		@Override
+		public String getCode() { return s.getCode(); }
+		
 		/**
 		 * Space identifier
 		 * @return Space identifier
@@ -497,6 +518,13 @@ public class OpenBISSpaceViewer extends Observable
 		public String toString() { return ("[project] " + p.getCode()); }
 
 		/**
+		 * Project code
+		 * @return Project code
+		 */			
+		@Override
+		public String getCode() { return p.getCode(); }
+		
+		/**
 		 * Project identifier
 		 * @return Project identifier
 		 */			
@@ -540,6 +568,13 @@ public class OpenBISSpaceViewer extends Observable
 		public String toString() { return ( "[experiment] " + e.getCode()); }
 
 		/**
+		 * Experiment code
+		 * @return Experiment code
+		 */			
+		@Override
+		public String getCode() { return e.getCode(); }
+		
+		/**
 		 * Experiment identifier
 		 * @return Experiment identifier
 		 */			
@@ -582,6 +617,13 @@ public class OpenBISSpaceViewer extends Observable
 		@Override
 		public String toString() { return ( "[sample] " + s.getCode()); }
 
+		/**
+		 * Sample code
+		 * @return Sample code
+		 */			
+		@Override
+		public String getCode() { return s.getCode(); }
+		
 		/**
 		 * Sample identifier
 		 * @return Sample identifier

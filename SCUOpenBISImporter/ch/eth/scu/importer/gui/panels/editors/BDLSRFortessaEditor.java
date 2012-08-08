@@ -20,6 +20,7 @@ import ch.eth.scu.importer.gui.components.viewers.XMLNode;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.panels.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
 import ch.eth.scu.importer.gui.panels.viewers.AbstractViewer;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.ExperimentDescriptor;
 
 /**
  * Metadata editor panel.
@@ -76,7 +77,7 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 		// We extract all projects from the openBIS model and create a list
 		// with which we will then create JComboBox associated to each project
 		// from the data model
-		List<String> projectNames = new ArrayList<String>();
+		List<CustomOpenBISNode> projects = new ArrayList<CustomOpenBISNode>();
 		
 		CustomOpenBISNode openBISRoot = 
 				(CustomOpenBISNode) openBISModel.getRoot();
@@ -100,10 +101,17 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 						(CustomOpenBISNode) openBISSpaceNode.getChildAt(j);
 				
 				// Add it to the list
-				projectNames.add(openBISProjectNode.toString());
+				projects.add(openBISProjectNode);
 
 			}
 		}
+		
+		// Extract the default project code and identifier to associate to the
+		// ExperimentDescriptors in the data model
+		String defaultProjectCode =
+				((CustomOpenBISNode)(projects.get(0))).getCode();
+		String defaultProjectIdentifier = 
+				((CustomOpenBISNode)(projects.get(0))).getIdentifier();
 
 		// We extract all experiments from the data model
 		RootNode dataRoot = (RootNode) dataModel.getRoot();
@@ -147,16 +155,47 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 				constraints.gridy = yPos++;
 				panel.add(new JLabel(dataExpNode.toString()), constraints);
 				
-				// Add a JComboBox with the Project options
-				JComboBox projCombo = new JComboBox(projectNames.toArray());
-				//projectCombos.add(projCombo);
+				// Glue all the info together for the Combo box
+				
+				// Add a JComboBox for the Glue objects
+				JComboBox projCombo = new JComboBox();
+				for (CustomOpenBISNode s : projects) {
+					projCombo.addItem(new Glue(dataXmlNode, dataExpNode, s));
+				}
 				projCombo.setSelectedIndex(0);
+				
+				// By default, set the first project to current 
+				// ExperimentDescriptor in the data model
+				ExperimentDescriptor expDescr =
+						((ExperimentDescriptor)dataExpNode.getUserObject());
+				expDescr.setOpenBISCode(defaultProjectCode);
+				expDescr.setOpenBISIdentifier(defaultProjectIdentifier);
+				
+				// When a project is selected, update the corresponding 
+				// ExperimentDescriptor in the data model 
 				projCombo.addActionListener(new ActionListener() {
 		            public void actionPerformed(ActionEvent e) {
 		        		if (e.getActionCommand().equals("comboBoxChanged")) {
-		        			// TODO Map this to the ExperimentNode object
-		        			System.out.println((String)
-		        					((JComboBox) e.getSource()).getSelectedItem());
+		        			
+		        			// Get the Glue object
+		        			Glue glue = (Glue) 
+		        					((JComboBox)(e.getSource())).getSelectedItem();
+
+		        			// Get the data experiment descriptor
+		        			ExperimentDescriptor expDescr =
+		        					((ExperimentDescriptor)glue.expNode.getUserObject());
+		        			
+		        			// Get the openBIS project node
+		        			CustomOpenBISNode projNode = 
+		        					((CustomOpenBISNode)glue.projNode);
+		        			
+		        			// Now fill the ExperimentDescriptor with the 
+		        			// information from the OpenBIS Project node
+		        			expDescr.setOpenBISCode(
+		        					projNode.getCode());
+		        			expDescr.setOpenBISIdentifier(
+		        					projNode.getIdentifier());
+		        					
 		        		}
 		            }
 		        });
@@ -182,5 +221,28 @@ public class BDLSRFortessaEditor extends AbstractEditor {
 	@Override
 	public void update(Observable obs, Object arg) {
 		render();
+	}
+	
+	/**
+	 * Glue class to combine all data and openBIS information to allow mapping
+	 * following user choice.
+	 * @author Aaron Ponti
+	 *
+	 */
+	protected class Glue {
+		protected XMLNode xmlNode;
+		protected ExperimentNode expNode;
+		protected CustomOpenBISNode projNode;
+		
+		protected Glue(XMLNode xmlNode, ExperimentNode expNode,
+				CustomOpenBISNode projNode) {
+			this.xmlNode = xmlNode;
+			this.expNode = expNode;
+			this.projNode = projNode;
+		}
+		
+		public String toString() {
+			return projNode.getIdentifier();
+		}
 	}
 }
