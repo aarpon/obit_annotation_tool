@@ -22,6 +22,9 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	
 	/**
 	 * Constructor
+	 * 
+	 * The inheriting classes must call this constructor.
+	 *  
 	 * @param dataViewer Reference to the viewer
 	 * @param openBISViewer Reference to the openBIS viewer
 	 */

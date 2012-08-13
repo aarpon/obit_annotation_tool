@@ -396,11 +396,11 @@ public class OpenBISSpaceViewer extends Observable
 		
 		/**
 		 * Constructor
-		 * @param name User name
+		 * @param username User name
 		 */
-		public OpenBISRootNode(String name) {
-			super(name);
-			this.name = name;
+		public OpenBISRootNode(String username) {
+			super(username);
+			this.name = username;
 		}
 		
 		/**
