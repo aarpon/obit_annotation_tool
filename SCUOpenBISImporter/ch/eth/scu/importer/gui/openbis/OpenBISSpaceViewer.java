@@ -18,7 +18,6 @@ import javax.swing.tree.TreeSelectionModel;
 import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.common.properties.DropboxProperties;
 import ch.eth.scu.importer.gui.dialogs.OpenBISLoginDialog;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
@@ -65,7 +64,7 @@ public class OpenBISSpaceViewer extends Observable
 	/**
 	 * Constructor
 	 */
-	public OpenBISSpaceViewer(DropboxProperties dropboxProperties) {
+	public OpenBISSpaceViewer() {
 
 		// Create a panel
 		panel = new JPanel();

@@ -8,7 +8,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.common.properties.DropboxProperties;
 import ch.eth.scu.importer.gui.editors.EditorContainer;
 import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.viewers.AbstractViewer;
@@ -33,7 +32,6 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private OpenBISSpaceViewer spaceViewer;
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
-	private DropboxProperties dropboxProperties;
 	
 	private static final String version = "0.0.0";
 	
@@ -54,9 +52,6 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Get the application properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();
-		
-		// Get the Dropbox properties
-		dropboxProperties = new DropboxProperties();
 		
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
@@ -79,7 +74,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		}
 		add(metadataViewer.getPanel(), BorderLayout.WEST);
 		
-		spaceViewer = new OpenBISSpaceViewer(dropboxProperties);
+		spaceViewer = new OpenBISSpaceViewer();
 		add(spaceViewer.getPanel(), BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
