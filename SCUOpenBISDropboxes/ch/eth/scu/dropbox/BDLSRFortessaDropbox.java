@@ -166,7 +166,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 			
 			// Iterate over current Experiment children
 			NodeList expChildren = e.getChildNodes();
-			for ( int j = 0; j < expChildren.getLength(); i++ ) {
+			for ( int j = 0; j < expChildren.getLength(); j++ ) {
 			
 				// Get child: it can be a Specimen or a Tray
 				Node c = expChildren.item(j);
@@ -174,8 +174,68 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 				
 				if (type.equals("Specimen")) {
 					
+					// Process the Specimen
+					ISample openBISSpecimen = processSpecimen(c, 
+							openBISExperiment);
+					
+					// Iterate over current Specimen children
+					NodeList specChildren = c.getChildNodes();
+					for ( int m = 0; m < specChildren.getLength(); m++ ) {
+
+						// Get child: it must be a Specimen
+						Node s = specChildren.item(m);
+						
+						// Check that it is indeed a Specimen
+						if (! s.getNodeName().equals("Tube")) {
+							return false;
+						}
+
+						// Process the Specimen
+						ISample openBISTube = processSpecimen(s, openBISSpecimen);
+						
+					}
+					
 				} else if (type.equals("Tray")) {
-					ISample Tray = processTray(c, openBISExperiment);
+					
+					// Process a Tray
+					ISample openBISTray = processTray(c, openBISExperiment);
+					
+					// Iterate over current Tray children
+					NodeList trayChildren = c.getChildNodes();
+					for ( int k = 0; k < trayChildren.getLength(); k++ ) {
+					
+						// Get child: it must be a Specimen
+						Node s = trayChildren.item(j);
+						
+						// Check that it is indeed a Specimen
+						if (! s.getNodeName().equals("Specimen")) {
+							return false;
+						}
+
+						// Process the Specimen
+						ISample openBISSpecimen =
+								processSpecimen(c, openBISTray);
+						
+						// Iterate over current Specimen children
+						NodeList specChildren = s.getChildNodes();
+						for ( int l = 0; l < specChildren.getLength(); l++ ) {
+
+							// Get child: it must be a Specimen
+							Node t = specChildren.item(j);
+							
+							// Check that it is indeed a Tube
+							if (! t.getNodeName().equals("Tube")) {
+								return false;
+							}
+							
+							// Process the Tube
+							ISample openBISTube = processTube(
+									t, openBISSpecimen);
+
+						}
+
+					}
+					
 				} else {
 					return false;
 				}
@@ -225,17 +285,21 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	}
 
 	/**
-	 * Register a Tray (Plate) based on the Experiment XML node
-	 * @param e An XML node corresponding to a Tray (Plate)
+	 * Register a Tray (Plate) based on the Tray XML node
+	 * and an IExperimentUpdatable object
+	 * @param tray An XML node corresponding to a Tray (Plate)
+	 * @param exp  An IExperimentUpdatable object
 	 * @return ISample sample, or null
 	 */
 	private ISample processTray(Node tray, IExperimentUpdatable exp) {
 		
 		// Initialize the Tray
-		ISample Tray = null;
+		ISample openBISTray = null;
 		
 		// Get Tray attributes
 		NamedNodeMap attr = tray.getAttributes();
+		
+		// Get the name
 		String name = 
 				attr.getNamedItem("name").getNodeValue();
 		
@@ -251,13 +315,13 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String tray_type = 
 				attr.getNamedItem("tray_type").getNodeValue();
 		
-		// TODO This shoud be mapped from the tray_type
+		// TODO This should be mapped from the tray_type
 		String openBISSampleType = "PLATE";
 
 		// The sample should NOT exist!
 		// TODO make sure to handle properly the case where the sample already
 		// exists!
-		ISample openBISTray = transaction.getSampleForUpdate(openBISIdentifier);
+		openBISTray = transaction.getSampleForUpdate(openBISIdentifier);
 		if(openBISTray == null) {
 			openBISTray = transaction.createNewSample(
 					openBISIdentifier, openBISSampleType);
@@ -265,9 +329,139 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		
 		// TODO Set all required properties
 		openBISTray.setPropertyValue("DESCRIPTION", name);
-		//openBISTray.setPropertyValue("$PLATE_GEOMETRY", mapped_tray_type);
+		//Tray.setPropertyValue("$PLATE_GEOMETRY", mapped_tray_type);
 		
-		return Tray;
+		return openBISTray;
+	}
+
+	/**
+	 * Register a Specimen (as a child of an Experiment) based on the Specimen 
+	 * XML node and an IExperimentUpdatable object
+	 * @param specimen An XML node corresponding to a Specimen
+	 * @param exp  An IExperimentUpdatable object
+	 * @return ISample sample, or null
+	 */
+	private ISample processSpecimen(Node specimen, IExperimentUpdatable exp) {
+	
+		// Initialize the Specimen
+		ISample openBISSpecimen = null;
+
+		// Get Tray attributes
+		NamedNodeMap attr = specimen.getAttributes();
+		
+		// Get the name
+		String name = 
+				attr.getNamedItem("name").getNodeValue();
+		
+		// Make an openBISCode from the name
+		String openBISCode = name.replaceAll(" ", "_").toUpperCase();
+		
+		// Build the openBIS Identifier
+		String openBISIdentifier =
+				exp.getExperimentIdentifier() + "/" + openBISCode;
+
+		// TODO This should be stored in the _properties.xml file
+		String openBISSpecimenType = "UNKNOWN";
+		
+		// The sample should NOT exist!
+		// TODO make sure to handle properly the case where the sample already
+		// exists!
+		openBISSpecimen = transaction.getSampleForUpdate(openBISIdentifier);
+		if(openBISSpecimen == null) {
+			openBISSpecimen = transaction.createNewSample(
+					openBISIdentifier, openBISSpecimenType);
+		}
+		
+		return openBISSpecimen;
+	}
+
+	/**
+	 * Register a Specimen (as a child of a Tray) based on the Specimen 
+	 * XML node and an ISample object
+	 * @param specimen An XML node corresponding to a Specimen
+	 * @param tray  An ISample object
+	 * @return ISample sample, or null
+	 */
+	private ISample processSpecimen(Node specimen, ISample tray) {
+	
+		// Initialize the Specimen
+		ISample openBISSpecimen = null;
+
+		// Get Tray attributes
+		NamedNodeMap attr = specimen.getAttributes();
+		
+		// Get the name
+		String name = 
+				attr.getNamedItem("name").getNodeValue();
+		
+		// Make an openBISCode from the name
+		String openBISCode = name.replaceAll(" ", "_").toUpperCase();
+		
+		// Build the openBIS Identifier
+		String openBISIdentifier =
+				tray.getSampleIdentifier() + "/" + openBISCode;
+
+		// TODO This should be stored in the _properties.xml file
+		String openBISSpecimenType = "UNKNOWN";
+		
+		// The sample should NOT exist!
+		// TODO make sure to handle properly the case where the sample already
+		// exists!
+		openBISSpecimen = transaction.getSampleForUpdate(openBISIdentifier);
+		if(openBISSpecimen == null) {
+			openBISSpecimen = transaction.createNewSample(
+					openBISIdentifier, openBISSpecimenType);
+		}
+		
+		// Set the tray as a container
+		openBISSpecimen.setContainer(tray);
+		
+		return openBISSpecimen;
 	}
 	
+	/**
+	 * Register a Tube (as a child of a Specimen) based on the Tube 
+	 * XML node and an ISample object
+	 * 
+	 * The associated fcs file is attached as a IDataset
+	 * 
+	 * @param tube An XML node corresponding to a Tube
+	 * @param specimen  An ISample object
+	 * @return ISample sample, or null
+	 */
+	private ISample processTube(Node tube, ISample specimen) {
+	
+		ISample openBISTube = null;
+		
+		// Get Tray attributes
+		NamedNodeMap attr = tube.getAttributes();
+		
+		// Get the name
+		String name = 
+				attr.getNamedItem("name").getNodeValue();
+		
+		// Make an openBISCode from the name
+		String openBISCode = name.replaceAll(" ", "_").toUpperCase();
+		
+		// Build the openBIS Identifier
+		String openBISIdentifier =
+				specimen.getSampleIdentifier() + "/" + openBISCode;
+
+		// TODO This should be stored in the _properties.xml file
+		String openBISTubeType = "UNKNOWN";
+
+		// The sample should NOT exist!
+		// TODO make sure to handle properly the case where the sample already
+		// exists!
+		openBISTube = transaction.getSampleForUpdate(openBISIdentifier);
+		if(openBISTube == null) {
+			openBISTube = transaction.createNewSample(
+					openBISIdentifier, openBISTubeType);
+		}
+		
+		// Set the specimen as a container
+		openBISTube.setContainer(specimen);
+		
+		return openBISTube;
+	}
 }
