@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Abstract class that represents an entity to be mapped to openBIS.
  * 
- * Derivd classes of AbstractDescriptor will represent Experiments, Specimens,
+ * Derived classes of AbstractDescriptor will represent Experiments, Specimens,
  * Trays (Plates), Tubes, Images, SubImages that will be wrapped into the tree
  * viewers and will allow to map the entities to their final location in 
  * openBIS.

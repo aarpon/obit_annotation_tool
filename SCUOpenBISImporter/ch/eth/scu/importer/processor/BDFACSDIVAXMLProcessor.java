@@ -122,7 +122,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	public class XMLFileDescriptor extends AbstractDescriptor {
 		
 		public boolean success = false;
-		public ArrayList<ExperimentDescriptor> experiments = new ArrayList<ExperimentDescriptor>();
+		public ArrayList<ExperimentDescriptor> experiments = 
+				new ArrayList<ExperimentDescriptor>();
 		
 		public XMLFileDescriptor(String name, Document doc) {
 			
