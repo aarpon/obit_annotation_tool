@@ -372,6 +372,9 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 					openBISIdentifier, openBISSpecimenType);
 		}
 		
+		// TODO Set all required properties
+		openBISSpecimen.setPropertyValue("DESCRIPTION", name);
+
 		return openBISSpecimen;
 	}
 
@@ -412,6 +415,9 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 			openBISSpecimen = transaction.createNewSample(
 					openBISIdentifier, openBISSpecimenType);
 		}
+		
+		// TODO Set all required properties
+		openBISSpecimen.setPropertyValue("DESCRIPTION", name);
 		
 		// Set the tray as a container
 		openBISSpecimen.setContainer(tray);
@@ -458,6 +464,9 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 			openBISTube = transaction.createNewSample(
 					openBISIdentifier, openBISTubeType);
 		}
+		
+		// TODO Set all required properties
+		openBISTube.setPropertyValue("DESCRIPTION", name);
 		
 		// Set the specimen as a container
 		openBISTube.setContainer(specimen);
