@@ -44,7 +44,8 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 */
 	public void update(Observable obs, Object arg) {
 		render();
-	}	
+	}
+	
 	/**
 	 * Function that creates and render all required widgets when both data 
 	 * and openBIS viewers have notified that their data model is ready. 

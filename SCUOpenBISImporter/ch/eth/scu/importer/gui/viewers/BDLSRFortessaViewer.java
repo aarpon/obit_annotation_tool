@@ -3,6 +3,7 @@ package ch.eth.scu.importer.gui.viewers;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
 import ch.eth.scu.importer.gui.viewers.model.ExperimentNode;
+import ch.eth.scu.importer.gui.viewers.model.FCSFileNode;
 import ch.eth.scu.importer.gui.viewers.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.model.SpecimenNode;
 import ch.eth.scu.importer.gui.viewers.model.TrayNode;
@@ -132,15 +133,17 @@ public class BDLSRFortessaViewer extends AbstractViewer
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.endsWith("TubeDescriptor")) {
+			htmlPane.setText(
+					((BDFACSDIVAXMLProcessor.TubeDescriptor) 
+							nodeInfo).attributesToString().replace(
+									", ", "\n"));			
+		} else if (className.endsWith("FCSFileDescriptor")) {
 			// Cast
-			BDFACSDIVAXMLProcessor.TubeDescriptor tube = 
-					(BDFACSDIVAXMLProcessor.TubeDescriptor) nodeInfo;
-			// Display attributes
-			String out = tube.attributesToString().replace(", ", "\n");
-			// Parse the fcs file and dump its metadata
-			Map<String,String> attrs = tube.getAttributes();
-			String fcsFile = attrs.get("fullDataFilename");
-			FCSProcessor fcs = new FCSProcessor(fcsFile, false);
+			BDFACSDIVAXMLProcessor.FCSFileDescriptor fcsFile = 
+					(BDFACSDIVAXMLProcessor.FCSFileDescriptor) nodeInfo;
+			String fcsFileName = fcsFile.getFileName();
+			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
+			String out = "";
 			try {
 				fcs.parse();
 				out += "\n\n" + fcs.metadataDump();
@@ -164,6 +167,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 		TrayNode tray = null;
 		SpecimenNode specimen = null;
 		TubeNode tube = null;
+		FCSFileNode fcs = null;
 
 		for (ExperimentDescriptor e : xmlfile.experiments) {
 
@@ -188,6 +192,10 @@ public class BDLSRFortessaViewer extends AbstractViewer
 						// Add the tubes
 						tube = new TubeNode(tb);
 						specimen.add(tube);
+						
+						// Add the fcs files
+						fcs = new FCSFileNode(tb.fcsFile);
+						tube.add(fcs);
 					}
 
 				}
@@ -205,10 +213,13 @@ public class BDLSRFortessaViewer extends AbstractViewer
 					// Add the tubes
 					tube = new TubeNode(tb);
 					specimen.add(tube);
+
+					// Add the fcs files
+					fcs = new FCSFileNode(tb.fcsFile);
+					tube.add(fcs);
 				}
 
 			}
-
 
 		}
 	}

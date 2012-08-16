@@ -334,6 +334,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 */
 	public class TubeDescriptor extends AbstractDescriptor {
 		
+		public FCSFileDescriptor fcsFile;
+		
 		/**
 		 * Constructor.
 		 * @param tubeNode DOM node that refers to a Tube.
@@ -375,6 +377,10 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 					// Skip
 				}
 			}
+			
+			// Associate the FCS file to the Tube
+			fcsFile = new FCSFileDescriptor(
+					attributes.get("fullDataFilename").toString());
 	
 		}
 	
@@ -384,8 +390,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public String toString() {
-			String str =  name + "   (" + attributes.get("dataFilename") + ")";
-			return str;
+			return this.name;
 		}
 	
 		/**
@@ -399,6 +404,56 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		
 	}
 
+	/**
+	 * Class that represents an FCS file associated to a Tube.
+	 * An FCS File is always a child of a Tube.
+	 * @author Aaron Ponti
+	 */
+	public class FCSFileDescriptor extends AbstractDescriptor {
+
+		private String fullFileName = "";
+		
+		/**
+		 * Constructor.
+		 * @param fcsFileName FCS file name with full path
+		 */
+		public FCSFileDescriptor(String fcsFileName) {
+
+			// Store the file name
+			this.fullFileName = fcsFileName; 
+			this.name = (new File( fcsFileName )).getName();
+
+		}
+
+		/**
+		 * Return a String representation of the extracted Tube node.
+		 * @return String representation of the Tube node.
+		 */
+		@Override
+		public String toString() {
+			String str = this.name;
+			return str;
+		}
+
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplidied class name.
+		 */
+		@Override		
+		public String getType() {
+			return "FCSFile";
+		}
+
+		/**
+		 * Return the full FCS file name.
+		 * @return full FCS file name.
+		 */
+		public String getFileName() {
+			return this.fullFileName;
+		}
+		
+	}
+	
 	/**
 	 * Class that represents a specimen parsed from the XML.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
