@@ -13,6 +13,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import ch.systemsx.cisd.etlserver.registrator.api.v1.IDataSet;
 import ch.systemsx.cisd.etlserver.registrator.api.v1.IExperimentUpdatable;
 import ch.systemsx.cisd.etlserver.registrator.api.v1.ISample;
 import ch.systemsx.cisd.etlserver.registrator.api.v2.AbstractJavaDataSetRegistrationDropboxV2;
@@ -191,7 +192,8 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 						}
 
 						// Process the Specimen
-						ISample openBISTube = processSpecimen(s, openBISSpecimen);
+						// (we don't need to get the Tube object back)
+						processTube(s, openBISSpecimen);
 						
 					}
 					
@@ -229,8 +231,8 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 							}
 							
 							// Process the Tube
-							ISample openBISTube = processTube(
-									t, openBISSpecimen);
+							// (we don't need to get the Tube object back)
+							processTube(t, openBISSpecimen);
 
 						}
 
@@ -262,8 +264,6 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		NamedNodeMap attr = e.getAttributes();
 		String name = 
 				attr.getNamedItem("name").getNodeValue();
-		String openBISCode = 
-				attr.getNamedItem("openBISCode").getNodeValue();
 		String openBISIdentifier =
 				attr.getNamedItem("openBISIdentifier").getNodeValue();
 		
@@ -470,6 +470,34 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		
 		// Set the specimen as a container
 		openBISTube.setContainer(specimen);
+		
+		// Get the dataset name and build the dataset code 
+		// (name without extension)
+		String dataFilename = 
+				attr.getNamedItem("dataFilename").getNodeValue();
+		String datasetCode;
+		int indx = dataFilename.lastIndexOf('.');
+		if (indx == -1) {
+			datasetCode = new String(dataFilename);
+		} else {
+			datasetCode = new String(dataFilename.substring(0, indx));
+		}
+		datasetCode = openBISIdentifier + "/" + datasetCode.toUpperCase();
+				
+		// TODO Set the correct dataset type
+		String datasetType = "UNKNOWN";
+		
+		// Create a new dataset
+		IDataSet dataset = transaction.createNewDataSet(
+				datasetType, datasetCode);
+		
+		// Assign the dataset to the sample
+		dataset.setSample(openBISTube);
+		
+		// Assign the file to the dataset
+		transaction.moveFile(dataFilename, dataset);
+		
+		// TODO Assign the file to experiment as well!
 		
 		return openBISTube;
 	}
