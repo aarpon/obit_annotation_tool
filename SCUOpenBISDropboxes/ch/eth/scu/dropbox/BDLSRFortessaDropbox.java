@@ -46,6 +46,9 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		// Get the name of the incoming data set folder
 		File incoming = transaction.getIncoming();
 		
+		// TODO DEBUG INFO TO REMOVE
+		System.out.println("Incoming: " + incoming.getAbsolutePath());
+		
 		// Find the related <incoming>_properties.xml file
 		File properties = buildPropertiesFileName(incoming);
 		if (properties == null) {
@@ -93,6 +96,9 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 			return null;
 		}
 		
+		// TODO DEBUG INFO TO REMOVE
+		System.out.println("Proterties.xml file: " + incomingName + "_properties.xml");
+
 		// Since incoming is a directory, we just append _properties.xml
 		// to the canonical path
 		return new File(incomingName + "_properties.xml");
@@ -493,12 +499,15 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		
 		// Assign the dataset to the sample
 		dataset.setSample(openBISTube);
-		
+
 		// Assign the file to the dataset
-		transaction.moveFile(dataFilename, dataset);
-		
+		transaction.moveFile(
+				transaction.getIncoming().getAbsolutePath() +
+				File.separator + dataFilename, dataset);
+
 		// TODO Assign the file to experiment as well!
 		
 		return openBISTube;
 	}
+
 }
