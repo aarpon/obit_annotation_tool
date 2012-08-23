@@ -53,7 +53,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
-		return "BD BioSciences FACSDiva\u2122 Software";
+		return "BD BioSciences FACSDiva\u2122 Software: experiment" +
+				" export (with XML file)";
 	}
 
 	/**
@@ -90,8 +91,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Return a String representation of the DBDIVAXMLProcessor.
-	 * @return String containing a description of the DBDIVAXMLProcessor. 
+	 * Return a String representation of the BDFACSDIVAXMLProcessor.
+	 * @return String containing a description of the BDFACSDIVAXMLProcessor. 
 	 */
 	public String toString() {
 		return (new File(xmlFilename)).getName();
@@ -107,8 +108,9 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}	
 
 	/**
-	 * Return a textual tree representation of the DBDIVAXMLProcessor 
-	 * @return String containing a tree representation of the DBDIVAXMLProcessor
+	 * Return a textual tree representation of the BDFACSDIVAXMLProcessor 
+	 * @return String containing a tree representation of the 
+	 * BDFACSDIVAXMLProcessor
 	 */	
 	public String treeView() {
 		return xmlFile.treeView();
@@ -395,7 +397,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	
 		/**
 		 * Return a simplified class name to use in XML.
-		 * @return simplidied class name.
+		 * @return simplified class name.
 		 */
 		@Override		
 		public String getType() {
@@ -437,7 +439,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 		/**
 		 * Return a simplified class name to use in XML.
-		 * @return simplidied class name.
+		 * @return simplified class name.
 		 */
 		@Override		
 		public String getType() {
@@ -502,7 +504,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	
 		/**
 		 * Return a simplified class name to use in XML.
-		 * @return simplidied class name.
+		 * @return simplified class name.
 		 */
 		@Override		
 		public String getType() {
