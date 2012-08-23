@@ -122,8 +122,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	public class XMLFileDescriptor extends AbstractDescriptor {
 		
 		public boolean success = false;
-		public ArrayList<ExperimentDescriptor> experiments = 
-				new ArrayList<ExperimentDescriptor>();
+		public Set<ExperimentDescriptor> experiments = 
+				new LinkedHashSet<ExperimentDescriptor>();
 		
 		public XMLFileDescriptor(String name, Document doc) {
 			
@@ -263,14 +263,14 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
 		/**
-		 * ArrayList of Tray's
+		 * Set of Tray's
 		 */
-		public ArrayList<TrayDescriptor> trays = new ArrayList<TrayDescriptor>();
+		public Set<TrayDescriptor> trays = new LinkedHashSet<TrayDescriptor>();
 
 		/**
-		 * ArrayList of Specimen's
+		 * Set of Specimen's
 		 */
-		public ArrayList<SpecimenDescriptor> specimens = new ArrayList<SpecimenDescriptor>();
+		public Set<SpecimenDescriptor> specimens = new LinkedHashSet<SpecimenDescriptor>();
 
 		/**
 		 * Constructor
@@ -464,9 +464,9 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		/* Public instance variables */
 	
 		/**
-		 * ArrayList of Tube's
+		 * Set of Tube's
 		 */			
-		public ArrayList<TubeDescriptor> tubes = new ArrayList<TubeDescriptor>();
+		public Set<TubeDescriptor> tubes = new LinkedHashSet<TubeDescriptor>();
 	
 		/**
 		 * Constructor.
@@ -520,9 +520,10 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		/* Public instance variables */
 	
 		/**
-		 * ArrayList of Specimen's
+		 * Set of Specimen's
 		 */
-		public ArrayList<SpecimenDescriptor> specimens = new ArrayList<SpecimenDescriptor>();
+		public Set<SpecimenDescriptor> specimens = 
+				new LinkedHashSet<SpecimenDescriptor>();
 	
 		/**
 		 * Constructor
