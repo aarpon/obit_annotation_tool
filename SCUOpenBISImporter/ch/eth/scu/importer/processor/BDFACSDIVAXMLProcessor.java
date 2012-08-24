@@ -176,9 +176,11 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 			// Store the version information
 			attributes.put("version", 
-					rootNode.getAttributes().getNamedItem("version").getNodeValue());
+					rootNode.getAttributes().getNamedItem(
+							"version").getNodeValue());
 			attributes.put("releaseVersion",
-					rootNode.getAttributes().getNamedItem("release_version").getNodeValue());
+					rootNode.getAttributes().getNamedItem(
+							"release_version").getNodeValue());
 
 			// Get children
 			NodeList children = rootNode.getChildNodes();
@@ -223,13 +225,13 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 					for (SpecimenDescriptor s : t.specimens) {
 
-						str +=  "|____[ Specimen ], name: " + s.getName() + " (" +
-								s.attributesToString() + ").\n";
+						str +=  "|____[ Specimen ], name: " + s.getName() + 
+								" (" +	s.attributesToString() + ").\n";
 
 						for (TubeDescriptor tb : s.tubes) {
 
-							str +=  "|______[ Tube ], name: " + tb.getName() + " (" +
-									tb.attributesToString() + ").\n";
+							str +=  "|______[ Tube ], name: " + tb.getName() +
+									" (" + tb.attributesToString() + ").\n";
 						}
 					}
 
@@ -272,7 +274,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		/**
 		 * Set of Specimen's
 		 */
-		public Set<SpecimenDescriptor> specimens = new LinkedHashSet<SpecimenDescriptor>();
+		public Set<SpecimenDescriptor> specimens = 
+				new LinkedHashSet<SpecimenDescriptor>();
 
 		/**
 		 * Constructor
@@ -281,7 +284,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		public ExperimentDescriptor(org.w3c.dom.Node expNode) {
 
 			// Get the experiment name
-			this.name = expNode.getAttributes().getNamedItem("name").getNodeValue();
+			this.name = expNode.getAttributes().getNamedItem(
+					"name").getNodeValue();
 
 			// Get children
 			NodeList children = expNode.getChildNodes();

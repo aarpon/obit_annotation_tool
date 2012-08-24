@@ -21,15 +21,16 @@ public class FCSProcessor extends AbstractProcessor {
 	/* Private instance variables */
 	private String filename;
 	private boolean enableDataParsing; 
-	RandomAccessFile in = null;
-	int TEXTbegin = 0;
-	int TEXTend   = 0;
-	int DATAbegin = 0;
-	int DATAend = 0;
-	int ANALYSISbegin = 0;
-	int ANALYSISend = 0;
-	int OTHERbegin = 0;
-	char DELIMITER;
+	private RandomAccessFile in = null;
+	private int TEXTbegin = 0;
+	private int TEXTend   = 0;
+	private int DATAbegin = 0;
+	private int DATAend = 0;
+	private int ANALYSISbegin = 0;
+	private int ANALYSISend = 0;
+	private int OTHERbegin = 0;
+	private char DELIMITER;
+	private boolean isFileParsed = false;
 
 	/* Public instance variables */
 	
@@ -94,6 +95,7 @@ public class FCSProcessor extends AbstractProcessor {
 			processParameters();
 
 			if (enableDataParsing == true ) {
+				
 				// Read the DATA (events)
 				parseData();
 
@@ -103,7 +105,11 @@ public class FCSProcessor extends AbstractProcessor {
 			
 			// Read the OTHER text segment (if present)
 			parseOther();
+		
+		} catch (IOException e) {
 			
+			System.err.println("Could not open file.");
+				
 		} finally {
 
 			// Always close the stream
@@ -117,7 +123,9 @@ public class FCSProcessor extends AbstractProcessor {
 
 		}
 
-		return true;
+		// Store and return state
+		isFileParsed = ( in != null ); 
+		return isFileParsed;
 
 	}
 
@@ -143,6 +151,11 @@ public class FCSProcessor extends AbstractProcessor {
 	 * @return String containing the metadata of the FCSProcessor. 
 	 */
 	public String metadataDump() {
+		
+		if (isFileParsed == false) {
+			return "File could not be parsed.";
+		}
+		
 		String str = 
 				"Valid FCS3.0 file with TEXT: "     + 
 						TEXTbegin     + " - " + TEXTend     + ", DATA: " +
@@ -183,6 +196,35 @@ public class FCSProcessor extends AbstractProcessor {
 
 		return str;
 
+	}
+	
+	/**
+	 * Return the value associated to a standard FCS 3.0 keyword or empty
+	 * @param key One of the standard keywords (staring with "$")
+	 * @return The value associated with the passed keyword or empty String
+	 * if not found
+	 */
+	public String getStandardKeyword(String key) {
+		if (TEXTMapStandard.containsKey(key)) {
+			return TEXTMapStandard.get(key);
+		} else {
+			return "";
+		}
+	}
+
+	/**
+	 * Return the value associated with a custom, non FCS 3.0-compliant keyword
+	 * or empty
+	 * @param key A custom keywords (without $ at the beginning)
+	 * @return The value associated with the passed keyword or empty String
+	 * if not found
+	 */
+	public String getCustomKeyword(String key) {
+		if (TEXTMapCustom.containsKey(key)) {
+			return TEXTMapCustom.get(key);
+		} else {
+			return "";
+		}
 	}
 	
 	/**
