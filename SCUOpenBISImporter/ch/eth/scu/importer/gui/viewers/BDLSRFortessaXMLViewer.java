@@ -32,7 +32,7 @@ import java.io.FileFilter;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDLSRFortessaViewer extends AbstractViewer
+public class BDLSRFortessaXMLViewer extends AbstractViewer
 	implements ActionListener, TreeSelectionListener {
 
 	// The valueChanged() method is fired twice when selection is changed in 
@@ -43,7 +43,7 @@ public class BDLSRFortessaViewer extends AbstractViewer
 	/**
 	 * Constructor
 	 */
-	public BDLSRFortessaViewer() {
+	public BDLSRFortessaXMLViewer() {
 		
 		// Call the AbstractViewer's constructor (to create the panel)
 		super();

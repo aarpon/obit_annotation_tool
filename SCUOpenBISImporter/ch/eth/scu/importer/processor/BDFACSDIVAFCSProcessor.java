@@ -1,6 +1,5 @@
 package ch.eth.scu.importer.processor;
 
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.SpecimenDescriptor;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import ch.eth.scu.importer.processor.model.RootDescriptor;
 
@@ -99,6 +98,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				recursiveDir(file);
 				
 				// Move on to the next file
+				continue;
+			}
+			
+			// We ignore any file that is not an fcs file
+			String fileName = file.getName();
+			String ext = fileName.substring(fileName.lastIndexOf("."));
+			if (! ext.equalsIgnoreCase(".fcs")) {
 				continue;
 			}
 			
