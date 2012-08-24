@@ -119,6 +119,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			} else {
 				expDesc = 
 						new ExperimentDescriptor(getExperimentName(processor));
+				// Store attributes
+				expDesc.setAttributes(getExperimentAttributes(processor));
 				rootDescriptor.experiments.put(experimentName, expDesc);
 			}
 			
@@ -133,7 +135,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					trayDesc = expDesc.trays.get(trayKey);
 				} else {
 					trayDesc = 
-							new TrayDescriptor(trayName);	
+							new TrayDescriptor(trayName);
+					// Store attributes
+					trayDesc.setAttributes(getTrayAttributes(processor));
 					// Store it in the experiment descriptor
 					expDesc.trays.put(trayKey, trayDesc);
 				}
@@ -146,7 +150,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					specDesc = trayDesc.specimens.get(specKey);
 				} else {
 					specDesc = 
-							new SpecimenDescriptor(specName);	
+							new SpecimenDescriptor(specName);
+					// Store attributes
+					specDesc.setAttributes(getSpecimenAttributes(processor));					
 					// Store it in the tray descriptor
 					trayDesc.specimens.put(specKey, specDesc);
 				}
@@ -159,7 +165,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					tubeDesc = specDesc.tubes.get(tubeKey);
 				} else {
 					tubeDesc = new TubeDescriptor(tubeName,
-							file.getCanonicalPath());	
+							file.getCanonicalPath());
+					// Store attributes
+					specDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
@@ -175,6 +183,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				} else {
 					specDesc = 
 							new SpecimenDescriptor(specName);	
+					// Store attributes
+					specDesc.setAttributes(getSpecimenAttributes(processor));
 					// Store it in the experiment descriptor
 					expDesc.specimens.put(specKey, specDesc);
 				}
@@ -188,6 +198,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				} else {
 					tubeDesc = new TubeDescriptor(tubeName,
 							file.getCanonicalPath());	
+					// Store attributes
+					specDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
@@ -348,49 +360,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 	}
 
-	/**
-	 * Class that represents a tube obtained from the FCS file.
-	 * A Tube is always a child of a Specimen.
-     *
-	 * TODO Add the attributes!
-	 * @author Aaron Ponti
-	 */
-	public class TubeDescriptor extends AbstractDescriptor {
-		
-		public FCSFileDescriptor fcsFile;
-		
-		/**
-		 * Constructor.
-		 * @param tubeNode DOM node that refers to a Tube.
-		 */
-		public TubeDescriptor(String name, String fcsFullFileName) {
-	
-			this.name = name;
-
-			// Associate the FCS file to the Tube
-			fcsFile = new FCSFileDescriptor(fcsFullFileName);
-	
-		}
-	
-		/**
-		 * Return a String representation of the extracted Tube node.
-		 * @return String representation of the Tube node.
-		 */
-		@Override
-		public String toString() {
-			return this.name;
-		}
-	
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override		
-		public String getType() {
-			return "Tube";
-		}
-		
-	}
 
 	/**
 	 * Class that represents an FCS file associated to a Tube.
@@ -514,6 +483,50 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 
 	}
+
+	/**
+	 * Class that represents a tube obtained from the FCS file.
+	 * A Tube is always a child of a Specimen.
+     *
+	 * TODO Add the attributes!
+	 * @author Aaron Ponti
+	 */
+	public class TubeDescriptor extends AbstractDescriptor {
+		
+		public FCSFileDescriptor fcsFile;
+		
+		/**
+		 * Constructor.
+		 * @param tubeNode DOM node that refers to a Tube.
+		 */
+		public TubeDescriptor(String name, String fcsFullFileName) {
+	
+			this.name = name;
+
+			// Associate the FCS file to the Tube
+			fcsFile = new FCSFileDescriptor(fcsFullFileName);
+	
+		}
+	
+		/**
+		 * Return a String representation of the extracted Tube node.
+		 * @return String representation of the Tube node.
+		 */
+		@Override
+		public String toString() {
+			return this.name;
+		}
+	
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplified class name.
+		 */
+		@Override		
+		public String getType() {
+			return "Tube";
+		}
+		
+	}
 	
 	/**
 	 * Return the tube name stored in the FCS file
@@ -595,5 +608,50 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		} else {
 			return "TRAY";
 		}
+	}
+
+	/**
+	 * Extract and store the Experiment attributes
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
+	 */
+	private Map<String, String> getExperimentAttributes(FCSProcessor processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
+		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
+		// Nothing
+		return attributes;
+	}
+		
+	/**
+	 * Extract and store the Tray attributes
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
+	 */
+	private Map<String, String> getTrayAttributes(FCSProcessor processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
+		// Nothing
+		return attributes;
+	}
+	
+	/**
+	 * Extract and store the Specimen attributes
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
+	 */
+	private Map<String, String> getSpecimenAttributes(FCSProcessor processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
+		// Nothing
+		return attributes;
+	}
+	
+	/**
+	 * Extract and store the Tube attributes
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
+	 */
+	private Map<String, String> getTubeAttributes(FCSProcessor processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
+		attributes.put("dataFilename", processor.getStandardKeyword("$FIL"));
+		return attributes;
 	}
 }
