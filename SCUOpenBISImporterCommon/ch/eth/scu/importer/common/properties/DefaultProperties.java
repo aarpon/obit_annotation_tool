@@ -40,8 +40,8 @@ public class DefaultProperties {
 			options.add("https://sprint-openbis.ethz.ch:8446/openbis/");
 			options.add("https://openbis-csb.ethz.ch/openbis");		
 		} else if (property.equals("AcquisitionStation")) {
-			options.add("LSRFortessaXML");
 			options.add("LSRFortessaFCS");
+			options.add("LSRFortessaXML");
 			options.add("LeicaSP5");
 		} else if (property.equals("DatamoverIncomingDir")) {
 			options.add("");

@@ -6,6 +6,8 @@ import ch.eth.scu.importer.processor.model.RootDescriptor;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 /**
  * BDFACSDIVAXMLProcessor parses folder structures created by the 
  * "BD BioSciences FACSDiva" software when "exporting as FCS".
@@ -18,30 +20,31 @@ import java.util.*;
 public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
-	private File rootFolder;
+	protected DefaultMutableTreeNode rootNode;
+	private File topFolder;
 	private boolean isValid = false;
 	
 	/* Public instance variables */
-	public RootFolderDescriptor rootDescriptor = null;
+	public FolderDescriptor folderDescriptor = null;
 	
 	/**
 	 * Constructor
-	 * @param rootFolderName Full path of the folder containing the exported experiment.
+	 * @param folderName Full path of the folder containing the exported experiment.
 	 */
-	public BDFACSDIVAFCSProcessor(String rootFolderName) {
+	public BDFACSDIVAFCSProcessor(String folderName) {
 
 		// Make sure rootFolderName is a valid directory
-		File rootFolder = new File(rootFolderName);
-		if (!rootFolder.isDirectory()) {
+		File folder = new File(folderName);
+		if (!folder.isDirectory()) {
 			System.err.println("Expected directory name.");
 			return;
 		}
 		
 		// Set the root folder
-		this.rootFolder = rootFolder;
+		this.topFolder = folder;
 		
 		// Create a RootDescriptor
-		rootDescriptor = new RootFolderDescriptor(rootFolder); 
+		folderDescriptor = new FolderDescriptor(folder); 
 		
 	}
 
@@ -63,7 +66,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Scan the root folder recursively to reconstruct the experiment
 		// structure.
 		try {
-			recursiveDir(this.rootFolder);
+			recursiveDir(this.topFolder);
 		} catch (IOException e) {
 			System.err.println("Could not parse the folder.");
 			this.isValid = false;
@@ -103,7 +106,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			
 			// We ignore any file that is not an fcs file
 			String fileName = file.getName();
-			String ext = fileName.substring(fileName.lastIndexOf("."));
+			int indx = fileName.lastIndexOf(".");
+			if (indx == -1) {
+				continue;
+			}
+			String ext = fileName.substring(indx);
 			if (! ext.equalsIgnoreCase(".fcs")) {
 				continue;
 			}
@@ -120,14 +127,14 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// Create a new ExperimentDescriptor or reuse an existing one
 			ExperimentDescriptor expDesc;
 			String experimentName = getExperimentName(processor);
-			if (rootDescriptor.experiments.containsKey(experimentName) ) {
-				expDesc = rootDescriptor.experiments.get(experimentName);
+			if (folderDescriptor.experiments.containsKey(experimentName) ) {
+				expDesc = folderDescriptor.experiments.get(experimentName);
 			} else {
 				expDesc = 
 						new ExperimentDescriptor(getExperimentName(processor));
 				// Store attributes
 				expDesc.setAttributes(getExperimentAttributes(processor));
-				rootDescriptor.experiments.put(experimentName, expDesc);
+				folderDescriptor.experiments.put(experimentName, expDesc);
 			}
 			
 			// Is the container a Tray or Specimen?
@@ -221,7 +228,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @return String containing a description of the BDFACSDIVAFCSProcessor. 
 	 */
 	public String toString() {
-		return rootFolder.getName();
+		return topFolder.getName();
 	}
 
 	/**
@@ -241,9 +248,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	public String treeView() {
 		String str = "[Folder] " + toString()+ ".\n|\n";        
 
-		for (String expKey : rootDescriptor.experiments.keySet()) {
+		for (String expKey : folderDescriptor.experiments.keySet()) {
 
-			ExperimentDescriptor e = rootDescriptor.experiments.get(expKey);
+			ExperimentDescriptor e = folderDescriptor.experiments.get(expKey);
 			
 			str +=  "[ Experiment ], name: " + e.getName() + " (" +
 					e.attributesToString() + ").\n";
@@ -305,21 +312,30 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Class that specialized the RootDescriptor and represented the root folder. 
 	 * @author Aaron Ponti
 	 */
-	public class RootFolderDescriptor extends RootDescriptor {
+	public class FolderDescriptor extends AbstractDescriptor {
 		
 		public Map<String, ExperimentDescriptor> experiments = 
 				new LinkedHashMap<String, ExperimentDescriptor>();
 		
-		public RootFolderDescriptor(File name) {
+		public FolderDescriptor(File name) {
 			
-			// Call the base constructor
-			super(name.getName());
-
+			// Set the descriptor name
+			this.name = name.getName();
+		
 		}
 		
 		@Override
 		public String getType() {
-			return "Root";
+			return "Folder";
+		}
+
+		/**
+		 * Return output file name to be used to save the data model to XML
+		 * @return output file name to save the data model to XML.
+		 */
+		@Override
+		public String getOutputName() {
+			return name + "_properties.xml";
 		}
 
 	}
@@ -353,6 +369,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public ExperimentDescriptor(String name) {
 			
 			this.name = name;
+
 		}
 
 		/**
@@ -363,7 +380,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Experiment";
 		}
-		
+
 	}
 
 

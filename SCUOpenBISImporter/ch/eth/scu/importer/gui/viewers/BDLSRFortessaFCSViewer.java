@@ -4,6 +4,7 @@ import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
 import ch.eth.scu.importer.gui.viewers.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.model.FCSFileNode;
+import ch.eth.scu.importer.gui.viewers.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.model.SpecimenNode;
 import ch.eth.scu.importer.gui.viewers.model.TrayNode;
@@ -64,7 +65,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer
 		// Process the file
 		BDFACSDIVAFCSProcessor divafcsprocessor;
 		try {
-			divafcsprocessor = new BDFACSDIVAFCSProcessor(folder.getCanonicalPath());
+			divafcsprocessor = new BDFACSDIVAFCSProcessor(
+					folder.getCanonicalPath());
 		} catch (IOException e) {
 			return false;
 		}
@@ -75,12 +77,13 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer
 			return false;
 		}
 
-		// Use the BDFACSDIVAFCSProcessor RootNodeDescriptor as the 
-		// RootNode for display
-		RootNode rootNode = new RootNode(divafcsprocessor.rootDescriptor);
+		// Create a folder note as a child of the root node
+		FolderNode folderNode = 
+				new FolderNode(divafcsprocessor.folderDescriptor);
+		rootNode.add(folderNode);
 		
-		// Add all the children
-		createNodes(rootNode, divafcsprocessor.rootDescriptor);
+		// We will append the experiment nodes directly to the root node
+		createNodes(folderNode, divafcsprocessor.folderDescriptor);
 		
 		return true;
 	}
@@ -151,21 +154,22 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer
 
 	/**
 	 * Create the nodes for the tree
-	 * @param top Root node
+	 * @param rootNode Root node
 	 */
 	protected void createNodes(CustomTreeNode top,
-			BDFACSDIVAFCSProcessor.RootFolderDescriptor rootFolderDescriptor) {
+			BDFACSDIVAFCSProcessor.FolderDescriptor folderDescriptor) {
+		
 		ExperimentNode experiment = null;
 		TrayNode tray = null;
 		SpecimenNode specimen = null;
 		TubeNode tube = null;
 		FCSFileNode fcs = null;
 
-		for (String expKey : rootFolderDescriptor.experiments.keySet()) {
+		for (String expKey : folderDescriptor.experiments.keySet()) {
 
 			// Get the ExperimentDescriptor
 			ExperimentDescriptor e = 
-					rootFolderDescriptor.experiments.get(expKey);
+					folderDescriptor.experiments.get(expKey);
 
 			// Add the experiments
 			experiment = new ExperimentNode(e);
@@ -253,17 +257,26 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer
 		File dropboxIncomingFolder = new File(
 				appProperties.getProperty("DatamoverIncomingDir"));
 		
-		// Parse the full dropboxIncomingFolder
-		if (parse(dropboxIncomingFolder) == false) {
-			rootNode = new RootNode(
-					new RootDescriptor("Error parsing folder."));
+		// Get a list of all subfolders
+		File[] rootSubFolders = dropboxIncomingFolder.listFiles(
+				new FileFilter() {
+					public boolean accept(File file) {
+						return file.isDirectory();
+					}
+				});
+
+		// Prepare a new root node for the Tree
+		rootNode = new RootNode(new RootDescriptor("/"));
+
+		// Parse all subfolders
+		for (File subfolder : rootSubFolders) {
+			parse(subfolder);
 		}
 		
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
-
 		tree.getSelectionModel().setSelectionMode(
-		TreeSelectionModel.SINGLE_TREE_SELECTION);
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);

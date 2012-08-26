@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.viewers.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.BDLSRFortessaFCSViewer;
 
 public class EditorContainer extends JPanel implements ActionListener {
 
@@ -58,9 +59,10 @@ public class EditorContainer extends JPanel implements ActionListener {
 
 		// Add the actual editor
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaXML") ||
-				acqStation.equals("LSRFortessaFCS")) {
-			metadataEditor = new BDLSRFortessaEditor(dataViewer, openBISViewer);
+		if (acqStation.equals("LSRFortessaXML")) {
+			metadataEditor = new BDLSRFortessaXMLEditor(dataViewer, openBISViewer);
+		} else if (acqStation.equals("LSRFortessaFCS")) {
+			metadataEditor = new BDLSRFortessaFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("LeicaSP5")) {
 			metadataEditor = new LeicaSP5Editor(dataViewer, openBISViewer);
 		} else {
@@ -94,7 +96,8 @@ public class EditorContainer extends JPanel implements ActionListener {
 			
 			// Make sure all models are ready
 			if (!dataViewer.isReady() || !openBISViewer.isReady()) {
-				System.out.println("Data models not ready (TODO: Use the output pane).");
+				System.out.println(
+						"Data models not ready (TODO: Use the output pane).");
 				return;
 			}
 

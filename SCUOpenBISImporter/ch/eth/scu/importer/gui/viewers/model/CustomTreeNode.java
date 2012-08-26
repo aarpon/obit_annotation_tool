@@ -9,7 +9,7 @@ import ch.eth.scu.importer.processor.model.AbstractDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public abstract class CustomTreeNode extends DefaultMutableTreeNode{ 
+public abstract class CustomTreeNode extends DefaultMutableTreeNode { 
 
 	private static final long serialVersionUID = 1L;
 

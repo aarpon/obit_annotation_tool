@@ -25,14 +25,14 @@ import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.ExperimentDescriptor
  * Metadata editor panel.
  * @author Aaron Ponti
  */
-public class BDLSRFortessaEditor extends AbstractEditor {
+public class BDLSRFortessaXMLEditor extends AbstractEditor {
 
 	protected List<ExperimentNode> experiments = new ArrayList<ExperimentNode>();
 	
 	/**
 	 * Constructor
 	 */
-	public BDLSRFortessaEditor(AbstractViewer dataViewer, 
+	public BDLSRFortessaXMLEditor(AbstractViewer dataViewer, 
 			OpenBISSpaceViewer openBISViewer) {
 
 		// Store the reference to the data and openBIS viewers
