@@ -77,6 +77,13 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer
 			return false;
 		}
 
+		// Make sure we have a clean FCS export
+		if (divafcsprocessor.isCleanFCSExport() == false) {
+			System.err.println("The dataset \"" + divafcsprocessor.toString() +
+					"\" is not a clean FCS export and will be skipped.");
+			return false;
+		}
+		
 		// Create a folder note as a child of the root node
 		FolderNode folderNode = 
 				new FolderNode(divafcsprocessor.folderDescriptor);

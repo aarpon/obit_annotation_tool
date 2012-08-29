@@ -49,7 +49,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		// TODO DEBUG INFO TO REMOVE
 		System.out.println("Incoming: " + incoming.getAbsolutePath());
 		
-		// Find the related <incoming>_properties.xml file
+		// Find the related <incoming>_properties.six file
 		File properties = buildPropertiesFileName(incoming);
 		if (properties == null) {
 			// TODO Handle the case the properties file could not be generated!
@@ -78,7 +78,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	
 	/**
 	 * Build properties file name from the name of the incoming directory
-	 * @return <incoming>_properties.xml file
+	 * @return <incoming>_properties.six file
 	 */
 	private File buildPropertiesFileName(File incoming) {
 		
@@ -97,16 +97,16 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		}
 		
 		// TODO DEBUG INFO TO REMOVE
-		System.out.println("Proterties.xml file: " + incomingName + "_properties.xml");
+		System.out.println("Properties.six file: " + incomingName + "_properties.six");
 
-		// Since incoming is a directory, we just append _properties.xml
+		// Since incoming is a directory, we just append _properties.six
 		// to the canonical path
-		return new File(incomingName + "_properties.xml");
+		return new File(incomingName + "_properties.six");
 	}
 	
 	/**
 	 * Read the properties XML file and returns a Document
-	 * @param properties <incoming>_properties.xml file 
+	 * @param properties <incoming>_properties.six file 
 	 * @return parsed XML Document or null if parsing failed
 	 */
 	private void readPropertiesFile(File properties) {
@@ -273,7 +273,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String openBISIdentifier =
 				attr.getNamedItem("openBISIdentifier").getNodeValue();
 		
-		// TODO Store the Experiment type in the _properties.xml file
+		// TODO Store the Experiment type in the _properties.six file
 		String expType = "UNKNOWN";
 	
 		// Get the Experiment
@@ -366,7 +366,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String openBISIdentifier =
 				exp.getExperimentIdentifier() + "/" + openBISCode;
 
-		// TODO This should be stored in the _properties.xml file
+		// TODO This should be stored in the _properties.six file
 		String openBISSpecimenType = "UNKNOWN";
 		
 		// The sample should NOT exist!
@@ -410,7 +410,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String openBISIdentifier =
 				tray.getSampleIdentifier() + "/" + openBISCode;
 
-		// TODO This should be stored in the _properties.xml file
+		// TODO This should be stored in the _properties.six file
 		String openBISSpecimenType = "UNKNOWN";
 		
 		// The sample should NOT exist!
@@ -459,7 +459,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String openBISIdentifier =
 				specimen.getSampleIdentifier() + "/" + openBISCode;
 
-		// TODO This should be stored in the _properties.xml file
+		// TODO This should be stored in the _properties.six file
 		String openBISTubeType = "UNKNOWN";
 
 		// The sample should NOT exist!

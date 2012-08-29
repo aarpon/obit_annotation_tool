@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.processor;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
-import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 import java.io.*;
 import java.util.*;
@@ -15,7 +15,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * Please notice that DIVA FCS files generated in this mode are different
  * from files accompanying the XML file generated when exporting as an 
  * experiment.
-  * @author Aaron Ponti
+ * @author Aaron Ponti
  */
 public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
@@ -23,10 +23,14 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	protected DefaultMutableTreeNode rootNode;
 	private File topFolder;
 	private boolean isValid = false;
-	
+	private boolean cleanFCSExport = true;
+
+	/* Protected instance variables */
+	protected File incomingDir;
+
 	/* Public instance variables */
 	public FolderDescriptor folderDescriptor = null;
-	
+
 	/**
 	 * Constructor
 	 * @param folderName Full path of the folder containing the exported experiment.
@@ -40,12 +44,33 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			return;
 		}
 		
+		// Store the incoming dir (to build relative paths)
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		this.incomingDir = new File( 
+				appProperties.getProperty("DatamoverIncomingDir") );
+
 		// Set the root folder
 		this.topFolder = folder;
-		
+
 		// Create a RootDescriptor
 		folderDescriptor = new FolderDescriptor(folder); 
-		
+
+	}
+
+	/**
+	 * Returns true if the dataset is from an "FCS export", false if it is an
+	 * "Experiment export".
+	 * 
+	 * The DIVA software can export FCS files in two modes: FCS export creates
+	 * valid FCS 3.0-compliant files. Experiment export creates files that 
+	 * cannot be used in subsequent analysis in third-party software like 
+	 * FlowJo. In case of Experiment exports, an XML file is saved along with
+	 * the series of FCS files. We use the presence of the XML file to 
+	 * discriminate between the two export modes.
+	 * @return true for an FCS export, false for and Experiment export
+	 */
+	public boolean isCleanFCSExport() {
+		return cleanFCSExport;
 	}
 
 	/**
@@ -104,13 +129,19 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				continue;
 			}
 			
-			// We ignore any file that is not an fcs file
+			// We ignore any file that is not an fcs file - but we pay 
+			// attention to the existance of XML files that indicate an
+			// Experiment export!
 			String fileName = file.getName();
 			int indx = fileName.lastIndexOf(".");
 			if (indx == -1) {
 				continue;
 			}
 			String ext = fileName.substring(indx);
+			if (ext.equalsIgnoreCase(".xml")) {
+				cleanFCSExport = false;
+				continue;
+			}
 			if (! ext.equalsIgnoreCase(".fcs")) {
 				continue;
 			}
@@ -174,13 +205,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				TubeDescriptor tubeDesc;
 				String tubeName = getTubeName(processor);
 				String tubeKey = specKey + "_" + tubeName;
-				if (specDesc.tubes.containsKey(tubeKey) ) {
-					tubeDesc = specDesc.tubes.get(tubeKey);
-				} else {
+				if (! specDesc.tubes.containsKey(tubeKey) ) {
 					tubeDesc = new TubeDescriptor(tubeName,
 							file.getCanonicalPath());
 					// Store attributes
-					specDesc.setAttributes(getTubeAttributes(processor));
+					tubeDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
@@ -206,13 +235,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				TubeDescriptor tubeDesc;
 				String tubeName = getTubeName(processor);
 				String tubeKey = specKey + "_" + tubeName;
-				if (specDesc.tubes.containsKey(tubeKey) ) {
-					tubeDesc = specDesc.tubes.get(tubeKey);
-				} else {
+				if (! specDesc.tubes.containsKey(tubeKey) ) {
 					tubeDesc = new TubeDescriptor(tubeName,
 							file.getCanonicalPath());	
 					// Store attributes
-					specDesc.setAttributes(getTubeAttributes(processor));
+					tubeDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
@@ -309,7 +336,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that specialized the RootDescriptor and represented the root folder. 
+	 * Descriptor that represents a folder containing a dataset. 
 	 * @author Aaron Ponti
 	 */
 	public class FolderDescriptor extends AbstractDescriptor {
@@ -321,7 +348,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			
 			// Set the descriptor name
 			this.name = name.getName();
-		
+
+			// Set the output name
+			this.outputName = this.name + File.separator + 
+					this.name +  "_properties.six";
+
 		}
 		
 		@Override
@@ -335,13 +366,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public String getOutputName() {
-			return name + "_properties.xml";
+			return outputName;
 		}
 
 	}
 	
 	/**
-	 * Class that represents an experiment obtained from the FCS file.
+	 * Descriptor representing an experiment obtained from the FCS file.
      * TODO Add the attributes!
 	 * @author Aaron Ponti
 	 */
@@ -385,24 +416,30 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 
 	/**
-	 * Class that represents an FCS file associated to a Tube.
+	 * Descriptor representing an FCS file associated to a Tube.
 	 * An FCS File is always a child of a Tube.
 	 * @author Aaron Ponti
 	 */
 	public class FCSFileDescriptor extends AbstractDescriptor {
 
 		private String fullFileName = "";
-		
+		private String relativeFileName = "";
+
 		/**
 		 * Constructor.
 		 * @param fcsFileName FCS file name with full path
 		 */
-		public FCSFileDescriptor(String fcsFileName) {
+		public FCSFileDescriptor(String fcsFileName) throws IOException {
 
 			// Store the file name
 			this.fullFileName = fcsFileName; 
 			this.name = (new File( fcsFileName )).getName();
 
+			// Store the relative file name (to the incoming dir)
+			storeRelativePath();
+			
+			// Set the attribute relative file name
+			attributes.put("relativeFileName", this.relativeFileName);
 		}
 
 		/**
@@ -411,8 +448,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public String toString() {
-			String str = this.name;
-			return str;
+			return this.name;
 		}
 
 		/**
@@ -431,11 +467,36 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getFileName() {
 			return this.fullFileName;
 		}
+
 		
+		/**
+		 * Return the file name with path relative to the global incoming dir
+		 * @return relative file name
+		 */
+		public String getRelativePathName() {
+			return this.relativeFileName;
+		}
+		
+		private void storeRelativePath() {
+			String incoming = "";
+			try {
+				incoming = incomingDir.getCanonicalPath();
+			} catch (IOException e) {
+				System.err.println("Error with incoming folder path " +
+						"("+ incomingDir + ")");
+			}
+			
+			// Return the FCS path relative to the incoming dir
+			this.relativeFileName = 
+					this.fullFileName.substring(incoming.length());
+			if (this.relativeFileName.startsWith(File.separator)) {
+				this.relativeFileName = this.relativeFileName.substring(1);
+			}
+		}
 	}
 	
 	/**
-	 * Class that represents a specimen obtained from the FCS file.
+	 * Descriptor representing a specimen obtained from the FCS file.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
 
 	 * TODO Add the attributes!	
@@ -473,7 +534,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that represents a tray obtained from the FCS file.
+	 * Descriptor representing a tray obtained from the FCS file.
 	 * @author Aaron Ponti
 	 */
 	public class TrayDescriptor extends AbstractDescriptor {
@@ -508,7 +569,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that represents a tube obtained from the FCS file.
+	 * Descriptor representing a tube obtained from the FCS file.
 	 * A Tube is always a child of a Specimen.
      *
 	 * TODO Add the attributes!
@@ -521,14 +582,16 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		/**
 		 * Constructor.
 		 * @param tubeNode DOM node that refers to a Tube.
+		 * @throws IOException 
 		 */
-		public TubeDescriptor(String name, String fcsFullFileName) {
+		public TubeDescriptor(String name, String fcsFullFileName) 
+				throws IOException {
 	
 			this.name = name;
 
 			// Associate the FCS file to the Tube
 			fcsFile = new FCSFileDescriptor(fcsFullFileName);
-	
+
 		}
 	
 		/**
@@ -544,7 +607,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
 		 */
-		@Override		
+		@Override
 		public String getType() {
 			return "Tube";
 		}

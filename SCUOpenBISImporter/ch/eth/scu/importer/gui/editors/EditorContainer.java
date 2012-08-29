@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.viewers.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.BDLSRFortessaFCSViewer;
 
 public class EditorContainer extends JPanel implements ActionListener {
 

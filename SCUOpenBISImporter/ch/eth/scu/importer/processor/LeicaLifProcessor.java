@@ -135,7 +135,7 @@ public class LeicaLifProcessor extends AbstractProcessor {
 			if (indx != -1) {
 				outputNameFile = outputNameFile.substring(0, indx);
 			}
-			this.outputName = outputNameFile + "_properties.xml";
+			this.outputName = outputNameFile + "_properties.six";
 		}
 		
 		/**

@@ -48,7 +48,8 @@ public class CustomTreeToXML {
 				(CustomTreeNode) tree.getModel().getRoot();
 		
 		// We create and save an XML file for each top-level children in the
-		// data model. The name of the XML file is obtained from the top node.
+		// data model. The name and path of the XML file is obtained from the 
+		// top node.
 		
 		// Get all children of the rootNode
 		int nTopLevelChildren = rootNode.getChildCount();
@@ -59,9 +60,10 @@ public class CustomTreeToXML {
 			CustomTreeNode topNode = (CustomTreeNode) rootNode.getChildAt(i);
 			
 			// Construct the file name (the key for the map)
-			String key = 
-					((AbstractDescriptor) topNode.getUserObject()).getOutputName();
- 
+			AbstractDescriptor topDescr = 
+					(AbstractDescriptor) topNode.getUserObject();
+			String key = topDescr.getOutputName();
+			
 			// Now build the XML document
 			try {
 				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -93,7 +95,7 @@ public class CustomTreeToXML {
 
 		for (String key: documents.keySet()) {
 			
-			// Build the filename
+			// Build the filename (with full path)
 			String filename = outputDirectory + File.separator + key;
 		
 			try {
@@ -171,6 +173,5 @@ public class CustomTreeToXML {
         }
         return element;
     }    
-
 }
 

@@ -1,5 +1,6 @@
 package ch.eth.scu.importer.processor;
 
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 
 import java.io.*;
@@ -20,6 +21,9 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	private DocumentBuilder parser = null;
 	private Document doc = null;
 
+	/* Protected instance variables */
+	protected File incomingDir;
+
 	/* Public instance variables */
 	public XMLFileDescriptor xmlFile;
 
@@ -31,6 +35,11 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 		// Set the filename
 		this.xmlFilename = filename;
+
+		// Store the incoming dir (to build relative paths)
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		this.incomingDir = new File(
+				appProperties.getProperty("DatamoverIncomingDir") );
 
 		// Instantiate the factory
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -117,7 +126,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that represents the full XML file.
+	 * Descriptor representing represents the full XML file.
 	 * @author Aaron Ponti
 	 *
 	 */
@@ -138,7 +147,16 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			if (indx != -1) {
 				outputNameFile = outputNameFile.substring(indx + 1);
 			}
-			this.outputName = outputNameFile + "_properties.xml";
+			
+			// Remove the extension
+			String namebody;
+			if (this.name.toLowerCase().endsWith(".xml")) {
+				namebody = this.name.substring(0, this.name.length() - 4);
+			} else {
+				namebody = this.name;
+			}
+			this.outputName = outputNameFile + File.separator + 
+					namebody +  "_properties.six";
 
 			// Process the document
 			success = processDoc(doc);
@@ -257,7 +275,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}
 	
 	/**
-	 * Class that represents an experiment parsed from the XML.
+	 * Descriptor representing an experiment parsed from the XML.
 	 * @author Aaron Ponti
 	 *
 	 */
@@ -334,7 +352,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that represents a tube parsed from the XML.
+	 * Descriptor representing a tube parsed from the XML.
 	 * A Tube is always a child of a Specimen.
 	 * @author Aaron Ponti
 	 */
@@ -411,13 +429,14 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that represents an FCS file associated to a Tube.
+	 * Descriptor representing an FCS file associated to a Tube.
 	 * An FCS File is always a child of a Tube.
 	 * @author Aaron Ponti
 	 */
 	public class FCSFileDescriptor extends AbstractDescriptor {
 
 		private String fullFileName = "";
+		private String relativeFileName = "";
 		
 		/**
 		 * Constructor.
@@ -428,7 +447,12 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			// Store the file name
 			this.fullFileName = fcsFileName; 
 			this.name = (new File( fcsFileName )).getName();
-
+			
+			// Store the relative file name (to the incoming dir)
+			storeRelativePath();
+			
+			// Set the attribute relative file name
+			attributes.put("relativeFileName", this.relativeFileName);			
 		}
 
 		/**
@@ -457,11 +481,36 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		public String getFileName() {
 			return this.fullFileName;
 		}
+
+		/**
+		 * Return the file name with path relative to the global incoming dir
+		 * @return relative file name
+		 */
+		public String getRelativePathName() {
+			return this.relativeFileName;
+		}
 		
+		private void storeRelativePath() {
+			String incoming = "";
+			try {
+				incoming = incomingDir.getCanonicalPath();
+			} catch (IOException e) {
+				System.err.println("Error with incoming folder path " +
+						"("+ incomingDir + ")");
+			}
+			
+			// Return the FCS path relative to the incoming dir
+			this.relativeFileName = 
+					this.fullFileName.substring(incoming.length());
+			if (this.relativeFileName.startsWith(File.separator)) {
+				this.relativeFileName = this.relativeFileName.substring(1);
+			}
+		}
+	
 	}
 	
 	/**
-	 * Class that represents a specimen parsed from the XML.
+	 * Descriptor representing a specimen parsed from the XML.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
 	 * @author Aaron Ponti
 	 */
@@ -518,7 +567,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Class that represents a tray parsed from the XML.
+	 * Descriptor representing a tray parsed from the XML.
 	 * @author Aaron Ponti
 	 */
 	public class TrayDescriptor extends AbstractDescriptor {

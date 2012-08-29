@@ -65,7 +65,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Add the viewer
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaLSM")) {
+		if (acqStation.equals("LSRFortessaXML")) {
 			metadataViewer = new BDLSRFortessaXMLViewer();
 		} else if (acqStation.equals("LSRFortessaFCS")) {
 			metadataViewer = new BDLSRFortessaFCSViewer();

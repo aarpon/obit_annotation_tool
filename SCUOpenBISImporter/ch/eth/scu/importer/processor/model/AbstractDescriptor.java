@@ -56,7 +56,7 @@ abstract public class AbstractDescriptor {
 	protected boolean mustBeProvided = false;
 
 	/**
-	 * Return a simplified class name to be used by the tree viewers.
+	 * Return a simplified class name to be used in the tree viewers (and XML).
 	 * @return simplified class name.
 	 */
 	abstract public String getType();

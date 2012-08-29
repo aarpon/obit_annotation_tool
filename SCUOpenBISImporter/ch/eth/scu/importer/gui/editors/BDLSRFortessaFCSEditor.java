@@ -19,7 +19,6 @@ import ch.eth.scu.importer.gui.viewers.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.model.RootNode;
-import ch.eth.scu.importer.gui.viewers.model.XMLFileNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.ExperimentDescriptor;
 
 /**
