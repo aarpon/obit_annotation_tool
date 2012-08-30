@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.editors;
+package ch.eth.scu.importer.gui.editors.data;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,8 +11,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.viewers.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
 
 public class EditorContainer extends JPanel implements ActionListener {
 

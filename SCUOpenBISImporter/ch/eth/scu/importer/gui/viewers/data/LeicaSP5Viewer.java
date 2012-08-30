@@ -1,10 +1,10 @@
-package ch.eth.scu.importer.gui.viewers;
+package ch.eth.scu.importer.gui.viewers.data;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
-import ch.eth.scu.importer.gui.viewers.model.ImageNode;
-import ch.eth.scu.importer.gui.viewers.model.RootNode;
-import ch.eth.scu.importer.gui.viewers.model.SubImageNode;
+import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.ImageNode;
+import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.data.model.SubImageNode;
 import ch.eth.scu.importer.processor.LeicaLifProcessor;
 import ch.eth.scu.importer.processor.LeicaLifProcessor.ImageDescriptor;
 import ch.eth.scu.importer.processor.LeicaLifProcessor.SubImageDescriptor;

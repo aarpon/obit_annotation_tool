@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.viewers.model;
+package ch.eth.scu.importer.gui.viewers.data.model;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 

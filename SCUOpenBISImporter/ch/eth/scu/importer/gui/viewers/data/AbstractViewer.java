@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.viewers;
+package ch.eth.scu.importer.gui.viewers.data;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -17,9 +17,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
-import ch.eth.scu.importer.gui.viewers.model.RootNode;
-import ch.eth.scu.importer.gui.viewers.renderer.CustomTree;
-import ch.eth.scu.importer.gui.viewers.renderer.CustomTreeToXML;
+import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.data.view.CustomTree;
+import ch.eth.scu.importer.gui.viewers.data.view.CustomTreeToXML;
 import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 /**

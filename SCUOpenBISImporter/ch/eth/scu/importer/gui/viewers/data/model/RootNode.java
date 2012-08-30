@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.viewers.model;
+package ch.eth.scu.importer.gui.viewers.data.model;
 
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 
@@ -7,20 +7,16 @@ import ch.eth.scu.importer.processor.model.AbstractDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class TubeNode extends CustomTreeNode {
+public class RootNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public TubeNode(AbstractDescriptor object) {
+	public RootNode(AbstractDescriptor object) {
 		super(object);
-		this.type = object.getType();
+		this.type = "root";
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("tube.png"));
-	}
-	
-	public String getTooltip() {
-		return "Tube";
+		return new javax.swing.ImageIcon(getClass().getResource("root.png"));
 	}
 }

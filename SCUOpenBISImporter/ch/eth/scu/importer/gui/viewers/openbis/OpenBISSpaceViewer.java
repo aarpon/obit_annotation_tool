@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.openbis;
+package ch.eth.scu.importer.gui.viewers.openbis;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

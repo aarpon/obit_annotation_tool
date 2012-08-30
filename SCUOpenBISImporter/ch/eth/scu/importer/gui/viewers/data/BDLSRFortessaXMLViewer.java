@@ -1,20 +1,20 @@
-package ch.eth.scu.importer.gui.viewers;
+package ch.eth.scu.importer.gui.viewers.data;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
-import ch.eth.scu.importer.gui.viewers.model.ExperimentNode;
-import ch.eth.scu.importer.gui.viewers.model.FCSFileNode;
-import ch.eth.scu.importer.gui.viewers.model.FolderNode;
-import ch.eth.scu.importer.gui.viewers.model.RootNode;
-import ch.eth.scu.importer.gui.viewers.model.SpecimenNode;
-import ch.eth.scu.importer.gui.viewers.model.TrayNode;
-import ch.eth.scu.importer.gui.viewers.model.TubeNode;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor;
+import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
+import ch.eth.scu.importer.gui.viewers.data.model.FCSFileNode;
+import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.data.model.SpecimenNode;
+import ch.eth.scu.importer.gui.viewers.data.model.TrayNode;
+import ch.eth.scu.importer.gui.viewers.data.model.TubeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.XMLFileNode;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.ExperimentDescriptor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.SpecimenDescriptor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.TrayDescriptor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.TubeDescriptor;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.ExperimentDescriptor;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.SpecimenDescriptor;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.TrayDescriptor;
+import ch.eth.scu.importer.processor.BDFACSDIVAXMLProcessor.TubeDescriptor;
 import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 import java.awt.event.*;
@@ -22,6 +22,7 @@ import java.awt.event.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Properties;
 import java.io.FileFilter;
@@ -30,17 +31,17 @@ import java.io.FileFilter;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDLSRFortessaFCSViewer extends AbstractViewer {
+public class BDLSRFortessaXMLViewer extends AbstractViewer {
 
 	// The valueChanged() method is fired twice when selection is changed in 
 	// a JTree, so we keep track of the last processed node to avoid parsing
 	// the same FCS file twice every time the node is changed.
 	private String lastSelectedNode;
-
+	
 	/**
 	 * Constructor
 	 */
-	public BDLSRFortessaFCSViewer() {
+	public BDLSRFortessaXMLViewer() {
 		
 		// Call the AbstractViewer's constructor (to create the panel)
 		super();
@@ -54,39 +55,33 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	}
 
 	/**
-	 *  Parse the FCS folder and append the resulting tree to the root
+	 *  Parse the selected XML file and appends the resulting tree to the root
 	 */
-	public boolean parse(File folder) {
+	public boolean parseXML(File subfolder, File xmlFile) {
 
 		// Process the file
-		BDFACSDIVAFCSProcessor divafcsprocessor;
+		BDFACSDIVAXMLProcessor xmlprocessor;
 		try {
-			divafcsprocessor = new BDFACSDIVAFCSProcessor(
-					folder.getCanonicalPath());
+			xmlprocessor = new BDFACSDIVAXMLProcessor(
+					xmlFile.getCanonicalPath());
 		} catch (IOException e) {
+			htmlPane.setText("Invalid file!");
+			xmlprocessor = null;
+			return false;
+		}
+		if (xmlprocessor.parse() == false) {
+			htmlPane.setText("Could not parse file!");
+			xmlprocessor = null;
 			return false;
 		}
 
-		if (divafcsprocessor.parse() == false) {
-			htmlPane.setText("Could not parse the folder!");
-			divafcsprocessor = null;
-			return false;
-		}
-
-		// Make sure we have a clean FCS export
-		if (divafcsprocessor.isCleanFCSExport() == false) {
-			System.err.println("The dataset \"" + divafcsprocessor.toString() +
-					"\" is not a clean FCS export and will be skipped.");
-			return false;
-		}
+		// Add the processor as new child of current folder node
+		XMLFileNode xmlNode = 
+				new XMLFileNode(xmlprocessor.xmlFile);
+		rootNode.add(xmlNode);
 		
-		// Create a folder note as a child of the root node
-		FolderNode folderNode = 
-				new FolderNode(divafcsprocessor.folderDescriptor);
-		rootNode.add(folderNode);
-		
-		// We will append the experiment nodes directly to the root node
-		createNodes(folderNode, divafcsprocessor.folderDescriptor);
+		// Add all the children
+		createNodes(xmlNode, xmlprocessor.xmlFile);
 		
 		return true;
 	}
@@ -115,30 +110,35 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 		// Print the attributes
 		String className = nodeInfo.getClass().getName();
-		if (className.endsWith("ExperimentDescriptor")) { 
+		if (className.endsWith("XMLFileDescriptor")) {
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.ExperimentDescriptor) 
+					((BDFACSDIVAXMLProcessor.XMLFileDescriptor) 
+							nodeInfo).attributesToString().replace(
+									", ", "\n"));
+		} else if (className.endsWith("ExperimentDescriptor")) { 
+			htmlPane.setText(
+					((BDFACSDIVAXMLProcessor.ExperimentDescriptor) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.endsWith("TrayDescriptor")) { 
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.TrayDescriptor) 
+					((BDFACSDIVAXMLProcessor.TrayDescriptor) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.endsWith("SpecimenDescriptor")) { 
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.SpecimenDescriptor) 
+					((BDFACSDIVAXMLProcessor.SpecimenDescriptor) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.endsWith("TubeDescriptor")) {
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.TubeDescriptor) 
+					((BDFACSDIVAXMLProcessor.TubeDescriptor) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));			
 		} else if (className.endsWith("FCSFileDescriptor")) {
 			// Cast
-			BDFACSDIVAFCSProcessor.FCSFileDescriptor fcsFile = 
-					(BDFACSDIVAFCSProcessor.FCSFileDescriptor) nodeInfo;
+			BDFACSDIVAXMLProcessor.FCSFileDescriptor fcsFile = 
+					(BDFACSDIVAXMLProcessor.FCSFileDescriptor) nodeInfo;
 			String fcsFileName = fcsFile.getFileName();
 			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
 			String out = "";
@@ -157,50 +157,36 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 	/**
 	 * Create the nodes for the tree
-	 * @param rootNode Root node
+	 * @param top Root node
 	 */
 	protected void createNodes(CustomTreeNode top,
-			BDFACSDIVAFCSProcessor.FolderDescriptor folderDescriptor) {
-		
+			BDFACSDIVAXMLProcessor.XMLFileDescriptor xmlfile) {
 		ExperimentNode experiment = null;
 		TrayNode tray = null;
 		SpecimenNode specimen = null;
 		TubeNode tube = null;
 		FCSFileNode fcs = null;
 
-		for (String expKey : folderDescriptor.experiments.keySet()) {
-
-			// Get the ExperimentDescriptor
-			ExperimentDescriptor e = 
-					folderDescriptor.experiments.get(expKey);
+		for (ExperimentDescriptor e : xmlfile.experiments) {
 
 			// Add the experiments
 			experiment = new ExperimentNode(e);
 			top.add(experiment);
 
-			for (String trayKey: e.trays.keySet()) {
+			for (TrayDescriptor t : e.trays) {
 
-				// Get the TrayDescriptor
-				TrayDescriptor t  = e.trays.get(trayKey);
-				
 				// Add the trays
 				tray = new TrayNode(t);
 				experiment.add(tray);
 
-				for (String specKey : t.specimens.keySet()) {
+				for (SpecimenDescriptor s : t.specimens) {
 
-					// Get the SpecimenDescriptor
-					SpecimenDescriptor s = t.specimens.get(specKey);
-					
 					// Add the specimens
 					specimen = new SpecimenNode(s);
 					tray.add(specimen);
 
-					for (String tubeKey : s.tubes.keySet()) {
+					for (TubeDescriptor tb : s.tubes) {
 
-						// Get the TubeDescriptor
-						TubeDescriptor tb  = s.tubes.get(tubeKey);
-						
 						// Add the tubes
 						tube = new TubeNode(tb);
 						specimen.add(tube);
@@ -214,20 +200,14 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 			}
 
-			for (String specKey : e.specimens.keySet()) {
+			for (SpecimenDescriptor s : e.specimens) {
 
-				// Get the SpecimenDescriptor
-				SpecimenDescriptor s = e.specimens.get(specKey);
-				
 				// Add the specimens
 				specimen = new SpecimenNode(s);
 				experiment.add(specimen);
 
-				for (String tubeKey : s.tubes.keySet()) {
+				for (TubeDescriptor tb : s.tubes) {
 
-					// Get the TubeDescriptor
-					TubeDescriptor tb = s.tubes.get(tubeKey);
-					
 					// Add the tubes
 					tube = new TubeNode(tb);
 					specimen.add(tube);
@@ -271,9 +251,27 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// Prepare a new root node for the Tree
 		rootNode = new RootNode(new RootDescriptor("/"));
 
-		// Parse all subfolders
+		// Go over all folders and check that there is an xml file inside
 		for (File subfolder : rootSubFolders) {
-			parse(subfolder);
+			File[] xmlFiles = subfolder.listFiles(
+					new FilenameFilter() {
+						public boolean accept(File file, String name) {
+							return name.toLowerCase().endsWith(".xml");
+						}
+					});
+			
+			// Make sure there is only one xml file per folder
+			if (xmlFiles.length == 0) {
+				System.err.println("No xml found in folder " + subfolder + 
+						". Skipping.");
+			} else if (xmlFiles.length > 1) {
+				System.err.println("Only on xml expected! Skipping folder " +
+			subfolder + ".");
+			} else {
+				// And now parse the file and append the results to the Tree
+				// under current folder node
+				parseXML(subfolder, xmlFiles[0]);
+			}
 		}
 		
 		// Create a tree that allows one selection at a time.

@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.viewers.renderer;
+package ch.eth.scu.importer.gui.viewers.data.view;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +22,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 

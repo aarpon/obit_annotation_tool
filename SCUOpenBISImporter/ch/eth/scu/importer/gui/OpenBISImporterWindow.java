@@ -8,12 +8,12 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.editors.EditorContainer;
-import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.viewers.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.BDLSRFortessaFCSViewer;
-import ch.eth.scu.importer.gui.viewers.BDLSRFortessaXMLViewer;
-import ch.eth.scu.importer.gui.viewers.LeicaSP5Viewer;
+import ch.eth.scu.importer.gui.editors.data.EditorContainer;
+import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.data.BDLSRFortessaFCSViewer;
+import ch.eth.scu.importer.gui.viewers.data.BDLSRFortessaXMLViewer;
+import ch.eth.scu.importer.gui.viewers.data.LeicaSP5Viewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;

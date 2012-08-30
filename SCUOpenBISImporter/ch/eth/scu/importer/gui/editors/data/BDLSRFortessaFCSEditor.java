@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.editors;
+package ch.eth.scu.importer.gui.editors.data;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -13,12 +13,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
 
-import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
-import ch.eth.scu.importer.gui.viewers.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.model.ExperimentNode;
-import ch.eth.scu.importer.gui.viewers.model.FolderNode;
-import ch.eth.scu.importer.gui.viewers.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
+import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
+import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.ExperimentDescriptor;
 
 /**

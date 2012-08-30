@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.gui.viewers.model;
+package ch.eth.scu.importer.gui.viewers.data.model;
 
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 
@@ -7,20 +7,20 @@ import ch.eth.scu.importer.processor.model.AbstractDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class TrayNode extends CustomTreeNode {
+public class FCSFileNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public TrayNode(AbstractDescriptor object) {
+	public FCSFileNode(AbstractDescriptor object) {
 		super(object);
 		this.type = object.getType();
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("plate.png"));
+		return new javax.swing.ImageIcon(getClass().getResource("fcs.png"));
 	}
 	
 	public String getTooltip() {
-		return "Tray";
+		return "FCS file";
 	}
 }
