@@ -3,6 +3,7 @@ package ch.eth.scu.importer.gui.viewers.renderer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -23,6 +24,7 @@ import org.w3c.dom.Element;
 
 import ch.eth.scu.importer.gui.viewers.model.CustomTreeNode;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 
 
 /**
@@ -59,11 +61,18 @@ public class CustomTreeToXML {
 			// Get current child
 			CustomTreeNode topNode = (CustomTreeNode) rootNode.getChildAt(i);
 			
-			// Construct the file name (the key for the map)
 			AbstractDescriptor topDescr = 
 					(AbstractDescriptor) topNode.getUserObject();
-			String key = topDescr.getOutputName();
 			
+			// Get the top level descriptor: top level descriptor MUST 
+			// extend the FirstLevelDescriptor abstract class
+			assert (topDescr instanceof FirstLevelDescriptor);
+			
+			// Construct the properties file name (which we also use as key
+			// for the map)
+			String key =
+				((FirstLevelDescriptor)topDescr).getPropertiesNameForSaving();
+
 			// Now build the XML document
 			try {
 				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -105,10 +114,11 @@ public class CustomTreeToXML {
 				OutputStream outputStream = new FileOutputStream(filename);
 				t.transform(new DOMSource(document), 
 						new StreamResult(outputStream));
-			} catch (TransformerException e) {
+				outputStream.close();
+			} catch (IOException e) {
 				e.printStackTrace();
 				return false;
-			} catch (FileNotFoundException e) {
+			} catch (TransformerException e) {
 				e.printStackTrace();
 				return false;
 			}

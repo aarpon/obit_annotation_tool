@@ -2,6 +2,7 @@ package ch.eth.scu.importer.processor;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 
 import java.io.*;
 import java.util.*;
@@ -33,12 +34,12 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/**
 	 * Constructor
-	 * @param folderName Full path of the folder containing the exported experiment.
+	 * @param fullFolderName Full path of the folder containing the exported experiment.
 	 */
-	public BDFACSDIVAFCSProcessor(String folderName) {
+	public BDFACSDIVAFCSProcessor(String fullFolderName) {
 
 		// Make sure rootFolderName is a valid directory
-		File folder = new File(folderName);
+		File folder = new File(fullFolderName);
 		if (!folder.isDirectory()) {
 			System.err.println("Expected directory name.");
 			return;
@@ -196,7 +197,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					specDesc = 
 							new SpecimenDescriptor(specName);
 					// Store attributes
-					specDesc.setAttributes(getSpecimenAttributes(processor));					
+					specDesc.setAttributes(getSpecimenAttributes(processor));
 					// Store it in the tray descriptor
 					trayDesc.specimens.put(specKey, specDesc);
 				}
@@ -339,19 +340,18 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Descriptor that represents a folder containing a dataset. 
 	 * @author Aaron Ponti
 	 */
-	public class FolderDescriptor extends AbstractDescriptor {
+	public class FolderDescriptor extends FirstLevelDescriptor {
 		
 		public Map<String, ExperimentDescriptor> experiments = 
 				new LinkedHashMap<String, ExperimentDescriptor>();
 		
-		public FolderDescriptor(File name) {
+		public FolderDescriptor(File fullFolder) {
 			
 			// Set the descriptor name
-			this.name = name.getName();
+			this.name = fullFolder.getName();
 
-			// Set the output name
-			this.outputName = this.name + File.separator + 
-					this.name +  "_properties.six";
+			// Store the relative path
+			storeRelativePath(fullFolder);
 
 		}
 		
@@ -361,14 +361,43 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 
 		/**
-		 * Return output file name to be used to save the data model to XML
-		 * @return output file name to save the data model to XML.
+		 * Return the folder name containing the processed dataset relative 
+		 * to the Datamover incoming folder.
 		 */
 		@Override
-		public String getOutputName() {
-			return outputName;
+		public String getRelativePath() {
+			return relativePath;
 		}
 
+		/**
+		 * Computes and store the folder path relative to the Datamover 
+		 * incoming folder.
+		 * @param fullFolder Folder with full path.
+		 */
+		private void storeRelativePath(File fullFolder) {
+			String incoming = "";
+			try {
+				incoming = incomingDir.getCanonicalPath();
+			} catch (IOException e) {
+				System.err.println("Error with incoming folder path " +
+						"("+ incomingDir + ")");
+				System.exit(1);
+			}
+			
+			// Extract the path relative to the incoming dir
+			String fullFolderStr = "";
+			try {
+				fullFolderStr = fullFolder.getCanonicalPath();
+			} catch (IOException e) {
+				System.err.println("Error with dataset folder path " +
+						"("+ fullFolder.toString() + ")");
+				System.exit(1);
+			}
+			this.relativePath = fullFolderStr.substring(incoming.length());
+			if (this.relativePath.startsWith(File.separator)) {
+				this.relativePath = this.relativePath.substring(1);
+			}
+		}
 	}
 	
 	/**
@@ -432,11 +461,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public FCSFileDescriptor(String fcsFileName) throws IOException {
 
 			// Store the file name
-			this.fullFileName = fcsFileName; 
-			this.name = (new File( fcsFileName )).getName();
+			this.fullFileName = fcsFileName;
+			this.name = (new File(fcsFileName)).getName();
 
 			// Store the relative file name (to the incoming dir)
-			storeRelativePath();
+			storeRelativePath(fcsFileName);
 			
 			// Set the attribute relative file name
 			attributes.put("relativeFileName", this.relativeFileName);
@@ -474,10 +503,10 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * @return relative file name
 		 */
 		public String getRelativePathName() {
-			return this.relativeFileName;
+			return relativeFileName;
 		}
 		
-		private void storeRelativePath() {
+		private void storeRelativePath(String fcsFileName) {
 			String incoming = "";
 			try {
 				incoming = incomingDir.getCanonicalPath();
@@ -487,8 +516,10 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 			
 			// Return the FCS path relative to the incoming dir
+			assert (incoming.length() <= fcsFileName.length()); 
+			
 			this.relativeFileName = 
-					this.fullFileName.substring(incoming.length());
+					fcsFileName.substring(incoming.length());
 			if (this.relativeFileName.startsWith(File.separator)) {
 				this.relativeFileName = this.relativeFileName.substring(1);
 			}

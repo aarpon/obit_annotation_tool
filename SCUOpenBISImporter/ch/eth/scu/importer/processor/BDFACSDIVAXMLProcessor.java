@@ -147,29 +147,9 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			if (indx != -1) {
 				outputNameFile = outputNameFile.substring(indx + 1);
 			}
-			
-			// Remove the extension
-			String namebody;
-			if (this.name.toLowerCase().endsWith(".xml")) {
-				namebody = this.name.substring(0, this.name.length() - 4);
-			} else {
-				namebody = this.name;
-			}
-			this.outputName = outputNameFile + File.separator + 
-					namebody +  "_properties.six";
 
 			// Process the document
 			success = processDoc(doc);
-		}
-
-		/**
-		 * Get XML output name
-		 * 
-		 * This is the name of the XML output file where to save the data model
-		 * @return the name of the XML output file 
-		 */
-		public String getOutputName() {
-			return outputName;
 		}
 		
 		@Override
@@ -437,7 +417,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 
 		private String fullFileName = "";
 		private String relativeFileName = "";
-		
+
 		/**
 		 * Constructor.
 		 * @param fcsFileName FCS file name with full path
@@ -445,14 +425,14 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		public FCSFileDescriptor(String fcsFileName) {
 
 			// Store the file name
-			this.fullFileName = fcsFileName; 
+			this.fullFileName = fcsFileName;
 			this.name = (new File( fcsFileName )).getName();
 			
 			// Store the relative file name (to the incoming dir)
-			storeRelativePath();
+			storeRelativePath(fcsFileName);
 			
 			// Set the attribute relative file name
-			attributes.put("relativeFileName", this.relativeFileName);			
+			attributes.put("relativeFileName", this.relativeFileName);
 		}
 
 		/**
@@ -466,6 +446,14 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}
 
 		/**
+		 * Return the full FCS file name.
+		 * @return full FCS file name.
+		 */
+		public String getFileName() {
+			return this.fullFileName;
+		}
+
+		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
 		 */
@@ -475,22 +463,10 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		}
 
 		/**
-		 * Return the full FCS file name.
-		 * @return full FCS file name.
-		 */
-		public String getFileName() {
-			return this.fullFileName;
-		}
-
-		/**
 		 * Return the file name with path relative to the global incoming dir
 		 * @return relative file name
 		 */
-		public String getRelativePathName() {
-			return this.relativeFileName;
-		}
-		
-		private void storeRelativePath() {
+		private void storeRelativePath(String fcsFileName) {
 			String incoming = "";
 			try {
 				incoming = incomingDir.getCanonicalPath();
@@ -500,15 +476,16 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 			}
 			
 			// Return the FCS path relative to the incoming dir
+			assert (incoming.length() <= fcsFileName.length()); 
+			
 			this.relativeFileName = 
-					this.fullFileName.substring(incoming.length());
+					fcsFileName.substring(incoming.length());
 			if (this.relativeFileName.startsWith(File.separator)) {
 				this.relativeFileName = this.relativeFileName.substring(1);
 			}
 		}
-	
 	}
-	
+
 	/**
 	 * Descriptor representing a specimen parsed from the XML.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.

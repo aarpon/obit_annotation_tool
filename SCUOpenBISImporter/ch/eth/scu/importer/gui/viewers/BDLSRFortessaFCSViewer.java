@@ -9,7 +9,6 @@ import ch.eth.scu.importer.gui.viewers.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.model.SpecimenNode;
 import ch.eth.scu.importer.gui.viewers.model.TrayNode;
 import ch.eth.scu.importer.gui.viewers.model.TubeNode;
-import ch.eth.scu.importer.gui.viewers.model.XMLFileNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.ExperimentDescriptor;
@@ -23,9 +22,7 @@ import java.awt.event.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import java.io.FileFilter;
 
@@ -40,7 +37,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer
 	// a JTree, so we keep track of the last processed node to avoid parsing
 	// the same FCS file twice every time the node is changed.
 	private String lastSelectedNode;
-	
+
 	/**
 	 * Constructor
 	 */

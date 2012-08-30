@@ -26,14 +26,6 @@ abstract public class AbstractDescriptor {
 	protected String name = "";
 	
 	/**
-	 * Output name of the entity. By default, this is the same as the name. 
-	 * 
-	 * For top-level descriptors, it returns the output file name to be used
-	 * to save the data model to XML for the openBIS dropbox scripts.
-	 */
-	protected String outputName = "";
-	
-	/**
 	 * String-string map of attribute key:value pair.
 	 * 
 	 * These will be uploaded to openBIS as associated information.
@@ -66,14 +58,6 @@ abstract public class AbstractDescriptor {
 	 * @return the name of the entity.
 	 */
 	public String getName() { return name; }
-
-	/**
-	 * Return the output name of the entity. By default, it returns the
-	 * name of the entity. Override to customize.
-	 * 
-	 * @return the output name of the entity.
-	 */
-	public String getOutputName() { return name; }
 	
 	/**
 	 * Sets the name of the entity.

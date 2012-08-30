@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -116,12 +117,13 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 *
 	 */
-	public class ImageDescriptor extends AbstractDescriptor {
+	public class ImageDescriptor extends FirstLevelDescriptor {
 
 		/**
 		 * SubImages
 		 */
-		public ArrayList<SubImageDescriptor> subImages = new ArrayList<SubImageDescriptor>();
+		public ArrayList<SubImageDescriptor> subImages =
+				new ArrayList<SubImageDescriptor>();
 
 		/**
 		 * Constructor
@@ -135,7 +137,6 @@ public class LeicaLifProcessor extends AbstractProcessor {
 			if (indx != -1) {
 				outputNameFile = outputNameFile.substring(0, indx);
 			}
-			this.outputName = outputNameFile + "_properties.six";
 		}
 		
 		/**
@@ -152,6 +153,12 @@ public class LeicaLifProcessor extends AbstractProcessor {
 		@Override		
 		public String getType() {
 			return "Image";
+		}
+
+		@Override
+		public String getRelativePath() {
+			// TODO IMPLEMENT THIS!
+			return null;
 		}
 	}
 
