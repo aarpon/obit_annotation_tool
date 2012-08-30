@@ -90,7 +90,11 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 		// First level are spaces (which we do not need)
 		int openBISNChildren = openBISRoot.getChildCount();
+		if (openBISNChildren == 0) {
+			return;
+		}
 
+		// Since there are children, we can create the UI elements
 		for (int i = 0; i < openBISNChildren; i++) {
 
 			// Get the Space
