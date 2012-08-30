@@ -30,8 +30,7 @@ import java.io.FileFilter;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDLSRFortessaFCSViewer extends AbstractViewer
-	implements ActionListener, TreeSelectionListener {
+public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 	// The valueChanged() method is fired twice when selection is changed in 
 	// a JTree, so we keep track of the last processed node to avoid parsing

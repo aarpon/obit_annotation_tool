@@ -24,7 +24,6 @@ import javax.swing.event.*;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 import java.io.FileFilter;
 
@@ -32,8 +31,7 @@ import java.io.FileFilter;
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
  */
-public class BDLSRFortessaXMLViewer extends AbstractViewer
-	implements ActionListener, TreeSelectionListener {
+public class BDLSRFortessaXMLViewer extends AbstractViewer {
 
 	// The valueChanged() method is fired twice when selection is changed in 
 	// a JTree, so we keep track of the last processed node to avoid parsing

@@ -198,7 +198,7 @@ public class OpenBISSpaceViewer extends Observable
 		isLoggedIn = true;
 		
 		// Fill in the tree view with the openBIS data
-		fillTreeViewWithOpenBISData();
+		scan();
 		
 		return true;
 	}
@@ -243,7 +243,7 @@ public class OpenBISSpaceViewer extends Observable
 	/**
 	 * Fill the tree view with the data obtained from openBIS
 	 */
-	private void fillTreeViewWithOpenBISData() {
+	private void scan() {
 
 		OpenBISSpaceNode space = null;
 		OpenBISProjectNode project = null;
