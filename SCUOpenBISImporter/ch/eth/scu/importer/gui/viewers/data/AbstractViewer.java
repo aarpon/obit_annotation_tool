@@ -11,6 +11,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,6 +39,9 @@ abstract public class AbstractViewer extends Observable
 	protected JScrollPane htmlView;
 	protected JLabel metadataView;
 	protected boolean isReady = false;
+	protected JLabel invalidDatasets;
+	protected JTable invalidDatasetsTable;
+	protected JScrollPane invalidDatasetsView;
 	
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
@@ -111,13 +115,42 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridx = 0;
 		constraints.gridy = 3;
 		constraints.weightx = 1.0;
-		constraints.weighty = 0.5;
+		constraints.weighty = 0.2;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		panel.add(htmlView, constraints);
 
 		// Add initial info to the html pane
 		htmlPane.setText("");
+		
+		// Add a simple label
+		invalidDatasets = new JLabel("Invalid datasets");
+		invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 4;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		panel.add(invalidDatasets, constraints);
+		
+		// Add the table
+		Object[][] data = { };
+		String columnNames[] = { "Folder", "Problem" };
+		invalidDatasetsTable = new JTable(data, columnNames);
+		invalidDatasetsTable.setFillsViewportHeight(true);
+		invalidDatasetsView = new JScrollPane(invalidDatasetsTable);
+        
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 5;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.1;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		panel.add(invalidDatasetsView, constraints);
 		
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
