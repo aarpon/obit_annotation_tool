@@ -57,13 +57,13 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 	/**
 	 *  Parse the selected XML file and appends the resulting tree to the root
 	 */
-	public boolean parseXML(File subfolder, File xmlFile) {
+	public boolean parseXML(File subfolder, File xmlFile, String userName) {
 
 		// Process the file
 		BDFACSDIVAXMLProcessor xmlprocessor;
 		try {
 			xmlprocessor = new BDFACSDIVAXMLProcessor(
-					xmlFile.getCanonicalPath());
+					xmlFile.getCanonicalPath(), userName);
 		} catch (IOException e) {
 			htmlPane.setText("Invalid file!");
 			xmlprocessor = null;
@@ -231,14 +231,19 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 	}
 
 	/**
-	 * Scan the datamover incoming folder
+	 * Scans the user subfolder of the datamover incoming directory for
+	 * datasets to be processed
+	 * @param userName user name that must correspond to the subfolder name in
+	 * the dropboxIncomingFolder 
 	 */
-	public void scan() {
+	public void scan(String userName) {
 		
 		// Get the datamover incoming folder from the application properties
+		// to which we append the user name to personalize the working space
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		File dropboxIncomingFolder = new File(
-				appProperties.getProperty("DatamoverIncomingDir"));
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + userName);
 		
 		// Get a list of all subfolders
 		File[] rootSubFolders = dropboxIncomingFolder.listFiles(
@@ -270,7 +275,7 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 			} else {
 				// And now parse the file and append the results to the Tree
 				// under current folder node
-				parseXML(subfolder, xmlFiles[0]);
+				parseXML(subfolder, xmlFiles[0], userName);
 			}
 		}
 		

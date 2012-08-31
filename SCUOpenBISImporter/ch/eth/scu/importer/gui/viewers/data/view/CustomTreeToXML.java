@@ -1,7 +1,6 @@
 package ch.eth.scu.importer.gui.viewers.data.view;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -78,8 +77,8 @@ public class CustomTreeToXML {
 				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				document = builder.newDocument();
 				
-				Element root = document.createElement("xml");
-				root.setAttribute("version", "1");
+				Element root = document.createElement("scuOpenBisImporterXml");
+				root.setAttribute("version", "0");
 
 				addNode(document, root, topNode);
 					

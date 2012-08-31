@@ -56,13 +56,13 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	/**
 	 *  Parse the FCS folder and append the resulting tree to the root
 	 */
-	public boolean parse(File folder) {
+	public boolean parse(File folder, String userName) {
 
 		// Process the file
 		BDFACSDIVAFCSProcessor divafcsprocessor;
 		try {
 			divafcsprocessor = new BDFACSDIVAFCSProcessor(
-					folder.getCanonicalPath());
+					folder.getCanonicalPath(), userName);
 		} catch (IOException e) {
 			return false;
 		}
@@ -251,14 +251,19 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	}
 
 	/**
-	 * Scan the datamover incoming folder
+	 * Scans the user subfolder of the datamover incoming directory for
+	 * datasets to be processed
+	 * @param userName user name that must correspond to the subfolder name in
+	 * the dropboxIncomingFolder
 	 */
-	public void scan() {
+	public void scan(String userName) {
 		
 		// Get the datamover incoming folder from the application properties
+		// to which we append the user name to personalize the working space
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		File dropboxIncomingFolder = new File(
-				appProperties.getProperty("DatamoverIncomingDir"));
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + userName);
 		
 		// Get a list of all subfolders
 		File[] rootSubFolders = dropboxIncomingFolder.listFiles(
@@ -269,13 +274,14 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				});
 
 		// Prepare a new root node for the Tree
-		rootNode = new RootNode(new RootDescriptor("/"));
+		rootNode = new RootNode(new RootDescriptor("/" + userName));
 
 		// Parse all subfolders
-		for (File subfolder : rootSubFolders) {
-			parse(subfolder);
+		if (rootSubFolders != null) { 
+			for (File subfolder : rootSubFolders) {
+				parse(subfolder, userName);
+			}
 		}
-		
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
 		tree.getSelectionModel().setSelectionMode(

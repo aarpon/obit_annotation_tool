@@ -112,12 +112,21 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		setLocationRelativeTo(null);
 		setResizable(false);
 		
-		// Ask the user to login
-		spaceViewer.login();
+		// Ask the user to login.
+		// Here we will insist on getting valid openBIS credentials, since a
+		// valid login is essential for the functioning of the application.
+		// If the user justs closes the dialog, we close the application.
+		boolean status = false;
+		while (status == false) {
+			status = spaceViewer.login();
+		}
+
+		// Now we can scan the openBIS instance
+		spaceViewer.scan();
 
 		// Scan the datamover incoming folder for datasets
-		metadataViewer.scan();
-		
+		metadataViewer.scan(spaceViewer.getUserName());
+
 		// Make window visible
 		setVisible(true);
 	}
@@ -130,11 +139,14 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// React to the context menu
 		if (e.getActionCommand().equals("Log in")) {
-			spaceViewer.login();
+			boolean status = false;
+			while (status == false) {
+				status = spaceViewer.login();
+			}
 		} else if (e.getActionCommand().equals("Log out")) {
 			spaceViewer.logout();
 		} else if (e.getActionCommand().equals("Scan")) {
-			metadataViewer.scan();
+			metadataViewer.scan(spaceViewer.getUserName());
 		} else if (e.getActionCommand().equals("Quit")) {
 				QuitApplication();
 		} else {

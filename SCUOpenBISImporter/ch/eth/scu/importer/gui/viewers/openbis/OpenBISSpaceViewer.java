@@ -121,6 +121,17 @@ public class OpenBISSpaceViewer extends Observable
 	}
 	
 	/**
+	 * Returns the user name if successfully logged in, empty string otherwise 
+	 * @return user name or empty String if log on was not successful 
+	 */
+	public String getUserName() {
+		if (isLoggedIn == false) {
+			return "";
+		}
+		return userName;
+	}
+	
+	/**
 	 * Called when selection in the Tree View is changed.
 	 * @param e A TreeSelectionEvent
 	 */
@@ -145,12 +156,9 @@ public class OpenBISSpaceViewer extends Observable
 		// Modal dialog: stops here until the dialog is disposed
 		// (when a username and password have been provided)
 		loginDialog = new OpenBISLoginDialog();
-		if (loginDialog.interrupted() == true) {
-			return false;
-		}
 		userName = loginDialog.getUsername();
 		userPassword = loginDialog.getPassword();
-		return true;
+		return (! userName.isEmpty());
 	}
 	
 	/**
@@ -162,8 +170,11 @@ public class OpenBISSpaceViewer extends Observable
 
 		// Check that user name and password were set
 		if (userName.equals("") || userPassword.equals("")) {
-			if (askForCredentials() == false) {
-				return false;
+			boolean status = false;
+			while (status == false) {
+				// This is redundant, since the dialog cannot be closed
+				// without specifying a user name and password.
+				status = askForCredentials();
 			}
 		}
 
@@ -196,9 +207,6 @@ public class OpenBISSpaceViewer extends Observable
 
 		// Set isLoggedIn to true
 		isLoggedIn = true;
-		
-		// Fill in the tree view with the openBIS data
-		scan();
 		
 		return true;
 	}
@@ -243,7 +251,7 @@ public class OpenBISSpaceViewer extends Observable
 	/**
 	 * Fill the tree view with the data obtained from openBIS
 	 */
-	private void scan() {
+	public void scan() {
 
 		OpenBISSpaceNode space = null;
 		OpenBISProjectNode project = null;

@@ -31,7 +31,7 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 	 * Constructor
 	 * @param filename Name with full path of the file to be opened.
 	 */
-	public BDFACSDIVAXMLProcessor(String filename) {
+	public BDFACSDIVAXMLProcessor(String filename, String userName) {
 
 		// Set the filename
 		this.xmlFilename = filename;
@@ -39,7 +39,8 @@ public class BDFACSDIVAXMLProcessor extends AbstractProcessor {
 		// Store the incoming dir (to build relative paths)
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		this.incomingDir = new File(
-				appProperties.getProperty("DatamoverIncomingDir") );
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + userName);
 
 		// Instantiate the factory
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

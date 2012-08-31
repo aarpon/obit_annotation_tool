@@ -9,7 +9,10 @@ public class TestBDDIVAFCSProcessor {
 	 */
 	public static void main(String[] args) {
 		
-		BDFACSDIVAFCSProcessor processor = new BDFACSDIVAFCSProcessor("/work/openbis/openbis_data/Quality Control MD");
+		BDFACSDIVAFCSProcessor processor = 
+				new BDFACSDIVAFCSProcessor(
+						"/work/openbis/openbis_data/Quality Control MD",
+						"pontia");
 
 		processor.parse();
 		

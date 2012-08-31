@@ -36,7 +36,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Constructor
 	 * @param fullFolderName Full path of the folder containing the exported experiment.
 	 */
-	public BDFACSDIVAFCSProcessor(String fullFolderName) {
+	public BDFACSDIVAFCSProcessor(String fullFolderName, String userName) {
 
 		// Make sure rootFolderName is a valid directory
 		File folder = new File(fullFolderName);
@@ -48,7 +48,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Store the incoming dir (to build relative paths)
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		this.incomingDir = new File( 
-				appProperties.getProperty("DatamoverIncomingDir") );
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + userName);
 
 		// Set the root folder
 		this.topFolder = folder;

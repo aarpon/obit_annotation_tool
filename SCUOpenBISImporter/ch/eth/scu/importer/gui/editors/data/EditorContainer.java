@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -103,7 +104,10 @@ public class EditorContainer extends JPanel implements ActionListener {
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
 			String outputDirectory = 
-					appProperties.getProperty("DatamoverIncomingDir");
+					appProperties.getProperty("DatamoverIncomingDir") +
+					File.separator + openBISViewer.getUserName();
+			
+			// Save to XML
 			dataViewer.saveToXML(outputDirectory);
 			System.out.println(
 					"File written to disk (TODO: Use the output pane).");

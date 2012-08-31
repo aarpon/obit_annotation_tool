@@ -43,7 +43,7 @@ abstract public class AbstractViewer extends Observable
 	 * Scans the datamover incoming directory for datasets to be processed.
 	 * At the end of scanning, the function MUST set isReady to true.
 	 */
-	abstract public void scan();
+	abstract public void scan(String userName);
 	
 	/**
 	 * Constructor

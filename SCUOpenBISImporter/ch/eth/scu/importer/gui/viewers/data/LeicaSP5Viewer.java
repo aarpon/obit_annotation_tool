@@ -128,15 +128,20 @@ public class LeicaSP5Viewer extends AbstractViewer
 	}
 
 	/**
-	 * Scans the datamover incoming directory for datasets to be processed
+	 * Scans the user subfolder of the datamover incoming directory for
+	 * datasets to be processed
+	 * @param userName user name that must correspond to the subfolder name in
+	 * the dropboxIncomingFolder
 	 */
-	public void scan() {
+	public void scan(String userName) {
 		
 		// Get the datamover incoming folder from the application properties
+		// to which we append the user name to personalize the working space
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		File dropboxIncomingFolder = new File(
-				appProperties.getProperty("DatamoverIncomingDir"));
-
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + userName);
+		
 		// Prepare a new root node for the Tree
 		rootNode = new RootNode(new RootDescriptor("/"));
 
