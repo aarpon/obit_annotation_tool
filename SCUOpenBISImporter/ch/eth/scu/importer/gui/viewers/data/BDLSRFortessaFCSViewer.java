@@ -19,6 +19,7 @@ import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 import java.awt.event.*;
 
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
@@ -77,9 +78,12 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		if (divafcsprocessor.isCleanFCSExport() == false) {
 			System.err.println("The dataset \"" + divafcsprocessor.toString() +
 					"\" is not a clean FCS export and will be skipped.");
+			DefaultTableModel model = 
+					(DefaultTableModel) invalidDatasetsTable.getModel();
+			model.addRow(new Object[] { folder.getName(), "Bad export mode."});
 			return false;
 		}
-		
+
 		// Create a folder note as a child of the root node
 		FolderNode folderNode = 
 				new FolderNode(divafcsprocessor.folderDescriptor);
