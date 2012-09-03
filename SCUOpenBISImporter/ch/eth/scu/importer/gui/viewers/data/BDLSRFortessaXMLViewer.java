@@ -237,6 +237,9 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 	 * the dropboxIncomingFolder 
 	 */
 	public void scan(String userName) {
+
+		// Make sure to clear the table of invalid datasets
+		clearTable();
 		
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space

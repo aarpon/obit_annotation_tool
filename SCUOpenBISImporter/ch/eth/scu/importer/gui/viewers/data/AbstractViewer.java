@@ -19,8 +19,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.apache.poi.ss.usermodel.Font;
-
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.data.view.CustomTree;
 import ch.eth.scu.importer.gui.viewers.data.view.CustomTreeToXML;
@@ -199,9 +197,21 @@ abstract public class AbstractViewer extends Observable
 		
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
-
 	}
 
+	/**
+	 * Clears the JTable listing the invalid datasets
+	 */
+	protected void clearTable() {
+		if (invalidDatasetsTable != null) {
+			Object[][] data = { };
+			String columnNames[] = { "Folder", "Problem" };
+			invalidDatasetsTable.setModel(
+					new DefaultTableModel(data, columnNames));
+			invalidDatasetsTable.repaint();
+		}
+	}
+	
 	/**
 	 * Create and save an XML representation of the JTree to file
 	 * @param outputDirectory Directory where XML property files are saved 

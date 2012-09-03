@@ -20,10 +20,12 @@ import ch.eth.scu.importer.processor.model.RootDescriptor;
 import java.awt.event.*;
 
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.io.FileFilter;
 
@@ -261,7 +263,10 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 * the dropboxIncomingFolder
 	 */
 	public void scan(String userName) {
-		
+
+		// Make sure to clear the table of invalid datasets
+		clearTable();
+
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
 		Properties appProperties = AppProperties.readPropertiesFromFile();
