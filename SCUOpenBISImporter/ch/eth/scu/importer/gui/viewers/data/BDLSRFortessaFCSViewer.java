@@ -276,12 +276,14 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// Prepare a new root node for the Tree
 		rootNode = new RootNode(new RootDescriptor("/" + userName));
 
-		// Parse all subfolders
+		// Parse all subfolders (and store success)
+		boolean globalStatus = true;
 		if (rootSubFolders != null) { 
 			for (File subfolder : rootSubFolders) {
-				parse(subfolder, userName);
+				globalStatus = globalStatus & parse(subfolder, userName);
 			}
 		}
+
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
 		tree.getSelectionModel().setSelectionMode(
@@ -293,8 +295,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// Clean the html pane
 		htmlPane.setText("");
 		
-		// Set isReady to true
-		isReady = true;
+		// Set isReady to globalStatus
+		isReady = globalStatus;
 	
 		// Notify observers that the scanning is done 
 		setChanged();

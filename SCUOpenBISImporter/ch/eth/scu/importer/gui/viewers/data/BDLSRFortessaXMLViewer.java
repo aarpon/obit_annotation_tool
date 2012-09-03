@@ -256,6 +256,9 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 		// Prepare a new root node for the Tree
 		rootNode = new RootNode(new RootDescriptor("/"));
 
+		// Global status
+		boolean globalStatus = true;
+		
 		// Go over all folders and check that there is an xml file inside
 		for (File subfolder : rootSubFolders) {
 			File[] xmlFiles = subfolder.listFiles(
@@ -269,13 +272,16 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 			if (xmlFiles.length == 0) {
 				System.err.println("No xml found in folder " + subfolder + 
 						". Skipping.");
+				globalStatus = false;
 			} else if (xmlFiles.length > 1) {
 				System.err.println("Only on xml expected! Skipping folder " +
 			subfolder + ".");
+				globalStatus = false;
 			} else {
 				// And now parse the file and append the results to the Tree
-				// under current folder node
-				parseXML(subfolder, xmlFiles[0], userName);
+				// under current folder node  (and store success)
+				globalStatus = globalStatus &
+						parseXML(subfolder, xmlFiles[0], userName);
 			}
 		}
 		
@@ -290,8 +296,8 @@ public class BDLSRFortessaXMLViewer extends AbstractViewer {
 		// Clean the html pane
 		htmlPane.setText("");
 		
-		// Set isReady to true
-		isReady = true;
+		// Set isReady to globalStatus
+		isReady = globalStatus;
 	
 		// Notify observers that the scanning is done 
 		setChanged();

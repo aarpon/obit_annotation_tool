@@ -145,6 +145,9 @@ public class LeicaSP5Viewer extends AbstractViewer
 		// Prepare a new root node for the Tree
 		rootNode = new RootNode(new RootDescriptor("/"));
 
+		// Global status
+		boolean globalStatus = true;
+		
 		// We only consider lif files in the root
 		File[] lifFiles = dropboxIncomingFolder.listFiles(
 				new FilenameFilter() {
@@ -154,9 +157,9 @@ public class LeicaSP5Viewer extends AbstractViewer
 				});
 		
 		// Now parse the lif files and append the results to the Tree
-		// under the root node
+		// under the root node  (and store success)
 		for (File lifFile : lifFiles) {
-			parse(lifFile);
+			globalStatus = globalStatus & parse(lifFile);
 		}
 		
 		// Create a tree that allows one selection at a time.
@@ -170,9 +173,9 @@ public class LeicaSP5Viewer extends AbstractViewer
 		// Clean the html pane
 		htmlPane.setText("");
 		
-		// Set isReady to true
-		isReady = true;
-		
+		// Set isReady to globalStatus
+		isReady = globalStatus;
+
 		// Notify observers that the scanning is done 
 		setChanged();
 		notifyObservers();

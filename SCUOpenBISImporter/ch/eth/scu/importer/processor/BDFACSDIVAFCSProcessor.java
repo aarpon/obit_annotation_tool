@@ -581,7 +581,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 		/**
 		 * Constructor
-		 * @param trayNode DOM node that refers to a Tray.
+		 * @param name name of the Tray.
 		 */
 		public TrayDescriptor(String name) {
 	
@@ -613,7 +613,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 		/**
 		 * Constructor.
-		 * @param tubeNode DOM node that refers to a Tube.
+		 * @param name Name of the Tube.
+		 * @param Full file name of the FCS file associated with the Tube.
 		 * @throws IOException 
 		 */
 		public TubeDescriptor(String name, String fcsFullFileName) 
