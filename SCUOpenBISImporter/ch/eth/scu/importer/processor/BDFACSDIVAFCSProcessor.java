@@ -614,7 +614,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		/**
 		 * Constructor.
 		 * @param name Name of the Tube.
-		 * @param Full file name of the FCS file associated with the Tube.
+		 * @param fcsFullFileName Full file name of the FCS file associated
+		 * with the Tube.
 		 * @throws IOException 
 		 */
 		public TubeDescriptor(String name, String fcsFullFileName) 
