@@ -14,9 +14,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
+
+import org.apache.poi.ss.usermodel.Font;
 
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.data.view.CustomTree;
@@ -42,6 +45,7 @@ abstract public class AbstractViewer extends Observable
 	protected JLabel invalidDatasets;
 	protected JTable invalidDatasetsTable;
 	protected JScrollPane invalidDatasetsView;
+	protected JLabel invalidDatasetsExpl;
 	
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
@@ -139,7 +143,8 @@ abstract public class AbstractViewer extends Observable
 		// Add the table
 		Object[][] data = { };
 		String columnNames[] = { "Folder", "Problem" };
-		invalidDatasetsTable = new JTable(data, columnNames);
+		invalidDatasetsTable = new JTable(
+				new DefaultTableModel(data, columnNames));
 		invalidDatasetsTable.setFillsViewportHeight(true);
 		invalidDatasetsView = new JScrollPane(invalidDatasetsTable);
         
@@ -151,6 +156,20 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		panel.add(invalidDatasetsView, constraints);
+		
+		// Add the explanation to the invalid dataset table
+		invalidDatasetsExpl = new JLabel(
+				"These datasets must be fixed or removed!");
+		invalidDatasetsExpl.setVerticalAlignment(SwingConstants.TOP);
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 6;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		panel.add(invalidDatasetsExpl, constraints);
 		
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
