@@ -11,7 +11,6 @@ import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.editors.data.EditorContainer;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.data.BDLSRFortessaFCSViewer;
-import ch.eth.scu.importer.gui.viewers.data.BDLSRFortessaXMLViewer;
 import ch.eth.scu.importer.gui.viewers.data.LeicaSP5Viewer;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
 
@@ -65,9 +64,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Add the viewer
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaXML")) {
-			metadataViewer = new BDLSRFortessaXMLViewer();
-		} else if (acqStation.equals("LSRFortessaFCS")) {
+		if (acqStation.equals("LSRFortessaFCS")) {
 			metadataViewer = new BDLSRFortessaFCSViewer();
 		} else if (acqStation.equals("LeicaSP5")) {
 			metadataViewer = new LeicaSP5Viewer();

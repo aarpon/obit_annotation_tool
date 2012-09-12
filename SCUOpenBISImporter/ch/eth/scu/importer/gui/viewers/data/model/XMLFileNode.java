@@ -1,6 +1,6 @@
 package ch.eth.scu.importer.gui.viewers.data.model;
 
-import ch.eth.scu.importer.processor.model.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different
@@ -11,7 +11,7 @@ public class XMLFileNode extends CustomTreeNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public XMLFileNode(AbstractDescriptor object) {
+	public XMLFileNode(FirstLevelDescriptor object) {
 		super(object);
 		this.type = object.getType();
 	}

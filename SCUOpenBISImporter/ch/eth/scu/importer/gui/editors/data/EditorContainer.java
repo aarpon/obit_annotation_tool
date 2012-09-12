@@ -59,9 +59,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 
 		// Add the actual editor
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaXML")) {
-			metadataEditor = new BDLSRFortessaXMLEditor(dataViewer, openBISViewer);
-		} else if (acqStation.equals("LSRFortessaFCS")) {
+		if (acqStation.equals("LSRFortessaFCS")) {
 			metadataEditor = new BDLSRFortessaFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("LeicaSP5")) {
 			metadataEditor = new LeicaSP5Editor(dataViewer, openBISViewer);

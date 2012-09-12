@@ -14,12 +14,16 @@ import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
+import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.ExperimentDescriptor;
+import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Experiment;
+import ch.eth.scu.importer.processor.model.AbstractDescriptor;
+import ch.eth.scu.importer.processor.model.DatasetDescriptor;
+import ch.eth.scu.importer.processor.model.SampleDescriptor;
 
 /**
  * Metadata editor panel.
@@ -56,8 +60,9 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 	/**
 	 * Renders all widgets on the panel
+	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
-	public void render() {
+	public void render() throws Exception {
 
 		// Make sure both viewers have completed their models
 		if (dataViewer.isReady() == false || openBISViewer.isReady() == false) {
@@ -116,13 +121,6 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			}
 		}
 
-		// Extract the default project code and identifier to associate to the
-		// ExperimentDescriptors in the data model
-		String defaultProjectCode =
-				((CustomOpenBISNode)(projects.get(0))).getCode();
-		String defaultProjectIdentifier = 
-				((CustomOpenBISNode)(projects.get(0))).getIdentifier();
-
 		// We extract all experiments from the data model
 		RootNode dataRoot = (RootNode) dataModel.getRoot();
 
@@ -165,21 +163,21 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				constraints.gridy = yPos++;
 				panel.add(new JLabel(dataExpNode.toString()), constraints);
 
-				// Glue all the info together for the Combo box
+				// Pair all the info together for the Combo box
 
-				// Add a JComboBox for the Glue objects
+				// Add a JComboBox for the Pair objects
 				JComboBox projCombo = new JComboBox();
 				for (CustomOpenBISNode s : projects) {
-					projCombo.addItem(new Glue(folderNode, dataExpNode, s));
+
+					// Add the Pair object
+					projCombo.addItem(new Pair(dataExpNode, s));
+
 				}
 				projCombo.setSelectedIndex(0);
 
 				// By default, set the first project to current 
 				// ExperimentDescriptor in the data model
-				ExperimentDescriptor expDescr =
-						((ExperimentDescriptor)dataExpNode.getUserObject());
-				expDescr.setOpenBISCode(defaultProjectCode);
-				expDescr.setOpenBISIdentifier(defaultProjectIdentifier);
+				performMapping(dataExpNode, projects.get(0));
 
 				// When a project is selected, update the corresponding 
 				// ExperimentDescriptor in the data model 
@@ -187,24 +185,13 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("comboBoxChanged")) {
 
-							// Get the Glue object
-							Glue glue = (Glue) 
+							// Get the Pair object
+							Pair pair = (Pair) 
 									((JComboBox)(e.getSource())).getSelectedItem();
 
-							// Get the data experiment descriptor
-							ExperimentDescriptor expDescr =
-									((ExperimentDescriptor)glue.expNode.getUserObject());
-
-							// Get the openBIS project node
-							CustomOpenBISNode projNode = 
-									((CustomOpenBISNode)glue.projNode);
-
-							// Now fill the ExperimentDescriptor with the 
-							// information from the OpenBIS Project node
-							expDescr.setOpenBISCode(
-									projNode.getCode());
-							expDescr.setOpenBISIdentifier(
-									projNode.getIdentifier());
+							// Now perform the full mapping
+							performMapping((ExperimentNode) pair.expNode,
+									(CustomOpenBISNode) pair.projNode);
 
 						}
 					}
@@ -234,19 +221,146 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	}
 
 	/**
-	 * Glue class to combine all data and openBIS information to allow mapping
-	 * following user choice.
-	 * @author Aaron Ponti
-	 *
+	 * Use the pair (ExperimentNode, ProjectNode) to update all data Descriptors
+	 * with the correct openBIS information 
 	 */
-	protected class Glue {
-		protected FolderNode folderNode;
+	public void performMapping(ExperimentNode expNode, CustomOpenBISNode projNode) {
+
+		// The parent of the ExperimentDescriptor is the FolderDescriptor, 
+		// which does not need to be updated.
+
+		// We first start by updating the Experiment descriptor itself
+		Experiment expDescr = (Experiment) expNode.getUserObject();
+
+		// Set the openBIS project identifier
+		expDescr.setOpenBISProjectIdentifier(projNode.getIdentifier());
+
+		// Now get the Trays and Specimens children of the Experiment
+		for (int i = 0; i < expNode.getChildCount(); i++) {
+
+			// Get the i-th child node
+			CustomTreeNode firstLevelSampleNode =
+					(CustomTreeNode) expNode.getChildAt(i);
+
+			// Get the Sample Descriptor
+			SampleDescriptor firstLevelSample =
+					(SampleDescriptor) firstLevelSampleNode.getUserObject();
+
+			// Make sure we have a Tray or a Specimen
+			assert((firstLevelSample.getType().equals("Tray") ||
+					firstLevelSample.getType().equals("Specimen")) == true);
+
+			// Set the Experiment identifier
+			firstLevelSample.setOpenBISExperimentIdentifier(
+					expDescr.getOpenBISIdentifier());
+
+			// Set the Sample identifier to "" since immediate children
+			// of the Experiment do not have a parent sample container
+			firstLevelSample.setOpenBISContainerSampleIdentifier("");
+
+			// Now go over the children
+			for (int j = 0; j < firstLevelSampleNode.getChildCount(); j++ ) {
+
+				// Get the j-th child node
+				CustomTreeNode secondLevelSampleNode =
+						(CustomTreeNode) firstLevelSampleNode.getChildAt(j);
+
+				// Get the Sample Descriptor
+				SampleDescriptor secondLevelSample =
+						(SampleDescriptor) secondLevelSampleNode.getUserObject();
+
+				// Make sure we have a Specimen or a Tube
+				assert((secondLevelSample.getType().equals("Specimen") ||
+						secondLevelSample.getType().equals("Tube")) == true);
+
+				// Set the container sample identifier
+				secondLevelSample.setOpenBISContainerSampleIdentifier(
+						firstLevelSample.getOpenBISIdentifier());
+
+				// Set the experiment identifier 
+				secondLevelSample.setOpenBISExperimentIdentifier(
+						expDescr.getOpenBISIdentifier());
+
+				// Now go over the children
+				for (int k = 0; k < secondLevelSampleNode.getChildCount(); k++ ) {
+
+					// Get the j-th child node
+					CustomTreeNode thirdLevelSampleNode =
+							(CustomTreeNode) secondLevelSampleNode.getChildAt(k);
+
+					// A third-level node can contain a Tube or an FCS file
+					AbstractDescriptor abstractSample = (AbstractDescriptor)
+							thirdLevelSampleNode.getUserObject();
+
+					// Make sure we have a Specimen or a Tube
+					assert((abstractSample.getType().equals("Tube") ||
+							abstractSample.getType().equals("FCSFile"))
+							== true);
+
+					if (abstractSample.getType().equals("Tube")) {
+
+						// Cast
+						SampleDescriptor thirdLevelSample = (SampleDescriptor)
+								thirdLevelSampleNode.getUserObject();
+
+						// Set the container sample identifier
+						thirdLevelSample.setOpenBISContainerSampleIdentifier(
+								secondLevelSample.getOpenBISIdentifier());
+
+						// Set the experiment identifier 
+						thirdLevelSample.setOpenBISExperimentIdentifier(
+								expDescr.getOpenBISIdentifier());
+
+						// And now we set up the associated FCS file
+
+						// Get the child (one!): the FCS file
+						assert(thirdLevelSampleNode.getChildCount() == 1);
+
+						CustomTreeNode fourthLevelSampleNode = (CustomTreeNode)
+								thirdLevelSampleNode.getChildAt(0);
+						DatasetDescriptor fcsFile = (DatasetDescriptor)
+								fourthLevelSampleNode.getUserObject();
+
+						// Set the experiment identifier
+						fcsFile.setOpenBISExperimentIdentifier(
+								expDescr.getOpenBISIdentifier());
+
+						// Set the sample
+						fcsFile.setOpenBISSampleIdentifier(
+								thirdLevelSample.getOpenBISIdentifier());
+
+					} else {
+
+						// Here we have an FCS file
+
+						// Cast
+						DatasetDescriptor fcsFile = (DatasetDescriptor)
+								thirdLevelSampleNode.getUserObject();
+
+						// Set the experiment identifier
+						fcsFile.setOpenBISExperimentIdentifier(
+								expDescr.getOpenBISIdentifier());
+
+						// Set the sample
+						fcsFile.setOpenBISSampleIdentifier(
+								secondLevelSample.getOpenBISIdentifier());
+					}
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * Pair of data and openBIS information to allow mapping following 
+	 * user choice.
+	 * @author Aaron Ponti
+	 */
+	protected class Pair {
 		protected ExperimentNode expNode;
 		protected CustomOpenBISNode projNode;
 
-		protected Glue(FolderNode folderNode, ExperimentNode expNode,
-				CustomOpenBISNode projNode) {
-			this.folderNode = folderNode;
+		protected Pair(ExperimentNode expNode, CustomOpenBISNode projNode) {
 			this.expNode = expNode;
 			this.projNode = projNode;
 		}

@@ -47,53 +47,53 @@ public class CustomTreeToXML {
 		// Get the root node of the JTree
 		CustomTreeNode rootNode = 
 				(CustomTreeNode) tree.getModel().getRoot();
-		
+
 		// We create and save an XML file for each top-level children in the
 		// data model. The name and path of the XML file is obtained from the 
 		// top node.
-		
+
 		// Get all children of the rootNode
 		int nTopLevelChildren = rootNode.getChildCount();
-		
+
 		for (int i = 0; i < nTopLevelChildren; i++) {
 
 			// Get current child
 			CustomTreeNode topNode = (CustomTreeNode) rootNode.getChildAt(i);
-			
+
 			AbstractDescriptor topDescr = 
 					(AbstractDescriptor) topNode.getUserObject();
-			
+
 			// Get the top level descriptor: top level descriptor MUST 
 			// extend the FirstLevelDescriptor abstract class
 			assert (topDescr instanceof FirstLevelDescriptor);
-			
+
 			// Construct the properties file name (which we also use as key
 			// for the map)
 			String key =
-				((FirstLevelDescriptor)topDescr).getPropertiesNameForSaving();
+					((FirstLevelDescriptor)topDescr).getPropertiesNameForSaving();
 
 			// Now build the XML document
 			try {
 				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				document = builder.newDocument();
-				
+
 				Element root = document.createElement("scuOpenBisImporterXml");
 				root.setAttribute("version", "0");
 
 				addNode(document, root, topNode);
-					
+
 				document.appendChild(root);
 
 			} catch (ParserConfigurationException e) {
 				e.printStackTrace();
 			}
-			
+
 			// Store the document
 			documents.put(key, document);
 		}
 
 	}
-	
+
 	/**
 	 * Save the XML document to file
 	 * @param outputDirectory Directory where XML property files are saved
@@ -102,10 +102,10 @@ public class CustomTreeToXML {
 	public boolean saveToFile(String outputDirectory) {
 
 		for (String key: documents.keySet()) {
-			
+
 			// Build the filename (with full path)
 			String filename = outputDirectory + File.separator + key;
-		
+
 			try {
 				Document document = (Document) documents.get(key);
 				Transformer t = 
@@ -122,65 +122,67 @@ public class CustomTreeToXML {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Add a JTree node as a node to the XML document 
 	 * @param parentNode	The XML parent node to which to append current
 	 * @param treeNode		The JTree node to append
 	 */
-    protected void addNode(Document document, Element parentNode,
-    		CustomTreeNode treeNode) {
-    	// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
-    	// This causes a warning in Java > 5.
-    	@SuppressWarnings("unchecked")
-        Enumeration<CustomTreeNode> children = treeNode.children();
-        while (children.hasMoreElements()) {
-            final CustomTreeNode node = children.nextElement();
-            final Element element = createElement(document, node);
-            parentNode.appendChild(element);
-            addNode(document, element, node);
-        }
-    }
+	protected void addNode(Document document, Element parentNode,
+			CustomTreeNode treeNode) {
+		// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
+		// This causes a warning in Java > 5.
+		@SuppressWarnings("unchecked")
+		Enumeration<CustomTreeNode> children = treeNode.children();
+		while (children.hasMoreElements()) {
+			final CustomTreeNode node = children.nextElement();
+			final Element element = createElement(document, node);
+			parentNode.appendChild(element);
+			addNode(document, element, node);
+		}
+	}
 
-    /**
-     * Create an XML node from a JTree node
-     * @param node JTree node from which an XML node is to be created  
-     * @return an XML node
-     */
-    protected Element createElement(Document document, CustomTreeNode node) {
-        final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
-        String tagName = node.getType();
-        String tagAttr = data.toString();
-        Element element;
-        try {
-        	
-        	// Create the element
-        	element = document.createElement(tagName);
-        	
-        	// Store all node attributes
-        	Map<String, String> attributes = data.getAttributes();
-        	for (String key: attributes.keySet() ) {
-        		String value = attributes.get(key);
-        		element.setAttribute(key, value);
-        	}
-        	
-        	// Store the openBIS code and identifier as attributes 
-        	element.setAttribute("openBISCode", data.getOpenBISICode());
-        	element.setAttribute("openBISIdentifier", 
-        			data.getOpenBISIdentifier());
+	/**
+	 * Create an XML node from a JTree node
+	 * @param node JTree node from which an XML node is to be created  
+	 * @return an XML node
+	 */
+	protected Element createElement(Document document, CustomTreeNode node) {
+		final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
+		String tagName = node.getType();
+		String tagAttr = data.toString();
+		Element element;
+		try {
 
-        	// Set the name as an attribute as well
-        	element.setAttribute("name", tagAttr);
+			// Create the element
+			element = document.createElement(tagName);
 
-        } catch (DOMException e) {
-        	System.err.println("Element with name " + tagName + 
-        			" could not be created.");
-        	element = document.createElement("invalid");
-        }
-        return element;
-    }    
+			// Store all openBIS node attributes
+			Map<String, String> openBISAttributes = data.getOpenBISAttributes();
+			for (String key: openBISAttributes.keySet() ) {
+				String value = openBISAttributes.get(key);
+				element.setAttribute(key, value);
+			}
+
+			// Store all node attributes
+			Map<String, String> attributes = data.getAttributes();
+			for (String key: attributes.keySet() ) {
+				String value = attributes.get(key);
+				element.setAttribute(key, value);
+			}
+
+			// Set the name as an attribute as well
+			element.setAttribute("name", tagAttr);
+
+		} catch (DOMException e) {
+			System.err.println("Element with name " + tagName + 
+					" could not be created.");
+			element = document.createElement("invalid");
+		}
+		return element;
+	}    
 }
 

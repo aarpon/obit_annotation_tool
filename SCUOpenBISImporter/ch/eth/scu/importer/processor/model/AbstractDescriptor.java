@@ -15,97 +15,73 @@ import java.util.Map;
  * @author Aaron Ponti
  */
 abstract public class AbstractDescriptor {
-	
-	/* Protected member variables */
-	
+
 	/**
 	 * Name of the entity.
 	 * 
 	 * This is displayed e.g. in the tree viewers.
 	 */
 	protected String name = "";
-	
+
 	/**
 	 * String-string map of attribute key:value pair.
 	 * 
 	 * These will be uploaded to openBIS as associated information.
 	 */
 	protected Map<String, String> attributes = new Hashtable<String, String>();
-	
+
 	/**
-	 * openBIS identifier associated to the entity.
+	 * String-string map of openBIS attribute key:value pair.
+	 * 
+	 * These will be uploaded to openBIS as associated information.
 	 */
-	protected String openBISIdentifier = "";
-	
-	/**
-	 * openBIS code associated to the entity.
-	 */
-	protected String openBISCode = "";
-	
-	/**
-	 * If true, the openBIS identifiers and code must be set.
-	 */
-	protected boolean mustBeProvided = false;
+	protected Map<String, String> openBISAttributes = 
+			new Hashtable<String, String>();
 
 	/**
 	 * Return a simplified class name to be used in the tree viewers (and XML).
 	 * @return simplified class name.
 	 */
 	abstract public String getType();
-		
+
 	/**
 	 * Return the name of the entity.
 	 * @return the name of the entity.
 	 */
 	public String getName() { return name; }
-	
+
 	/**
 	 * Sets the name of the entity.
 	 */
 	public void setName(String name) { this.name = name; }
-	
-	/**
-	 * Return the openBIS identifier of the entity.
-	 */
-	public String getOpenBISIdentifier() { return openBISIdentifier; }
 
 	/**
-	 * Sets the openBIS identifier of the entity.
+	 * Return the openBIS identifier of the entity. This is used to get or
+	 * create the openBIS entity associated to this Descriptor.
 	 */
-	public void setOpenBISIdentifier(String openBISIdentifier) { 
-		this.openBISIdentifier = openBISIdentifier; 
+	public String getOpenBISIdentifier() {
+		return "";
 	}
-	
-	/**
-	 * Return the openBIS code of the entity.
-	 */
-	public String getOpenBISICode() { return openBISCode; }
 
 	/**
-	 * Sets the openBIS code of the entity.
+	 * Return the openBIS code of the entity (based on its name).
 	 */
-	public void setOpenBISCode(String openBISCode) { 
-		this.openBISCode = openBISCode; 
+	public String getOpenBISCode() { 
+		return name.replaceAll(" ", "_").toUpperCase();
 	}
-	
-	/**
-	 * Return true if both openBIS code and identifier must be provided
-	 * (because they are needed to map to openBIS), false otherwise
-	 */
-	public boolean mustBeProvided() { return mustBeProvided; }
-	
+
 	/**
 	 * Return a string representation of the entity.
 	 * @return string representation of the entity.
 	 */
 	public String toString() { return name; }
-	
+
 	/**
 	 * Return the entity attributes.
 	 * @return a string-string map with attribute name : value pairs.
 	 */
 	public Map<String, String> getAttributes() { return attributes; }
-	
+
 	/**
 	 * Sets the entity attributes.
 	 */
@@ -114,12 +90,36 @@ abstract public class AbstractDescriptor {
 	}
 
 	/**
+	 * Return the entity openBIS attributes.
+	 * @return a string-string map with attribute name : value pairs.
+	 */
+	public Map<String, String> getOpenBISAttributes() { 
+		return openBISAttributes; 
+	}
+
+	/**
+	 * Sets the entity openBIS attributes.
+	 */
+	public void setOpenBISAttributes(Map<String, String> openBISAttributes) { 
+		this.openBISAttributes = openBISAttributes; 
+	}
+
+	/**
 	 * Returns the entity attributes in a comma-separated list.
 	 * @return a comma-separated list of attribute name : value pairs.
-	 */		
+	 */
 	public String attributesToString() {
 		String str = attributes.toString();
 		return str.substring(1, str.length() - 1);
 	}
-	
+
+	/**
+	 * Returns the entity openBIS attributes in a comma-separated list.
+	 * @return a comma-separated list of attribute name : value pairs.
+	 */		
+	public String openBISAttributesToString() {
+		String str = openBISAttributes.toString();
+		return str.substring(1, str.length() - 1);
+	}
+
 }

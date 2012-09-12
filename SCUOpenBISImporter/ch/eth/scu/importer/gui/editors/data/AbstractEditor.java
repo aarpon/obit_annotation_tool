@@ -43,14 +43,20 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 * @param arg Argument
 	 */
 	public void update(Observable obs, Object arg) {
-		render();
+		try {
+			render();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
 	 * Function that creates and render all required widgets when both data 
 	 * and openBIS viewers have notified that their data model is ready. 
+	 * @throws Exception if some of the openBIS identifiers cannot be computed
 	 */
-	abstract public void render();
+	abstract public void render() throws Exception;
 	
 	/**
 	 * Return the reference to the JPanel to be added to a container component

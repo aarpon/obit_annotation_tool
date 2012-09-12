@@ -1,8 +1,10 @@
 package ch.eth.scu.importer.processor;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
+import ch.eth.scu.importer.processor.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processor.model.SampleDescriptor;
+import ch.eth.scu.importer.processor.model.DatasetDescriptor;
 
 import java.io.*;
 import java.util.*;
@@ -30,7 +32,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	protected File incomingDir;
 
 	/* Public instance variables */
-	public FolderDescriptor folderDescriptor = null;
+	public Folder folderDescriptor = null;
 
 	/**
 	 * Constructor
@@ -55,7 +57,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		this.topFolder = folder;
 
 		// Create a RootDescriptor
-		folderDescriptor = new FolderDescriptor(folder); 
+		folderDescriptor = new Folder(folder); 
 
 	}
 
@@ -132,7 +134,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 			
 			// We ignore any file that is not an fcs file - but we pay 
-			// attention to the existance of XML files that indicate an
+			// attention to the existence of XML files that indicate an
 			// Experiment export!
 			String fileName = file.getName();
 			int indx = fileName.lastIndexOf(".");
@@ -158,13 +160,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 		
 			// Create a new ExperimentDescriptor or reuse an existing one
-			ExperimentDescriptor expDesc;
+			Experiment expDesc;
 			String experimentName = getExperimentName(processor);
 			if (folderDescriptor.experiments.containsKey(experimentName) ) {
 				expDesc = folderDescriptor.experiments.get(experimentName);
 			} else {
 				expDesc = 
-						new ExperimentDescriptor(getExperimentName(processor));
+						new Experiment(getExperimentName(processor));
 				// Store attributes
 				expDesc.setAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentName, expDesc);
@@ -174,14 +176,14 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			if (identifyContainerType(processor).equals("TRAY")) {
 				
 				// Create a new TrayDescriptor or reuse an existing one
-				TrayDescriptor trayDesc;
+				Tray trayDesc;
 				String trayName = getTrayName(processor);
 				String trayKey = experimentName + "_" + trayName;
 				if (expDesc.trays.containsKey(trayKey) ) {
 					trayDesc = expDesc.trays.get(trayKey);
 				} else {
 					trayDesc = 
-							new TrayDescriptor(trayName);
+							new Tray(trayName);
 					// Store attributes
 					trayDesc.setAttributes(getTrayAttributes(processor));
 					// Store it in the experiment descriptor
@@ -189,14 +191,14 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				}
 				
 				// Create a new Specimen or reuse an existing one
-				SpecimenDescriptor specDesc;
+				Specimen specDesc;
 				String specName = getSpecimenName(processor);
 				String specKey = trayKey + "_" + specName;
 				if (trayDesc.specimens.containsKey(specKey) ) {
 					specDesc = trayDesc.specimens.get(specKey);
 				} else {
 					specDesc = 
-							new SpecimenDescriptor(specName);
+							new Specimen(specName);
 					// Store attributes
 					specDesc.setAttributes(getSpecimenAttributes(processor));
 					// Store it in the tray descriptor
@@ -204,11 +206,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				}
 				
 				// Create a new Tube descriptor or reuse an existing one
-				TubeDescriptor tubeDesc;
+				Tube tubeDesc;
 				String tubeName = getTubeName(processor);
 				String tubeKey = specKey + "_" + tubeName;
 				if (! specDesc.tubes.containsKey(tubeKey) ) {
-					tubeDesc = new TubeDescriptor(tubeName,
+					tubeDesc = new Tube(tubeName,
 							file.getCanonicalPath());
 					// Store attributes
 					tubeDesc.setAttributes(getTubeAttributes(processor));
@@ -219,14 +221,14 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			} else {
 				
 				// Create a new Specimen or reuse an existing one
-				SpecimenDescriptor specDesc;
+				Specimen specDesc;
 				String specName = getSpecimenName(processor);
 				String specKey = experimentName + "_" + specName;
 				if (expDesc.specimens.containsKey(specKey) ) {
 					specDesc = expDesc.specimens.get(specKey);
 				} else {
 					specDesc = 
-							new SpecimenDescriptor(specName);	
+							new Specimen(specName);	
 					// Store attributes
 					specDesc.setAttributes(getSpecimenAttributes(processor));
 					// Store it in the experiment descriptor
@@ -234,11 +236,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				}
 				
 				// Create a new Tube descriptor or reuse an existing one
-				TubeDescriptor tubeDesc;
+				Tube tubeDesc;
 				String tubeName = getTubeName(processor);
 				String tubeKey = specKey + "_" + tubeName;
 				if (! specDesc.tubes.containsKey(tubeKey) ) {
-					tubeDesc = new TubeDescriptor(tubeName,
+					tubeDesc = new Tube(tubeName,
 							file.getCanonicalPath());	
 					// Store attributes
 					tubeDesc.setAttributes(getTubeAttributes(processor));
@@ -279,28 +281,28 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
-			ExperimentDescriptor e = folderDescriptor.experiments.get(expKey);
+			Experiment e = folderDescriptor.experiments.get(expKey);
 			
 			str +=  "[ Experiment ], name: " + e.getName() + " (" +
 					e.attributesToString() + ").\n";
 
 			for (String trayKey : e.trays.keySet()) {
 
-				TrayDescriptor t = e.trays.get(trayKey);
+				Tray t = e.trays.get(trayKey);
 				
 				str +=  "|__[ Tray ], name: " + t.getName() + " (" +
 						t.attributesToString() + ").\n";
 
 				for (String specimenKey : t.specimens.keySet()) {
 
-					SpecimenDescriptor s = t.specimens.get(specimenKey);
+					Specimen s = t.specimens.get(specimenKey);
 					
 					str +=  "|____[ Specimen ], name: " + s.getName() + 
 							" (" +	s.attributesToString() + ").\n";
 
 					for (String tubeKey : s.tubes.keySet()) {
 
-						TubeDescriptor tb =  s.tubes.get(tubeKey);
+						Tube tb =  s.tubes.get(tubeKey);
 						
 						str +=  "|______[ Tube ], name: " + tb.getName() +
 								" (" + tb.attributesToString() + ").\n";
@@ -314,14 +316,14 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 			for (String specimenKey : e.specimens.keySet()) {
 
-				SpecimenDescriptor s = e.specimens.get(specimenKey);
+				Specimen s = e.specimens.get(specimenKey);
 				
 				str +=  "|__[ Specimen ], name: " + s.getName() + "(" +
 						s.attributesToString() + ").\n";
 
 				for (String tubeKey : s.tubes.keySet()) {
 
-					TubeDescriptor tb = s.tubes.get(tubeKey);
+					Tube tb = s.tubes.get(tubeKey);
 					
 					str +=  "|____[ Tube ], name: " + tb.getName() + " (" +
 							tb.attributesToString() + ").\n";
@@ -341,12 +343,12 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Descriptor that represents a folder containing a dataset. 
 	 * @author Aaron Ponti
 	 */
-	public class FolderDescriptor extends FirstLevelDescriptor {
+	public class Folder extends FirstLevelDescriptor {
 		
-		public Map<String, ExperimentDescriptor> experiments = 
-				new LinkedHashMap<String, ExperimentDescriptor>();
+		public Map<String, Experiment> experiments = 
+				new LinkedHashMap<String, Experiment>();
 		
-		public FolderDescriptor(File fullFolder) {
+		public Folder(File fullFolder) {
 			
 			// Set the descriptor name
 			this.name = fullFolder.getName();
@@ -406,7 +408,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
      * TODO Add the attributes!
 	 * @author Aaron Ponti
 	 */
-	public class ExperimentDescriptor extends AbstractDescriptor {
+	public class Experiment extends ExperimentDescriptor {
 
 		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
@@ -414,20 +416,20 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		/**
 		 * ArrayList of Tray's
 		 */
-		public Map<String, TrayDescriptor> trays = 
-				new LinkedHashMap<String, TrayDescriptor>();
+		public Map<String, Tray> trays = 
+				new LinkedHashMap<String, Tray>();
 
 		/**
 		 * ArrayList of Specimen's
 		 */
-		public Map<String, SpecimenDescriptor> specimens = 
-				new LinkedHashMap<String, SpecimenDescriptor>();
+		public Map<String, Specimen> specimens = 
+				new LinkedHashMap<String, Specimen>();
 
 		/**
 		 * Constructor
 		 * @param name Name of the experiment.
 		 */
-		public ExperimentDescriptor(String name) {
+		public Experiment(String name) {
 			
 			this.name = name;
 
@@ -450,7 +452,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * An FCS File is always a child of a Tube.
 	 * @author Aaron Ponti
 	 */
-	public class FCSFileDescriptor extends AbstractDescriptor {
+	public class FCSFile extends DatasetDescriptor {
 
 		private String fullFileName = "";
 		private String relativeFileName = "";
@@ -459,7 +461,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * Constructor.
 		 * @param fcsFileName FCS file name with full path
 		 */
-		public FCSFileDescriptor(String fcsFileName) throws IOException {
+		public FCSFile(String fcsFileName) throws IOException {
 
 			// Store the file name
 			this.fullFileName = fcsFileName;
@@ -534,21 +536,21 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * TODO Add the attributes!	
 	 * @author Aaron Ponti
 	 */
-	public class SpecimenDescriptor extends AbstractDescriptor {
+	public class Specimen extends SampleDescriptor {
 	
 		/* Public instance variables */
 	
 		/**
 		 * ArrayList of Tube's
 		 */			
-		public Map<String, TubeDescriptor> tubes =
-				new LinkedHashMap<String, TubeDescriptor>();
+		public Map<String, Tube> tubes =
+				new LinkedHashMap<String, Tube>();
 	
 		/**
 		 * Constructor.
 		 * @param name Name of the specimen
 		 */
-		public SpecimenDescriptor(String name) {
+		public Specimen(String name) {
 	
 			this.name = name;
 	
@@ -569,21 +571,21 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Descriptor representing a tray obtained from the FCS file.
 	 * @author Aaron Ponti
 	 */
-	public class TrayDescriptor extends AbstractDescriptor {
+	public class Tray extends SampleDescriptor {
 	
 		/* Public instance variables */
 	
 		/**
 		 * ArrayList of Specimen's
 		 */
-		public Map<String, SpecimenDescriptor> specimens = 
-				new LinkedHashMap<String, SpecimenDescriptor>();
+		public Map<String, Specimen> specimens = 
+				new LinkedHashMap<String, Specimen>();
 	
 		/**
 		 * Constructor
 		 * @param name name of the Tray.
 		 */
-		public TrayDescriptor(String name) {
+		public Tray(String name) {
 	
 			this.name = name;
 
@@ -607,9 +609,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * TODO Add the attributes!
 	 * @author Aaron Ponti
 	 */
-	public class TubeDescriptor extends AbstractDescriptor {
+	public class Tube extends SampleDescriptor {
 		
-		public FCSFileDescriptor fcsFile;
+		public FCSFile fcsFile;
 		
 		/**
 		 * Constructor.
@@ -618,13 +620,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * with the Tube.
 		 * @throws IOException 
 		 */
-		public TubeDescriptor(String name, String fcsFullFileName) 
+		public Tube(String name, String fcsFullFileName) 
 				throws IOException {
 	
 			this.name = name;
 
 			// Associate the FCS file to the Tube
-			fcsFile = new FCSFileDescriptor(fcsFullFileName);
+			fcsFile = new FCSFile(fcsFullFileName);
 
 		}
 	

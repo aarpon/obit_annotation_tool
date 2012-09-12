@@ -9,23 +9,21 @@ import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.data.model.SpecimenNode;
 import ch.eth.scu.importer.gui.viewers.data.model.TrayNode;
 import ch.eth.scu.importer.gui.viewers.data.model.TubeNode;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor;
 import ch.eth.scu.importer.processor.FCSProcessor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.ExperimentDescriptor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.SpecimenDescriptor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.TrayDescriptor;
-import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.TubeDescriptor;
+import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor;
+import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Specimen;
+import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Tray;
+import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Experiment;
+import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Tube;
 import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 import java.awt.event.*;
 
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.io.FileFilter;
 
@@ -121,30 +119,30 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 		// Print the attributes
 		String className = nodeInfo.getClass().getName();
-		if (className.endsWith("ExperimentDescriptor")) { 
+		if (className.endsWith("Experiment")) { 
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.ExperimentDescriptor) 
+					((BDFACSDIVAFCSProcessor.Experiment) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.endsWith("TrayDescriptor")) { 
+		} else if (className.endsWith("Tray")) { 
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.TrayDescriptor) 
+					((BDFACSDIVAFCSProcessor.Tray) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.endsWith("SpecimenDescriptor")) { 
+		} else if (className.endsWith("Specimen")) { 
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.SpecimenDescriptor) 
+					((BDFACSDIVAFCSProcessor.Specimen) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.endsWith("TubeDescriptor")) {
+		} else if (className.endsWith("Tube")) {
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.TubeDescriptor) 
+					((BDFACSDIVAFCSProcessor.Tube) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));			
-		} else if (className.endsWith("FCSFileDescriptor")) {
+		} else if (className.endsWith("FCSFile")) {
 			// Cast
-			BDFACSDIVAFCSProcessor.FCSFileDescriptor fcsFile = 
-					(BDFACSDIVAFCSProcessor.FCSFileDescriptor) nodeInfo;
+			BDFACSDIVAFCSProcessor.FCSFile fcsFile = 
+					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;
 			String fcsFileName = fcsFile.getFileName();
 			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
 			String out = "";
@@ -166,7 +164,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 * @param rootNode Root node
 	 */
 	protected void createNodes(CustomTreeNode top,
-			BDFACSDIVAFCSProcessor.FolderDescriptor folderDescriptor) {
+			BDFACSDIVAFCSProcessor.Folder folderDescriptor) {
 		
 		ExperimentNode experiment = null;
 		TrayNode tray = null;
@@ -177,7 +175,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
 			// Get the ExperimentDescriptor
-			ExperimentDescriptor e = 
+			Experiment e = 
 					folderDescriptor.experiments.get(expKey);
 
 			// Add the experiments
@@ -187,7 +185,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			for (String trayKey: e.trays.keySet()) {
 
 				// Get the TrayDescriptor
-				TrayDescriptor t  = e.trays.get(trayKey);
+				Tray t  = e.trays.get(trayKey);
 				
 				// Add the trays
 				tray = new TrayNode(t);
@@ -196,7 +194,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				for (String specKey : t.specimens.keySet()) {
 
 					// Get the SpecimenDescriptor
-					SpecimenDescriptor s = t.specimens.get(specKey);
+					Specimen s = t.specimens.get(specKey);
 					
 					// Add the specimens
 					specimen = new SpecimenNode(s);
@@ -205,7 +203,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 					for (String tubeKey : s.tubes.keySet()) {
 
 						// Get the TubeDescriptor
-						TubeDescriptor tb  = s.tubes.get(tubeKey);
+						Tube tb  = s.tubes.get(tubeKey);
 						
 						// Add the tubes
 						tube = new TubeNode(tb);
@@ -223,7 +221,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			for (String specKey : e.specimens.keySet()) {
 
 				// Get the SpecimenDescriptor
-				SpecimenDescriptor s = e.specimens.get(specKey);
+				Specimen s = e.specimens.get(specKey);
 				
 				// Add the specimens
 				specimen = new SpecimenNode(s);
@@ -232,7 +230,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				for (String tubeKey : s.tubes.keySet()) {
 
 					// Get the TubeDescriptor
-					TubeDescriptor tb = s.tubes.get(tubeKey);
+					Tube tb = s.tubes.get(tubeKey);
 					
 					// Add the tubes
 					tube = new TubeNode(tb);

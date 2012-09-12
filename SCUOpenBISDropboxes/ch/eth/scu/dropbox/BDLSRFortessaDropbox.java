@@ -1,7 +1,12 @@
 package ch.eth.scu.dropbox;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,6 +36,11 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	 */
 	private IDataSetRegistrationTransactionV2 transaction;
 	
+	private BufferedWriter out;
+	
+	final String LOGFILE = 
+			"/local0/openbis/sprint/servers/core-plugins/scu/1/dss/drop-boxes/bdlsrfortessa-dropbox/logs/BDLSRLog.txt";
+
 	/**
 	 * Parsed XML document
 	 */
@@ -39,7 +49,6 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	@Override
     public void process(IDataSetRegistrationTransactionV2 transaction)
     {
-		
 		// Store the transaction reference
 		this.transaction = transaction;
 		
@@ -47,19 +56,41 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		File incoming = transaction.getIncoming();
 		
 		// TODO DEBUG INFO TO REMOVE
-		System.out.println("Incoming: " + incoming.getAbsolutePath());
+		logToFile("Incoming: " + incoming.getAbsolutePath());
 		
-		// Find the related <incoming>_properties.six file
-		File properties = buildPropertiesFileName(incoming);
+		// Incoming is the 'user' folder. Experiments are sub-folders within 
+		// incoming. So, we scan incoming for sub-folders and return them.
+		File[] subFolders = scanIncomingForSubFolders(incoming);
+		
+		// Now we process (and ultimately register) all subfolders
+		for (File subfolder : subFolders) {
+			logToFile("Processing: " + subfolder.getName());
+			processSubFolder(subfolder);
+		}
+    }
+
+	/**
+	 * Process the experiment contained in the given subfolder. The processing
+	 * is a multi-step that results in the registration in openBIS. 
+	 * @param subfolder Full path name of the subfolder to process.
+	 */
+	private void processSubFolder(File subfolder) {
+		
+		// Find the related <>_properties.six file
+		File properties = getPropertiesFileName(subfolder);
 		if (properties == null) {
 			// TODO Handle the case the properties file could not be generated!
 			// This happens if incoming is a file, or if an exception is thrown
+			logToFile("ERROR: Could not find properties file for subfolder " +
+					subfolder.getName());
 			return;
 		}
 		
 		// Make sure the properties file exists
 		if (properties.exists() == false) {
 			// TODO Handle the case where the properties file does not exist!
+			logToFile("ERROR: The properties file for subfolder " +
+					subfolder.getName() + " does not exist!");
 			return;
 		}
 
@@ -67,43 +98,50 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		readPropertiesFile(properties);
 		if (doc == null) {
 			// TODO Handle the case where the properties file cannot be parsed!
+			logToFile("ERROR: Could not parse properties file for subfolder " +
+					subfolder.getName());
 			return;
 		}
 		
 		// Use the information in the XML file to register the data set
 		if (!register()) {
+			logToFile("ERROR: Could not register data in subfolder " +
+					subfolder.getName());
 			// TODO Handle failed processing
 		}
-    }
-	
+		
+	}	
+
 	/**
-	 * Build properties file name from the name of the incoming directory
-	 * @return <incoming>_properties.six file
+	 * Return the properties file name for the given subfolder
+	 * @return the <>_properties.six full file name
 	 */
-	private File buildPropertiesFileName(File incoming) {
+	private File getPropertiesFileName(File subfolder) {
 		
 		// Incoming must be a directory
-		if (! incoming.isDirectory()) {
+		if (! subfolder.isDirectory()) {
+			logToFile("ERROR: Subfolder " + subfolder + " is not a directory");
 			return null;
 		}
 		
-		// Get full incoming name 
-		String incomingName;
-		try {
-			incomingName = incoming.getCanonicalPath();
-		} catch (IOException e) {
-			// TODO Handle the case one cannot get the incoming path!
+		File[] propertyFiles = subfolder.listFiles(
+				new FilenameFilter() {
+					public boolean accept(File file, String name) {
+						return name.toLowerCase().endsWith("_properties.six");
+					}
+				});
+		if (propertyFiles.length != 1) {
+			logToFile("ERROR: Exactly ONE _properties.six file must be in " +
+					"an experiment subfolder!" );
 			return null;
 		}
-		
-		// TODO DEBUG INFO TO REMOVE
-		System.out.println("Properties.six file: " + incomingName + "_properties.six");
 
-		// Since incoming is a directory, we just append _properties.six
-		// to the canonical path
-		return new File(incomingName + "_properties.six");
+		// TODO DEBUG INFO TO REMOVE
+		logToFile("Properties.six file: " + propertyFiles[0]);
+
+		return propertyFiles[0];
 	}
-	
+
 	/**
 	 * Read the properties XML file and returns a Document
 	 * @param properties <incoming>_properties.six file 
@@ -153,6 +191,8 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 			return false;
 		}
 		
+		logToFile("Registering...");
+		
 		// Get the root node
 		Node rootNode = doc.getDocumentElement();
 
@@ -170,7 +210,15 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 			
 			// Process the experiment
 			IExperimentUpdatable openBISExperiment = processExperiment(e);
-			
+
+			if (openBISExperiment != null ) {
+				logToFile("Experiment processed successfully.");
+			} else {
+				logToFile("ERROR: Failure processing Experiment!");
+			}
+
+			logToFile("Iterating over Experiment children.");
+
 			// Iterate over current Experiment children
 			NodeList expChildren = e.getChildNodes();
 			for ( int j = 0; j < expChildren.getLength(); j++ ) {
@@ -180,6 +228,8 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 				String type = c.getNodeName();
 				
 				if (type.equals("Specimen")) {
+					
+					logToFile("Processing Specimen.");
 					
 					// Process the Specimen
 					ISample openBISSpecimen = processSpecimen(c, 
@@ -204,6 +254,8 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 					}
 					
 				} else if (type.equals("Tray")) {
+					
+					logToFile("Processing Tray.");
 					
 					// Process a Tray
 					ISample openBISTray = processTray(c, openBISExperiment);
@@ -273,11 +325,14 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String openBISIdentifier =
 				attr.getNamedItem("openBISIdentifier").getNodeValue();
 		
+		logToFile("Get/create experiment: " + openBISIdentifier );
+		
 		// TODO Store the Experiment type in the _properties.six file
 		String expType = "UNKNOWN";
-	
+		
 		// Get the Experiment
-		openBISExperiment = transaction.getExperimentForUpdate(openBISIdentifier);
+		openBISExperiment = 
+				transaction.getExperimentForUpdate(openBISIdentifier);
 		if (openBISExperiment == null) {
 			// Create the Experiment
 			openBISExperiment = transaction.createNewExperiment(
@@ -309,6 +364,8 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String name = 
 				attr.getNamedItem("name").getNodeValue();
 		
+		logToFile("Processing Tray " + name);
+		
 		// Make an openBISCode from the name
 		String openBISCode = name.replaceAll(" ", "_").toUpperCase();
 		
@@ -316,14 +373,27 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		String openBISIdentifier =
 				exp.getExperimentIdentifier() + "/" + openBISCode;
 		
+		logToFile("Tray has identifier: " + openBISIdentifier);
+		
 		// TODO Map tray_type from the Fortessa software to an openBIS 
 		// sample type
-		String tray_type = 
-				attr.getNamedItem("tray_type").getNodeValue();
+		String tray_type = "";
+		Node trayTypeNode = attr.getNamedItem("tray_type");
+		if (trayTypeNode == null ) {
+			tray_type = "UNKNOWN";
+		} else {
+			tray_type = trayTypeNode.getNodeValue();
+		}
+		String trayGeometry = "96 Wells, 8x12";
+		
+		logToFile("Tray has type: " + tray_type);
 		
 		// TODO This should be mapped from the tray_type
 		String openBISSampleType = "PLATE";
 
+		logToFile("Creating new Tray with identifier: " + openBISIdentifier + 
+				" and sample type: " + openBISSampleType);
+		
 		// The sample should NOT exist!
 		// TODO make sure to handle properly the case where the sample already
 		// exists!
@@ -333,9 +403,12 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 					openBISIdentifier, openBISSampleType);
 		}
 		
+		logToFile("Created/Obtained new Tray with identifier: " + 
+				openBISIdentifier + " and sample type: " + openBISSampleType);
+
 		// TODO Set all required properties
 		openBISTray.setPropertyValue("DESCRIPTION", name);
-		//Tray.setPropertyValue("$PLATE_GEOMETRY", mapped_tray_type);
+		openBISTray.setPropertyValue("$PLATE_GEOMETRY", trayGeometry);
 		
 		return openBISTray;
 	}
@@ -508,6 +581,37 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		// TODO Assign the file to experiment as well!
 		
 		return openBISTube;
+	}
+	
+	/**
+	 * Logs the message to file
+	 * @param message String to be logged to file
+	 */
+	private void logToFile(String message) {
+		try {
+			out = new BufferedWriter(new FileWriter(LOGFILE, true));
+			out.write((new Date()).toString() + ": " + message + "\n");
+			out.close();
+		} catch (IOException e) {
+			System.err.println("Error: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * The incoming folder is the user folder. The experiment folders are 
+	 * subfolders of incoming. This function returns all direct subfolders of
+	 * incoming
+	 * @param incoming Full path to the incoming folder
+	 * @return Array of subfolders
+	 */
+	private File[] scanIncomingForSubFolders(File incoming) {
+		File[] subFolders = incoming.listFiles(
+				new FileFilter() {
+					public boolean accept(File file) {
+						return file.isDirectory();
+					}
+				});	
+		return subFolders;
 	}
 
 }
