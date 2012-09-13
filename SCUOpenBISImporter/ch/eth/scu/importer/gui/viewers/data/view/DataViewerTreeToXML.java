@@ -21,7 +21,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 
@@ -31,7 +31,7 @@ import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
  * @author Aaron Ponti
  *
  */
-public class CustomTreeToXML {
+public class DataViewerTreeToXML {
 
 	Map<String, Document> documents = new Hashtable<String, Document>();
 
@@ -39,14 +39,14 @@ public class CustomTreeToXML {
 	 * Constructor
 	 * @param tree Custom JTree
 	 */
-	public CustomTreeToXML(CustomTree tree) {
+	public DataViewerTreeToXML(DataViewerTree tree) {
 
 		DocumentBuilder builder;
 		Document document = null;
 
 		// Get the root node of the JTree
-		CustomTreeNode rootNode = 
-				(CustomTreeNode) tree.getModel().getRoot();
+		AbstractNode rootNode = 
+				(AbstractNode) tree.getModel().getRoot();
 
 		// We create and save an XML file for each top-level children in the
 		// data model. The name and path of the XML file is obtained from the 
@@ -58,7 +58,7 @@ public class CustomTreeToXML {
 		for (int i = 0; i < nTopLevelChildren; i++) {
 
 			// Get current child
-			CustomTreeNode topNode = (CustomTreeNode) rootNode.getChildAt(i);
+			AbstractNode topNode = (AbstractNode) rootNode.getChildAt(i);
 
 			AbstractDescriptor topDescr = 
 					(AbstractDescriptor) topNode.getUserObject();
@@ -132,13 +132,13 @@ public class CustomTreeToXML {
 	 * @param treeNode		The JTree node to append
 	 */
 	protected void addNode(Document document, Element parentNode,
-			CustomTreeNode treeNode) {
+			AbstractNode treeNode) {
 		// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
 		// This causes a warning in Java > 5.
 		@SuppressWarnings("unchecked")
-		Enumeration<CustomTreeNode> children = treeNode.children();
+		Enumeration<AbstractNode> children = treeNode.children();
 		while (children.hasMoreElements()) {
-			final CustomTreeNode node = children.nextElement();
+			final AbstractNode node = children.nextElement();
 			final Element element = createElement(document, node);
 			parentNode.appendChild(element);
 			addNode(document, element, node);
@@ -150,7 +150,7 @@ public class CustomTreeToXML {
 	 * @param node JTree node from which an XML node is to be created  
 	 * @return an XML node
 	 */
-	protected Element createElement(Document document, CustomTreeNode node) {
+	protected Element createElement(Document document, AbstractNode node) {
 		final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
 		String tagName = node.getType();
 		String tagAttr = data.toString();

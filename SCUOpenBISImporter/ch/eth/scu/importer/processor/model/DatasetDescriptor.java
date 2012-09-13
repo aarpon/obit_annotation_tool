@@ -20,16 +20,16 @@ public class DatasetDescriptor extends AbstractDescriptor{
 	}
 	
 	/**
-	 * Get the openBIS project identifier
-	 * @return the openBIS project identifier
+	 * Get the openBIS experiment identifier
+	 * @return the openBIS experiment identifier
 	 */
 	public String getOpenBISExperimentIdentifier() {
 		return openBISExperimentID;
 	}
 	
 	/**
-	 * Set the openBIS experiment ID 
-	 * @param openBISExperimentID The openBIS experiment ID
+	 * Set the openBIS experiment identifier 
+	 * @param openBISExperimentID The openBIS experiment identifier
 	 */
 	public void setOpenBISExperimentIdentifier(String openBISExperimentID) {
 		this.openBISExperimentID = openBISExperimentID;
@@ -44,8 +44,8 @@ public class DatasetDescriptor extends AbstractDescriptor{
 	}
 	
 	/**
-	 * Set the openBIS sample ID 
-	 * @param openBISExperimentID The openBIS sample ID
+	 * Set the openBIS sample identifier 
+	 * @param openBISSampleID The openBIS sample identifier
 	 */
 	public void setOpenBISSampleIdentifier(String openBISSampleID) {
 		this.openBISSampleID = openBISSampleID;

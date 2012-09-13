@@ -20,8 +20,8 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
-import ch.eth.scu.importer.gui.viewers.data.view.CustomTree;
-import ch.eth.scu.importer.gui.viewers.data.view.CustomTreeToXML;
+import ch.eth.scu.importer.gui.viewers.data.view.DataViewerTree;
+import ch.eth.scu.importer.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.processor.model.RootDescriptor;
 
 /**
@@ -33,7 +33,7 @@ abstract public class AbstractViewer extends Observable
 
 	protected JPanel panel;
 	protected JEditorPane htmlPane;
-	protected CustomTree tree;
+	protected DataViewerTree tree;
 	protected JLabel title;
 	protected DefaultMutableTreeNode rootNode;
 	protected JScrollPane treeView;
@@ -191,7 +191,7 @@ abstract public class AbstractViewer extends Observable
 		rootNode = new RootNode(new RootDescriptor("/"));
 
 		// Create a tree that allows one selection at a time.
-		tree = new CustomTree(rootNode);
+		tree = new DataViewerTree(rootNode);
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		
@@ -219,7 +219,7 @@ abstract public class AbstractViewer extends Observable
 	 */	
 	public boolean saveToXML(String outputDirectory) {
 		
-		CustomTreeToXML treeToXML = new CustomTreeToXML(tree);
+		DataViewerTreeToXML treeToXML = new DataViewerTreeToXML(tree);
 		return (treeToXML.saveToFile(outputDirectory));
 	
 	}

@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.model.RootDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class RootNode extends CustomTreeNode {
+public class RootNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,6 +17,7 @@ public class RootNode extends CustomTreeNode {
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("root.png"));
+		return new javax.swing.ImageIcon(
+				getClass().getResource("./icons/root.png"));
 	}
 }

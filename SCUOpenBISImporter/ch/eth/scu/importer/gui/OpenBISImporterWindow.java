@@ -136,9 +136,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// React to the context menu
 		if (e.getActionCommand().equals("Log in")) {
-			boolean status = false;
-			while (status == false) {
-				status = spaceViewer.login();
+			boolean status = spaceViewer.login();
+			if (status == true) {
+				spaceViewer.scan();
 			}
 		} else if (e.getActionCommand().equals("Log out")) {
 			spaceViewer.logout();
@@ -159,23 +159,23 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private void addButtons() {
 
 		// Quit
-        toolBar.add(createButton("quit.png", "Quit",
+        toolBar.add(createButton("./icons/quit.png", "Quit",
         		"Quit", "Quit the application"));
 
         toolBar.addSeparator();
 
         // Log in
-        toolBar.add(createButton("login.png", "Log in",
+        toolBar.add(createButton("./icons/login.png", "Log in",
         		"Log in", "Log in to openBIS"));
 
         // Log out
-        toolBar.add(createButton("logout.png", "Log out",
+        toolBar.add(createButton("./icons/logout.png", "Log out",
         		"Log out", "Log out from openBIS"));
 
         toolBar.addSeparator();
 
         // Scan incoming file
-        toolBar.add(createButton("fileopen.png", "Scan",
+        toolBar.add(createButton("./icons/scan.png", "Scan",
         		"Scan", "Scan data mover incoming folder"));
      }
 	

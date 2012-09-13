@@ -1,11 +1,8 @@
-ch.eth.scu.dropbox
 ch.eth.scu.importer
 ch.eth.scu.importer.common.properties
 ch.eth.scu.importer.gui
 ch.eth.scu.importer.gui.dialogs
-ch.eth.scu.importer.gui.editors
 ch.eth.scu.importer.gui.editors.data
-ch.eth.scu.importer.gui.viewers
 ch.eth.scu.importer.gui.viewers.data
 ch.eth.scu.importer.gui.viewers.data.model
 ch.eth.scu.importer.gui.viewers.data.view

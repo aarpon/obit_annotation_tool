@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.model.SampleDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class TrayNode extends CustomTreeNode {
+public class TrayNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,8 @@ public class TrayNode extends CustomTreeNode {
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("plate.png"));
+		return new javax.swing.ImageIcon(
+				getClass().getResource("./icons/plate.png"));
 	}
 	
 	public String getTooltip() {

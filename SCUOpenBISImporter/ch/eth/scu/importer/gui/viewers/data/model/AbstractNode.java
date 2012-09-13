@@ -5,17 +5,17 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 
 /**
- * Customized Node to be used in a JTree allowing different icons for different
- * Node types
+ * Customized Node to be used in a JTree that renders the hierarchical
+ * experiment content of datasets
  * @author Aaron Ponti 
  */
-public abstract class CustomTreeNode extends DefaultMutableTreeNode { 
+public abstract class AbstractNode extends DefaultMutableTreeNode { 
 
 	private static final long serialVersionUID = 1L;
 
 	protected String type;
 	
-	public CustomTreeNode(AbstractDescriptor object) {
+	public AbstractNode(AbstractDescriptor object) {
 		super(object);
 		this.type = object.getType();
 	}

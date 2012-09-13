@@ -14,12 +14,12 @@ import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer.CustomOpenBISNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Experiment;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import ch.eth.scu.importer.processor.model.DatasetDescriptor;
@@ -88,10 +88,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// We extract all projects from the openBIS model and create a list
 		// with which we will then create JComboBox associated to each project
 		// from the data model
-		List<CustomOpenBISNode> projects = new ArrayList<CustomOpenBISNode>();
+		List<AbstractOpenBISNode> projects = new ArrayList<AbstractOpenBISNode>();
 
-		CustomOpenBISNode openBISRoot = 
-				(CustomOpenBISNode) openBISModel.getRoot();
+		AbstractOpenBISNode openBISRoot = 
+				(AbstractOpenBISNode) openBISModel.getRoot();
 
 		// First level are spaces (which we do not need)
 		int openBISNChildren = openBISRoot.getChildCount();
@@ -103,8 +103,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		for (int i = 0; i < openBISNChildren; i++) {
 
 			// Get the Space
-			CustomOpenBISNode openBISSpaceNode = 
-					(CustomOpenBISNode) openBISRoot.getChildAt(i);
+			AbstractOpenBISNode openBISSpaceNode = 
+					(AbstractOpenBISNode) openBISRoot.getChildAt(i);
 
 			// Go over the child Projects
 			int n = openBISSpaceNode.getChildCount();
@@ -112,8 +112,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			for (int j = 0; j < n; j++) {
 
 				// Get the node
-				CustomOpenBISNode openBISProjectNode = 
-						(CustomOpenBISNode) openBISSpaceNode.getChildAt(j);
+				AbstractOpenBISNode openBISProjectNode = 
+						(AbstractOpenBISNode) openBISSpaceNode.getChildAt(j);
 
 				// Add it to the list
 				projects.add(openBISProjectNode);
@@ -167,7 +167,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 				// Add a JComboBox for the Pair objects
 				JComboBox projCombo = new JComboBox();
-				for (CustomOpenBISNode s : projects) {
+				for (AbstractOpenBISNode s : projects) {
 
 					// Add the Pair object
 					projCombo.addItem(new Pair(dataExpNode, s));
@@ -191,7 +191,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 							// Now perform the full mapping
 							performMapping((ExperimentNode) pair.expNode,
-									(CustomOpenBISNode) pair.projNode);
+									(AbstractOpenBISNode) pair.projNode);
 
 						}
 					}
@@ -224,7 +224,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * Use the pair (ExperimentNode, ProjectNode) to update all data Descriptors
 	 * with the correct openBIS information 
 	 */
-	public void performMapping(ExperimentNode expNode, CustomOpenBISNode projNode) {
+	public void performMapping(ExperimentNode expNode, AbstractOpenBISNode projNode) {
 
 		// The parent of the ExperimentDescriptor is the FolderDescriptor, 
 		// which does not need to be updated.
@@ -239,8 +239,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		for (int i = 0; i < expNode.getChildCount(); i++) {
 
 			// Get the i-th child node
-			CustomTreeNode firstLevelSampleNode =
-					(CustomTreeNode) expNode.getChildAt(i);
+			AbstractNode firstLevelSampleNode =
+					(AbstractNode) expNode.getChildAt(i);
 
 			// Get the Sample Descriptor
 			SampleDescriptor firstLevelSample =
@@ -262,8 +262,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			for (int j = 0; j < firstLevelSampleNode.getChildCount(); j++ ) {
 
 				// Get the j-th child node
-				CustomTreeNode secondLevelSampleNode =
-						(CustomTreeNode) firstLevelSampleNode.getChildAt(j);
+				AbstractNode secondLevelSampleNode =
+						(AbstractNode) firstLevelSampleNode.getChildAt(j);
 
 				// Get the Sample Descriptor
 				SampleDescriptor secondLevelSample =
@@ -285,8 +285,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				for (int k = 0; k < secondLevelSampleNode.getChildCount(); k++ ) {
 
 					// Get the j-th child node
-					CustomTreeNode thirdLevelSampleNode =
-							(CustomTreeNode) secondLevelSampleNode.getChildAt(k);
+					AbstractNode thirdLevelSampleNode =
+							(AbstractNode) secondLevelSampleNode.getChildAt(k);
 
 					// A third-level node can contain a Tube or an FCS file
 					AbstractDescriptor abstractSample = (AbstractDescriptor)
@@ -316,7 +316,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 						// Get the child (one!): the FCS file
 						assert(thirdLevelSampleNode.getChildCount() == 1);
 
-						CustomTreeNode fourthLevelSampleNode = (CustomTreeNode)
+						AbstractNode fourthLevelSampleNode = (AbstractNode)
 								thirdLevelSampleNode.getChildAt(0);
 						DatasetDescriptor fcsFile = (DatasetDescriptor)
 								fourthLevelSampleNode.getUserObject();
@@ -358,9 +358,9 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 */
 	protected class Pair {
 		protected ExperimentNode expNode;
-		protected CustomOpenBISNode projNode;
+		protected AbstractOpenBISNode projNode;
 
-		protected Pair(ExperimentNode expNode, CustomOpenBISNode projNode) {
+		protected Pair(ExperimentNode expNode, AbstractOpenBISNode projNode) {
 			this.expNode = expNode;
 			this.projNode = projNode;
 		}

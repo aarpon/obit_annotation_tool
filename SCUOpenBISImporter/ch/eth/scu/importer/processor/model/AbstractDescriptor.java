@@ -51,7 +51,7 @@ abstract public class AbstractDescriptor {
 	public String getName() { return name; }
 
 	/**
-	 * Sets the name of the entity.
+	 * Set the name of the entity.
 	 */
 	public void setName(String name) { this.name = name; }
 
@@ -83,7 +83,7 @@ abstract public class AbstractDescriptor {
 	public Map<String, String> getAttributes() { return attributes; }
 
 	/**
-	 * Sets the entity attributes.
+	 * Set the entity attributes.
 	 */
 	public void setAttributes(Map<String, String> attributes) { 
 		this.attributes = attributes; 
@@ -98,14 +98,14 @@ abstract public class AbstractDescriptor {
 	}
 
 	/**
-	 * Sets the entity openBIS attributes.
+	 * Set the entity openBIS attributes.
 	 */
 	public void setOpenBISAttributes(Map<String, String> openBISAttributes) { 
 		this.openBISAttributes = openBISAttributes; 
 	}
 
 	/**
-	 * Returns the entity attributes in a comma-separated list.
+	 * Return the entity attributes in a comma-separated list.
 	 * @return a comma-separated list of attribute name : value pairs.
 	 */
 	public String attributesToString() {
@@ -114,7 +114,7 @@ abstract public class AbstractDescriptor {
 	}
 
 	/**
-	 * Returns the entity openBIS attributes in a comma-separated list.
+	 * Return the entity openBIS attributes in a comma-separated list.
 	 * @return a comma-separated list of attribute name : value pairs.
 	 */		
 	public String openBISAttributesToString() {

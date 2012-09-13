@@ -65,8 +65,8 @@ public class ExperimentDescriptor extends AbstractDescriptor{
 	}
 	
 	/**
-	 * Set the project ID of 
-	 * @param projectID
+	 * Set the openBIS project identifier 
+	 * @param projectID The openBIS project identifier
 	 */
 	public void setOpenBISProjectIdentifier(String projectID) {
 		this.openBISProjectID = projectID;

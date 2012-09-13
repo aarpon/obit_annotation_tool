@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class XMLFileNode extends CustomTreeNode {
+public class XMLFileNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,8 @@ public class XMLFileNode extends CustomTreeNode {
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("xml.png"));
+		return new javax.swing.ImageIcon(
+				getClass().getResource("./icons/xml.png"));
 	}
 	
 	public String getTooltip() {

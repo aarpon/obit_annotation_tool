@@ -3,20 +3,20 @@ import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 
 /**
  * Custom Cell Renderer that adapts to individual Node implementations
  * @author Aaron Ponti
  */
-public class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
+public class DataViewerTreeCellRenderer extends DefaultTreeCellRenderer{
 	
 	private static final long serialVersionUID = 1L;
 
     /**   
     * Constructor  
     */ 
-    public CustomTreeCellRenderer() 
+    public DataViewerTreeCellRenderer() 
     { 
         // Call base constructor 
         super(); 
@@ -38,8 +38,8 @@ public class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
 
 		// Override the icon with the Node's one and add the custom
 		// tool-tip text
-		if ((value != null) && (value instanceof CustomTreeNode) ) {
-			CustomTreeNode node = (CustomTreeNode) value;
+		if ((value != null) && (value instanceof AbstractNode) ) {
+			AbstractNode node = (AbstractNode) value;
 			setIcon(node.getIcon());
 			setToolTipText(node.getTooltip());
 		}

@@ -1,0 +1,1 @@
+package ch.eth.scu.importer.gui.icons;

@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.model.ExperimentDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class ExperimentNode extends CustomTreeNode {
+public class ExperimentNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,8 @@ public class ExperimentNode extends CustomTreeNode {
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("experiment.png"));
+		return new javax.swing.ImageIcon(
+				getClass().getResource("./icons/experiment.png"));
 	}
 
 	public String getTooltip() {

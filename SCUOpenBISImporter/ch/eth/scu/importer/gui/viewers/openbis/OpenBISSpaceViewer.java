@@ -10,7 +10,6 @@ import java.util.Properties;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -19,6 +18,13 @@ import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.dialogs.OpenBISLoginDialog;
+import ch.eth.scu.importer.gui.viewers.openbis.model.AbstractOpenBISNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISExperimentNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISSampleNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISSpaceNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISUserNode;
+import ch.eth.scu.importer.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
@@ -50,8 +56,8 @@ public class OpenBISSpaceViewer extends Observable
 	private IOpenbisServiceFacade facade;
 	
 	private JLabel title;
-	private OpenBISRootNode rootNode;
-	private JTree tree;
+	private OpenBISUserNode userNode;
+	private OpenBISViewerTree tree;
 	private JScrollPane treeView;
 	private String defaultRootNodeString = "Please login to openBIS...";
 
@@ -95,10 +101,10 @@ public class OpenBISSpaceViewer extends Observable
 		panel.add(title, constraints);
 		
 		// Create the root node for the tree
-		rootNode = new OpenBISRootNode(defaultRootNodeString);
+		userNode = new OpenBISUserNode(defaultRootNodeString);
 		
 		// Create a tree that allows one selection at a time.
-		tree = new JTree(rootNode);
+		tree = new OpenBISViewerTree(userNode);
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
@@ -139,7 +145,7 @@ public class OpenBISSpaceViewer extends Observable
 	public void valueChanged(TreeSelectionEvent e) {
 		
 		// Get the selected tree node
-		CustomOpenBISNode node = (CustomOpenBISNode)
+		AbstractOpenBISNode node = (AbstractOpenBISNode)
                 tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
@@ -238,9 +244,9 @@ public class OpenBISSpaceViewer extends Observable
 	private void clearTreeView() {
 
 		// Create the root node
-		rootNode = new OpenBISRootNode(defaultRootNodeString);
+		userNode = new OpenBISUserNode(defaultRootNodeString);
 
-		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.setModel(new DefaultTreeModel(userNode));
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
@@ -279,7 +285,7 @@ public class OpenBISSpaceViewer extends Observable
 		}
 
 		// Set the root of the tree
-		rootNode = new OpenBISRootNode(userName);
+		userNode = new OpenBISUserNode(userName);
 
 		// Get spaces
 		List<SpaceWithProjectsAndRoleAssignments> spaces =
@@ -289,7 +295,7 @@ public class OpenBISSpaceViewer extends Observable
 
 			// Add the space
 			space = new OpenBISSpaceNode(s);
-			rootNode.add(space);
+			userNode.add(space);
 		    
 			// Get the projects for current space
 			List<Project> projects = s.getProjects();
@@ -331,7 +337,7 @@ public class OpenBISSpaceViewer extends Observable
 		}
 		
 		// Update the view
-		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.setModel(new DefaultTreeModel(userNode));
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
@@ -354,8 +360,8 @@ public class OpenBISSpaceViewer extends Observable
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		// TODO Currently we do not do anything when the user interacts 
+		// with the code 
 	}
 	
 	/**
@@ -364,280 +370,6 @@ public class OpenBISSpaceViewer extends Observable
 	 */
 	public JPanel getPanel() {
 		return panel;
-	}
-
-	/**
-	 * A Custom TreeNode to store OpenBIS-related entities in the JTree
-	 * @author Aaron Ponti
-	 *
-	 */
-	abstract public class CustomOpenBISNode extends DefaultMutableTreeNode {
-		
-		private static final long serialVersionUID = 1L;
-
-		protected String identifier;
-		
-		public CustomOpenBISNode(Object o) {
-			super(o);
-		}
-		
-		abstract public String getType();
-		
-		abstract public String toString();
-		
-		abstract public String getCode();
-		
-		abstract public String getIdentifier();
-	}
-	
-	/**
-	 * A Custom Root TreeNode
-	 * @author Aaron Ponti
-	 *
-	 */
-	public class OpenBISRootNode extends CustomOpenBISNode {
-		
-		private static final long serialVersionUID = 1L;
-		
-		protected String name;
-		
-		/**
-		 * Constructor
-		 * @param username User name
-		 */
-		public OpenBISRootNode(String username) {
-			super(username);
-			this.name = username;
-		}
-		
-		/**
-		 * Returns the type of the node
-		 * @return Type of the node
-		 */
-		public String getType() { return "root"; }
-
-		/**
-		 * String representation of the node
-		 * @return String representation of the node
-		 */
-		@Override
-		public String toString() { return name; }
-
-		/**
-		 * Root code (custom)
-		 * @return String openBIS code of the root object (set to "ROOT")
-		 */
-		@Override
-		public String getCode() { return "ROOT"; }
-
-		/**
-		 * Root identifier (custom)
-		 * @return String openBIS identifier of the root object (set to "/")
-		 */
-		@Override
-		public String getIdentifier() { return "/"; }
-		
-	}
-	
-	/**
-	 * A Custom Space TreeNode
-	 * @author Aaron Ponti
-	 *
-	 */
-	public class OpenBISSpaceNode extends CustomOpenBISNode {
-
-		private static final long serialVersionUID = 1L;
-		
-		private SpaceWithProjectsAndRoleAssignments s;
-		
-		/**
-		 * Constructor 
-		 * @param s SpaceWithProjectsAndRoleAssignments object
-		 */
-		public OpenBISSpaceNode(SpaceWithProjectsAndRoleAssignments s) {
-			super(s);
-			this.s = s;
-		}
-		
-		/**
-		 * Returns the type of the node
-		 * @return Type of the node
-		 */		
-		@Override
-		public String getType() { return "Space"; }
-
-		/**
-		 * String representation of the node
-		 * @return String representation of the node
-		 */		
-		@Override
-		public String toString() { return ("[space] " + s.getCode()); }
-
-		
-		/**
-		 * Space code
-		 * @return Space code
-		 */			
-		@Override
-		public String getCode() { return s.getCode(); }
-		
-		/**
-		 * Space identifier
-		 * @return Space identifier
-		 */			
-		@Override
-		public String getIdentifier() { return s.getCode(); }
-		
-	}
-
-	/**
-	 * A Custom Project TreeNode
-	 * @author Aaron Ponti
-	 *
-	 */	
-	public class OpenBISProjectNode extends CustomOpenBISNode {
-		
-		private static final long serialVersionUID = 1L;
-		
-		private Project p;
-
-		/**
-		 * Constructor 
-		 * @param p Project object
-		 */		
-		public OpenBISProjectNode(Project p) {
-			super(p);
-			this.p = p;
-		}
-
-		/**
-		 * Returns the type of the node
-		 * @return Type of the node
-		 */			
-		@Override
-		public String getType() { return "Project"; }
-
-		/**
-		 * String representation of the node
-		 * @return String representation of the node
-		 */			
-		@Override
-		public String toString() { return ("[project] " + p.getCode()); }
-
-		/**
-		 * Project code
-		 * @return Project code
-		 */			
-		@Override
-		public String getCode() { return p.getCode(); }
-		
-		/**
-		 * Project identifier
-		 * @return Project identifier
-		 */			
-		@Override
-		public String getIdentifier() { return p.getIdentifier(); }
-		
-	}
-
-	/**
-	 * A Custom Experiment TreeNode
-	 * @author Aaron Ponti
-	 *
-	 */	
-	public class OpenBISExperimentNode extends CustomOpenBISNode {
-		
-		private static final long serialVersionUID = 1L;
-
-		private Experiment e;
-
-		/**
-		 * Constructor 
-		 * @param e Experiment object
-		 */		
-		public OpenBISExperimentNode(Experiment e) {
-			super(e);
-			this.e = e;
-		}
-
-		/**
-		 * Returns the type of the node
-		 * @return Type of the node
-		 */			
-		@Override
-		public String getType() { return "Experiment"; }
-
-		/**
-		 * String representation of the node
-		 * @return String representation of the node
-		 */			
-		@Override
-		public String toString() { return ( "[experiment] " + e.getCode()); }
-
-		/**
-		 * Experiment code
-		 * @return Experiment code
-		 */			
-		@Override
-		public String getCode() { return e.getCode(); }
-		
-		/**
-		 * Experiment identifier
-		 * @return Experiment identifier
-		 */			
-		@Override
-		public String getIdentifier() { return e.getIdentifier(); }
-		
-	}
-	
-	/**
-	 * A Custom Sample TreeNode
-	 * @author Aaron Ponti
-	 *
-	 */	
-	public class OpenBISSampleNode extends CustomOpenBISNode {
-		
-		private static final long serialVersionUID = 1L;
-
-		private Sample s;
-
-		/**
-		 * Constructor 
-		 * @param s Sample object
-		 */		
-		public OpenBISSampleNode(Sample s) {
-			super(s);
-			this.s = s;
-		}
-
-		/**
-		 * Returns the type of the node
-		 * @return Type of the node
-		 */			
-		@Override
-		public String getType() { return "Sample"; }
-
-		/**
-		 * String representation of the node
-		 * @return String representation of the node
-		 */			
-		@Override
-		public String toString() { return ( "[sample] " + s.getCode()); }
-
-		/**
-		 * Sample code
-		 * @return Sample code
-		 */			
-		@Override
-		public String getCode() { return s.getCode(); }
-		
-		/**
-		 * Sample identifier
-		 * @return Sample identifier
-		 */			
-		@Override
-		public String getIdentifier() { return s.getIdentifier(); }
-		
 	}
 
 }

@@ -48,7 +48,8 @@ public class SampleDescriptor extends AbstractDescriptor{
 
 	/**
 	 * Return the openBIS identifier of the entity. This is used to get or
-	 * create the openBIS entity associated to this Descriptor.
+	 * create the openBIS entity associated to this Descriptor. It is computed
+	 * from the space identifier and the code.
 	 */
 	public String getOpenBISIdentifier() {
 		return getOpenBISSpaceIdentifier() + "/" + getOpenBISCode();
@@ -63,10 +64,12 @@ public class SampleDescriptor extends AbstractDescriptor{
 	}
 
 	/**
-	 * Set the project ID of 
-	 * @param projectID
+	 * Set the openBIS identifier of the container sample, or "" if there is
+	 * no container. 
+	 * @param openBISContainerSampleID
 	 */
-	public void setOpenBISContainerSampleIdentifier(String openBISContainerSampleID) {
+	public void setOpenBISContainerSampleIdentifier(
+			String openBISContainerSampleID) {
 		this.openBISContainerSampleID = openBISContainerSampleID;
 	}
 
@@ -79,8 +82,8 @@ public class SampleDescriptor extends AbstractDescriptor{
 	}
 
 	/**
-	 * Set the project ID of 
-	 * @param projectID
+	 * Set the openBIS identifier of the experiment 
+	 * @param openBISExperimentID The openBIS experiment identifier.
 	 */
 	public void setOpenBISExperimentIdentifier(String openBISExperimentID) {
 		this.openBISExperimentID = openBISExperimentID;

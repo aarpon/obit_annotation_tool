@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.model.SampleDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class TubeNode extends CustomTreeNode {
+public class TubeNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,8 @@ public class TubeNode extends CustomTreeNode {
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("tube.png"));
+		return new javax.swing.ImageIcon(
+				getClass().getResource("./icons/tube.png"));
 	}
 	
 	public String getTooltip() {

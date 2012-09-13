@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.gui.viewers.data;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.data.model.FCSFileNode;
 import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
@@ -101,7 +101,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		CustomTreeNode node = (CustomTreeNode) tree.getLastSelectedPathComponent();
+		AbstractNode node = (AbstractNode) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
 		}
@@ -163,7 +163,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 * Create the nodes for the tree
 	 * @param rootNode Root node
 	 */
-	protected void createNodes(CustomTreeNode top,
+	protected void createNodes(AbstractNode top,
 			BDFACSDIVAFCSProcessor.Folder folderDescriptor) {
 		
 		ExperimentNode experiment = null;

@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.gui.viewers.data;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.gui.viewers.data.model.CustomTreeNode;
+import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ImageNode;
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.data.model.SubImageNode;
@@ -89,7 +89,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		CustomTreeNode node = (CustomTreeNode) tree.getLastSelectedPathComponent();
+		AbstractNode node = (AbstractNode) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
 		}
@@ -189,7 +189,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 * Create the nodes for the tree
 	 * @param top Root node
 	 */
-	protected void createNodes(CustomTreeNode lifImageNode, ImageDescriptor image) {
+	protected void createNodes(AbstractNode lifImageNode, ImageDescriptor image) {
 		
 		SubImageNode subImageNode = null;
 		

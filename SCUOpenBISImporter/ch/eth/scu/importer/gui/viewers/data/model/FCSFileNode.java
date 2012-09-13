@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.model.DatasetDescriptor;
  * Node types
  * @author Aaron Ponti 
  */
-public class FCSFileNode extends CustomTreeNode {
+public class FCSFileNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,8 @@ public class FCSFileNode extends CustomTreeNode {
 	}
 
 	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(getClass().getResource("fcs.png"));
+		return new javax.swing.ImageIcon(
+				getClass().getResource("./icons/fcs.png"));
 	}
 	
 	public String getTooltip() {

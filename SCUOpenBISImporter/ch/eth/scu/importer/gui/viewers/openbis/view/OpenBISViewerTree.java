@@ -1,26 +1,24 @@
-package ch.eth.scu.importer.gui.viewers.data.view;
+package ch.eth.scu.importer.gui.viewers.openbis.view;
 
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import ch.eth.scu.importer.gui.viewers.data.view.CustomTreeCellRenderer;
-
 /**
  * Custom JTree that uses a customized renderer
  * @author Aaron Ponti
  */
-public class CustomTree extends JTree {
+public class OpenBISViewerTree extends JTree {
 
 	private static final long serialVersionUID = 1L;
 
-	public CustomTree(DefaultMutableTreeNode node) {
+	public OpenBISViewerTree(DefaultMutableTreeNode node) {
 		
 		// Pass the node on to the base constructor
 		super(node);
 		
 		// Set the custom renderer
-	    setCellRenderer(new CustomTreeCellRenderer());
+	    setCellRenderer(new OpenBISViewerTreeCellRenderer());
 	    
 	    // Tooltip manager
 	    ToolTipManager.sharedInstance().registerComponent(this); 
