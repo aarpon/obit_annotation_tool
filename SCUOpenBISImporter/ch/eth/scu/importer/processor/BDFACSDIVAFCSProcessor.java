@@ -49,7 +49,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 		// Store the incoming dir (to build relative paths)
 		Properties appProperties = AppProperties.readPropertiesFromFile();
-		this.incomingDir = new File( 
+		this.incomingDir = new File(
 				appProperties.getProperty("DatamoverIncomingDir"));
 
 		// Set the root folder
@@ -469,8 +469,12 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// Store the relative file name (to the incoming dir)
 			storeRelativePath(fcsFileName);
 			
-			// Set the attribute relative file name
-			attributes.put("relativeFileName", this.relativeFileName);
+			// Set the attribute relative file name. Since this will be used
+			// by the Datastore server running on a Unix machine, we make sure
+			// to use forward slashes for path separators when we set it as
+			// an attribute.
+			attributes.put("relativeFileName",
+					this.relativeFileName.replace("\\", "/"));
 		}
 
 		/**
