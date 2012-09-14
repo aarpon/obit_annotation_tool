@@ -50,8 +50,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Store the incoming dir (to build relative paths)
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		this.incomingDir = new File( 
-				appProperties.getProperty("DatamoverIncomingDir") +
-				File.separator + userName);
+				appProperties.getProperty("DatamoverIncomingDir"));
 
 		// Set the root folder
 		this.topFolder = folder;

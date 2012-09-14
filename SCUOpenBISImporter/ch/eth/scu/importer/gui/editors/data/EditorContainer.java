@@ -102,9 +102,8 @@ public class EditorContainer extends JPanel implements ActionListener {
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
 			String outputDirectory = 
-					appProperties.getProperty("DatamoverIncomingDir") +
-					File.separator + openBISViewer.getUserName();
-			
+					appProperties.getProperty("DatamoverIncomingDir");
+
 			// Save to XML
 			dataViewer.saveToXML(outputDirectory);
 			System.out.println(
