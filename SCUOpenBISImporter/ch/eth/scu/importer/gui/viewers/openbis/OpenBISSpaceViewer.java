@@ -14,6 +14,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
@@ -202,13 +203,24 @@ public class OpenBISSpaceViewer extends Observable
 			return false;
 		} catch (RemoteConnectFailureException e) {
 			JOptionPane.showMessageDialog(this.panel,
-					"Could not connect to openBIS.\n" + 
-			"The server appears to be down.\n" +
-							"Please try again later.",	
+					"Could not connect to openBIS: " + 
+							"the server appears to be down.\n" +
+							"Please try again later.\n\n" +
+							"The application will now quit.",	
 					"Connection error",
 					JOptionPane.ERROR_MESSAGE);
 			facade = null;
-			return false;
+			System.exit(1);
+		} catch (RemoteAccessException e) {
+			JOptionPane.showMessageDialog(this.panel,
+					"Could not connect to openBIS: " + 
+							"the server appears to be down.\n" +
+							"Please try again later.\n\n" +
+							"The application will now quit.",	
+					"Connection error",
+					JOptionPane.ERROR_MESSAGE);
+			facade = null;
+			System.exit(1);
 		}
 
 		// Set isLoggedIn to true
