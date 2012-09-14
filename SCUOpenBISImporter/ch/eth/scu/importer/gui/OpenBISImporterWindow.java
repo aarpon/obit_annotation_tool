@@ -45,7 +45,11 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Use the system default look-and-feel
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			} else {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			}
 		} catch (Exception e) {
 			System.err.println("Couldn't set look and feel.");
 		}
