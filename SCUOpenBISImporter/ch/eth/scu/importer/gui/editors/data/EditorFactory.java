@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
@@ -20,7 +20,7 @@ public class EditorFactory {
 	 * @return a concrete implementation of an AbstractViewer
 	 */
 	public static AbstractEditor createEditor(AbstractViewer dataViewer,
-			OpenBISSpaceViewer openBISViewer) {
+			OpenBISViewer openBISViewer) {
 
 		// Get the application properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();

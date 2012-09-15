@@ -7,7 +7,7 @@ import java.util.Observer;
 import javax.swing.JPanel;
 
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
 /**
  * Abstract editor for processors
@@ -18,7 +18,7 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	protected JPanel panel;
 	
 	protected AbstractViewer dataViewer;
-	protected OpenBISSpaceViewer openBISViewer;
+	protected OpenBISViewer openBISViewer;
 	
 	/**
 	 * Constructor
@@ -29,7 +29,7 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 * @param openBISViewer Reference to the openBIS viewer
 	 */
 	public AbstractEditor(AbstractViewer dataViewer, 
-			OpenBISSpaceViewer openBISViewer) {
+			OpenBISViewer openBISViewer) {
 		
 		panel = new JPanel();
 		

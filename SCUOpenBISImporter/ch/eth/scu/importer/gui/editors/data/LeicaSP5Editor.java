@@ -4,7 +4,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
 /**
  * Metadata editor panel.
@@ -16,7 +16,7 @@ public class LeicaSP5Editor extends AbstractEditor {
 	 * Constructor
 	 */
 	public LeicaSP5Editor(AbstractViewer dataViewer, 
-			OpenBISSpaceViewer openBISViewer) {
+			OpenBISViewer openBISViewer) {
 
 		// Store the reference to the data and openBIS viewers
 		super(dataViewer, openBISViewer);		

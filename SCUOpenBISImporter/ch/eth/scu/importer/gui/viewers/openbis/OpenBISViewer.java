@@ -45,7 +45,7 @@ import java.awt.Insets;
  * acquired datasets.
  * @author Aaron Ponti
  */
-public class OpenBISSpaceViewer extends Observable
+public class OpenBISViewer extends Observable
 	implements ActionListener, TreeSelectionListener {
 
 	protected JPanel panel;
@@ -71,7 +71,7 @@ public class OpenBISSpaceViewer extends Observable
 	/**
 	 * Constructor
 	 */
-	public OpenBISSpaceViewer() {
+	public OpenBISViewer() {
 
 		// Create a panel
 		panel = new JPanel();

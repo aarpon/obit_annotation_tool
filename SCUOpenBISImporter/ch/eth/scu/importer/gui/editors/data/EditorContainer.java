@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
 public class EditorContainer extends JPanel implements ActionListener {
 
@@ -22,13 +22,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 	private JButton uploadButton;
 
 	protected AbstractViewer dataViewer;
-	protected OpenBISSpaceViewer openBISViewer;
+	protected OpenBISViewer openBISViewer;
 	
 	/**
 	 * Constructor
 	 */
 	public EditorContainer(AbstractViewer dataViewer, 
-			OpenBISSpaceViewer openBISViewer) {
+			OpenBISViewer openBISViewer) {
 		
 		// Store the references
 		this.dataViewer = dataViewer;

@@ -18,7 +18,7 @@ import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Experiment;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
@@ -37,7 +37,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * Constructor
 	 */
 	public BDLSRFortessaFCSEditor(AbstractViewer dataViewer, 
-			OpenBISSpaceViewer openBISViewer) {
+			OpenBISViewer openBISViewer) {
 
 		// Store the reference to the data and openBIS viewers
 		super(dataViewer, openBISViewer);

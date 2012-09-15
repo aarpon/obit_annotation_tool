@@ -10,7 +10,7 @@ import javax.swing.*;
 import ch.eth.scu.importer.gui.editors.data.EditorContainer;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.data.ViewerFactory;
-import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
+import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -26,7 +26,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private EditorContainer editorContainer;
 	private JTextArea outputPane; 
 	private JScrollPane outputWindow;
-	private OpenBISSpaceViewer spaceViewer;
+	private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
 	
@@ -65,8 +65,8 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		} 
 		add(metadataViewer.getPanel(), BorderLayout.WEST);
 		
-		spaceViewer = new OpenBISSpaceViewer();
-		add(spaceViewer.getPanel(), BorderLayout.EAST);
+		openBISViewer = new OpenBISViewer();
+		add(openBISViewer.getPanel(), BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
 		outputPane = new JTextArea();
@@ -79,12 +79,12 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// Add the editor: it is important to create this object as the last
 		// one, since it requires non-null references to both the metadata and
 		// the openBIS viewers!
-		editorContainer = new EditorContainer(metadataViewer, spaceViewer);
+		editorContainer = new EditorContainer(metadataViewer, openBISViewer);
 		add(editorContainer, BorderLayout.CENTER);
 
 		// Add observers to the viewers
 		metadataViewer.addObserver(editorContainer.getEditor());
-		spaceViewer.addObserver(editorContainer.getEditor());
+		openBISViewer.addObserver(editorContainer.getEditor());
 		
 		// We do not want the window to close without some clean up
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -106,14 +106,14 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// If the user justs closes the dialog, we close the application.
 		boolean status = false;
 		while (status == false) {
-			status = spaceViewer.login();
+			status = openBISViewer.login();
 		}
 
 		// Now we can scan the openBIS instance
-		spaceViewer.scan();
+		openBISViewer.scan();
 
 		// Scan the datamover incoming folder for datasets
-		metadataViewer.scan(spaceViewer.getUserName());
+		metadataViewer.scan(openBISViewer.getUserName());
 
 		// Make window visible
 		setVisible(true);
@@ -127,14 +127,14 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// React to the context menu
 		if (e.getActionCommand().equals("Log in")) {
-			boolean status = spaceViewer.login();
+			boolean status = openBISViewer.login();
 			if (status == true) {
-				spaceViewer.scan();
+				openBISViewer.scan();
 			}
 		} else if (e.getActionCommand().equals("Log out")) {
-			spaceViewer.logout();
+			openBISViewer.logout();
 		} else if (e.getActionCommand().equals("Scan")) {
-			metadataViewer.scan(spaceViewer.getUserName());
+			metadataViewer.scan(openBISViewer.getUserName());
 		} else if (e.getActionCommand().equals("Quit")) {
 				QuitApplication();
 		} else {
@@ -203,7 +203,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
         		JOptionPane.YES_NO_OPTION,
         		JOptionPane.QUESTION_MESSAGE) == 
         		JOptionPane.YES_OPTION) {
-        	spaceViewer.logout();
+        	openBISViewer.logout();
         	System.exit(0);
         }
    }
