@@ -7,16 +7,13 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.editors.data.EditorContainer;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
-import ch.eth.scu.importer.gui.viewers.data.BDLSRFortessaFCSViewer;
-import ch.eth.scu.importer.gui.viewers.data.LeicaSP5Viewer;
+import ch.eth.scu.importer.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISSpaceViewer;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
-import java.util.Properties;
 
 /**
  * Main window of the SCUOpenBISImporter application.
@@ -45,18 +42,11 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Use the system default look-and-feel
 		try {
-			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-			} else {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			System.err.println("Couldn't set look and feel.");
 		}
 
-		// Get the application properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
-		
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
 		
@@ -67,15 +57,12 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		add(toolBar, BorderLayout.NORTH);
 
 		// Add the viewer
-		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaFCS")) {
-			metadataViewer = new BDLSRFortessaFCSViewer();
-		} else if (acqStation.equals("LeicaSP5")) {
-			metadataViewer = new LeicaSP5Viewer();
-		} else {
+		try {
+			metadataViewer = ViewerFactory.createViewer();
+		} catch (Exception e1) {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);
-		}
+		} 
 		add(metadataViewer.getPanel(), BorderLayout.WEST);
 		
 		spaceViewer = new OpenBISSpaceViewer();

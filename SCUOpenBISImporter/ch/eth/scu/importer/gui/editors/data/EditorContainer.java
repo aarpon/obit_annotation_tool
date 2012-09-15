@@ -4,7 +4,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -54,19 +53,8 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.weighty = 0.0;
 		add(title, constraints);
 
-		// Get the application properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
-
-		// Add the actual editor
-		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaFCS")) {
-			metadataEditor = new BDLSRFortessaFCSEditor(dataViewer, openBISViewer);
-		} else if (acqStation.equals("LeicaSP5")) {
-			metadataEditor = new LeicaSP5Editor(dataViewer, openBISViewer);
-		} else {
-			System.err.println("Unknown acquisition station! Aborting.");
-			System.exit(1);
-		}
+		// Add the editor
+		metadataEditor = EditorFactory.createEditor(dataViewer, openBISViewer);
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
