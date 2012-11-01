@@ -118,28 +118,28 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		Object nodeInfo = node.getUserObject();
 
 		// Print the attributes
-		String className = nodeInfo.getClass().getName();
-		if (className.endsWith("Experiment")) { 
+		String className = nodeInfo.getClass().getSimpleName();
+		if (className.equals("Experiment")) { 
 			htmlPane.setText(
 					((BDFACSDIVAFCSProcessor.Experiment) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.endsWith("Tray")) { 
+		} else if (className.equals("Tray")) { 
 			htmlPane.setText(
 					((BDFACSDIVAFCSProcessor.Tray) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.endsWith("Specimen")) { 
+		} else if (className.equals("Specimen")) { 
 			htmlPane.setText(
 					((BDFACSDIVAFCSProcessor.Specimen) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.endsWith("Tube")) {
+		} else if (className.equals("Tube")) {
 			htmlPane.setText(
 					((BDFACSDIVAFCSProcessor.Tube) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));			
-		} else if (className.endsWith("FCSFile")) {
+		} else if (className.equals("FCSFile")) {
 			// Cast
 			BDFACSDIVAFCSProcessor.FCSFile fcsFile = 
 					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;

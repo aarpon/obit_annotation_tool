@@ -19,7 +19,7 @@ abstract public class AbstractDescriptor {
 	/**
 	 * Name of the entity.
 	 * 
-	 * This is displayed e.g. in the tree viewers.
+	 * This is displayed in the viewers and in openBIS.
 	 */
 	protected String name = "";
 
@@ -78,12 +78,13 @@ abstract public class AbstractDescriptor {
 
 	/**
 	 * Return the entity attributes.
-	 * @return a string-string map with attribute name : value pairs.
+	 * @return a string-string map with attribute name:value pairs.
 	 */
 	public Map<String, String> getAttributes() { return attributes; }
 
 	/**
 	 * Set the entity attributes.
+	 * @param attributes String-string map with attribute name:value pairs.
 	 */
 	public void setAttributes(Map<String, String> attributes) { 
 		this.attributes = attributes; 
@@ -91,7 +92,7 @@ abstract public class AbstractDescriptor {
 
 	/**
 	 * Return the entity openBIS attributes.
-	 * @return a string-string map with attribute name : value pairs.
+	 * @return a string-string map with openBIS attribute name:value pairs.
 	 */
 	public Map<String, String> getOpenBISAttributes() { 
 		return openBISAttributes; 
@@ -99,6 +100,8 @@ abstract public class AbstractDescriptor {
 
 	/**
 	 * Set the entity openBIS attributes.
+	 * @param openBISAttributes String-string map with openBIS attribute 
+	 * name : value pairs.
 	 */
 	public void setOpenBISAttributes(Map<String, String> openBISAttributes) { 
 		this.openBISAttributes = openBISAttributes; 

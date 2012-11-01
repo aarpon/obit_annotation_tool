@@ -155,7 +155,7 @@ public class FCSProcessor extends AbstractProcessor {
 		if (isFileParsed == false) {
 			return "File could not be parsed.";
 		}
-		
+
 		String str = 
 				"Valid FCS3.0 file with TEXT: "     + 
 						TEXTbegin     + " - " + TEXTend     + ", DATA: " +
@@ -188,10 +188,11 @@ public class FCSProcessor extends AbstractProcessor {
 		str += "Parameters and their attributes:\n\n";
 
 		for (Parameter p : parameters) {
-			str += ("Parameter: " + p.name + ", range: " + p.range + 
-					", bits: " + p.bits + ", decade: " + p.decade + ", " +
-					"log: " + p.log + ", logzero: " + p.logzero + 
-					", gain: " + p.gain + "\n");
+			str += ("Parameter: name = " + p.name + ", label = " + p.label + 
+					", range = " + p.range + ", bits = " + p.bits + 
+					", decade = " + p.decade + ", " + "log = " + p.log + 
+					", logzero = " + p.logzero + ", gain = " + p.gain +
+					", voltage = " + p.voltage + "\n");
 		}
 
 		return str;
@@ -451,34 +452,60 @@ public class FCSProcessor extends AbstractProcessor {
 			Parameter param = new Parameter();
 
 			// Name
-			param.name  = TEXTMapStandard.get("$P" + i + "N");
-			
-			// Range
-			param.range = Integer.parseInt(TEXTMapStandard.get("$P" + i + "R"));
-			
-			// Bits
-			param.bits  = Integer.parseInt(TEXTMapStandard.get("$P" + i + "B"));
-			
-			// Linear or logarithmic amplifiers?
-			String decade = TEXTMapStandard.get("$P" + i + "E");
-			String decadeParts[] = decade.split(",");
-			param.decade = Float.parseFloat(decadeParts[0]);
-			float value  = Float.parseFloat(decadeParts[1]);
-			if (param.decade == 0.0) {
-				// Amplification is linear or undefined
-				param.log = 0.0f;
-				param.logzero = 0.0f;
-			} else {
-				param.log = 1.0f;
-				if (value == 0.0) {
-					param.logzero = 1.0f;
-				} else {
-					param.logzero = value;
-				}
+			String name = TEXTMapStandard.get("$P" + i + "N");
+			if (name != null) {
+				param.name  = name;
+			}
+
+			// Label
+			String label = TEXTMapStandard.get("$P" + i + "S");
+			if (label != null) {
+				param.label = label;
 			}
 			
+			// Range
+			String range = TEXTMapStandard.get("$P" + i + "R");
+			if (range != null) {
+				param.range = Integer.parseInt(range);
+			}
+
+			// Bits
+			String bits = TEXTMapStandard.get("$P" + i + "B");
+			if (bits != null) {
+				param.bits  = Integer.parseInt(bits);
+			}
+
+			// Linear or logarithmic amplifiers?
+			String decade = TEXTMapStandard.get("$P" + i + "E");
+			if (decade != null) {
+				String decadeParts[] = decade.split(",");
+				param.decade = Float.parseFloat(decadeParts[0]);
+				float value = Float.parseFloat(decadeParts[1]);
+				if (param.decade == 0.0) {
+					// Amplification is linear or undefined
+					param.log = 0.0f;
+					param.logzero = 0.0f;
+				} else {
+					param.log = 1.0f;
+					if (value == 0.0) {
+						param.logzero = 1.0f;
+					} else {
+						param.logzero = value;
+					}
+				}
+			}
+
 			// Gain
-			param.gain = Float.parseFloat(TEXTMapStandard.get("$P" + i + "G"));
+			String gain = TEXTMapStandard.get("$P" + i + "G");
+			if (gain != null) {
+				param.gain = Float.parseFloat(gain);
+			}
+
+			// Voltage
+			String voltage = TEXTMapStandard.get("$P" + i + "V");
+			if (voltage != null) {
+				param.voltage = Float.parseFloat(voltage);
+			}
 
 			// Add the Parameter
 			parameters.add(param);
@@ -640,14 +667,18 @@ public class FCSProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 */
 	private class Parameter {
-		public String name;
-		public int range;
-		public int bits;
-		public float decade;
-		public float log;
-		public float logzero;
-		public float gain;
 		
+		// We initialize parameters with "invalid" values 
+		public String name = "<not set>";
+		public String label = "<not set>";
+		public int range = -1;
+		public int bits = -1;
+		public float decade = Float.NaN;
+		public float log = Float.NaN;
+		public float logzero = Float.NaN;
+		public float gain = Float.NaN;
+		public float voltage = Float.NaN;
+
 		public Parameter() {
 		}
 	}

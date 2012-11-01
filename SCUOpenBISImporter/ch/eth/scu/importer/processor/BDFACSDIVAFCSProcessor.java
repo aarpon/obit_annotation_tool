@@ -124,10 +124,10 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 			// Is it a directory? Recurse into it
 			if (file.isDirectory() == true) {
-				
+
 				// Recurse into the subfolder
 				recursiveDir(file);
-				
+
 				// Move on to the next file
 				continue;
 			}
@@ -148,7 +148,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			if (! ext.equalsIgnoreCase(".fcs")) {
 				continue;
 			}
-			
+
 			// Is it a file? Scan it and extract the information
 			FCSProcessor processor = 
 					new FCSProcessor(file.getCanonicalPath(), false);
@@ -170,7 +170,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				expDesc.setAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentName, expDesc);
 			}
-			
+
 			// Is the container a Tray or Specimen?
 			if (identifyContainerType(processor).equals("TRAY")) {
 				
@@ -203,7 +203,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the tray descriptor
 					trayDesc.specimens.put(specKey, specDesc);
 				}
-				
+
 				// Create a new Tube descriptor or reuse an existing one
 				Tube tubeDesc;
 				String tubeName = getTubeName(processor);
@@ -216,9 +216,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
-				
+
 			} else {
-				
+
 				// Create a new Specimen or reuse an existing one
 				Specimen specDesc;
 				String specName = getSpecimenName(processor);
@@ -233,7 +233,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the experiment descriptor
 					expDesc.specimens.put(specKey, specDesc);
 				}
-				
+
 				// Create a new Tube descriptor or reuse an existing one
 				Tube tubeDesc;
 				String tubeName = getTubeName(processor);
@@ -246,9 +246,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
-				
+
 			}
-			
+
 		}
 
 	}
@@ -662,7 +662,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 		// We discriminate here since there is a formatting
 		// difference in the value stored in the "TUBE NAME"
-		// keyword (which is always found in the file, not 
+		// keyword (which is always found in the file, no 
 		// matter whether the container is a Specimen or a
 		// Tray) and the one stored in the "WELL ID" (which 
 		// is found only in Trays). A "TUBE NAME" value like 
