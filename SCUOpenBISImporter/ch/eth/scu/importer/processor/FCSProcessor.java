@@ -94,7 +94,7 @@ public class FCSProcessor extends AbstractProcessor {
 			// Process the parameters
 			processParameters();
 
-			if (enableDataParsing == true ) {
+			if (enableDataParsing == true) {
 				
 				// Read the DATA (events)
 				parseData();
@@ -113,8 +113,8 @@ public class FCSProcessor extends AbstractProcessor {
 		} finally {
 
 			// Always close the stream
-			if (in != null) { 
-				try { 
+			if (in != null) {
+				try {
 					in.close();
 				} catch (Exception e) {
 					// Silent
@@ -124,7 +124,7 @@ public class FCSProcessor extends AbstractProcessor {
 		}
 
 		// Store and return state
-		isFileParsed = ( in != null ); 
+		isFileParsed = (in != null); 
 		return isFileParsed;
 
 	}
@@ -169,8 +169,8 @@ public class FCSProcessor extends AbstractProcessor {
 
 		str += "Standard TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
 
-		for ( String key : keySet ) {
-			str += ( key + ": " + TEXTMapStandard.get(key) + "\n" );  
+		for (String key : keySet) {
+			str += (key + ": " + TEXTMapStandard.get(key) + "\n");  
 		}
 
 		// Output the list of custom key-value pairs 
@@ -179,16 +179,16 @@ public class FCSProcessor extends AbstractProcessor {
 		str += "\n\n";
 		str += "Custom TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
 
-		for ( String key : keySet ) {
-			str += ( key + ": " + TEXTMapCustom.get(key) + "\n" );  
+		for (String key : keySet) {
+			str += (key + ": " + TEXTMapCustom.get(key) + "\n");  
 		}
 
 		// Output the list of parameters (and their attributes)
 		str += "\n\n";
 		str += "Parameters and their attributes:\n\n";
 
-		for (Parameter p : parameters ) {
-			str += ( "Parameter: " + p.name + ", range: " + p.range + 
+		for (Parameter p : parameters) {
+			str += ("Parameter: " + p.name + ", range: " + p.range + 
 					", bits: " + p.bits + ", decade: " + p.decade + ", " +
 					"log: " + p.log + ", logzero: " + p.logzero + 
 					", gain: " + p.gain + "\n");
@@ -340,8 +340,8 @@ public class FCSProcessor extends AbstractProcessor {
 		// Seek to the DATA segment
 		long dataOffset;
 		try {
-			dataOffset = Long.parseLong( TEXTMapStandard.get("$BEGINDATA").trim() ); 
-		} catch ( NumberFormatException e ) {
+			dataOffset = Long.parseLong(TEXTMapStandard.get("$BEGINDATA").trim()); 
+		} catch (NumberFormatException e) {
 			System.out.println("Invalid offset for the DATA segment! " +
 					"This is a bug! Please report it.");
 			return false;
@@ -539,9 +539,9 @@ public class FCSProcessor extends AbstractProcessor {
 		String datatype = "N";
 		if (TEXTMapStandard.containsKey("$BYTEORD")) {
 			String byteOrd = TEXTMapStandard.get("$BYTEORD");
-			if ( byteOrd.equals("1,2,3,4") ) {
+			if (byteOrd.equals("1,2,3,4")) {
 				datatype = "L";
-			} else if ( byteOrd.equals("4,3,2,1") ) {
+			} else if (byteOrd.equals("4,3,2,1")) {
 				datatype = "B";
 			} else {
 				datatype = "U";
@@ -561,7 +561,7 @@ public class FCSProcessor extends AbstractProcessor {
 	private String mode() {
 		if (TEXTMapStandard.containsKey("$MODE")) {
 			String mode = TEXTMapStandard.get("$MODE");
-			if ( mode.equals("C") || mode.equals("L") || mode.equals("U") ) {
+			if (mode.equals("C") || mode.equals("L") || mode.equals("U")) {
 				return mode;
 			} else {
 				return "N";
@@ -625,9 +625,9 @@ public class FCSProcessor extends AbstractProcessor {
 			DATA = record.asDoubleBuffer();			
 		} else if (datatype.equals("A")) {
 			System.out.println("Data is stored with ASCII-encoded integer value." +
-					"Additional processing is required which is not implemented yet!" );
+					"Additional processing is required which is not implemented yet!");
 			DATA = record.asCharBuffer();
-		} else { 
+		} else {
 			System.out.println("Unknown data type!");
 			return false;
 		}

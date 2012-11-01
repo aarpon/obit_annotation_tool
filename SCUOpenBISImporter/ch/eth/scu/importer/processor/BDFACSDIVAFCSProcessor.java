@@ -161,7 +161,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// Create a new ExperimentDescriptor or reuse an existing one
 			Experiment expDesc;
 			String experimentName = getExperimentName(processor);
-			if (folderDescriptor.experiments.containsKey(experimentName) ) {
+			if (folderDescriptor.experiments.containsKey(experimentName)) {
 				expDesc = folderDescriptor.experiments.get(experimentName);
 			} else {
 				expDesc = 
@@ -178,7 +178,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				Tray trayDesc;
 				String trayName = getTrayName(processor);
 				String trayKey = experimentName + "_" + trayName;
-				if (expDesc.trays.containsKey(trayKey) ) {
+				if (expDesc.trays.containsKey(trayKey)) {
 					trayDesc = expDesc.trays.get(trayKey);
 				} else {
 					trayDesc = 
@@ -193,7 +193,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				Specimen specDesc;
 				String specName = getSpecimenName(processor);
 				String specKey = trayKey + "_" + specName;
-				if (trayDesc.specimens.containsKey(specKey) ) {
+				if (trayDesc.specimens.containsKey(specKey)) {
 					specDesc = trayDesc.specimens.get(specKey);
 				} else {
 					specDesc = 
@@ -208,7 +208,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				Tube tubeDesc;
 				String tubeName = getTubeName(processor);
 				String tubeKey = specKey + "_" + tubeName;
-				if (! specDesc.tubes.containsKey(tubeKey) ) {
+				if (! specDesc.tubes.containsKey(tubeKey)) {
 					tubeDesc = new Tube(tubeName,
 							file.getCanonicalPath());
 					// Store attributes
@@ -223,7 +223,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				Specimen specDesc;
 				String specName = getSpecimenName(processor);
 				String specKey = experimentName + "_" + specName;
-				if (expDesc.specimens.containsKey(specKey) ) {
+				if (expDesc.specimens.containsKey(specKey)) {
 					specDesc = expDesc.specimens.get(specKey);
 				} else {
 					specDesc = 
@@ -238,7 +238,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				Tube tubeDesc;
 				String tubeName = getTubeName(processor);
 				String tubeKey = specKey + "_" + tubeName;
-				if (! specDesc.tubes.containsKey(tubeKey) ) {
+				if (! specDesc.tubes.containsKey(tubeKey)) {
 					tubeDesc = new Tube(tubeName,
 							file.getCanonicalPath());	
 					// Store attributes
