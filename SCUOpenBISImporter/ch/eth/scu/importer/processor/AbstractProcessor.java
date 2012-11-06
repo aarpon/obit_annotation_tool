@@ -1,10 +1,17 @@
 package ch.eth.scu.importer.processor;
 
+import ch.eth.scu.importer.processor.validator.GenericValidator;
+
 /**
  * Abstract base class for file processors. Actual implementations must extend this class.
  * @author Aaron Ponti
  */
 abstract public class AbstractProcessor {
+
+	/**
+	 * Validator
+	 */
+	public GenericValidator validator;
 
 	/**
 	 * Parses the file to extract data and metadata. 

@@ -5,9 +5,12 @@ import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
 import ch.eth.scu.importer.processor.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processor.model.SampleDescriptor;
 import ch.eth.scu.importer.processor.model.DatasetDescriptor;
+import ch.eth.scu.importer.processor.validator.GenericValidator;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -25,8 +28,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	/* Private instance variables */
 	protected DefaultMutableTreeNode rootNode;
 	private File topFolder;
-	private boolean isValid = false;
-	private boolean cleanFCSExport = true;
 
 	/* Protected instance variables */
 	protected File incomingDir;
@@ -39,6 +40,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @param fullFolderName Full path of the folder containing the exported experiment.
 	 */
 	public BDFACSDIVAFCSProcessor(String fullFolderName, String userName) {
+
+		// Instatiate the validator
+		validator = new GenericValidator();
 
 		// Make sure rootFolderName is a valid directory
 		File folder = new File(fullFolderName);
@@ -58,22 +62,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Create a RootDescriptor
 		folderDescriptor = new Folder(folder); 
 
-	}
-
-	/**
-	 * Returns true if the dataset is from an "FCS export", false if it is an
-	 * "Experiment export".
-	 * 
-	 * The DIVA software can export FCS files in two modes: FCS export creates
-	 * valid FCS 3.0-compliant files. Experiment export creates files that 
-	 * cannot be used in subsequent analysis in third-party software like 
-	 * FlowJo. In case of Experiment exports, an XML file is saved along with
-	 * the series of FCS files. We use the presence of the XML file to 
-	 * discriminate between the two export modes.
-	 * @return true for an FCS export, false for and Experiment export
-	 */
-	public boolean isCleanFCSExport() {
-		return cleanFCSExport;
 	}
 
 	/**
@@ -97,13 +85,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			recursiveDir(this.topFolder);
 		} catch (IOException e) {
 			System.err.println("Could not parse the folder.");
-			this.isValid = false;
-			return this.isValid;
+			return false;
 		}
 		
 		// Success
-		this.isValid = true;
-		return this.isValid;
+		return true;
 		
 	}
 
@@ -135,6 +121,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// We ignore any file that is not an fcs file - but we pay 
 			// attention to the existence of XML files that indicate an
 			// Experiment export!
+			//
+			// The DIVA software can export FCS files in two modes: FCS export
+			// creates valid FCS 3.0-compliant files. Experiment export creates 
+			// files that cannot be used in subsequent analysis in third-party
+			// software like FlowJo. In case of Experiment exports, an XML file
+			// is saved along with the series of FCS files. We use the presence
+			// of the XML file to discriminate between the two export modes.
 			String fileName = file.getName();
 			int indx = fileName.lastIndexOf(".");
 			if (indx == -1) {
@@ -142,7 +135,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 			String ext = fileName.substring(indx);
 			if (ext.equalsIgnoreCase(".xml")) {
-				cleanFCSExport = false;
+				validator.isValid = false;
+				validator.errorMessages.add("Experiment export");
 				continue;
 			}
 			if (! ext.equalsIgnoreCase(".fcs")) {
@@ -743,10 +737,38 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	private Map<String, String> getExperimentAttributes(FCSProcessor processor) {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
-		// Nothing
+		String acqHardwareString = processor.getStandardKeyword("$CYT");
+		if (acqHardwareString.equals("LSRII")) {
+			// LSRII is generic. We replace it here with "BD LSR Fortessa"
+			acqHardwareString = "BD LSR Fortessa";
+		} else {
+			validator.isValid = false;
+			validator.errorMessages.add(
+					"Wrong hardware string: " + acqHardwareString);
+		}
+		attributes.put("acq_hardware", acqHardwareString);
+		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
+		if (!acqSoftwareString.contains("BD FACSDiva Software")) {
+			validator.isValid = false;
+			validator.errorMessages.add(
+					"Wrong software string: " + acqHardwareString);
+		} else {
+			// Check major and minor version (we ignore the patch)
+			Pattern p = Pattern.compile(
+					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
+			Matcher m = p.matcher(acqSoftwareString);
+			if (!m.matches() ||
+					!m.group(2).equals("6") || !m.group(3).equals("1")) {
+				validator.isValid = false;
+				validator.errorMessages.add(
+						"Unsupported software version: " + m.group(1) + "." +
+								 m.group(2));
+			}
+		}
+		attributes.put("acq_software", acqSoftwareString);
 		return attributes;
 	}
-		
+
 	/**
 	 * Extract and store the Tray attributes
 	 * @param processor FCSProcessor with already scanned file

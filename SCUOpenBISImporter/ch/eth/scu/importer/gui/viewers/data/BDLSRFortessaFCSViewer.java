@@ -74,13 +74,17 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			return false;
 		}
 
-		// Make sure we have a clean FCS export
-		if (divafcsprocessor.isCleanFCSExport() == false) {
-			System.err.println("The dataset \"" + divafcsprocessor.toString() +
-					"\" is not a clean FCS export and will be skipped.");
+		// Make sure we have a valid dataset
+		if (divafcsprocessor.validator.isValid == false) {
 			DefaultTableModel model = 
 					(DefaultTableModel) invalidDatasetsTable.getModel();
-			model.addRow(new Object[] { folder.getName(), "Bad export mode."});
+			int nError = 0;
+			StringBuilder err = new StringBuilder("");
+			for (String errorString : divafcsprocessor.validator.errorMessages) {
+				nError++;
+				err.append("(" + nError + ") " + errorString);
+			}
+			model.addRow(new Object[] {folder.getName(), err});
 			return false;
 		}
 
