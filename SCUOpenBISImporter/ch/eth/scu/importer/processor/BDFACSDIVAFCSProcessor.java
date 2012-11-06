@@ -757,12 +757,16 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			Pattern p = Pattern.compile(
 					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
 			Matcher m = p.matcher(acqSoftwareString);
-			if (!m.matches() ||
-					!m.group(2).equals("6") || !m.group(3).equals("1")) {
+			if (!m.matches()) {
 				validator.isValid = false;
-				validator.errorMessages.add(
-						"Unsupported software version: " + m.group(1) + "." +
-								 m.group(2));
+				validator.errorMessages.add("Unknown software version.");
+			} else {
+				if (!m.group(2).equals("6") || !m.group(3).equals("1")) {
+					validator.isValid = false;
+					validator.errorMessages.add(
+					"Unsupported software version: " + m.group(2) + "." +
+							 m.group(3));
+				}
 			}
 		}
 		attributes.put("acq_software", acqSoftwareString);
