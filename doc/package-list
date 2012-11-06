@@ -16,5 +16,6 @@ ch.eth.scu.importer.gui.viewers.openbis.model.icons
 ch.eth.scu.importer.gui.viewers.openbis.view
 ch.eth.scu.importer.processor
 ch.eth.scu.importer.processor.model
+ch.eth.scu.importer.processor.validator
 ch.eth.scu.importeradmin
 ch.eth.scu.importeradmin.gui.dialogs
