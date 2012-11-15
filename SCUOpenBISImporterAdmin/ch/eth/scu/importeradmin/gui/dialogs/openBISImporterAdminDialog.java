@@ -25,10 +25,10 @@ public class openBISImporterAdminDialog extends JDialog {
 	/* Private instance variables */
 	private static final long serialVersionUID = 1L;
 
-	protected String selAcqStation = "";
-	protected String selIncomingDir = "";
-	protected String selOpenBISURL = "";
-	
+	protected String selAcqStation;
+	protected String selIncomingDir;
+	protected String selOpenBISURL;
+
 	protected JButton dirButton;
 	protected JButton saveButton;
 	protected JButton cancelButton;
@@ -172,22 +172,21 @@ public class openBISImporterAdminDialog extends JDialog {
             	// The acquisition station and the openBIS URL are always set;
             	// we make sure that the user also picked an incoming directory
             	if (selIncomingDir.equals("")) {
-            		JOptionPane.showMessageDialog(null, 
-            				"Please set the incoming directory!", "Error", 
+            		JOptionPane.showMessageDialog(null,
+            				"Please set the incoming directory!", "Error",
             				JOptionPane.ERROR_MESSAGE);
 
             		return;
             	}
 
             	// Save the selection to the properties file
-            	if (!saveProperties()) {
+            	if (saveProperties() == false) {
             		JOptionPane.showMessageDialog(null,
-                            "Could not save settings! " +
-                                    "Make sure you have administrator rights!",
-                            "Error",
+            				new String( "Could not save settings! " +
+            		"Make sure you have administrator rights!"), "Error",
             				JOptionPane.ERROR_MESSAGE);
             	} else {
-            	
+
             		setVisible(false);
             		dispose();
             	}
