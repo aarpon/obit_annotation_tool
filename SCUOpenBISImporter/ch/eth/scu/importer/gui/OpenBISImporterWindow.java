@@ -105,7 +105,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// valid login is essential for the functioning of the application.
 		// If the user justs closes the dialog, we close the application.
 		boolean status = false;
-		while (status == false) {
+		while (!status) {
 			status = openBISViewer.login();
 		}
 
@@ -128,7 +128,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// React to the context menu
 		if (e.getActionCommand().equals("Log in")) {
 			boolean status = openBISViewer.login();
-			if (status == true) {
+			if (status) {
 				openBISViewer.scan();
 			}
 		} else if (e.getActionCommand().equals("Log out")) {
@@ -140,7 +140,6 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		} else {
 			outputPane.append("Action command: " + e.getActionCommand() + 
 					" from "  + e.getSource().getClass() + "\n");
-			return;
 		}
 	}
 

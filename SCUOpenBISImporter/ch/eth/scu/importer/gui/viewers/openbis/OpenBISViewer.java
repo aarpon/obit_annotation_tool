@@ -132,7 +132,7 @@ public class OpenBISViewer extends Observable
 	 * @return user name or empty String if log on was not successful 
 	 */
 	public String getUserName() {
-		if (isLoggedIn == false) {
+		if (!isLoggedIn) {
 			return "";
 		}
 		return userName;
@@ -151,7 +151,8 @@ public class OpenBISViewer extends Observable
 		if (node == null) {
 			return;
 		}
-		
+
+		// TODO Implement!
 	}
 
 	/**
@@ -178,7 +179,7 @@ public class OpenBISViewer extends Observable
 		// Check that user name and password were set
 		if (userName.equals("") || userPassword.equals("")) {
 			boolean status = false;
-			while (status == false) {
+			while (!status) {
 				// This is redundant, since the dialog cannot be closed
 				// without specifying a user name and password.
 				status = askForCredentials();
@@ -186,7 +187,7 @@ public class OpenBISViewer extends Observable
 		}
 
 		// Are we already logged in?
-		if (isLoggedIn == true) {
+		if (isLoggedIn) {
 			return true;
 		}
 		
@@ -234,7 +235,7 @@ public class OpenBISViewer extends Observable
 	 * @return true if logging out was successful, false otherwise.
 	 */
 	public boolean logout() {
-		if (facade != null && isLoggedIn == true) {
+		if (facade != null && isLoggedIn) {
 			facade.logout();
 			clearTreeView();
 			isLoggedIn = false;
@@ -271,13 +272,13 @@ public class OpenBISViewer extends Observable
 	 */
 	public void scan() {
 
-		OpenBISSpaceNode space = null;
-		OpenBISProjectNode project = null;
-		OpenBISExperimentNode experiment = null;
-		OpenBISSampleNode sample = null;
+		OpenBISSpaceNode space;
+		OpenBISProjectNode project;
+		OpenBISExperimentNode experiment;
+		OpenBISSampleNode sample;
 		
 		// Do we have a connection with openBIS?
-		if (facade == null || isLoggedIn == false) {
+		if (facade == null || !isLoggedIn) {
 			return;
 		}
 		

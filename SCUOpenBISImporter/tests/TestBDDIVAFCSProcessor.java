@@ -5,7 +5,7 @@ import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor;
 public class TestBDDIVAFCSProcessor {
 
 	/**
-	 * @param args
+	 * @param args Application arguments.
 	 */
 	public static void main(String[] args) {
 		

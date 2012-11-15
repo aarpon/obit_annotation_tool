@@ -87,7 +87,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		}
 		
 		// Make sure the properties file exists
-		if (properties.exists() == false) {
+		if (!properties.exists()) {
 			// TODO Handle the case where the properties file does not exist!
 			logToFile("ERROR: The properties file for subfolder " +
 					subfolder.getName() + " does not exist!");
@@ -149,7 +149,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	 */
 	private void readPropertiesFile(File properties) {
 		
-		DocumentBuilder parser = null;
+		DocumentBuilder parser;
 		
 		// Instantiate the factory
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -316,7 +316,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	private IExperimentUpdatable processExperiment(Node e) {
 		
 		// Initialize the experiment
-		IExperimentUpdatable openBISExperiment = null;
+		IExperimentUpdatable openBISExperiment;
 		
 		// Get Experiment attributes
 		NamedNodeMap attr = e.getAttributes();
@@ -355,7 +355,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	private ISample processTray(Node tray, IExperimentUpdatable exp) {
 		
 		// Initialize the Tray
-		ISample openBISTray = null;
+		ISample openBISTray;
 		
 		// Get Tray attributes
 		NamedNodeMap attr = tray.getAttributes();
@@ -377,7 +377,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 		
 		// TODO Map tray_type from the Fortessa software to an openBIS 
 		// sample type
-		String tray_type = "";
+		String tray_type;
 		Node trayTypeNode = attr.getNamedItem("tray_type");
 		if (trayTypeNode == null ) {
 			tray_type = "UNKNOWN";
@@ -423,7 +423,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	private ISample processSpecimen(Node specimen, IExperimentUpdatable exp) {
 	
 		// Initialize the Specimen
-		ISample openBISSpecimen = null;
+		ISample openBISSpecimen;
 
 		// Get Tray attributes
 		NamedNodeMap attr = specimen.getAttributes();
@@ -467,7 +467,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	private ISample processSpecimen(Node specimen, ISample tray) {
 	
 		// Initialize the Specimen
-		ISample openBISSpecimen = null;
+		ISample openBISSpecimen;
 
 		// Get Tray attributes
 		NamedNodeMap attr = specimen.getAttributes();
@@ -516,7 +516,7 @@ public class BDLSRFortessaDropbox extends AbstractJavaDataSetRegistrationDropbox
 	 */
 	private ISample processTube(Node tube, ISample specimen) {
 	
-		ISample openBISTube = null;
+		ISample openBISTube;
 		
 		// Get Tray attributes
 		NamedNodeMap attr = tube.getAttributes();

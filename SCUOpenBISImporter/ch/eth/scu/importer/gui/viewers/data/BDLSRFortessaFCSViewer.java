@@ -68,21 +68,21 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			return false;
 		}
 
-		if (divafcsprocessor.parse() == false) {
+		if (!divafcsprocessor.parse()) {
 			htmlPane.setText("Could not parse the folder!");
 			divafcsprocessor = null;
 			return false;
 		}
 
 		// Make sure we have a valid dataset
-		if (divafcsprocessor.validator.isValid == false) {
+		if (!divafcsprocessor.validator.isValid) {
 			DefaultTableModel model = 
 					(DefaultTableModel) invalidDatasetsTable.getModel();
 			int nError = 0;
 			StringBuilder err = new StringBuilder("");
 			for (String errorString : divafcsprocessor.validator.errorMessages) {
 				nError++;
-				err.append("(" + nError + ") " + errorString);
+				err.append("(").append(nError).append(") ").append(errorString);
 			}
 			model.addRow(new Object[] {folder.getName(), err});
 			return false;
@@ -170,11 +170,11 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	protected void createNodes(AbstractNode top,
 			BDFACSDIVAFCSProcessor.Folder folderDescriptor) {
 		
-		ExperimentNode experiment = null;
-		TrayNode tray = null;
-		SpecimenNode specimen = null;
-		TubeNode tube = null;
-		FCSFileNode fcs = null;
+		ExperimentNode experiment;
+		TrayNode tray;
+		SpecimenNode specimen;
+		TubeNode tube;
+		FCSFileNode fcs;
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
@@ -255,8 +255,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 *  @param e An ActionEvent 
 	 */
 	public void actionPerformed(ActionEvent e) {
-		return;
-	}
+    }
 
 	/**
 	 * Scans the user subfolder of the datamover incoming directory for

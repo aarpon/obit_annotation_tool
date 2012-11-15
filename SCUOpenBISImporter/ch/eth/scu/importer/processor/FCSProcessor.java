@@ -94,7 +94,7 @@ public class FCSProcessor extends AbstractProcessor {
 			// Process the parameters
 			processParameters();
 
-			if (enableDataParsing == true) {
+			if (enableDataParsing) {
 				
 				// Read the DATA (events)
 				parseData();
@@ -152,7 +152,7 @@ public class FCSProcessor extends AbstractProcessor {
 	 */
 	public String metadataDump() {
 		
-		if (isFileParsed == false) {
+		if (!isFileParsed) {
 			return "File could not be parsed.";
 		}
 

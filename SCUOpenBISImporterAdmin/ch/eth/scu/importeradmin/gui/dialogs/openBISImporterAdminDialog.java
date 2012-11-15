@@ -180,10 +180,11 @@ public class openBISImporterAdminDialog extends JDialog {
             	}
 
             	// Save the selection to the properties file
-            	if (saveProperties() == false) {
-            		JOptionPane.showMessageDialog(null, 
-            				new String( "Could not save settings! " +
-            		"Make sure you have administrator rights!"), "Error", 
+            	if (!saveProperties()) {
+            		JOptionPane.showMessageDialog(null,
+                            "Could not save settings! " +
+                                    "Make sure you have administrator rights!",
+                            "Error",
             				JOptionPane.ERROR_MESSAGE);
             	} else {
             	

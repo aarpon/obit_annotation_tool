@@ -66,7 +66,7 @@ public class SampleDescriptor extends AbstractDescriptor{
 	/**
 	 * Set the openBIS identifier of the container sample, or "" if there is
 	 * no container. 
-	 * @param openBISContainerSampleID
+	 * @param openBISContainerSampleID openBIS identifier of the container sample.
 	 */
 	public void setOpenBISContainerSampleIdentifier(
 			String openBISContainerSampleID) {

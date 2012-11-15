@@ -7,7 +7,7 @@ import ch.eth.scu.importer.processor.FCSProcessor;
 public class TestFCSProcessor {
 
 	/**
-	 * @param args
+	 * @param args  Application arguments.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

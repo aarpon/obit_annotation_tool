@@ -92,8 +92,8 @@ public class OpenBISLoginDialog extends JDialog {
 		loginButtonCnstr.insets = new Insets(10, 3, 3, 3);
 		loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	if (getUsername().equals("") == false && 
-            			getPassword().equals("") == false) {
+            	if (!getUsername().equals("") &&
+            			!getPassword().equals("")) {
             		setVisible(false);
             		dispose();
             	}

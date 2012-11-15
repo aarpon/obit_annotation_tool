@@ -19,7 +19,7 @@ public class SCUOpenBISImporter {
 
 		// Check whether the application has been set up already.
 		// If not, we inform the user and quit.
-		if (AppProperties.propertiesFileExists() == false) {
+		if (!AppProperties.propertiesFileExists()) {
 			JOptionPane.showMessageDialog(null,
 				    "The application has not ben configured yet. " +
 			"Please ask an administrator to do it for you.",

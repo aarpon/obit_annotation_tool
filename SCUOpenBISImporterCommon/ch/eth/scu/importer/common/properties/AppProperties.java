@@ -35,8 +35,8 @@ public class AppProperties {
 		Properties appProperties = getDefaultProperties();
 		
 		// Make sure the Properties file exists
-		if (AppProperties.propertiesFileExists() == false) {
-			if (AppProperties.initializePropertiesFile() == false) {
+		if (!AppProperties.propertiesFileExists()) {
+			if (!AppProperties.initializePropertiesFile()) {
 				System.err.println("Could not initialize properties file " +
 						getPropertiesFileName() + ".");
 				return appProperties;
@@ -75,8 +75,8 @@ public class AppProperties {
 			String acqStation, String incomingDir) {
 
 		// Make sure the Properties file exists
-		if (AppProperties.propertiesFileExists() == false) {
-			if (AppProperties.initializePropertiesFile() == false) {
+		if (!AppProperties.propertiesFileExists()) {
+			if (!AppProperties.initializePropertiesFile()) {
 				System.err.println("Could not initialize properties file " +
 						getPropertiesFileName() + ".");
 			}
@@ -122,7 +122,7 @@ public class AppProperties {
 			throws UnsupportedOperationException {
 
 		// Initialize the applicationDir variable
-		File applicationDataDir = null;
+		File applicationDataDir;
 		
 		// Build the path as a function of the operating system
 		String OS = System.getProperty("os.name");
@@ -138,10 +138,9 @@ public class AppProperties {
 		}
 		
 		// Append the sub-path common to all platform
-		File scuFolder = new File( applicationDataDir + 
-				File.separator + "scu" + File.separator + "scuimporter");
-		
-		return scuFolder;
+
+        return new File( applicationDataDir +
+                File.separator + "scu" + File.separator + "scuimporter");
 	}
 	
 	/**
@@ -159,17 +158,14 @@ public class AppProperties {
 	 * @return 	true if the application data directory could be created
 	 * successfully, false otherwise.
 	 */
-	static private boolean creareApplicationPropertiesDir() {
+	static private boolean createApplicationPropertiesDir() {
 		
 		// Get the application directory
 		File scuFolder = getApplicationPropertiesDir();
 		
 		// Create it if not there
-		if (!scuFolder.exists()) {
-			return scuFolder.mkdirs();
-		}
-		return true;
-	}
+        return scuFolder.exists() || scuFolder.mkdirs();
+    }
 	
 	/**
 	 * Initialize the properties file (if it does not exist)
@@ -179,8 +175,8 @@ public class AppProperties {
 	static private boolean initializePropertiesFile() {
 		
 		// Make sure the properties file exists
-		if (AppProperties.propertiesFileExists() == false) {
-			if (AppProperties.creareApplicationPropertiesDir() == false) {
+		if (!AppProperties.propertiesFileExists()) {
+			if (!AppProperties.createApplicationPropertiesDir()) {
 				return false;
 			}
 		}

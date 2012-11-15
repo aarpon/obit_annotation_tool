@@ -60,7 +60,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 			return false;
 		}
 		try {
-			if (leicalifprocessor.parse() == false) {
+			if (!leicalifprocessor.parse()) {
 				htmlPane.setText("Could not parse file!");
 				leicalifprocessor = null;
 				return false;
@@ -124,7 +124,6 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 *  @param e An ActionEvent 
 	 */
 	public void actionPerformed(ActionEvent e) {
-		return;
 	}
 
 	/**
@@ -191,7 +190,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 */
 	protected void createNodes(AbstractNode lifImageNode, ImageDescriptor image) {
 		
-		SubImageNode subImageNode = null;
+		SubImageNode subImageNode;
 		
 		for (SubImageDescriptor d : image.subImages) {
 

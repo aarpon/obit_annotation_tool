@@ -23,7 +23,7 @@ public class ExperimentDescriptor extends AbstractDescriptor{
 	 * create the openBIS entity associated to this Descriptor.
 	 */
 	public String getOpenBISIdentifier() {
-		if (openBISProjectID.isEmpty() == true) {
+		if (openBISProjectID.isEmpty()) {
 			System.err.println("ExperimentDescriptor: the openBIS project " +
 					"identifier was not set!");
 		}

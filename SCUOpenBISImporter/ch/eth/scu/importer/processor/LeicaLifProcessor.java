@@ -179,11 +179,11 @@ public class LeicaLifProcessor extends AbstractProcessor {
 			this.name = name;
 			
 			// Set the attributes
-			attributes.put("sizeX", new Integer(sizeX).toString());
-			attributes.put("sizeY", new Integer(sizeY).toString());
-			attributes.put("sizeZ", new Integer(sizeZ).toString());
-			attributes.put("sizeC", new Integer(sizeC).toString());
-			attributes.put("sizeT", new Integer(sizeT).toString());
+			attributes.put("sizeX", Integer.toString(sizeX));
+			attributes.put("sizeY", Integer.toString(sizeY));
+			attributes.put("sizeZ", Integer.toString(sizeZ));
+			attributes.put("sizeC", Integer.toString(sizeC));
+			attributes.put("sizeT", Integer.toString(sizeT));
 			attributes.put("datatype", datatype);
 			
 		}

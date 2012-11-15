@@ -65,7 +65,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	public void render() throws Exception {
 
 		// Make sure both viewers have completed their models
-		if (dataViewer.isReady() == false || openBISViewer.isReady() == false) {
+		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
 			return;
 		}
 
@@ -248,7 +248,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 			// Make sure we have a Tray or a Specimen
 			assert((firstLevelSample.getType().equals("Tray") ||
-					firstLevelSample.getType().equals("Specimen")) == true);
+                    firstLevelSample.getType().equals("Specimen")));
 
 			// Set the Experiment identifier
 			firstLevelSample.setOpenBISExperimentIdentifier(
@@ -271,7 +271,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 				// Make sure we have a Specimen or a Tube
 				assert((secondLevelSample.getType().equals("Specimen") ||
-						secondLevelSample.getType().equals("Tube")) == true);
+                        secondLevelSample.getType().equals("Tube")));
 
 				// Set the container sample identifier
 				secondLevelSample.setOpenBISContainerSampleIdentifier(
@@ -294,8 +294,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 					// Make sure we have a Specimen or a Tube
 					assert((abstractSample.getType().equals("Tube") ||
-							abstractSample.getType().equals("FCSFile"))
-							== true);
+                            abstractSample.getType().equals("FCSFile")));
 
 					if (abstractSample.getType().equals("Tube")) {
 

@@ -109,7 +109,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			File file = new File(dir + File.separator + f);
 
 			// Is it a directory? Recurse into it
-			if (file.isDirectory() == true) {
+			if (file.isDirectory()) {
 
 				// Recurse into the subfolder
 				recursiveDir(file);
@@ -146,7 +146,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// Is it a file? Scan it and extract the information
 			FCSProcessor processor = 
 					new FCSProcessor(file.getCanonicalPath(), false);
-			if (processor.parse() == false) {
+			if (!processor.parse()) {
 				System.err.println("File " + file.getCanonicalPath() + 
 						" could not be parsed! It will be skipped.");
 				continue;
@@ -512,7 +512,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				incoming = incomingDir.getCanonicalPath();
 			} catch (IOException e) {
 				System.err.println("Error with incoming folder path " +
-						"("+ incomingDir + ")");
+                        "(" + incomingDir + ")");
 			}
 			
 			// Return the FCS path relative to the incoming dir
@@ -779,9 +779,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @return a key-value map of attributes
 	 */
 	private Map<String, String> getTrayAttributes(FCSProcessor processor) {
-		Map<String, String> attributes = new HashMap<String, String>();
-		// Nothing
-		return attributes;
+        // Nothing
+		return new HashMap<String, String>();
 	}
 	
 	/**
@@ -790,9 +789,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @return a key-value map of attributes
 	 */
 	private Map<String, String> getSpecimenAttributes(FCSProcessor processor) {
-		Map<String, String> attributes = new HashMap<String, String>();
-		// Nothing
-		return attributes;
+        // Nothing
+		return new HashMap<String, String>();
 	}
 	
 	/**
