@@ -6,6 +6,7 @@ import java.util.Observer;
 
 import javax.swing.JPanel;
 
+import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
@@ -43,20 +44,32 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 * @param arg Argument
 	 */
 	public void update(Observable obs, Object arg) {
-		try {
-			render();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        // Get the ObserverAction
+        ObserverActionParameters observerActionParams = (ObserverActionParameters) arg;
+
+        // Perform the correct action
+        switch (observerActionParams.action) {
+            case SCAN_COMPLETE:
+                try {
+                    render(observerActionParams);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                break;
+            case EXPERIMENT_CHANGED:
+                break;
+            default:
+                break;
+        }
 	}
-	
+
 	/**
 	 * Function that creates and render all required widgets when both data 
 	 * and openBIS viewers have notified that their data model is ready. 
 	 * @throws Exception if some of the openBIS identifiers cannot be computed
 	 */
-	abstract public void render() throws Exception;
+	abstract public void render(ObserverActionParameters params) throws Exception;
 	
 	/**
 	 * Return the reference to the JPanel to be added to a container component

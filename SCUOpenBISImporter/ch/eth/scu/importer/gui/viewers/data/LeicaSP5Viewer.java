@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.gui.viewers.data;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ImageNode;
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
@@ -180,7 +181,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 
 		// Notify observers that the scanning is done 
 		setChanged();
-		notifyObservers();
+		notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.SCAN_COMPLETE, ""));
 		
 	}
 	

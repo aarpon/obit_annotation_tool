@@ -3,6 +3,7 @@ package ch.eth.scu.importer.gui.editors.data;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
+import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 
@@ -29,7 +30,7 @@ public class LeicaSP5Editor extends AbstractEditor {
 	/**
 	 * Renders all widgets on the panel
 	 */
-	public void render() {
+	public void render(ObserverActionParameters params) {
 
 		// Make sure both viewers have completed their data model
 		if (!dataViewer.isReady() || !openBISViewer.isReady()) {

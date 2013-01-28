@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.gui.viewers.data;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.gui.viewers.data.model.FCSFileNode;
@@ -128,24 +129,29 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 					((BDFACSDIVAFCSProcessor.Experiment) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
+            // Notify the editor to update its view
+            setChanged();
+            notifyObservers(new ObserverActionParameters(
+                    ObserverActionParameters.Action.EXPERIMENT_CHANGED,
+                    ((BDFACSDIVAFCSProcessor.Experiment) nodeInfo).getName()));
 		} else if (className.equals("Tray")) { 
 			htmlPane.setText(
 					((BDFACSDIVAFCSProcessor.Tray) 
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
-		} else if (className.equals("Specimen")) { 
+		} else if (className.equals("Specimen")) {
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.Specimen) 
+					((BDFACSDIVAFCSProcessor.Specimen)
 							nodeInfo).attributesToString().replace(
 									", ", "\n"));
 		} else if (className.equals("Tube")) {
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.Tube) 
+					((BDFACSDIVAFCSProcessor.Tube)
 							nodeInfo).attributesToString().replace(
-									", ", "\n"));			
+									", ", "\n"));
 		} else if (className.equals("FCSFile")) {
 			// Cast
-			BDFACSDIVAFCSProcessor.FCSFile fcsFile = 
+			BDFACSDIVAFCSProcessor.FCSFile fcsFile =
 					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;
 			String fcsFileName = fcsFile.getFileName();
 			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
@@ -161,11 +167,13 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		} else {
 			htmlPane.setText("");
 		}
+
 	}
 
 	/**
 	 * Create the nodes for the tree
-	 * @param rootNode Root node
+	 * @param top Root node for the tree
+     * @param folderDescriptor A folder descriptor object.
 	 */
 	protected void createNodes(AbstractNode top,
 			BDFACSDIVAFCSProcessor.Folder folderDescriptor) {
@@ -310,7 +318,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	
 		// Notify observers that the scanning is done 
 		setChanged();
-		notifyObservers();		
+		notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.SCAN_COMPLETE, ""));
 	}
 
 }

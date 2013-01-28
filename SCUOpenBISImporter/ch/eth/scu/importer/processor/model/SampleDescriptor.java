@@ -2,7 +2,7 @@ package ch.eth.scu.importer.processor.model;
 
 import java.util.Map;
 
-public class SampleDescriptor extends AbstractDescriptor{
+public abstract class SampleDescriptor extends AbstractDescriptor{
 
 	/**
 	 * openBIS identifiers
@@ -93,21 +93,5 @@ public class SampleDescriptor extends AbstractDescriptor{
 	 * Return the entity openBIS attributes.
 	 * @return a string-string map with attribute name : value pairs.
 	 */
-	public Map<String, String> getOpenBISAttributes() { 
-
-		// Fill in the map
-		openBISAttributes.put("openBISCode",
-				getOpenBISCode());
-		openBISAttributes.put("openBISContainerSampleIdentifier",
-				getOpenBISContainerSampleIdentifier());
-		openBISAttributes.put("openBISExperimentIdentifier",
-				getOpenBISExperimentIdentifier());
-		openBISAttributes.put("openBISIdentifier",
-				getOpenBISIdentifier());
-		openBISAttributes.put("openBISSpaceIdentifier",
-				getOpenBISSpaceIdentifier());
-
-		// Return
-		return openBISAttributes;
-	}
+	public abstract Map<String, String> getOpenBISAttributes();
 }

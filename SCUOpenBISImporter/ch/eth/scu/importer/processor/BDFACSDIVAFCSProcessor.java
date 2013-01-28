@@ -26,7 +26,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
-	protected DefaultMutableTreeNode rootNode;
 	private File topFolder;
 
 	/* Protected instance variables */
@@ -41,7 +40,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	public BDFACSDIVAFCSProcessor(String fullFolderName, String userName) {
 
-		// Instatiate the validator
+		// Instantiate the validator
 		validator = new GenericValidator();
 
 		// Make sure rootFolderName is a valid directory
@@ -93,160 +92,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 	}
 
-	/**
-	 * Scan the folder recursively and process all fcs files found
-	 * @param file Full path to the directory to scan
-	 * @throws IOException Thrown if a FCS file could not be processed
-	 */
-	private void recursiveDir(File dir) throws IOException {
-
-		// Get the directory listing
-		String [] files = dir.list();
-
-		// Go over the files and folders
-		for (String f : files) {
-			
-			File file = new File(dir + File.separator + f);
-
-			// Is it a directory? Recurse into it
-			if (file.isDirectory()) {
-
-				// Recurse into the subfolder
-				recursiveDir(file);
-
-				// Move on to the next file
-				continue;
-			}
-			
-			// We ignore any file that is not an fcs file - but we pay 
-			// attention to the existence of XML files that indicate an
-			// Experiment export!
-			//
-			// The DIVA software can export FCS files in two modes: FCS export
-			// creates valid FCS 3.0-compliant files. Experiment export creates 
-			// files that cannot be used in subsequent analysis in third-party
-			// software like FlowJo. In case of Experiment exports, an XML file
-			// is saved along with the series of FCS files. We use the presence
-			// of the XML file to discriminate between the two export modes.
-			String fileName = file.getName();
-			int indx = fileName.lastIndexOf(".");
-			if (indx == -1) {
-				continue;
-			}
-			String ext = fileName.substring(indx);
-			if (ext.equalsIgnoreCase(".xml")) {
-				validator.isValid = false;
-				validator.errorMessages.add("Experiment export");
-				continue;
-			}
-			if (! ext.equalsIgnoreCase(".fcs")) {
-				continue;
-			}
-
-			// Is it a file? Scan it and extract the information
-			FCSProcessor processor = 
-					new FCSProcessor(file.getCanonicalPath(), false);
-			if (!processor.parse()) {
-				System.err.println("File " + file.getCanonicalPath() + 
-						" could not be parsed! It will be skipped.");
-				continue;
-			}
-		
-			// Create a new ExperimentDescriptor or reuse an existing one
-			Experiment expDesc;
-			String experimentName = getExperimentName(processor);
-			if (folderDescriptor.experiments.containsKey(experimentName)) {
-				expDesc = folderDescriptor.experiments.get(experimentName);
-			} else {
-				expDesc = 
-						new Experiment(getExperimentName(processor));
-				// Store attributes
-				expDesc.setAttributes(getExperimentAttributes(processor));
-				folderDescriptor.experiments.put(experimentName, expDesc);
-			}
-
-			// Is the container a Tray or Specimen?
-			if (identifyContainerType(processor).equals("TRAY")) {
-				
-				// Create a new TrayDescriptor or reuse an existing one
-				Tray trayDesc;
-				String trayName = getTrayName(processor);
-				String trayKey = experimentName + "_" + trayName;
-				if (expDesc.trays.containsKey(trayKey)) {
-					trayDesc = expDesc.trays.get(trayKey);
-				} else {
-					trayDesc = 
-							new Tray(trayName);
-					// Store attributes
-					trayDesc.setAttributes(getTrayAttributes(processor));
-					// Store it in the experiment descriptor
-					expDesc.trays.put(trayKey, trayDesc);
-				}
-				
-				// Create a new Specimen or reuse an existing one
-				Specimen specDesc;
-				String specName = getSpecimenName(processor);
-				String specKey = trayKey + "_" + specName;
-				if (trayDesc.specimens.containsKey(specKey)) {
-					specDesc = trayDesc.specimens.get(specKey);
-				} else {
-					specDesc = 
-							new Specimen(specName);
-					// Store attributes
-					specDesc.setAttributes(getSpecimenAttributes(processor));
-					// Store it in the tray descriptor
-					trayDesc.specimens.put(specKey, specDesc);
-				}
-
-				// Create a new Tube descriptor or reuse an existing one
-				Tube tubeDesc;
-				String tubeName = getTubeName(processor);
-				String tubeKey = specKey + "_" + tubeName;
-				if (! specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName,
-							file.getCanonicalPath());
-					// Store attributes
-					tubeDesc.setAttributes(getTubeAttributes(processor));
-					// Store it in the specimen descriptor
-					specDesc.tubes.put(tubeKey, tubeDesc);
-				}
-
-			} else {
-
-				// Create a new Specimen or reuse an existing one
-				Specimen specDesc;
-				String specName = getSpecimenName(processor);
-				String specKey = experimentName + "_" + specName;
-				if (expDesc.specimens.containsKey(specKey)) {
-					specDesc = expDesc.specimens.get(specKey);
-				} else {
-					specDesc = 
-							new Specimen(specName);	
-					// Store attributes
-					specDesc.setAttributes(getSpecimenAttributes(processor));
-					// Store it in the experiment descriptor
-					expDesc.specimens.put(specKey, specDesc);
-				}
-
-				// Create a new Tube descriptor or reuse an existing one
-				Tube tubeDesc;
-				String tubeName = getTubeName(processor);
-				String tubeKey = specKey + "_" + tubeName;
-				if (! specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName,
-							file.getCanonicalPath());	
-					// Store attributes
-					tubeDesc.setAttributes(getTubeAttributes(processor));
-					// Store it in the specimen descriptor
-					specDesc.tubes.put(tubeKey, tubeDesc);
-				}
-
-			}
-
-		}
-
-	}
-	
 	/**
 	 * Return a String representation of the BDFACSDIVAFCSProcessor.
 	 * @return String containing a description of the BDFACSDIVAFCSProcessor. 
@@ -561,6 +406,19 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Specimen";
 		}
+		
+		/**
+		 * Return the entity openBIS attributes in a comma-separated list.
+		 * @return a comma-separated list of attribute name : value pairs.
+		 */
+		@Override
+		public Map<String, String> getOpenBISAttributes() {		
+			
+			// The Specimen entity does not provide any
+			// openBIS attributes.
+			assert (openBISAttributes.size() == 0);
+			return openBISAttributes;
+		}
 
 	}
 
@@ -596,6 +454,21 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Tray";
 		}
+
+		/**
+		 * Return the entity openBIS attributes in a comma-separated list.
+		 * @return a comma-separated list of attribute name : value pairs.
+		 */
+		@Override
+		public Map<String, String> getOpenBISAttributes() {		
+			
+			// The Tray entity provides the space identifier
+			// openBIS attributes.
+			assert (openBISAttributes.size() == 0);
+			openBISAttributes.put("openBISSpaceIdentifier",
+					getOpenBISSpaceIdentifier());
+			return openBISAttributes;
+		}		
 
 	}
 
@@ -644,9 +517,178 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Tube";
 		}
-		
+
+		/**
+		 * Return the entity openBIS attributes in a comma-separated list.
+		 * @return a comma-separated list of attribute name : value pairs.
+		 */
+		@Override
+		public Map<String, String> getOpenBISAttributes() {		
+			
+			// The Tube entity provides the space identifier
+			// openBIS attributes.
+			assert (openBISAttributes.size() == 0);
+			openBISAttributes.put("openBISSpaceIdentifier",
+					getOpenBISSpaceIdentifier());
+			return openBISAttributes;
+		}
+
 	}
 	
+	/**
+	 * Scan the folder recursively and process all fcs files found
+	 * @param dir Full path to the directory to scan
+	 * @throws IOException Thrown if a FCS file could not be processed
+	 */
+	private void recursiveDir(File dir) throws IOException {
+	
+		// Get the directory listing
+		String [] files = dir.list();
+	
+		// Go over the files and folders
+		for (String f : files) {
+			
+			File file = new File(dir + File.separator + f);
+	
+			// Is it a directory? Recurse into it
+			if (file.isDirectory()) {
+	
+				// Recurse into the subfolder
+				recursiveDir(file);
+	
+				// Move on to the next file
+				continue;
+			}
+			
+			// We ignore any file that is not an fcs file - but we pay 
+			// attention to the existence of XML files that indicate an
+			// Experiment export!
+			//
+			// The DIVA software can export FCS files in two modes: FCS export
+			// creates valid FCS 3.0-compliant files. Experiment export creates 
+			// files that cannot be used in subsequent analysis in third-party
+			// software like FlowJo. In case of Experiment exports, an XML file
+			// is saved along with the series of FCS files. We use the presence
+			// of the XML file to discriminate between the two export modes.
+			String fileName = file.getName();
+			int indx = fileName.lastIndexOf(".");
+			if (indx == -1) {
+				continue;
+			}
+			String ext = fileName.substring(indx);
+			if (ext.equalsIgnoreCase(".xml")) {
+				validator.isValid = false;
+				validator.errorMessages.add("Experiment export");
+				continue;
+			}
+			if (! ext.equalsIgnoreCase(".fcs")) {
+				continue;
+			}
+	
+			// Is it a file? Scan it and extract the information
+			FCSProcessor processor = 
+					new FCSProcessor(file.getCanonicalPath(), false);
+			if (!processor.parse()) {
+				System.err.println("File " + file.getCanonicalPath() + 
+						" could not be parsed! It will be skipped.");
+				continue;
+			}
+		
+			// Create a new ExperimentDescriptor or reuse an existing one
+			Experiment expDesc;
+			String experimentName = getExperimentName(processor);
+			if (folderDescriptor.experiments.containsKey(experimentName)) {
+				expDesc = folderDescriptor.experiments.get(experimentName);
+			} else {
+				expDesc = 
+						new Experiment(getExperimentName(processor));
+				// Store attributes
+				expDesc.setAttributes(getExperimentAttributes(processor));
+				folderDescriptor.experiments.put(experimentName, expDesc);
+			}
+	
+			// Is the container a Tray or Specimen?
+			if (identifyContainerType(processor).equals("TRAY")) {
+				
+				// Create a new TrayDescriptor or reuse an existing one
+				Tray trayDesc;
+				String trayName = getTrayName(processor);
+				String trayKey = experimentName + "_" + trayName;
+				if (expDesc.trays.containsKey(trayKey)) {
+					trayDesc = expDesc.trays.get(trayKey);
+				} else {
+					trayDesc = 
+							new Tray(trayName);
+					// Store attributes
+					trayDesc.setAttributes(getTrayAttributes(processor));
+					// Store it in the experiment descriptor
+					expDesc.trays.put(trayKey, trayDesc);
+				}
+				
+				// Create a new Specimen or reuse an existing one
+				Specimen specDesc;
+				String specName = getSpecimenName(processor);
+				String specKey = trayKey + "_" + specName;
+				if (trayDesc.specimens.containsKey(specKey)) {
+					specDesc = trayDesc.specimens.get(specKey);
+				} else {
+					specDesc = 
+							new Specimen(specName);
+					// Store attributes
+					specDesc.setAttributes(getSpecimenAttributes(processor));
+					// Store it in the tray descriptor
+					trayDesc.specimens.put(specKey, specDesc);
+				}
+	
+				// Create a new Tube descriptor or reuse an existing one
+				Tube tubeDesc;
+				String tubeName = getTubeName(processor);
+				String tubeKey = specKey + "_" + tubeName;
+				if (! specDesc.tubes.containsKey(tubeKey)) {
+					tubeDesc = new Tube(tubeName,
+							file.getCanonicalPath());
+					// Store attributes
+					tubeDesc.setAttributes(getTubeAttributes(processor));
+					// Store it in the specimen descriptor
+					specDesc.tubes.put(tubeKey, tubeDesc);
+				}
+	
+			} else {
+	
+				// Create a new Specimen or reuse an existing one
+				Specimen specDesc;
+				String specName = getSpecimenName(processor);
+				String specKey = experimentName + "_" + specName;
+				if (expDesc.specimens.containsKey(specKey)) {
+					specDesc = expDesc.specimens.get(specKey);
+				} else {
+					specDesc = 
+							new Specimen(specName);	
+					// Store attributes
+					specDesc.setAttributes(getSpecimenAttributes(processor));
+					// Store it in the experiment descriptor
+					expDesc.specimens.put(specKey, specDesc);
+				}
+	
+				// Create a new Tube descriptor or reuse an existing one
+				Tube tubeDesc;
+				String tubeName = getTubeName(processor);
+				String tubeKey = specKey + "_" + tubeName;
+				if (! specDesc.tubes.containsKey(tubeKey)) {
+					tubeDesc = new Tube(tubeName,
+							file.getCanonicalPath());	
+					// Store attributes
+					tubeDesc.setAttributes(getTubeAttributes(processor));
+					// Store it in the specimen descriptor
+					specDesc.tubes.put(tubeKey, tubeDesc);
+				}
+	
+			}
+	
+		}
+	
+	}
+
 	/**
 	 * Return the tube name stored in the FCS file
 	 * @param processor with already scanned file

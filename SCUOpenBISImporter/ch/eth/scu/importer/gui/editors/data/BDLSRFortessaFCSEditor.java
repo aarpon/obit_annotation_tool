@@ -13,6 +13,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
 
+import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.gui.viewers.data.model.ExperimentNode;
@@ -62,7 +63,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * Renders all widgets on the panel
 	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
-	public void render() throws Exception {
+	public void render(ObserverActionParameters params) throws Exception {
 
 		// Make sure both viewers have completed their models
 		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
@@ -85,7 +86,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		TreeModel dataModel = dataViewer.getDataModel();
 		TreeModel openBISModel = openBISViewer.getDataModel();
 
-		// We extract all projects from the openBIS model and create a list
+        // We extract all projects from the openBIS model and create a list
 		// with which we will then create JComboBox associated to each project
 		// from the data model
 		List<AbstractOpenBISNode> projects = new ArrayList<AbstractOpenBISNode>();
@@ -127,7 +128,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// Keep track of the Y position in the layout
 		int yPos = 0;
 
-		// First level are the XML files 
+		// First level are the folder nodes 
 		int dataNChildren = dataRoot.getChildCount();
 
 		for (int i = 0; i < dataNChildren; i++) {

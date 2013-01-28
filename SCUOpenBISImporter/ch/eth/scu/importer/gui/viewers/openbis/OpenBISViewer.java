@@ -19,6 +19,7 @@ import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.gui.dialogs.OpenBISLoginDialog;
+import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISExperimentNode;
 import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISProjectNode;
@@ -362,7 +363,8 @@ public class OpenBISViewer extends Observable
 		
 		// Notify observers that the scanning is done 
 		setChanged();
-		notifyObservers();
+		notifyObservers(new ObserverActionParameters(
+				ObserverActionParameters.Action.SCAN_COMPLETE, ""));
 	}
 
 	/**

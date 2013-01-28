@@ -79,14 +79,8 @@ public class ExperimentDescriptor extends AbstractDescriptor{
 	public Map<String, String> getOpenBISAttributes() { 
 		
 		// Fill in the map
-		openBISAttributes.put("openBISCode",
-				getOpenBISCode());
 		openBISAttributes.put("openBISIdentifier",
 				getOpenBISIdentifier());
-		openBISAttributes.put("openBISProjectIdentifier",
-				getOpenBISProjectIdentifier());
-		openBISAttributes.put("openBISSpaceIdentifier",
-				getOpenBISSpaceIdentifier());
 
 		// Return
 		return openBISAttributes;
