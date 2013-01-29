@@ -1,18 +1,20 @@
 package ch.eth.scu.importer.processor;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
-import ch.eth.scu.importer.processor.model.ExperimentDescriptor;
-import ch.eth.scu.importer.processor.model.SampleDescriptor;
-import ch.eth.scu.importer.processor.model.DatasetDescriptor;
-import ch.eth.scu.importer.processor.validator.GenericValidator;
-
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.processor.model.DatasetDescriptor;
+import ch.eth.scu.importer.processor.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
+import ch.eth.scu.importer.processor.model.SampleDescriptor;
+import ch.eth.scu.importer.processor.validator.GenericValidator;
 
 /**
  * BDFACSDIVAXMLProcessor parses folder structures created by the 
@@ -406,19 +408,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Specimen";
 		}
-		
-		/**
-		 * Return the entity openBIS attributes in a comma-separated list.
-		 * @return a comma-separated list of attribute name : value pairs.
-		 */
-		@Override
-		public Map<String, String> getOpenBISAttributes() {		
-			
-			// The Specimen entity does not provide any
-			// openBIS attributes.
-			assert (openBISAttributes.size() == 0);
-			return openBISAttributes;
-		}
 
 	}
 
@@ -454,21 +443,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Tray";
 		}
-
-		/**
-		 * Return the entity openBIS attributes in a comma-separated list.
-		 * @return a comma-separated list of attribute name : value pairs.
-		 */
-		@Override
-		public Map<String, String> getOpenBISAttributes() {		
-			
-			// The Tray entity provides the space identifier
-			// openBIS attributes.
-			assert (openBISAttributes.size() == 0);
-			openBISAttributes.put("openBISSpaceIdentifier",
-					getOpenBISSpaceIdentifier());
-			return openBISAttributes;
-		}		
 
 	}
 
@@ -515,21 +489,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		@Override
 		public String getType() {
 			return "Tube";
-		}
-
-		/**
-		 * Return the entity openBIS attributes in a comma-separated list.
-		 * @return a comma-separated list of attribute name : value pairs.
-		 */
-		@Override
-		public Map<String, String> getOpenBISAttributes() {		
-			
-			// The Tube entity provides the space identifier
-			// openBIS attributes.
-			assert (openBISAttributes.size() == 0);
-			openBISAttributes.put("openBISSpaceIdentifier",
-					getOpenBISSpaceIdentifier());
-			return openBISAttributes;
 		}
 
 	}

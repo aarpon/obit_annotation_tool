@@ -28,19 +28,6 @@ public class LeicaSP5Editor extends AbstractEditor {
 	}
 
 	/**
-	 * Renders all widgets on the panel
-	 */
-	public void render(ObserverActionParameters params) {
-
-		// Make sure both viewers have completed their data model
-		if (!dataViewer.isReady() || !openBISViewer.isReady()) {
-			return;
-		}
-
-		// TODO Implement!
-	}
-	
-	/**
 	 * ActionPerformed method from the ActionListener interface
 	 * @param e The ActionEvent object
 	 */
@@ -57,6 +44,12 @@ public class LeicaSP5Editor extends AbstractEditor {
 	public void updateAll(ObserverActionParameters observerActionParams) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean updateDataModel() {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

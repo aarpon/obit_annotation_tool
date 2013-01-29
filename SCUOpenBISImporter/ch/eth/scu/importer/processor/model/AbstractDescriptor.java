@@ -24,11 +24,12 @@ abstract public class AbstractDescriptor {
 	protected String name = "";
 
 	/**
-	 * String-string map of attribute key:value pair.
+	 * String-string map of data attribute key:value pair.
 	 * 
 	 * These will be uploaded to openBIS as associated information.
 	 */
-	protected Map<String, String> attributes = new Hashtable<String, String>();
+	protected Map<String, String> attributes =
+			new Hashtable<String, String>();
 
 	/**
 	 * String-string map of openBIS attribute key:value pair.
@@ -39,7 +40,16 @@ abstract public class AbstractDescriptor {
 			new Hashtable<String, String>();
 
 	/**
-	 * Return a simplified class name to be used in the tree viewers (and XML).
+	 * String-string map of user attribute key:value pair.
+	 * 
+	 * These will be uploaded to openBIS as associated information.
+	 */
+	protected Map<String, String> userAttributes =
+			new Hashtable<String, String>();
+	
+	/**
+	 * Return a simplified class name to be used in the tree 
+	 * viewers (and XML).
 	 * @return simplified class name.
 	 */
 	abstract public String getType();
@@ -54,21 +64,6 @@ abstract public class AbstractDescriptor {
 	 * Set the name of the entity.
 	 */
 	public void setName(String name) { this.name = name; }
-
-	/**
-	 * Return the openBIS identifier of the entity. This is used to get or
-	 * create the openBIS entity associated to this Descriptor.
-	 */
-	public String getOpenBISIdentifier() {
-		return "";
-	}
-
-	/**
-	 * Return the openBIS code of the entity (based on its name).
-	 */
-	public String getOpenBISCode() { 
-		return name.replaceAll(" ", "_").toUpperCase();
-	}
 
 	/**
 	 * Return a string representation of the entity.
@@ -108,6 +103,23 @@ abstract public class AbstractDescriptor {
 	}
 
 	/**
+	 * Return the entity user attributes.
+	 * @return a string-string map with user attribute name:value pairs.
+	 */
+	public Map<String, String> getUserAttributes() { 
+		return userAttributes; 
+	}
+
+	/**
+	 * Set the entity user attributes.
+	 * @param userAttributes String-string map with openBIS attribute 
+	 * name : value pairs.
+	 */
+	public void setUserAttributes(Map<String, String> userAttributes) { 
+		this.userAttributes = userAttributes; 
+	}
+	
+	/**
 	 * Return the entity attributes in a comma-separated list.
 	 * @return a comma-separated list of attribute name : value pairs.
 	 */
@@ -125,4 +137,12 @@ abstract public class AbstractDescriptor {
 		return str.substring(1, str.length() - 1);
 	}
 
+	/**
+	 * Return the user attributes in a comma-separated list.
+	 * @return a comma-separated list of attribute name : value pairs.
+	 */		
+	public String userAttributesToString() {
+		String str = userAttributes.toString();
+		return str.substring(1, str.length() - 1);
+	}	
 }

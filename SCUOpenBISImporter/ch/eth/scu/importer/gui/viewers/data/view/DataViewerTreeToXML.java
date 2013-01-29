@@ -33,8 +33,9 @@ import ch.eth.scu.importer.processor.model.FirstLevelDescriptor;
  */
 public class DataViewerTreeToXML {
 
-	Map<String, Document> documents = new Hashtable<String, Document>();
-
+	protected Map<String, Document> documents = 
+			new Hashtable<String, Document>();
+	
 	/**
 	 * Constructor
 	 * @param tree Custom JTree
@@ -167,6 +168,13 @@ public class DataViewerTreeToXML {
 				element.setAttribute(key, value);
 			}
 
+			// Store all user node attributes
+			Map<String, String> userAttributes = data.getUserAttributes();
+			for (String key: userAttributes.keySet() ) {
+				String value = userAttributes.get(key);
+				element.setAttribute(key, value);
+			}
+			
 			// Store all node attributes
 			Map<String, String> attributes = data.getAttributes();
 			for (String key: attributes.keySet() ) {

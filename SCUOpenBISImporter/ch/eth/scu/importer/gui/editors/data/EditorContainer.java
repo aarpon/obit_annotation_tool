@@ -87,6 +87,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 				return;
 			}
 
+			// Update the data model with the openBIS and user attributes
+			if (!metadataEditor.updateDataModel()) {
+				System.out.println(
+						"Metadata incomplete (TODO: Use the output pane).");
+				return;
+			}
+			
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
 			String outputDirectory = 
@@ -106,4 +113,5 @@ public class EditorContainer extends JPanel implements ActionListener {
 	public AbstractEditor getEditor() {
 		return metadataEditor;
 	}
+	
 }

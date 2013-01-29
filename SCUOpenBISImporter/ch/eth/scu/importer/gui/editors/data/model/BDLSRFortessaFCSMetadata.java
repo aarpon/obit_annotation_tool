@@ -11,7 +11,7 @@ import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISProjectNode;
  * @author Aaron Ponti
  *
  */
-public class BDLSRFortessaFCSMetadata extends AbstractMetadataElement {
+public class BDLSRFortessaFCSMetadata extends AbstractMetadata {
 
 	public FolderNode folderNode;
 	public OpenBISProjectNode openBISProjectNode;
@@ -62,6 +62,37 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataElement {
 	 */
 	public String getProjectName() {
 		return openBISProjectNode.toString();
+	}
+
+	/**
+	 * Get the openBIS Experiment Identifier
+	 * @return the openBIS Experiment identifier
+	 */
+	public String getOpenBISExerimentIdentifier() {
+		String openBISProjectID = openBISProjectNode.getIdentifier();
+		String name = getExperimentName().replaceAll(" ", "_");
+		return (openBISProjectID + "/" + name).toUpperCase();
+	}
+	
+	/**
+	 * Get the openBIS Space Identifier
+	 * @return the openBIS space identifier
+	 */
+	public String getOpenBISSpaceIdentifier() {
+		String openBISProjectID = openBISProjectNode.getIdentifier();
+		
+		// Find the first occurrence of / which is NOT at the beginning
+		int indx = openBISProjectID.indexOf("/", 1);
+		
+		if (indx == -1) {
+			// This should not happen, sice the identifier came
+			// from openBIS in the first place.
+			System.err.println(
+					"Malformed openBIS project identifier!");
+			return "INVALID";
+		}
+		
+		return (openBISProjectID.substring(0, indx).toUpperCase());
 	}
 
 }
