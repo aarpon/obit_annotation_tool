@@ -14,6 +14,10 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.gui.editors.data.model.BDLSRFortessaFCSMetadata;
@@ -58,6 +62,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	protected JLabel labelExpName;
 	protected JComboBox<String> comboGeometryList;
 	protected JComboBox<OpenBISProjectNode> comboProjectList;
+	protected JTextArea expDescription;
 	
 	/**
 	 * Constructor
@@ -140,6 +145,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", metadata.description); 
+			expDescr.setUserAttributes(expUserAttributes);
 
 			// Now get the Trays and Specimens children of the Experiment
 			for (int i = 0; i < expNode.getChildCount(); i++) {
@@ -283,6 +289,18 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	}	
 
 	/**
+	 * Update metadata and UI
+	 */
+	public void updateAll(ObserverActionParameters params) {
+	
+		// Update the currentExperimentIndex property
+		currentExperimentIndex = dataFolders.indexOf(params.node);
+	
+		// Update the UI
+		updateUIElements();
+	}
+
+	/**
 	 * Map the data and openBIS models
 	 * @throws Exception 
 	 */
@@ -379,6 +397,52 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		panel.add(labelExpName, constraints);
 
 		/*
+		 * Description label
+		 */
+		
+		// Create a label for the experiment description
+		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		JLabel labelExpDescription = new JLabel("Description");
+		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
+		panel.add(labelExpDescription, constraints);
+
+		/*
+		 * Description text area
+		 */
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		expDescription = new JTextArea(metadata.description);
+		expDescription.setLineWrap(true);
+		expDescription.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				updateExpDescription();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				updateExpDescription();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				updateExpDescription();
+			}
+        });
+		JScrollPane areaScrollPane = new JScrollPane(expDescription);
+		areaScrollPane.setVerticalScrollBarPolicy(
+		                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		areaScrollPane.setPreferredSize(new Dimension(250, 50));
+		panel.add(areaScrollPane, constraints);
+		
+		/*
 		 *  Tray geometry label
 		 */
 
@@ -387,7 +451,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = 4;
 		JLabel labelGeometry = new JLabel("Plate geometry");
 		labelGeometry.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelGeometry, constraints);
@@ -436,7 +500,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 3;
+		constraints.gridy = 5;
 		panel.add(comboGeometryList, constraints);
 
 		/*
@@ -448,7 +512,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = 6;
 		JLabel labelProjects = new JLabel("Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
@@ -497,7 +561,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 5;
+		constraints.gridy = 7;
 		panel.add(comboProjectList, constraints);
 
 		/*
@@ -506,7 +570,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		
 		// Add a spacer
 		constraints.gridx = 0;
-		constraints.gridy = 6;
+		constraints.gridy = 8;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
@@ -532,7 +596,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		
 		// Update the experiment name
 		labelExpName.setText(metadata.getExperimentName());
-		
+
+		// Update the description
+		expDescription.setText(metadata.description);
+
 		// Update the geometry
 		comboGeometryList.setSelectedIndex(
 				metadata.supportedTrayGeometries.indexOf(
@@ -541,20 +608,6 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// Update the project
 		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
 				metadata.openBISProjectNode));
-		
-		// TODO: Add description
-	}
-	
-	/**
-	 * Update metadata and UI
-	 */
-	public void updateAll(ObserverActionParameters params) {
-
-		// Update the currentExperimentIndex property
-		currentExperimentIndex = dataFolders.indexOf(params.node);
-
-		// Update the UI
-		updateUIElements();
 	}
 	
 	/**
@@ -625,5 +678,18 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		}        
 	}
 
+	/**
+	 * We update the experiment description on the fly while the user 
+	 * is typing in the Text Area.
+	 */
+	protected void updateExpDescription() {
 
+		// Get the active metadata object
+		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
+				currentExperimentIndex);
+		
+		// Store the experiment description
+		metadata.description = expDescription.getText();
+    }
+	
 }
