@@ -476,7 +476,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Descriptor representing a tube obtained from the FCS file.
 	 * A Tube is always a child of a Specimen.
      *
-	 * TODO Add the attributes!
 	 * @author Aaron Ponti
 	 */
 	public class Tube extends SampleDescriptor {

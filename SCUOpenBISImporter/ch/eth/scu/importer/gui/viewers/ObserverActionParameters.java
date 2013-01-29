@@ -1,5 +1,7 @@
 package ch.eth.scu.importer.gui.viewers;
 
+import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
+
 /**
  * Lists the actions supported by the observer pattern.
  *
@@ -14,10 +16,11 @@ public class ObserverActionParameters {
     }
 
 	public ObserverActionParameters.Action action;
-    public String param = "";
+    public AbstractNode node = null;
 
-    public ObserverActionParameters(ObserverActionParameters.Action action, String param) {
+    public ObserverActionParameters(
+    		ObserverActionParameters.Action action, AbstractNode node) {
         this.action = action;
-        this.param  = param;
+        this.node  = node;
     }
 }

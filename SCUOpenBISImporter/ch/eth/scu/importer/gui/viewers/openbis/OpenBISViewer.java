@@ -364,7 +364,8 @@ public class OpenBISViewer extends Observable
 		// Notify observers that the scanning is done 
 		setChanged();
 		notifyObservers(new ObserverActionParameters(
-				ObserverActionParameters.Action.SCAN_COMPLETE, ""));
+				ObserverActionParameters.Action.SCAN_COMPLETE,
+				null));
 	}
 
 	/**

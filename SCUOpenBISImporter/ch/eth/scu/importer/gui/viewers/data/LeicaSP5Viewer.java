@@ -181,7 +181,9 @@ public class LeicaSP5Viewer extends AbstractViewer
 
 		// Notify observers that the scanning is done 
 		setChanged();
-		notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.SCAN_COMPLETE, ""));
+		notifyObservers(new ObserverActionParameters(
+				ObserverActionParameters.Action.SCAN_COMPLETE,
+				null));
 		
 	}
 	

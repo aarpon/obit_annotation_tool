@@ -38,6 +38,12 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	// a JTree, so we keep track of the last processed node to avoid parsing
 	// the same FCS file twice every time the node is changed.
 	private String lastSelectedNode;
+	
+	// When selecting an entry in the tree, the editor might be refreshed
+	// in response. This should happen only if a new folder is selected -
+	// as long as one changes between nodes within an experiment no
+	// editor refresh is needed.
+	private AbstractNode lastSelectedFolder;
 
 	/**
 	 * Constructor
@@ -126,15 +132,10 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		String className = nodeInfo.getClass().getSimpleName();
 		if (className.equals("Experiment")) { 
 			htmlPane.setText(
-					((BDFACSDIVAFCSProcessor.Experiment) 
-							nodeInfo).attributesToString().replace(
-									", ", "\n"));
-            // Notify the editor to update its view
-            setChanged();
-            notifyObservers(new ObserverActionParameters(
-                    ObserverActionParameters.Action.EXPERIMENT_CHANGED,
-                    ((BDFACSDIVAFCSProcessor.Experiment) nodeInfo).getName()));
-		} else if (className.equals("Tray")) { 
+                    ((BDFACSDIVAFCSProcessor.Experiment)
+                            nodeInfo).attributesToString().replace(
+                            ", ", "\n"));
+		} else if (className.equals("Tray")) {
 			htmlPane.setText(
 					((BDFACSDIVAFCSProcessor.Tray) 
 							nodeInfo).attributesToString().replace(
@@ -168,13 +169,58 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			htmlPane.setText("");
 		}
 
+        // Get the folder name
+        AbstractNode folderNode = getFolderNode(node);
+        if (folderNode != null && folderNode != lastSelectedFolder) {
+        		
+        		// Update the lastSelectedFolder property
+        		lastSelectedFolder = folderNode;
+        		
+            // Notify the editor to update its view
+            setChanged();
+            notifyObservers(new ObserverActionParameters(
+                ObserverActionParameters.Action.EXPERIMENT_CHANGED, folderNode));
+        }
 	}
 
-	/**
-	 * Create the nodes for the tree
-	 * @param top Root node for the tree
-     * @param folderDescriptor A folder descriptor object.
-	 */
+    /**
+     * Climb the JTree to find the folder node and return its name
+     * @param selectedNode Node selected in the JTree
+     * @return folder node name
+     */
+    protected AbstractNode getFolderNode(AbstractNode selectedNode) {
+
+        // Get the class name of the selected node
+        String className = selectedNode.getUserObject().getClass().getSimpleName();
+
+        // Try to get the folder name
+        if (className.equals("RootDescriptor")) {
+            // We are above the folder node, we return ""
+            return null;
+        } else if (className.equals("Folder")) {
+            // We are at the folder node , we return its name
+            return selectedNode;
+        } else {
+            // We are somewhere below the folder node: we climb up the tree
+            // until we find it and then return its name
+            AbstractNode parentNode = (AbstractNode) selectedNode.getParent();
+            while (parentNode != null) {
+                // Are we at the folder node?
+                if (parentNode.getUserObject().getClass().getSimpleName().equals("Folder")) {
+                    return parentNode;
+                } else {
+                    parentNode = (AbstractNode) parentNode.getParent();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+         * Create the nodes for the tree
+         * @param top Root node for the tree
+         * @param folderDescriptor A folder descriptor object.
+         */
 	protected void createNodes(AbstractNode top,
 			BDFACSDIVAFCSProcessor.Folder folderDescriptor) {
 		
@@ -318,7 +364,9 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	
 		// Notify observers that the scanning is done 
 		setChanged();
-		notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.SCAN_COMPLETE, ""));
+		notifyObservers(new ObserverActionParameters(
+				ObserverActionParameters.Action.SCAN_COMPLETE,
+				null));
 	}
 
 }

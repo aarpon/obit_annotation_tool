@@ -47,4 +47,16 @@ public class LeicaSP5Editor extends AbstractEditor {
 	public void actionPerformed(ActionEvent e) {
     }
 
+	@Override
+	public void init(ObserverActionParameters params) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateAll(ObserverActionParameters observerActionParams) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

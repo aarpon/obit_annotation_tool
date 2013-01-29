@@ -45,19 +45,26 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 */
 	public void update(Observable obs, Object arg) {
         // Get the ObserverAction
-        ObserverActionParameters observerActionParams = (ObserverActionParameters) arg;
+        ObserverActionParameters observerActionParams = 
+        		(ObserverActionParameters) arg;
 
         // Perform the correct action
         switch (observerActionParams.action) {
             case SCAN_COMPLETE:
                 try {
-                    render(observerActionParams);
+                    init(observerActionParams);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 break;
             case EXPERIMENT_CHANGED:
+                try {
+                	updateAll(observerActionParams);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 break;
             default:
                 break;
@@ -65,11 +72,18 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	}
 
 	/**
-	 * Function that creates and render all required widgets when both data 
-	 * and openBIS viewers have notified that their data model is ready. 
+	 * Function that maps the metadata information from the openBIS and
+	 * data viewers (when they notify being ready) and creates and 
+	 * renders all required UI widgets for metadata editing. 
 	 * @throws Exception if some of the openBIS identifiers cannot be computed
 	 */
-	abstract public void render(ObserverActionParameters params) throws Exception;
+	abstract public void init(ObserverActionParameters params) throws Exception;
+	
+	/**
+	 * Function that updates the metadata and the UI widgets when the user
+	 * edits something in the editor. 
+	 */
+	abstract public void updateAll(ObserverActionParameters observerActionParams);
 	
 	/**
 	 * Return the reference to the JPanel to be added to a container component

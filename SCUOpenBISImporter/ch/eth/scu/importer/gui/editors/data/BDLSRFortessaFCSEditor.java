@@ -13,6 +13,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
 
+import ch.eth.scu.importer.gui.editors.data.model.BDLSRFortessaFCSMetadata;
 import ch.eth.scu.importer.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.gui.viewers.data.model.AbstractNode;
@@ -21,6 +22,7 @@ import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.gui.viewers.openbis.model.AbstractOpenBISNode;
+import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.processor.BDFACSDIVAFCSProcessor.Experiment;
 import ch.eth.scu.importer.processor.model.AbstractDescriptor;
 import ch.eth.scu.importer.processor.model.DatasetDescriptor;
@@ -32,8 +34,27 @@ import ch.eth.scu.importer.processor.model.SampleDescriptor;
  */
 public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
-	protected List<ExperimentNode> experiments = new ArrayList<ExperimentNode>();
+	protected TreeModel dataModel;
+	protected TreeModel openBISModel;
+	
+	protected List<OpenBISProjectNode> openBISProjects = 
+			new ArrayList<OpenBISProjectNode>();
 
+	// List of experiments from the Data Model
+	protected List<FolderNode> dataFolders = 
+			new ArrayList<FolderNode>();
+	
+	protected List<BDLSRFortessaFCSMetadata> experimentMetadata =
+			new ArrayList<BDLSRFortessaFCSMetadata>();
+
+	// Indicate which of the List<BDLSRFortessaFCSMetadata> is the 
+	// active one
+	protected int currentExperimentIndex = -1;
+
+	protected JLabel labelFolderName;
+	protected JLabel labelExpName;
+	protected JComboBox<OpenBISProjectNode> comboProjectList;
+	
 	/**
 	 * Constructor
 	 */
@@ -60,13 +81,71 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	}
 
 	/**
+	 * Map the data and openBIS models
+	 * @throws Exception 
+	 */
+	public void init(ObserverActionParameters params) throws Exception {
+		
+		// Make sure both viewers have completed their models
+		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
+			return;
+		}
+		
+		// Init the metadata
+		if (initMetadata()) {
+			
+			// Create the widgets
+			createUIElements(params);
+
+		}
+		
+	}
+	
+	/**
+	 * Map the data and openBIS models
+	 * @throws Exception 
+	 */
+	private boolean initMetadata() {
+		
+		// Make sure both viewers have completed their models
+		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
+			return false;
+		}
+		
+		// Store the and openBIS nodes
+		storeOpenBISProjects();
+		storeDataFolders();
+		
+		// Check that there is at least one entry in each of the 
+		// arrays
+		if (dataFolders.size() == 0 || openBISProjects.size() == 0) {
+			// TODO: Inform the user
+			return false;
+		}
+		
+		// Create all BDLSRFortessaFCSMetadata objects
+		for (FolderNode node : dataFolders) {
+			experimentMetadata.add(
+					new BDLSRFortessaFCSMetadata(
+							node, openBISProjects.get(0)));
+		}
+		
+		// Initially we set the first openBIS project as a target
+		// for all experiments
+		currentExperimentIndex = 0;
+		
+		// Return success
+		return true;
+	}
+	
+	/**
 	 * Renders all widgets on the panel
 	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
-	public void render(ObserverActionParameters params) throws Exception {
+	private void createUIElements(ObserverActionParameters params) throws Exception {
 
 		// Make sure both viewers have completed their models
-		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
+		if (experimentMetadata.size() == 0) {
 			return;
 		}
 
@@ -77,31 +156,146 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			panel.revalidate(); 
 		}
 
+		// Get selected metadata element
+		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
+				currentExperimentIndex);
+		
 		// Constraints
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 
-		// We get the models
-		TreeModel dataModel = dataViewer.getDataModel();
-		TreeModel openBISModel = openBISViewer.getDataModel();
+		// Create a label for the XML file
+		constraints.insets = new Insets(10, 10, 10, 10);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		labelFolderName = new JLabel(metadata.folderNode.toString());
+		panel.add(labelFolderName, constraints);
 
+		String expName = metadata.folderNode.getChildAt(0).toString();
+		
+		// Create a label for the experiment
+		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		labelExpName = new JLabel(expName); 
+		panel.add(labelExpName, constraints);
+
+		// Store the project in a JCombo box
+		comboProjectList = new JComboBox<OpenBISProjectNode>();
+		
+		for (OpenBISProjectNode s : openBISProjects) {
+
+			// Add the BDLSRFortessaFCSMetadata object
+			comboProjectList.addItem(s);
+
+		}
+		
+		// Select the correct one
+		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
+				metadata.openBISProjectNode));
+
+		// When a project is selected, update the corresponding 
+		// experiment in the data model 
+		comboProjectList.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("comboBoxChanged")) {
+
+					// Get the BDLSRFortessaFCSMetadata object
+					OpenBISProjectNode projectNode =
+							(OpenBISProjectNode)
+							((JComboBox<OpenBISProjectNode>)
+									e.getSource()).getSelectedItem();
+					
+					// Update the metadata object with the new projects
+					experimentMetadata.get(
+							currentExperimentIndex).openBISProjectNode =
+							projectNode;
+
+				}
+			}
+		});
+	
+		// Add the JComboBox
+		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		panel.add(comboProjectList, constraints);
+
+		// Add a spacer
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		panel.add(new JLabel(""), constraints);
+		
+		// In case this was called when then window was already visible (i.e.
+		// if the login failed the first time and this panel was drawn without
+		// children)
+		panel.revalidate();
+
+	}
+
+	/**
+	 * Update all widgets on the panel
+	 */
+	private void updateUIElements() {
+		
+		// Get the active metadata object
+		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
+				currentExperimentIndex);
+
+		// Update the folder name
+		labelFolderName.setText(metadata.getFolderName());
+		
+		// Update the experiment name
+		labelExpName.setText(metadata.getExperimentName());
+		
+		// Update the project
+		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
+				metadata.openBISProjectNode));
+		
+		// TODO: Add geometry and description
+	}
+	
+	/**
+	 * Update metadata and UI
+	 */
+	public void updateAll(ObserverActionParameters params) {
+
+		// Update the currentExperimentIndex property
+		currentExperimentIndex = dataFolders.indexOf(params.node);
+
+		// Update the UI
+		updateUIElements();
+	}
+	
+
+	/**
+	 * Collects and stores openBIS projects for mapping
+	 * @return list of openBIS nodes
+	 */
+	private void storeOpenBISProjects() {
+		
+		// Store the openBIS model
+		openBISModel = openBISViewer.getDataModel();
+		
         // We extract all projects from the openBIS model and create a list
 		// with which we will then create JComboBox associated to each project
 		// from the data model
-		List<AbstractOpenBISNode> projects = new ArrayList<AbstractOpenBISNode>();
-
+		openBISProjects = new ArrayList<OpenBISProjectNode>();
+		
 		AbstractOpenBISNode openBISRoot = 
 				(AbstractOpenBISNode) openBISModel.getRoot();
 
-		// First level are spaces (which we do not need)
-		int openBISNChildren = openBISRoot.getChildCount();
-		if (openBISNChildren == 0) {
-			return;
-		}
-
-		// Since there are children, we can create the UI elements
-		for (int i = 0; i < openBISNChildren; i++) {
+		// Iterate over the space nodes (there should be at least one)
+		for (int i = 0; i < openBISRoot.getChildCount(); i++) {
 
 			// Get the Space
 			AbstractOpenBISNode openBISSpaceNode = 
@@ -113,21 +307,31 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			for (int j = 0; j < n; j++) {
 
 				// Get the node
-				AbstractOpenBISNode openBISProjectNode = 
-						(AbstractOpenBISNode) openBISSpaceNode.getChildAt(j);
+				OpenBISProjectNode openBISProjectNode = 
+						(OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
 
 				// Add it to the list
-				projects.add(openBISProjectNode);
+				openBISProjects.add(openBISProjectNode);
 
 			}
 		}
+	}
 
+	/**
+	 * Collects and stores data folders for mapping
+	 * @return list of openBIS nodes
+	 */
+	private void storeDataFolders() {
+
+		// Reset the dataFolders list
+		dataFolders = new ArrayList<FolderNode>();
+
+		// Store the data model
+		dataModel = dataViewer.getDataModel();
+		
 		// We extract all experiments from the data model
 		RootNode dataRoot = (RootNode) dataModel.getRoot();
-
-		// Keep track of the Y position in the layout
-		int yPos = 0;
-
+		
 		// First level are the folder nodes 
 		int dataNChildren = dataRoot.getChildCount();
 
@@ -136,237 +340,9 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			// Get the FolderNode
 			FolderNode folderNode = (FolderNode) dataRoot.getChildAt(i);
 
-			// Create a label for the XML file
-			constraints.insets = new Insets(10, 10, 10, 10);
-			constraints.weightx = 1;
-			constraints.weighty = 0;
-			constraints.gridx = 0;
-			constraints.gridy = yPos++;
-			panel.add(new JLabel(folderNode.toString()), constraints);
-
-			// Now go over the children (Experiments)
-			int nChildren = folderNode.getChildCount();
-
-			for (int j = 0; j < nChildren; j++) {
-
-				// Get the Experiment node
-				ExperimentNode dataExpNode = 
-						(ExperimentNode) folderNode.getChildAt(j);
-
 				// Store the reference to the ExperimentNode
-				experiments.add(dataExpNode);
-
-				// Create a label for the experiment
-				constraints.insets = new Insets(0, 20, 0, 20);
-				constraints.weightx = 1;
-				constraints.weighty = 0;
-				constraints.gridx = 0;
-				constraints.gridy = yPos++;
-				panel.add(new JLabel(dataExpNode.toString()), constraints);
-
-				// Pair all the info together for the Combo box
-
-				// Add a JComboBox for the Pair objects
-				JComboBox projCombo = new JComboBox();
-				for (AbstractOpenBISNode s : projects) {
-
-					// Add the Pair object
-					projCombo.addItem(new Pair(dataExpNode, s));
-
-				}
-				projCombo.setSelectedIndex(0);
-
-				// By default, set the first project to current 
-				// ExperimentDescriptor in the data model
-				performMapping(dataExpNode, projects.get(0));
-
-				// When a project is selected, update the corresponding 
-				// ExperimentDescriptor in the data model 
-				projCombo.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand().equals("comboBoxChanged")) {
-
-							// Get the Pair object
-							Pair pair = (Pair) 
-									((JComboBox)(e.getSource())).getSelectedItem();
-
-							// Now perform the full mapping
-							performMapping((ExperimentNode) pair.expNode,
-									(AbstractOpenBISNode) pair.projNode);
-
-						}
-					}
-				});
-				constraints.insets = new Insets(0, 20, 0, 20);
-				constraints.weightx = 1;
-				constraints.weighty = 0;
-				constraints.gridx = 0;
-				constraints.gridy = yPos++;
-				panel.add(projCombo, constraints);
-
-			}
-		}
-
-		// Add a spacer
-		constraints.gridx = 0;
-		constraints.gridy = yPos;
-		constraints.weightx = 1.0;
-		constraints.weighty = 1.0;
-		panel.add(new JLabel(""), constraints);
-
-		// In case this was called when then window was already visible (i.e.
-		// if the login failed the first time and this panel was drawn without
-		// children)
-		panel.revalidate();
-
+				dataFolders.add(folderNode);
+		}        
 	}
 
-	/**
-	 * Use the pair (ExperimentNode, ProjectNode) to update all data Descriptors
-	 * with the correct openBIS information 
-	 */
-	public void performMapping(ExperimentNode expNode, AbstractOpenBISNode projNode) {
-
-		// The parent of the ExperimentDescriptor is the FolderDescriptor, 
-		// which does not need to be updated.
-
-		// We first start by updating the Experiment descriptor itself
-		Experiment expDescr = (Experiment) expNode.getUserObject();
-
-		// Set the openBIS project identifier
-		expDescr.setOpenBISProjectIdentifier(projNode.getIdentifier());
-
-		// Now get the Trays and Specimens children of the Experiment
-		for (int i = 0; i < expNode.getChildCount(); i++) {
-
-			// Get the i-th child node
-			AbstractNode firstLevelSampleNode =
-					(AbstractNode) expNode.getChildAt(i);
-
-			// Get the Sample Descriptor
-			SampleDescriptor firstLevelSample =
-					(SampleDescriptor) firstLevelSampleNode.getUserObject();
-
-			// Make sure we have a Tray or a Specimen
-			assert((firstLevelSample.getType().equals("Tray") ||
-                    firstLevelSample.getType().equals("Specimen")));
-
-			// Set the Experiment identifier
-			firstLevelSample.setOpenBISExperimentIdentifier(
-					expDescr.getOpenBISIdentifier());
-
-			// Set the Sample identifier to "" since immediate children
-			// of the Experiment do not have a parent sample container
-			firstLevelSample.setOpenBISContainerSampleIdentifier("");
-
-			// Now go over the children
-			for (int j = 0; j < firstLevelSampleNode.getChildCount(); j++ ) {
-
-				// Get the j-th child node
-				AbstractNode secondLevelSampleNode =
-						(AbstractNode) firstLevelSampleNode.getChildAt(j);
-
-				// Get the Sample Descriptor
-				SampleDescriptor secondLevelSample =
-						(SampleDescriptor) secondLevelSampleNode.getUserObject();
-
-				// Make sure we have a Specimen or a Tube
-				assert((secondLevelSample.getType().equals("Specimen") ||
-                        secondLevelSample.getType().equals("Tube")));
-
-				// Set the container sample identifier
-				secondLevelSample.setOpenBISContainerSampleIdentifier(
-						firstLevelSample.getOpenBISIdentifier());
-
-				// Set the experiment identifier 
-				secondLevelSample.setOpenBISExperimentIdentifier(
-						expDescr.getOpenBISIdentifier());
-
-				// Now go over the children
-				for (int k = 0; k < secondLevelSampleNode.getChildCount(); k++ ) {
-
-					// Get the j-th child node
-					AbstractNode thirdLevelSampleNode =
-							(AbstractNode) secondLevelSampleNode.getChildAt(k);
-
-					// A third-level node can contain a Tube or an FCS file
-					AbstractDescriptor abstractSample = (AbstractDescriptor)
-							thirdLevelSampleNode.getUserObject();
-
-					// Make sure we have a Specimen or a Tube
-					assert((abstractSample.getType().equals("Tube") ||
-                            abstractSample.getType().equals("FCSFile")));
-
-					if (abstractSample.getType().equals("Tube")) {
-
-						// Cast
-						SampleDescriptor thirdLevelSample = (SampleDescriptor)
-								thirdLevelSampleNode.getUserObject();
-
-						// Set the container sample identifier
-						thirdLevelSample.setOpenBISContainerSampleIdentifier(
-								secondLevelSample.getOpenBISIdentifier());
-
-						// Set the experiment identifier 
-						thirdLevelSample.setOpenBISExperimentIdentifier(
-								expDescr.getOpenBISIdentifier());
-
-						// And now we set up the associated FCS file
-
-						// Get the child (one!): the FCS file
-						assert(thirdLevelSampleNode.getChildCount() == 1);
-
-						AbstractNode fourthLevelSampleNode = (AbstractNode)
-								thirdLevelSampleNode.getChildAt(0);
-						DatasetDescriptor fcsFile = (DatasetDescriptor)
-								fourthLevelSampleNode.getUserObject();
-
-						// Set the experiment identifier
-						fcsFile.setOpenBISExperimentIdentifier(
-								expDescr.getOpenBISIdentifier());
-
-						// Set the sample
-						fcsFile.setOpenBISSampleIdentifier(
-								thirdLevelSample.getOpenBISIdentifier());
-
-					} else {
-
-						// Here we have an FCS file
-
-						// Cast
-						DatasetDescriptor fcsFile = (DatasetDescriptor)
-								thirdLevelSampleNode.getUserObject();
-
-						// Set the experiment identifier
-						fcsFile.setOpenBISExperimentIdentifier(
-								expDescr.getOpenBISIdentifier());
-
-						// Set the sample
-						fcsFile.setOpenBISSampleIdentifier(
-								secondLevelSample.getOpenBISIdentifier());
-					}
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * Pair of data and openBIS information to allow mapping following 
-	 * user choice.
-	 * @author Aaron Ponti
-	 */
-	protected class Pair {
-		protected ExperimentNode expNode;
-		protected AbstractOpenBISNode projNode;
-
-		protected Pair(ExperimentNode expNode, AbstractOpenBISNode projNode) {
-			this.expNode = expNode;
-			this.projNode = projNode;
-		}
-
-		public String toString() {
-			return projNode.getIdentifier();
-		}
-	}
 }
