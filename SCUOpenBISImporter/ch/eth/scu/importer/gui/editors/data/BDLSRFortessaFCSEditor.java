@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.tree.TreeModel;
@@ -177,6 +178,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		labelFolderName = new JLabel(metadata.folderNode.toString());
+		labelFolderName.setIcon(new ImageIcon(
+				this.getClass().getResource("./icons/folder.png")));
 		panel.add(labelFolderName, constraints);
 
 		/*
@@ -191,7 +194,9 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = 1;
-		labelExpName = new JLabel(expName); 
+		labelExpName = new JLabel(expName);
+		labelExpName.setIcon(new ImageIcon(
+				this.getClass().getResource("./icons/experiment.png")));		
 		panel.add(labelExpName, constraints);
 
 		/*
