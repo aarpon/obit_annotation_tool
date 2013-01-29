@@ -53,6 +53,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 	protected JLabel labelFolderName;
 	protected JLabel labelExpName;
+	protected JComboBox<String> comboGeometryList;
 	protected JComboBox<OpenBISProjectNode> comboProjectList;
 	
 	/**
@@ -160,12 +161,16 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
 				currentExperimentIndex);
 		
+		/*
+		 *  Folder name
+		 */
+		
 		// Constraints
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 
-		// Create a label for the XML file
+		// Create a label for the folder
 		constraints.insets = new Insets(10, 10, 10, 10);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
@@ -174,6 +179,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		labelFolderName = new JLabel(metadata.folderNode.toString());
 		panel.add(labelFolderName, constraints);
 
+		/*
+		 *  Experiment name
+		 */
+		
 		String expName = metadata.folderNode.getChildAt(0).toString();
 		
 		// Create a label for the experiment
@@ -185,6 +194,87 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		labelExpName = new JLabel(expName); 
 		panel.add(labelExpName, constraints);
 
+		/*
+		 *  Tray geometry label
+		 */
+
+		// Create a label for the geometry combo box
+		constraints.insets = new Insets(10, 10, 10, 10);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		JLabel labelGeometry = new JLabel("Plate geometry");
+		labelGeometry.setHorizontalAlignment(JLabel.CENTER);
+		panel.add(labelGeometry, constraints);
+		
+		/*
+		 *  Tray geometry combo
+		 */
+		
+		// Display a combo box with the geometries
+		ArrayList<String> supportedGeometries =
+				metadata.supportedTrayGeometries;
+		comboGeometryList = new JComboBox<String>();
+		for (String geometry : supportedGeometries) {
+
+			// Add the geometry
+			comboGeometryList.addItem(geometry);
+
+		}		
+
+		// Select the correct one
+		int indx = supportedGeometries.indexOf(
+				metadata.trayGeometry);
+		comboGeometryList.setSelectedIndex(supportedGeometries.indexOf(
+				metadata.trayGeometry));
+
+		// When a geometry is selected, update the corresponding 
+		// experiment in the data model 
+		comboGeometryList.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("comboBoxChanged")) {
+
+					String geometry =
+							(String)
+							((JComboBox<String>)
+									e.getSource()).getSelectedItem();
+					
+					// Update the metadata object with the new projects
+					experimentMetadata.get(
+							currentExperimentIndex).trayGeometry =
+							geometry;
+
+				}
+			}
+		});
+
+		// Add the geometry combo box
+		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		panel.add(comboGeometryList, constraints);
+
+		/*
+		 *  Label openBIS projects
+		 */
+
+		// Create a label for the openBIS projects
+		constraints.insets = new Insets(10, 10, 10, 10);
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 4;
+		JLabel labelProjects = new JLabel("Target openBIS project");
+		labelProjects.setHorizontalAlignment(JLabel.CENTER);
+		panel.add(labelProjects, constraints);
+		
+		/*
+		 *  Tray openBIS projects
+		 */
+		
 		// Store the project in a JCombo box
 		comboProjectList = new JComboBox<OpenBISProjectNode>();
 		
@@ -220,17 +310,21 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			}
 		});
 	
-		// Add the JComboBox
+		// Add the project combo box
 		constraints.insets = new Insets(0, 20, 0, 20);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = 5;
 		panel.add(comboProjectList, constraints);
 
+		/*
+		 *  Spacer
+		 */
+		
 		// Add a spacer
 		constraints.gridx = 0;
-		constraints.gridy = 3;
+		constraints.gridy = 6;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
@@ -257,11 +351,16 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// Update the experiment name
 		labelExpName.setText(metadata.getExperimentName());
 		
+		// Update the geometry
+		comboGeometryList.setSelectedIndex(
+				metadata.supportedTrayGeometries.indexOf(
+				metadata.trayGeometry));
+
 		// Update the project
 		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
 				metadata.openBISProjectNode));
 		
-		// TODO: Add geometry and description
+		// TODO: Add description
 	}
 	
 	/**

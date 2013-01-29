@@ -1,5 +1,7 @@
 package ch.eth.scu.importer.gui.editors.data.model;
 
+import java.util.ArrayList;
+
 import ch.eth.scu.importer.gui.viewers.data.model.FolderNode;
 import ch.eth.scu.importer.gui.viewers.openbis.model.OpenBISProjectNode;
 
@@ -15,6 +17,7 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataElement {
 	public OpenBISProjectNode openBISProjectNode;
 	public String trayGeometry;
 	public String description;
+	public ArrayList<String> supportedTrayGeometries;
 	
 	/** 
 	 * Constructor
@@ -22,8 +25,18 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataElement {
 	public BDLSRFortessaFCSMetadata(FolderNode folderNode, 
 			OpenBISProjectNode openBISProjectNode) {
 	
+		// Assign folder and openBIS project nodes
 		this.folderNode = folderNode;
 		this.openBISProjectNode = openBISProjectNode;
+		
+		// Set the supported geometries
+		this.supportedTrayGeometries = new ArrayList<String>();
+		this.supportedTrayGeometries.add("96_WELLS_8X12");
+		this.supportedTrayGeometries.add("384_WELLS_16x24");
+		
+		// Set default values for trayGeometry and description
+		this.trayGeometry = this.supportedTrayGeometries.get(0);
+		this.description = "";
 	}
 
 	/**
@@ -50,5 +63,5 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataElement {
 	public String getProjectName() {
 		return openBISProjectNode.toString();
 	}
-	
+
 }
