@@ -139,8 +139,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 					new Hashtable<String, String>();
 			expOpenBISAttributes.put("openBISIdentifier", 
 					metadata.getOpenBISExerimentIdentifier());
+			expOpenBISAttributes.put("openBISSpaceIdentifier", 
+					metadata.getOpenBISSpaceIdentifier());
 			expDescr.setOpenBISAttributes(expOpenBISAttributes);
-			
+
 			// Set the description
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
