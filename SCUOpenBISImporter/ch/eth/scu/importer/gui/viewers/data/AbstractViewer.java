@@ -31,18 +31,20 @@ import ch.eth.scu.importer.processor.model.RootDescriptor;
 abstract public class AbstractViewer extends Observable
 	implements ActionListener, TreeSelectionListener {
 
+	protected boolean isReady = false;
+
 	protected JPanel panel;
-	protected JEditorPane htmlPane;
 	protected DataViewerTree tree;
 	protected JLabel title;
 	protected DefaultMutableTreeNode rootNode;
 	protected JScrollPane treeView;
 	protected JScrollPane htmlView;
 	protected JLabel metadataView;
-	protected boolean isReady = false;
+	protected JTable metadataViewTable;
+	protected JScrollPane metadataViewPane;	
 	protected JLabel invalidDatasets;
 	protected JTable invalidDatasetsTable;
-	protected JScrollPane invalidDatasetsView;
+	protected JScrollPane invalidDatasetsPane;
 	
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
@@ -89,7 +91,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
-		constraints.weighty = 0.5;
+		constraints.weighty = 0.45;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		panel.add(treeView, constraints);
@@ -107,23 +109,24 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridheight = 1;
 		panel.add(metadataView, constraints);
 		
-		// Create the HTML viewing pane.
-		htmlPane = new JEditorPane();
-		htmlPane.setEditable(false);
-		htmlView = new JScrollPane(htmlPane);
-
+		// Add the table
+		Object[][] mdData = { };
+		String mdColumnNames[] = { "Name", "Value" };
+		metadataViewTable = new JTable(
+				new DefaultTableModel(mdData, mdColumnNames));
+		metadataViewTable.setFillsViewportHeight(true);
+		metadataViewTable.setAutoCreateRowSorter(true);
+		metadataViewPane = new JScrollPane(metadataViewTable);
+		
 		// Add to the layout
 		constraints.gridx = 0;
 		constraints.gridy = 3;
 		constraints.weightx = 1.0;
-		constraints.weighty = 0.2;
+		constraints.weighty = 0.20;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		panel.add(htmlView, constraints);
+		panel.add(metadataViewPane, constraints);
 
-		// Add initial info to the html pane
-		htmlPane.setText("");
-		
 		// Add a simple label
 		invalidDatasets = new JLabel("Invalid datasets");
 		invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
@@ -143,16 +146,17 @@ abstract public class AbstractViewer extends Observable
 		invalidDatasetsTable = new JTable(
 				new DefaultTableModel(data, columnNames));
 		invalidDatasetsTable.setFillsViewportHeight(true);
-		invalidDatasetsView = new JScrollPane(invalidDatasetsTable);
+		invalidDatasetsTable.setAutoCreateRowSorter(true);
+		invalidDatasetsPane = new JScrollPane(invalidDatasetsTable);
         
 		// Add to the layout
 		constraints.gridx = 0;
 		constraints.gridy = 5;
 		constraints.weightx = 1.0;
-		constraints.weighty = 0.1;
+		constraints.weighty = 0.05;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		panel.add(invalidDatasetsView, constraints);
+		panel.add(invalidDatasetsPane, constraints);
 		
 		// Set the preferred and minimum size
 		panel.setMinimumSize(new Dimension(400, 700));
@@ -188,16 +192,29 @@ abstract public class AbstractViewer extends Observable
 	/**
 	 * Clears the JTable listing the invalid datasets
 	 */
-	protected void clearTable() {
+	protected void clearInvalidDatasetsTable() {
 		if (invalidDatasetsTable != null) {
-			Object[][] data = { };
-			String columnNames[] = { "Folder", "Problem" };
-			invalidDatasetsTable.setModel(
-					new DefaultTableModel(data, columnNames));
-			invalidDatasetsTable.repaint();
+			DefaultTableModel model =
+					(DefaultTableModel) invalidDatasetsTable.getModel();
+			for (int i = model.getRowCount() - 1; i >= 0; i--) {
+			    model.removeRow(i);
+			}
 		}
 	}
-	
+
+	/**
+	 * Clears the JTable listing the metadata (attributes)
+	 */
+	protected void clearMetadataTable() {
+		if (metadataViewTable != null) {
+			DefaultTableModel model =
+					(DefaultTableModel) metadataViewTable.getModel();
+			for (int i = model.getRowCount() - 1; i >= 0; i--) {
+			    model.removeRow(i);
+			}
+		}
+	}
+
 	/**
 	 * Create and save an XML representation of the JTree to file
 	 * @param outputDirectory Directory where XML property files are saved 

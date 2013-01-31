@@ -41,9 +41,6 @@ public class LeicaSP5Viewer extends AbstractViewer
 		
 		// Call the AbstractViewer's constructor (to create the panel)
 		super();
-		
-		// Add initial info to the html pane
-		htmlPane.setText("\nLeica LIF Viewer");
 	}
 
 	/**
@@ -56,13 +53,13 @@ public class LeicaSP5Viewer extends AbstractViewer
 		try {
 			leicalifprocessor = new LeicaLifProcessor(file.getCanonicalPath());
 		} catch (IOException e) {
-			htmlPane.setText("Invalid file!");
+			System.err.println("Invalid file! (TODO: Use panel)");
 			leicalifprocessor = null;
 			return false;
 		}
 		try {
 			if (!leicalifprocessor.parse()) {
-				htmlPane.setText("Could not parse file!");
+				System.err.println("Could not parse file! (TODO: Use panel)");
 				leicalifprocessor = null;
 				return false;
 			}
@@ -109,14 +106,19 @@ public class LeicaSP5Viewer extends AbstractViewer
 		// Dump attributes to the html pane 
 		String className = nodeInfo.getClass().getName();
 		if (className.endsWith("$ImageDescriptor")) {
-			htmlPane.setText(
-					((ImageDescriptor) nodeInfo).toString());
+			// TODO: Display this in the metadata table. The htmlPane 
+			// does not longer exist in the AbstractViewer.
+//			htmlPane.setText(
+//					((ImageDescriptor) nodeInfo).toString());
 		} else if (className.endsWith("$SubImageDescriptor")) {
-			htmlPane.setText(
-					((SubImageDescriptor)nodeInfo).attributesToString().replace(
-							", ", "\n"));
+			// TODO: Display this in the metadata table. The htmlPane 
+			// does not longer exist in the AbstractViewer.
+//			htmlPane.setText(
+//					((SubImageDescriptor)nodeInfo).attributesToString().replace(
+//							", ", "\n"));
 		} else {
-			htmlPane.setText("");
+			// Clear the metadata table
+			clearMetadataTable();
 		}
 	}
 
@@ -135,8 +137,10 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 */
 	public void scan(String userName) {
 
-		// Make sure to clear the table of invalid datasets
-		clearTable();
+		// Make sure to clear the table of invalid datasets and
+		// metadata
+		clearInvalidDatasetsTable();
+		clearMetadataTable();
 		
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
@@ -173,8 +177,8 @@ public class LeicaSP5Viewer extends AbstractViewer
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
 
-		// Clean the html pane
-		htmlPane.setText("");
+		// Clear the metadata table
+		clearMetadataTable();
 		
 		// Set isReady to globalStatus
 		isReady = globalStatus;

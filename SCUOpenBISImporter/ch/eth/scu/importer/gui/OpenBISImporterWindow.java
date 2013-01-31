@@ -105,10 +105,10 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Set up the frame and center on screen
 		setMinimumSize(new Dimension(1250, 700));
-		setMaximumSize(new Dimension(1500, 1200));
+		setMaximumSize(new Dimension(1500, 1500));
 		pack();
 		setLocationRelativeTo(null);
-		
+
 		// Ask the user to login.
 		// Here we will insist on getting valid openBIS credentials, since a
 		// valid login is essential for the functioning of the application.

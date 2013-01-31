@@ -25,6 +25,8 @@ import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.io.FileFilter;
 
@@ -52,13 +54,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		
 		// Call the AbstractViewer's constructor (to create the panel)
 		super();
-		
-		// Add initial info to the html pane
-		htmlPane.setText(
-				"\nDisplays 'BD BioSciences FACSDiva\u2122 Software' " +
-				"XML files with the associated 'Data File Standard " + 
-				"for Flow Cytometry, Version FCS3.0' files generated " +
-				"by the BD LSRFortessa flow cytometer.");	
+
 	}
 
 	/**
@@ -76,7 +72,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		}
 
 		if (!divafcsprocessor.parse()) {
-			htmlPane.setText("Could not parse the folder!");
+			System.err.println("Could not parse the folder! (TODO: Use panel!)");
 			divafcsprocessor = null;
 			return false;
 		}
@@ -130,43 +126,41 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 		// Print the attributes
 		String className = nodeInfo.getClass().getSimpleName();
-		if (className.equals("Experiment")) { 
-			htmlPane.setText(
+		if (className.equals("Experiment")) {
+			clearMetadataTable();
+			addAttributesToMetadataTable(
                     ((BDFACSDIVAFCSProcessor.Experiment)
-                            nodeInfo).attributesToString().replace(
-                            ", ", "\n"));
+                            nodeInfo).getAttributes());
 		} else if (className.equals("Tray")) {
-			htmlPane.setText(
+			clearMetadataTable();
+			addAttributesToMetadataTable(
 					((BDFACSDIVAFCSProcessor.Tray) 
-							nodeInfo).attributesToString().replace(
-									", ", "\n"));
+							nodeInfo).getAttributes());
 		} else if (className.equals("Specimen")) {
-			htmlPane.setText(
+			clearMetadataTable();
+			addAttributesToMetadataTable(
 					((BDFACSDIVAFCSProcessor.Specimen)
-							nodeInfo).attributesToString().replace(
-									", ", "\n"));
+							nodeInfo).getAttributes());
 		} else if (className.equals("Tube")) {
-			htmlPane.setText(
+			clearMetadataTable();
+			addAttributesToMetadataTable(
 					((BDFACSDIVAFCSProcessor.Tube)
-							nodeInfo).attributesToString().replace(
-									", ", "\n"));
+							nodeInfo).getAttributes());
 		} else if (className.equals("FCSFile")) {
 			// Cast
 			BDFACSDIVAFCSProcessor.FCSFile fcsFile =
 					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;
 			String fcsFileName = fcsFile.getFileName();
 			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
-			String out = "";
 			try {
 				fcs.parse();
-				out += "\n\n" + fcs.metadataDump();
+				clearMetadataTable();
+				addAttributesToMetadataTable(fcs.getAllKeywords());
 			} catch (IOException e1) {
-				out += "\n\nCould not parse file " + fcsFile + ".";
+				System.err.println("Could not parse file " + fcsFile + ". (TODO: Use panel)");
 			}
-			// Display
-			htmlPane.setText(out);
 		} else {
-			htmlPane.setText("");
+			clearMetadataTable();
 		}
 
         // Get the folder name
@@ -319,9 +313,11 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 */
 	public void scan(String userName) {
 
-		// Make sure to clear the table of invalid datasets
-		clearTable();
-
+		// Make sure to clear the table of invalid datasets and
+		// metadata
+		clearInvalidDatasetsTable();
+		clearMetadataTable();
+		
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
 		Properties appProperties = AppProperties.readPropertiesFromFile();
@@ -356,8 +352,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
 
-		// Clean the html pane
-		htmlPane.setText("");
+		// Clear the metadata table
+		clearMetadataTable();
 		
 		// Set isReady to globalStatus
 		isReady = globalStatus;
@@ -369,4 +365,18 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				null));
 	}
 
+	/**
+	 * Adds all key-value pairs from an attributes Map to the metadata
+	 * view table 
+	 * @param attributes Map of attributes returned by the various
+	 * processors.
+	 */
+	private void addAttributesToMetadataTable(Map<String, String> attributes) {
+		DefaultTableModel model =
+				(DefaultTableModel) metadataViewTable.getModel();
+		for (String key: attributes.keySet() ) {
+			String value = attributes.get(key);
+			model.addRow(new Object[] {key, value});
+		}
+	}
 }

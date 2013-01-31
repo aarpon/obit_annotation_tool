@@ -198,7 +198,15 @@ public class FCSProcessor extends AbstractProcessor {
 		return str;
 
 	}
-	
+
+	/**
+	 * Returns all standard FCS 3.0 keywords as a String - String map
+	 * @return The String - String Map of all standard FCS 3.0 keywords
+	 */
+	public Map<String, String> getStandardKeywords() {
+		return TEXTMapStandard;
+	}
+
 	/**
 	 * Return the value associated to a standard FCS 3.0 keyword or empty
 	 * @param key One of the standard keywords (staring with "$")
@@ -214,6 +222,16 @@ public class FCSProcessor extends AbstractProcessor {
 	}
 
 	/**
+	 * Returns all custom, non FCS 3.0-compliant keywords as a String - 
+	 * String map
+	 * @return The String - String Map of all custom, non FCS 
+	 * 3.0-compliant keywords
+	 */
+	public Map<String, String> getCustomKeywords() {
+		return TEXTMapStandard;
+	}
+	
+	/**
 	 * Return the value associated with a custom, non FCS 3.0-compliant keyword
 	 * or empty
 	 * @param key A custom keywords (without $ at the beginning)
@@ -228,6 +246,18 @@ public class FCSProcessor extends AbstractProcessor {
 		}
 	}
 	
+	/**
+	 * Returns all keywords as a String - String map (FCS 3.0-compliant 
+	 * and custom)
+	 * @return The String - String Map of all keywords
+	 */
+	public Map<String, String> getAllKeywords() {
+		Map<String, String> allMap = new HashMap<String, String>();
+		allMap.putAll(TEXTMapStandard);
+		allMap.putAll(TEXTMapCustom);
+		return allMap;
+	}
+
 	/**
 	 * Parse the header.
 	 * @return true if the file header could be parsed successfully, false otherwise. 
