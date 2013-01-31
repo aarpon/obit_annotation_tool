@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -103,9 +104,9 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	    });
 
 		// Set up the frame and center on screen
+		setMinimumSize(new Dimension(1250, 700));
 		pack();
 		setLocationRelativeTo(null);
-		setResizable(false);
 		
 		// Ask the user to login.
 		// Here we will insist on getting valid openBIS credentials, since a

@@ -1,5 +1,6 @@
 package ch.eth.scu.importer.gui.editors.data;
 
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.Observable;
 import java.util.Observer;
@@ -36,6 +37,11 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 		
 		this.dataViewer = dataViewer;
 		this.openBISViewer = openBISViewer;
+		
+		// Set the preferred and minimum size
+		panel.setMinimumSize(new Dimension(450, 700));
+		panel.setPreferredSize(new Dimension(450, 700));
+		
 	}
 
 	/**

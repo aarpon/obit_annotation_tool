@@ -1,5 +1,6 @@
 package ch.eth.scu.importer.gui.editors.data;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -69,6 +70,11 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.weighty = 0.0;
 		uploadButton.addActionListener(this);
 		add(uploadButton, constraints);
+		
+		// Set the preferred and minimum size
+		this.setMinimumSize(new Dimension(450, 700));
+		this.setPreferredSize(new Dimension(450, 700));
+		
 
 	}
 

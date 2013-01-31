@@ -77,9 +77,6 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		panel.setLayout(gridBagLayout);
 
-		// Set sizes
-		panel.setMinimumSize(new Dimension(400, 700));
-		panel.setPreferredSize(new Dimension(400, 700));
 	}
 
 	/**
@@ -441,7 +438,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		JScrollPane areaScrollPane = new JScrollPane(expDescription);
 		areaScrollPane.setVerticalScrollBarPolicy(
 		                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		areaScrollPane.setPreferredSize(new Dimension(250, 50));
+		areaScrollPane.setMinimumSize(new Dimension(400, 50));
+		areaScrollPane.setPreferredSize(new Dimension(400, 50));
 		panel.add(areaScrollPane, constraints);
 		
 		/*

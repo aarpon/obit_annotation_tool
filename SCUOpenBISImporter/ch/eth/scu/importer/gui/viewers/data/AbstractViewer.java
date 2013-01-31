@@ -154,9 +154,10 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridheight = 1;
 		panel.add(invalidDatasetsView, constraints);
 		
-		// Set sizes
+		// Set the preferred and minimum size
 		panel.setMinimumSize(new Dimension(400, 700));
-		panel.setPreferredSize(new Dimension(400, 700));
+		panel.setPreferredSize(new Dimension(450, 700));
+
 	}
 	
 	/**
