@@ -105,6 +105,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Set up the frame and center on screen
 		setMinimumSize(new Dimension(1250, 700));
+		setMaximumSize(new Dimension(1500, 1200));
 		pack();
 		setLocationRelativeTo(null);
 		
