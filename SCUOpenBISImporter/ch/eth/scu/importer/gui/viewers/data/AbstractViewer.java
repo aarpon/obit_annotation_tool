@@ -114,6 +114,7 @@ abstract public class AbstractViewer extends Observable
 		String mdColumnNames[] = { "Name", "Value" };
 		metadataViewTable = new JTable(
 				new DefaultTableModel(mdData, mdColumnNames));
+		metadataViewTable.setShowGrid(false);
 		metadataViewTable.setFillsViewportHeight(true);
 		metadataViewTable.setAutoCreateRowSorter(true);
 		metadataViewPane = new JScrollPane(metadataViewTable);
@@ -145,6 +146,7 @@ abstract public class AbstractViewer extends Observable
 		String columnNames[] = { "Folder", "Problem" };
 		invalidDatasetsTable = new JTable(
 				new DefaultTableModel(data, columnNames));
+		invalidDatasetsTable.setShowGrid(false);
 		invalidDatasetsTable.setFillsViewportHeight(true);
 		invalidDatasetsTable.setAutoCreateRowSorter(true);
 		invalidDatasetsPane = new JScrollPane(invalidDatasetsTable);
