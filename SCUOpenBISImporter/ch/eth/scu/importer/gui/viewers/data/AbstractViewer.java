@@ -43,7 +43,6 @@ abstract public class AbstractViewer extends Observable
 	protected JLabel invalidDatasets;
 	protected JTable invalidDatasetsTable;
 	protected JScrollPane invalidDatasetsView;
-	protected JLabel invalidDatasetsExpl;
 	
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
@@ -154,20 +153,6 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		panel.add(invalidDatasetsView, constraints);
-		
-		// Add the explanation to the invalid dataset table
-		invalidDatasetsExpl = new JLabel(
-				"These datasets must be fixed or removed!");
-		invalidDatasetsExpl.setVerticalAlignment(SwingConstants.TOP);
-
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 6;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		panel.add(invalidDatasetsExpl, constraints);
 		
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
