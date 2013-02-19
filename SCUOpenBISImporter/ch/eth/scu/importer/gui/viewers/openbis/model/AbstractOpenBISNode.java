@@ -13,6 +13,8 @@ public abstract class AbstractOpenBISNode extends DefaultMutableTreeNode {
 	
 	private static final long serialVersionUID = 1L;
 
+	protected boolean isLoaded = false;
+	
 	public AbstractOpenBISNode(Object object) {
 		super(object);
 	}
@@ -46,6 +48,13 @@ public abstract class AbstractOpenBISNode extends DefaultMutableTreeNode {
 	 * @return the icon to be displayed in the JTree
 	 */	
 	public abstract javax.swing.Icon getIcon();
+
+	/**
+	 * Each specialization of this class must specify if it is a leaf 
+	 * (i.e. it cannot be expanded) or not: this is essential for lazy 
+	 * loading
+	 */
+	public abstract boolean isLeaf();
 	
 	/**
 	 * Get the tooltip to be displayed when the user places the mouse 
@@ -54,4 +63,19 @@ public abstract class AbstractOpenBISNode extends DefaultMutableTreeNode {
 	 */	
 	public String getTooltip() { return ""; }
 
+	/**
+	 * Return true if the node children were (lazy) loaded already
+	 * @return true if the children were loaded, false otherwise
+	 */
+	public boolean isLoaded() {
+		return isLoaded;
+	}
+
+	/**
+	 * Indicate that the children of current node were (lazy-)loaded
+	 */
+	public void setLoaded() {
+		isLoaded = true;
+	}
+	
 }

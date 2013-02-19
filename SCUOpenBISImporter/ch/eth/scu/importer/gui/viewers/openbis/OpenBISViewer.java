@@ -1,5 +1,9 @@
 package ch.eth.scu.importer.gui.viewers.openbis;
 
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -7,11 +11,18 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Properties;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.springframework.remoting.RemoteAccessException;
@@ -32,14 +43,9 @@ import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -47,7 +53,7 @@ import java.awt.Insets;
  * @author Aaron Ponti
  */
 public class OpenBISViewer extends Observable
-	implements ActionListener, TreeSelectionListener {
+	implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
 	protected JPanel panel;
 	
@@ -112,6 +118,9 @@ public class OpenBISViewer extends Observable
 
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
+		
+		// Listen for when a node is about to be opened (for lazy loading)
+		tree.addTreeWillExpandListener(this);
 		
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
@@ -265,7 +274,10 @@ public class OpenBISViewer extends Observable
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);		
+		tree.addTreeSelectionListener(this);
+		
+		// Listen for when a node is about to be opened (for lazy loading)
+		tree.addTreeWillExpandListener(this);
 	}
 	
 	/**
@@ -275,8 +287,6 @@ public class OpenBISViewer extends Observable
 
 		OpenBISSpaceNode space;
 		OpenBISProjectNode project;
-		OpenBISExperimentNode experiment;
-		OpenBISSampleNode sample;
 		
 		// Do we have a connection with openBIS?
 		if (facade == null || !isLoggedIn) {
@@ -314,39 +324,16 @@ public class OpenBISViewer extends Observable
 			// Get the projects for current space
 			List<Project> projects = s.getProjects();
 			
+			// We add the projects -- experiments and samples will be 
+			// lazily loaded on node expansion
 			for (Project p : projects) {
 			    
 				// Add the project
 				project = new OpenBISProjectNode(p);
 				space.add(project);
 
-				// Get the experiments
-				List<String> expId = new ArrayList<String>();
-				expId.add(p.getIdentifier());
-				List<Experiment> experiments = 
-						facade.listExperimentsForProjects(expId);
-				
-				for (Experiment e : experiments) {
-
-					// Add the experiment
-					experiment = new OpenBISExperimentNode(e);
-					project.add(experiment);
-				
-					// Get the samples for the experiment
-					List<String> sampleId = new ArrayList<String>();
-					sampleId.add(e.getIdentifier());
-					List<Sample> samples = 
-							facade.listSamplesForExperiments(sampleId);
-					
-					for (Sample sm : samples) {
-						
-						// Add the sample
-						sample = new OpenBISSampleNode(sm);
-						experiment.add(sample);
-					}
-				}
-				
 			}
+			
 		    
 		}
 		
@@ -355,8 +342,11 @@ public class OpenBISViewer extends Observable
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-		// Listen for when the selection changes.
+		// Listen for when the selection changes
 		tree.addTreeSelectionListener(this);
+		
+		// Listen for when a node is about to be opened (for lazy loading)
+		tree.addTreeWillExpandListener(this);		
 		
 		// Set isReady to true
 		isReady = true;
@@ -386,6 +376,87 @@ public class OpenBISViewer extends Observable
 	 */
 	public JPanel getPanel() {
 		return panel;
+	}
+
+
+	/**
+	 * Called when a node in the Tree is about to expand.
+	 * @param event A TreeExpansionEvent.
+	 * Required by TreeWillExpandListener interface.
+	 */	
+	@Override
+	public void treeWillExpand(TreeExpansionEvent event)
+			throws ExpandVetoException {
+        TreePath path = event.getPath();
+        loadLazyChildren(
+        		(AbstractOpenBISNode) path.getLastPathComponent());
+	}
+
+	/**
+	 * Called when a node in the Tree is about to collapse.
+	 * @param event A TreeExpansionEvent.
+	 * Required by TreeWillExpandListener interface.
+	 */
+	@Override
+	public void treeWillCollapse(TreeExpansionEvent event)
+			throws ExpandVetoException {
+		// We do nothing
+	}
+	
+	/**
+	 * Load the childen of the specified node if needed
+	 * @param node
+	 */
+	private void loadLazyChildren(AbstractOpenBISNode node) {
+		
+		// If the node children were loaded already, we just return 
+		if (node.isLoaded()) {
+			return;
+		}
+		
+		// Get the user object stored in the node
+		Object obj = node.getUserObject();
+		
+		// Which openBIS object did we get?
+		String className = obj.getClass().getSimpleName();
+
+		// Proceed with the loading
+		if (className.equals("Project")) {
+			
+			// If we have a Project, we load the contained Experiments
+			Project p = (Project) obj;
+			List<String> expId = new ArrayList<String>();
+			expId.add(p.getIdentifier());
+			List<Experiment> experiments =
+					facade.listExperimentsForProjects(expId);
+			for (Experiment e : experiments) {
+				// Add the experiments
+				OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
+				node.add(experiment);
+			}
+							
+		} else if (className.equals("Experiment")) {
+		
+			// If we have an Experiment, we loaded the contained Samples
+			Experiment e = (Experiment) obj;
+			List<String> sampleId = new ArrayList<String>();
+			sampleId.add(e.getIdentifier());
+			List<Sample> samples = 
+					facade.listSamplesForExperiments(sampleId);
+			for (Sample sm : samples) {
+				// Add the samples
+				OpenBISSampleNode sample = new OpenBISSampleNode(sm);
+				node.add(sample);
+			}
+
+		} else {
+			
+			// We do nothing for other openBIS object types
+		}
+
+		// Mark the node as loaded (in any case)
+		node.setLoaded();
+		
 	}
 
 }

@@ -65,4 +65,13 @@ public class OpenBISUserNode extends AbstractOpenBISNode {
 		return "Shows the user name when logged in.";
 	}
 
+	/**
+	 * User has children and is therefore not a leaf
+	 * @return false
+	 */
+	@Override
+	public boolean isLeaf() {
+		return false;
+	}
+	
 }

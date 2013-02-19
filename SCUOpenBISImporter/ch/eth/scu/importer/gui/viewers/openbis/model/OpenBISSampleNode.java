@@ -66,4 +66,13 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
 	 */	
 	public String getTooltip() { return "openBIS sample"; }
 	
+	/**
+	 * Sample does not have children and is therefore a leaf
+	 * @return true
+	 */
+	@Override
+	public boolean isLeaf() {
+		return true;
+	}
+	
 }

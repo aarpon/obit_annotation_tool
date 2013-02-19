@@ -67,4 +67,13 @@ public class OpenBISSpaceNode extends AbstractOpenBISNode {
 	 */	
 	public String getTooltip() { return "openBIS space"; }
 
+	/**
+	 * Space has children and is therefore not a leaf
+	 * @return false
+	 */
+	@Override
+	public boolean isLeaf() {
+		return false;
+	}
+	
 }

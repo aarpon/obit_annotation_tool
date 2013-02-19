@@ -66,4 +66,13 @@ public class OpenBISProjectNode extends AbstractOpenBISNode {
 	 */	
 	public String getTooltip() { return "openBIS project"; }
 
+	/**
+	 * Project has children and is therefore not a leaf
+	 * @return false
+	 */
+	@Override
+	public boolean isLeaf() {
+		return false;
+	}
+
 }
