@@ -5,6 +5,8 @@ import java.util.Properties;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.workstations.leicasp5.gui.editors.data.LeicaSP5Editor;
+import ch.eth.scu.importer.workstations.lsrfortessa.gui.editors.data.BDLSRFortessaFCSEditor;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
