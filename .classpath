@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="SCUOpenBISImporter"/>
-	<classpathentry kind="src" path="SCUOpenBISImporterAdmin"/>
-	<classpathentry kind="src" path="SCUOpenBISImporterCommon"/>
+	<classpathentry kind="src" path="AnnotationTool"/>
+	<classpathentry kind="src" path="AnnotationToolAdmin"/>
+	<classpathentry kind="src" path="AnnotationToolCommon"/>
+	<classpathentry kind="src" path="AnnotationToolProcessors"/>
+	<classpathentry kind="src" path="AnnotationToolWorkstations"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dropbox/datastore_server.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cglib-nodep.jar"/>
