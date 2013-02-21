@@ -19,7 +19,7 @@ public class ImageNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/image.png"));
+				getClass().getResource("icons/image.png"));
 	}
 	
 	public String getTooltip() {

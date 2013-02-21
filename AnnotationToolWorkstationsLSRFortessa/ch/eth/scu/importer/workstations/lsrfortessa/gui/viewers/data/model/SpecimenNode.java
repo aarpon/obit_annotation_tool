@@ -19,7 +19,7 @@ public class SpecimenNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/specimen.png"));
+				getClass().getResource("icons/specimen.png"));
 	}
 
 	public String getTooltip() {

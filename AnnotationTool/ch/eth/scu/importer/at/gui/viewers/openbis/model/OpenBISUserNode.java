@@ -52,7 +52,7 @@ public class OpenBISUserNode extends AbstractOpenBISNode {
 	@Override
 	public Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/user.png"));
+				getClass().getResource("icons/user.png"));
 	}
 
 	/**

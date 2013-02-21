@@ -376,7 +376,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.gridy = 0;
 		labelFolderName = new JLabel(metadata.folderNode.toString());
 		labelFolderName.setIcon(new ImageIcon(
-				this.getClass().getResource("./icons/folder.png")));
+				this.getClass().getResource("icons/folder.png")));
 		panel.add(labelFolderName, constraints);
 
 		/*
@@ -393,7 +393,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.gridy = 1;
 		labelExpName = new JLabel(expName);
 		labelExpName.setIcon(new ImageIcon(
-				this.getClass().getResource("./icons/experiment.png")));		
+				this.getClass().getResource("icons/experiment.png")));		
 		panel.add(labelExpName, constraints);
 
 		/*

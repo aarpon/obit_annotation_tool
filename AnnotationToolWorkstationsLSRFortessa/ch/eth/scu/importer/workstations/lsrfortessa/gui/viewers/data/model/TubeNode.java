@@ -19,7 +19,7 @@ public class TubeNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/tube.png"));
+				getClass().getResource("icons/tube.png"));
 	}
 	
 	public String getTooltip() {

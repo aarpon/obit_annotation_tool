@@ -57,7 +57,7 @@ public class OpenBISSpaceNode extends AbstractOpenBISNode {
 	 */	
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/space.png"));
+				getClass().getResource("icons/space.png"));
 	}
 	
 	/**

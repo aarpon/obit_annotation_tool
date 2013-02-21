@@ -56,7 +56,7 @@ public class OpenBISExperimentNode extends AbstractOpenBISNode {
 	 */	
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/experiment.png"));
+				getClass().getResource("icons/experiment.png"));
 	}
 
 	/**

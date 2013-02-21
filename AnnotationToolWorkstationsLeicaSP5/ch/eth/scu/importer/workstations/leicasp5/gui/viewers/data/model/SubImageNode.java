@@ -19,7 +19,7 @@ public class SubImageNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/subimage.png"));
+				getClass().getResource("icons/subimage.png"));
 	}
 	
 	public String getTooltip() {

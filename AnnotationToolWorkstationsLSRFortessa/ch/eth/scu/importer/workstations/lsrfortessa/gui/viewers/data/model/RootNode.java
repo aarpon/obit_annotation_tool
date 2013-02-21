@@ -19,6 +19,6 @@ public class RootNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/root.png"));
+				getClass().getResource("icons/root.png"));
 	}
 }

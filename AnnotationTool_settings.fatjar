@@ -1,12 +1,12 @@
 #Fat Jar Configuration File
-#Thu Feb 21 15:11:13 CET 2013
+#Thu Feb 21 17:20:46 CET 2013
 onejar.license.required=false
 manifest.classpath=
 manifest.removesigners=true
 onejar.checkbox=true
 jarname=dist/AnnotationTool.jar
 manifest.mergeall=true
-manifest.mainclass=ch.eth.scu.importer.SCUImporter
+manifest.mainclass=ch.eth.scu.importer.at.SCUOpenBISImporter
 manifest.file=<createnew>
 jarname.isextern=false
 onejar.expand=

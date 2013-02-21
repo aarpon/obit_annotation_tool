@@ -158,23 +158,23 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private void addButtons() {
 
 		// Quit
-        toolBar.add(createButton("./icons/quit.png", "Quit",
+        toolBar.add(createButton("icons/quit.png", "Quit",
         		"Quit", "Quit the application"));
 
         toolBar.addSeparator();
 
         // Log in
-        toolBar.add(createButton("./icons/login.png", "Log in",
+        toolBar.add(createButton("icons/login.png", "Log in",
         		"Log in", "Log in to openBIS"));
 
         // Log out
-        toolBar.add(createButton("./icons/logout.png", "Log out",
+        toolBar.add(createButton("icons/logout.png", "Log out",
         		"Log out", "Log out from openBIS"));
 
         toolBar.addSeparator();
 
         // Scan incoming file
-        toolBar.add(createButton("./icons/scan.png", "Scan",
+        toolBar.add(createButton("icons/scan.png", "Scan",
         		"Scan", "Scan data mover incoming folder"));
      }
 	

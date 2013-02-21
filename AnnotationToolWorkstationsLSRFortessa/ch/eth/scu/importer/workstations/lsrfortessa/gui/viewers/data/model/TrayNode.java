@@ -19,7 +19,7 @@ public class TrayNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/plate.png"));
+				getClass().getResource("icons/plate.png"));
 	}
 	
 	public String getTooltip() {

@@ -19,7 +19,7 @@ public class WellNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/well.png"));
+				getClass().getResource("icons/well.png"));
 	}
 	
 	public String getTooltip() {

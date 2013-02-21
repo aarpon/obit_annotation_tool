@@ -19,7 +19,7 @@ public class FCSFileNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/fcs.png"));
+				getClass().getResource("icons/fcs.png"));
 	}
 	
 	public String getTooltip() {

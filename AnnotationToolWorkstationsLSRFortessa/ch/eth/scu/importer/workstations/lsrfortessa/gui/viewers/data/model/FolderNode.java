@@ -19,6 +19,6 @@ public class FolderNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/folder.png"));
+				getClass().getResource("icons/folder.png"));
 	}
 }

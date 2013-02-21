@@ -19,7 +19,7 @@ public class XMLFileNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("./icons/xml.png"));
+				getClass().getResource("icons/xml.png"));
 	}
 	
 	public String getTooltip() {
