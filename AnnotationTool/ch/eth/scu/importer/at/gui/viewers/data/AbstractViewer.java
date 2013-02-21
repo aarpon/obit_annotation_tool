@@ -20,7 +20,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
-import ch.eth.scu.importer.proc.processor.model.RootDescriptor;
+import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.RootNode;
 
 /**

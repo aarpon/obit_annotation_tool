@@ -4,8 +4,10 @@
 	<classpathentry kind="src" path="AnnotationToolAdmin"/>
 	<classpathentry kind="src" path="AnnotationToolCommon"/>
 	<classpathentry kind="src" path="AnnotationToolProcessors"/>
-	<classpathentry kind="src" path="AnnotationToolWorkstationLSRFortessa"/>
-	<classpathentry kind="src" path="AnnotationToolWorkstationLeicaSP5"/>
+	<classpathentry kind="src" path="AnnotationToolWorkstationsLSRFortessa"/>
+	<classpathentry kind="src" path="AnnotationToolWorkstationsLeicaSP5"/>
+	<classpathentry kind="src" path="AnnotationToolProcessorsLSRFortessa"/>
+	<classpathentry kind="src" path="AnnotationToolProcessorsLeicaSP5"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dropbox/datastore_server.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cglib-nodep.jar"/>

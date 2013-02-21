@@ -2,7 +2,7 @@ package tests;
 
 import java.io.IOException;
 
-import ch.eth.scu.importer.proc.processor.FCSProcessor;
+import ch.eth.scu.importer.processors.lsrfortessa.FCSProcessor;
 
 public class TestFCSProcessor {
 

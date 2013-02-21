@@ -22,8 +22,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.proc.processor.model.AbstractDescriptor;
-import ch.eth.scu.importer.proc.processor.model.FirstLevelDescriptor;
+import ch.eth.scu.importer.processors.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
 
 
 /**
