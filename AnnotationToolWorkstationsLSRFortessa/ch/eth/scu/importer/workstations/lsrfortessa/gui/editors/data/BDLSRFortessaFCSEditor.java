@@ -295,7 +295,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	
 		// Update the currentExperimentIndex property
 		currentExperimentIndex = dataFolders.indexOf(params.node);
-	
+		if (currentExperimentIndex == -1) {
+			return;
+		}
+		
 		// Update the UI
 		updateUIElements();
 	}

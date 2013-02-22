@@ -18,6 +18,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
+import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
@@ -44,6 +45,7 @@ abstract public class AbstractViewer extends Observable
 	protected JLabel invalidDatasets;
 	protected JTable invalidDatasetsTable;
 	protected JScrollPane invalidDatasetsPane;
+	protected OutputPane outputPane;
 	
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
@@ -163,6 +165,18 @@ abstract public class AbstractViewer extends Observable
 		panel.setMinimumSize(new Dimension(400, 700));
 		panel.setPreferredSize(new Dimension(450, 700));
 
+	}
+
+	/**
+	 * Sets the reference to the OutputPane
+	 * @param outputPane A reference to the main window output pane to be 
+	 * used to display information. 
+	 */
+	public void setOutputPane(OutputPane outputPane) {
+
+		// Store the OutputPane reference
+		this.outputPane = outputPane;
+	
 	}
 	
 	/**

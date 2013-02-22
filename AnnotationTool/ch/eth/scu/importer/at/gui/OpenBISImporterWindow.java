@@ -82,10 +82,14 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		outputWindow = new JScrollPane(outputPane);
 		add(outputWindow, BorderLayout.SOUTH);
 
+		// Set the output pane to the viewer
+		metadataViewer.setOutputPane(outputPane);
+		
 		// Add the editor: it is important to create this object as the last
-		// one, since it requires non-null references to both the metadata and
-		// the openBIS viewers!
-		editorContainer = new EditorContainer(metadataViewer, openBISViewer);
+		// one, since it requires non-null references to the metadata and
+		// the openBIS viewers, and the output pane!
+		editorContainer = new EditorContainer(
+				metadataViewer, openBISViewer, outputPane);
 		add(editorContainer, BorderLayout.CENTER);
 
 		// Add observers to the viewers
@@ -124,6 +128,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 
 		// Make window visible
 		setVisible(true);
+		
 	}
 
 	/**
@@ -145,8 +150,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		} else if (e.getActionCommand().equals("Quit")) {
 				QuitApplication();
 		} else {
-			outputPane.append("Action command: " + e.getActionCommand() + 
-					" from "  + e.getSource().getClass() + "\n");
+			// Nothing
 		}
 	}
 

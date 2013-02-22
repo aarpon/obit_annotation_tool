@@ -68,11 +68,12 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			divafcsprocessor = new BDFACSDIVAFCSProcessor(
 					folder.getCanonicalPath(), userName);
 		} catch (IOException e) {
+			outputPane.err("Could not parse the folder " + folder + "!");
 			return false;
 		}
 
 		if (!divafcsprocessor.parse()) {
-			System.err.println("Could not parse the folder! (TODO: Use panel!)");
+			outputPane.err("Could not parse the folder " + folder + "!");
 			divafcsprocessor = null;
 			return false;
 		}
@@ -88,6 +89,9 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				err.append("(").append(nError).append(") ").append(errorString);
 			}
 			model.addRow(new Object[] {folder.getName(), err});
+			outputPane.err("Could not process folder \"" + 
+				divafcsprocessor.folderDescriptor + 
+				"\" (see \"Invalid datasets\")");
 			return false;
 		}
 
@@ -99,6 +103,9 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// We will append the experiment nodes directly to the root node
 		createNodes(folderNode, divafcsprocessor.folderDescriptor);
 		
+		// Inform the user
+		outputPane.log("Successfully processed folder \"" + 
+				divafcsprocessor.toString() + "\"");
 		return true;
 	}
 
@@ -157,7 +164,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				clearMetadataTable();
 				addAttributesToMetadataTable(fcs.getAllKeywords());
 			} catch (IOException e1) {
-				System.err.println("Could not parse file " + fcsFile + ". (TODO: Use panel)");
+				outputPane.err("Could not parse file " + fcsFile + "!");
 			}
 		} else {
 			clearMetadataTable();
@@ -357,6 +364,11 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		
 		// Set isReady to globalStatus
 		isReady = globalStatus;
+		
+		// Inform the user if isReady is false
+		if (!isReady) {
+			outputPane.err("Please fix the invalid datasets to continue!");
+		}
 	
 		// Notify observers that the scanning is done 
 		setChanged();

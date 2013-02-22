@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
@@ -24,16 +25,18 @@ public class EditorContainer extends JPanel implements ActionListener {
 
 	protected AbstractViewer dataViewer;
 	protected OpenBISViewer openBISViewer;
+	protected OutputPane outputPane;
 	
 	/**
 	 * Constructor
 	 */
 	public EditorContainer(AbstractViewer dataViewer, 
-			OpenBISViewer openBISViewer) {
+			OpenBISViewer openBISViewer, OutputPane outputPane) {
 		
 		// Store the references
 		this.dataViewer = dataViewer;
 		this.openBISViewer = openBISViewer;
+		this.outputPane = outputPane;
 		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -88,15 +91,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 			
 			// Make sure all models are ready
 			if (!dataViewer.isReady() || !openBISViewer.isReady()) {
-				System.out.println(
-						"Data models not ready (TODO: Use the output pane).");
+				outputPane.warn("Data models not ready!");
 				return;
 			}
 
 			// Update the data model with the openBIS and user attributes
 			if (!metadataEditor.updateDataModel()) {
-				System.out.println(
-						"Metadata incomplete (TODO: Use the output pane).");
+				outputPane.warn("Metadata incomplete!");
 				return;
 			}
 			
@@ -107,8 +108,8 @@ public class EditorContainer extends JPanel implements ActionListener {
 
 			// Save to XML
 			dataViewer.saveToXML(outputDirectory);
-			System.out.println(
-					"File written to disk (TODO: Use the output pane).");
+			outputPane.log("Metadata information stored. " +
+			"Data is now ready for transfer.");
 		}
     }
 	
