@@ -378,5 +378,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			String value = attributes.get(key);
 			model.addRow(new Object[] {key, value});
 		}
+		// Sort the table by the first column
+		metadataViewTable.getRowSorter().toggleSortOrder(0);
 	}
 }

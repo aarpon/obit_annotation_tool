@@ -19,6 +19,7 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import ch.eth.scu.importer.at.gui.editors.data.EditorContainer;
+import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
@@ -32,7 +33,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	private EditorContainer editorContainer;
-	private JTextArea outputPane; 
+	private OutputPane outputPane; 
 	private JScrollPane outputWindow;
 	private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
@@ -77,10 +78,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		add(openBISViewer.getPanel(), BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
-		outputPane = new JTextArea();
-		outputPane.setRows(5);
-		outputPane.setEditable(false);
-		outputPane.setText("Ready");
+		outputPane = new OutputPane();
 		outputWindow = new JScrollPane(outputPane);
 		add(outputWindow, BorderLayout.SOUTH);
 
