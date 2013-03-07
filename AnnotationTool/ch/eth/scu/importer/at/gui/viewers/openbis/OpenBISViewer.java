@@ -246,10 +246,14 @@ public class OpenBISViewer extends Observable
 	 */
 	public boolean logout() {
 		if (facade != null && isLoggedIn) {
-			facade.logout();
-			clearTreeView();
-			isLoggedIn = false;
-			return true;
+			try {
+				facade.logout();
+				clearTreeView();
+				isLoggedIn = false;
+				return true;
+			} catch (RemoteAccessException e) {
+				return false;
+			}
 		}
 		return false;
 	}

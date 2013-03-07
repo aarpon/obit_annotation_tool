@@ -246,7 +246,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 	/**
 	 * Descriptor representing an experiment obtained from the FCS file.
-     * TODO Add the attributes!
 	 * @author Aaron Ponti
 	 */
 	public class Experiment extends ExperimentDescriptor {
@@ -377,8 +376,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	/**
 	 * Descriptor representing a specimen obtained from the FCS file.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
-
-	 * TODO Add the attributes!	
 	 * @author Aaron Ponti
 	 */
 	public class Specimen extends SampleDescriptor {
@@ -493,7 +490,41 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 
 	}
+
+	/**
+	 * Descriptor representing a well obtained from the FCS file.
+	 * A Well is always a child of a Specimen.
+     *
+	 * @author Aaron Ponti
+	 */
+	public class Well extends Tube {
+		
+		/**
+		 * Constructor.
+		 * @param name Name of the Well.
+		 * @param fcsFullFileName Full file name of the FCS file associated
+		 * with the Well.
+		 * @throws IOException 
+		 */
+		public Well(String name, String fcsFullFileName) 
+				throws IOException {
+			
+			// Call base constructor
+			super(name, fcsFullFileName);
+
+		}
 	
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplified class name.
+		 */
+		@Override
+		public String getType() {
+			return "Well";
+		}
+
+	}
+
 	/**
 	 * Scan the folder recursively and process all fcs files found
 	 * @param dir Full path to the directory to scan
@@ -599,17 +630,17 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					trayDesc.specimens.put(specKey, specDesc);
 				}
 	
-				// Create a new Tube descriptor or reuse an existing one
-				Tube tubeDesc;
-				String tubeName = getTubeName(processor);
-				String tubeKey = specKey + "_" + tubeName;
-				if (! specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName,
+				// Create a new Well descriptor or reuse an existing one
+				Well wellDesc;
+				String wellName = getTubeOrWellName(processor);
+				String wellKey = specKey + "_" + wellName;
+				if (! specDesc.tubes.containsKey(wellKey)) {
+					wellDesc = new Well(wellName,
 							file.getCanonicalPath());
 					// Store attributes
-					tubeDesc.setAttributes(getTubeAttributes(processor));
+					wellDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
-					specDesc.tubes.put(tubeKey, tubeDesc);
+					specDesc.tubes.put(wellKey, wellDesc);
 				}
 	
 			} else {
@@ -631,7 +662,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 				// Create a new Tube descriptor or reuse an existing one
 				Tube tubeDesc;
-				String tubeName = getTubeName(processor);
+				String tubeName = getTubeOrWellName(processor);
 				String tubeKey = specKey + "_" + tubeName;
 				if (! specDesc.tubes.containsKey(tubeKey)) {
 					tubeDesc = new Tube(tubeName,
@@ -653,7 +684,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @param processor with already scanned file
 	 * @return name of the tube
 	 */
-	private String getTubeName(FCSProcessor processor) {
+	private String getTubeOrWellName(FCSProcessor processor) {
 		
 		// We discriminate here since there is a formatting
 		// difference in the value stored in the "TUBE NAME"

@@ -221,11 +221,11 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 						AbstractDescriptor abstractSample = (AbstractDescriptor)
 								thirdLevelSampleNode.getUserObject();
 	
-						// Make sure we have a Specimen or a Tube
-						assert((abstractSample.getType().equals("Tube") ||
+						// Make sure we have a Well or a FCSFile
+						assert((abstractSample.getType().equals("Well") ||
 	                            abstractSample.getType().equals("FCSFile")));
 	
-						if (abstractSample.getType().equals("Tube")) {
+						if (abstractSample.getType().equals("Well")	) {
 	
 							// Cast
 							SampleDescriptor thirdLevelSample = (SampleDescriptor)

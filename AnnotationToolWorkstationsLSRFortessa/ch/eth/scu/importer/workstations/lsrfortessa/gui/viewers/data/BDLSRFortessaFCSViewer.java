@@ -5,6 +5,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor;
+import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Well;
 import ch.eth.scu.importer.processors.lsrfortessa.FCSProcessor;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Specimen;
@@ -18,6 +19,7 @@ import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.RootN
 import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.SpecimenNode;
 import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.TrayNode;
 import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.TubeNode;
+import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.WellNode;
 
 import java.awt.event.*;
 
@@ -153,6 +155,11 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			addAttributesToMetadataTable(
 					((BDFACSDIVAFCSProcessor.Tube)
 							nodeInfo).getAttributes());
+		} else if (className.equals("Well")) {
+			clearMetadataTable();
+			addAttributesToMetadataTable(
+					((BDFACSDIVAFCSProcessor.Well)
+							nodeInfo).getAttributes());
 		} else if (className.equals("FCSFile")) {
 			// Cast
 			BDFACSDIVAFCSProcessor.FCSFile fcsFile =
@@ -229,6 +236,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		TrayNode tray;
 		SpecimenNode specimen;
 		TubeNode tube;
+		WellNode well;
 		FCSFileNode fcs;
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
@@ -259,18 +267,18 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 					specimen = new SpecimenNode(s);
 					tray.add(specimen);
 
-					for (String tubeKey : s.tubes.keySet()) {
+					for (String wellKey : s.tubes.keySet()) {
 
 						// Get the TubeDescriptor
-						Tube tb  = s.tubes.get(tubeKey);
+						Well wl  = (Well) s.tubes.get(wellKey);
 						
 						// Add the tubes
-						tube = new TubeNode(tb);
-						specimen.add(tube);
+						well = new WellNode(wl);
+						specimen.add(well);
 						
 						// Add the fcs files
-						fcs = new FCSFileNode(tb.fcsFile);
-						tube.add(fcs);
+						fcs = new FCSFileNode(wl.fcsFile);
+						well.add(fcs);
 					}
 
 				}

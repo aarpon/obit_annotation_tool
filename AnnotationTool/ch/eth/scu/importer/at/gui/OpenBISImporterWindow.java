@@ -114,7 +114,7 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 		// Ask the user to login.
 		// Here we will insist on getting valid openBIS credentials, since a
 		// valid login is essential for the functioning of the application.
-		// If the user justs closes the dialog, we close the application.
+		// If the user just closes the dialog, we close the application.
 		boolean status = false;
 		while (!status) {
 			status = openBISViewer.login();
@@ -144,7 +144,13 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 				openBISViewer.scan();
 			}
 		} else if (e.getActionCommand().equals("Log out")) {
-			openBISViewer.logout();
+			if (openBISViewer.logout() == false) {
+				JOptionPane.showMessageDialog(this,
+					"Could not log out from openBIS: " + 
+						"the server is no longer reachable.",	
+						"Connection error",
+						JOptionPane.ERROR_MESSAGE);
+			}
 		} else if (e.getActionCommand().equals("Scan")) {
 			metadataViewer.scan(openBISViewer.getUserName());
 		} else if (e.getActionCommand().equals("Quit")) {
@@ -213,8 +219,30 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
         		JOptionPane.YES_NO_OPTION,
         		JOptionPane.QUESTION_MESSAGE) == 
         		JOptionPane.YES_OPTION) {
-        	openBISViewer.logout();
-        	System.exit(0);
+        	if (openBISViewer.logout() == false) {
+				// Inform user that logging out was unsuccessful
+				// Give the user the option to wait or close
+				// the application
+				Object[] options = {"Wait", "Force close"};
+				int n = JOptionPane.showOptionDialog(this,
+						"Could not log out from openBIS: " + 
+							"the server is no longer reachable.\n" +
+							"Do you want to wait and retry later or to " +
+							"force close the application?",
+						"Connection error",
+						JOptionPane.ERROR_MESSAGE,
+						JOptionPane.YES_NO_OPTION,
+						null, options, options[0]);
+				if (n==0) {
+					// Wait
+					return;
+				} else {
+					// Force close
+					System.exit(1);
+				}
+        	} else {
+        		System.exit(0);
+        	}
         }
    }
 
