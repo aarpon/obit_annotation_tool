@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Commodity class to manage the SCUOpenBISImporter application properties
+ * Commodity class to manage the AnnotationTool application properties
  * @author Aaron Ponti
  */
 public class AppProperties {
@@ -97,7 +97,7 @@ public class AppProperties {
 		try {
 			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
 			applicationProperties.store(out, 
-					"SCUOpenBISImporter Default Properties Set");
+					"AnnotationTool Default Properties Set");
 			out.close();
 		} catch (IOException e) {
 			System.err.println("Could not write to file " +
