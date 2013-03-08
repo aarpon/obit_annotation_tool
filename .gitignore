@@ -1,2 +1,5 @@
 /bin/
-/dist/lib
+/dist/AnnotationToolExe/*.jar
+/dist/AnnotationToolExe/*.exe
+/dist/AnnotationToolAdminExe/*.jar
+/dist/AnnotationToolAdminExe/*.exe
