@@ -13,10 +13,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+
+import org.springframework.remoting.RemoteAccessException;
 
 import ch.eth.scu.importer.at.gui.editors.data.EditorContainer;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
@@ -144,12 +145,14 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 				openBISViewer.scan();
 			}
 		} else if (e.getActionCommand().equals("Log out")) {
-			if (openBISViewer.logout() == false) {
-				JOptionPane.showMessageDialog(this,
-					"Could not log out from openBIS: " + 
-						"the server is no longer reachable.",	
-						"Connection error",
-						JOptionPane.ERROR_MESSAGE);
+			try {
+				openBISViewer.logout();
+ 			} catch (RemoteAccessException ex) {
+ 				JOptionPane.showMessageDialog(this,
+ 						"Could not log out from openBIS: " + 
+ 							"the server is no longer reachable.",	
+ 							"Connection error",
+ 							JOptionPane.ERROR_MESSAGE);
 			}
 		} else if (e.getActionCommand().equals("Scan")) {
 			metadataViewer.scan(openBISViewer.getUserName());
@@ -219,8 +222,12 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
         		JOptionPane.YES_NO_OPTION,
         		JOptionPane.QUESTION_MESSAGE) == 
         		JOptionPane.YES_OPTION) {
-        	if (openBISViewer.logout() == false) {
-				// Inform user that logging out was unsuccessful
+        	try {
+        		openBISViewer.logout();
+        		System.exit(0);
+        	} catch (RemoteAccessException e) {
+       
+        		// Inform user that logging out was unsuccessful
 				// Give the user the option to wait or close
 				// the application
 				Object[] options = {"Wait", "Force close"};
@@ -240,8 +247,6 @@ public class OpenBISImporterWindow extends JFrame implements ActionListener {
 					// Force close
 					System.exit(1);
 				}
-        	} else {
-        		System.exit(0);
         	}
         }
    }

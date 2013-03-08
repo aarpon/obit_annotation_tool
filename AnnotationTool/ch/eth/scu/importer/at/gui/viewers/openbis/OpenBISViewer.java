@@ -244,16 +244,12 @@ public class OpenBISViewer extends Observable
 	 * Log out from openBIS
 	 * @return true if logging out was successful, false otherwise.
 	 */
-	public boolean logout() {
+	public boolean logout() throws RemoteAccessException {
 		if (facade != null && isLoggedIn) {
-			try {
-				facade.logout();
-				clearTreeView();
-				isLoggedIn = false;
-				return true;
-			} catch (RemoteAccessException e) {
-				return false;
-			}
+			facade.logout();
+			clearTreeView();
+			isLoggedIn = false;
+			return true;
 		}
 		return false;
 	}
