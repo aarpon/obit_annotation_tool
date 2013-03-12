@@ -802,6 +802,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 		}
 		attributes.put("acq_software", acqSoftwareString);
+		attributes.put("date", processor.getStandardKeyword("$DATE"));
 		return attributes;
 	}
 
