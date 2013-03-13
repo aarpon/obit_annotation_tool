@@ -136,8 +136,11 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 * @param userName user name that must correspond to the subfolder name in
 	 * the dropboxIncomingFolder
 	 */
-	public void scan(String userName) {
+	public void scan() {
 
+		// The user name MUST be set
+		assert(this.userName == "");
+		
 		// Make sure to clear the table of invalid datasets and
 		// metadata
 		clearInvalidDatasetsTable();

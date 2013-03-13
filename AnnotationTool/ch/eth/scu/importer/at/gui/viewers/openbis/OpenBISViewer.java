@@ -29,6 +29,7 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.eth.scu.importer.at.gui.dialogs.OpenBISLoginDialog;
+import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISExperimentNode;
@@ -75,10 +76,15 @@ public class OpenBISViewer extends Observable
 	
 	private boolean isReady = false;
 	
+	protected OutputPane outputPane;
+	
 	/**
 	 * Constructor
 	 */
-	public OpenBISViewer() {
+	public OpenBISViewer(OutputPane outputPane) {
+
+		// Store the OutputPane reference
+		this.outputPane = outputPane;
 
 		// Create a panel
 		panel = new JPanel();
@@ -200,6 +206,9 @@ public class OpenBISViewer extends Observable
 		if (isLoggedIn) {
 			return true;
 		}
+
+		// Inform
+		outputPane.log("Logging in to openBIS...");
 		
 		// Try logging in with current credentials
 		try {

@@ -97,10 +97,10 @@ public class EditorContainer extends JPanel implements ActionListener {
 
 			// Update the data model with the openBIS and user attributes
 			if (!metadataEditor.updateDataModel()) {
-				outputPane.warn("Metadata incomplete!");
+				outputPane.warn("No new datasets ready for upload!");
 				return;
 			}
-			
+
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
 			String outputDirectory = 
@@ -110,6 +110,9 @@ public class EditorContainer extends JPanel implements ActionListener {
 			dataViewer.saveToXML(outputDirectory);
 			outputPane.log("Metadata information stored. " +
 			"Data is now ready for transfer.");
+			
+			// Re-scan
+			dataViewer.scan();
 		}
     }
 	

@@ -73,7 +73,7 @@ public class OutputPane extends JTextPane {
 		log  = doc.addStyle("log",  base);
 		warn = doc.addStyle("warn", base);
 		StyleConstants.setItalic(warn, true);
-		StyleConstants.setForeground(warn, Color.orange);		
+		StyleConstants.setForeground(warn, new Color(117, 188, 255));		
 		err  = doc.addStyle("err",  base);
 		StyleConstants.setItalic(err, true);
 		StyleConstants.setForeground(err, Color.red);
@@ -85,7 +85,7 @@ public class OutputPane extends JTextPane {
 		setEditable(false);
 		
 		// Add the first text
-		log("Ready");
+		log("Ready.");
 	}
 
 	/**

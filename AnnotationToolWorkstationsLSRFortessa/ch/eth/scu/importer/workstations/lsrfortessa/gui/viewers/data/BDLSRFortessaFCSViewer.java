@@ -23,6 +23,7 @@ import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.WellN
 
 import java.awt.event.*;
 
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.*;
 import javax.swing.event.*;
@@ -74,10 +75,19 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			return false;
 		}
 
+		// We parse. If parsing fails, we just return (the dataset is invalid).
 		if (!divafcsprocessor.parse()) {
 			outputPane.err("Could not parse the folder " + folder + "!");
 			divafcsprocessor = null;
 			return false;
+		}
+
+		// If the subfolder is already annotated, we skip it (but still
+		// we return success)
+		if (divafcsprocessor.validator.isAnnotated) {
+			outputPane.warn("Dataset \"" + divafcsprocessor.folderDescriptor + 
+					"\" is already annotated.");
+			return true;
 		}
 
 		// Make sure we have a valid dataset
@@ -326,8 +336,14 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 * @param userName user name that must correspond to the subfolder name in
 	 * the dropboxIncomingFolder
 	 */
-	public void scan(String userName) {
+	public void scan() {
 
+		// The user name MUST be set
+		assert(this.userName == "");
+
+		// Inform
+		outputPane.log("Scanning user data folder...");
+		
 		// Make sure to clear the table of invalid datasets and
 		// metadata
 		clearInvalidDatasetsTable();
@@ -340,7 +356,25 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				appProperties.getProperty("DatamoverIncomingDir") +
 				File.separator + userName);
 		
-		// Get a list of all subfolders
+		// Does the folder exist? If not, we create it
+		if (!dropboxIncomingFolder.exists()) {
+			outputPane.warn("User directory not found! Creating...");
+			try {
+				dropboxIncomingFolder.mkdirs();
+				outputPane.log("User directory created successfully.");
+			} catch (Exception e) {
+				outputPane.err("Failed creating user directory!");
+				JOptionPane.showMessageDialog(null,
+					    "Failed creating user directory!\n" +
+				"Please contact your administrator. The application\n" +
+					    		"will now exit!",
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+		}
+		
+		// Get a list of all subfolders (each representing a dataset)
 		File[] rootSubFolders = dropboxIncomingFolder.listFiles(
 				new FileFilter() {
 					public boolean accept(File file) {
@@ -353,10 +387,12 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 		// Parse all subfolders (and store success)
 		boolean globalStatus = true;
-		if (rootSubFolders != null) { 
+		if (rootSubFolders.length > 0) { 
 			for (File subfolder : rootSubFolders) {
 				globalStatus = globalStatus & parse(subfolder, userName);
 			}
+		} else {
+			outputPane.warn("No data found in the user folder!");
 		}
 
 		// Create a tree that allows one selection at a time.

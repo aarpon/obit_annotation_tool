@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.processors.lsrfortessa;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -80,6 +81,27 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	@Override
 	public boolean parse() {
+
+		// First we check if the dataset is already annotated. An  
+		// annotated dataset has a file ending in _properties.six
+		// at the root of the folder.
+		// In this case we set the validator.isAnnotated flag to true
+		// (as well as the validator.isValid flag) and return
+		// immediately without parsing.
+		File[] propertiesFile = this.topFolder.listFiles(
+				new FileFilter() {
+					public boolean accept(File file) {
+						return (file.isFile() && 
+							file.getName().endsWith("_properties.six"));
+					}
+				});
+		if (propertiesFile.length > 0) {
+			this.validator.isAnnotated = true;
+			this.validator.isValid = true;
+			return true;
+		} else {
+			this.validator.isAnnotated = false;
+		}
 
 		// Scan the root folder recursively to reconstruct the experiment
 		// structure.
@@ -534,7 +556,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 		// Get the directory listing
 		String [] files = dir.list();
-	
+
 		// Go over the files and folders
 		for (String f : files) {
 			
@@ -568,14 +590,17 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			String ext = fileName.substring(indx);
 			if (ext.equalsIgnoreCase(".xml")) {
 				validator.isValid = false;
+				validator.isAnnotated = false;
 				validator.errorMessages.add("Experiment export");
 				continue;
 			}
+
+			// Do we have an unknown file? If we do, we move on to the next.
 			if (! ext.equalsIgnoreCase(".fcs")) {
 				continue;
 			}
-	
-			// Is it a file? Scan it and extract the information
+			
+			// Is it an FCS file? Scan it and extract the information
 			FCSProcessor processor = 
 					new FCSProcessor(file.getCanonicalPath(), false);
 			if (!processor.parse()) {
@@ -677,6 +702,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 		}
 	
+		// Mark as valid and not annotated
+		this.validator.isValid = true;
+		this.validator.isAnnotated = false;
 	}
 
 	/**

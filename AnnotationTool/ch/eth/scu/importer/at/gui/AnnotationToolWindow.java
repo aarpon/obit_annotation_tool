@@ -66,7 +66,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		addButtons();
 		add(toolBar, BorderLayout.NORTH);
 
-		// Add the viewer
+		// Add the metadata viewer
 		try {
 			metadataViewer = ViewerFactory.createViewer();
 		} catch (Exception e1) {
@@ -74,9 +74,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 			System.exit(1);
 		} 
 		add(metadataViewer.getPanel(), BorderLayout.WEST);
-		
-		openBISViewer = new OpenBISViewer();
-		add(openBISViewer.getPanel(), BorderLayout.EAST);
 
 		// Create the HTML viewing pane.
 		outputPane = new OutputPane();
@@ -85,6 +82,10 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Set the output pane to the viewer
 		metadataViewer.setOutputPane(outputPane);
+		
+		// Add the openBIS viewer
+		openBISViewer = new OpenBISViewer(outputPane);
+		add(openBISViewer.getPanel(), BorderLayout.EAST);
 		
 		// Add the editor: it is important to create this object as the last
 		// one, since it requires non-null references to the metadata and
@@ -125,7 +126,8 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		openBISViewer.scan();
 
 		// Scan the datamover incoming folder for datasets
-		metadataViewer.scan(openBISViewer.getUserName());
+		metadataViewer.setUserName(openBISViewer.getUserName());
+		metadataViewer.scan();
 
 		// Make window visible
 		setVisible(true);
@@ -155,7 +157,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
  							JOptionPane.ERROR_MESSAGE);
 			}
 		} else if (e.getActionCommand().equals("Scan")) {
-			metadataViewer.scan(openBISViewer.getUserName());
+			metadataViewer.scan();
 		} else if (e.getActionCommand().equals("Quit")) {
 				QuitApplication();
 		} else {

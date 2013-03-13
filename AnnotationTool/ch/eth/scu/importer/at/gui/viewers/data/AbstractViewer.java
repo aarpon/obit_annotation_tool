@@ -32,7 +32,8 @@ abstract public class AbstractViewer extends Observable
 	implements ActionListener, TreeSelectionListener {
 
 	protected boolean isReady = false;
-
+	protected String userName;
+	
 	protected JPanel panel;
 	protected DataViewerTree tree;
 	protected JLabel title;
@@ -50,8 +51,11 @@ abstract public class AbstractViewer extends Observable
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
 	 * At the end of scanning, the function MUST set isReady to true.
+	 * setUserName() MUST be called before scan().
+	 * 
+	 * @see setUserName
 	 */
-	abstract public void scan(String userName);
+	abstract public void scan();
 	
 	/**
 	 * Constructor
@@ -165,6 +169,21 @@ abstract public class AbstractViewer extends Observable
 		panel.setMinimumSize(new Dimension(400, 700));
 		panel.setPreferredSize(new Dimension(450, 700));
 
+	}
+
+	/**
+	 * Sets the user name to be used for scanning the user folder
+	 * @param userName User name
+	 * 
+	 * This must be called before scan() can be called!
+	 * 
+	 * @see scan()
+	 */
+	public void setUserName(String userName) {
+
+		// Store the user name
+		this.userName = userName;
+	
 	}
 
 	/**

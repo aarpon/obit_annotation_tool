@@ -16,6 +16,10 @@ abstract public class AbstractProcessor {
 	/**
 	 * Parses the file to extract data and metadata. 
 	 * The file name should be passed to the constructor.
+	 * 
+	 * The parse() method MUST set the isValid and isAnnotated properties
+	 * in the Validator.
+	 * 
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws Exception
 	 */

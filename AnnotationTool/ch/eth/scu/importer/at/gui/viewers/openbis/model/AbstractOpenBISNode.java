@@ -15,6 +15,10 @@ public abstract class AbstractOpenBISNode extends DefaultMutableTreeNode {
 
 	protected boolean isLoaded = false;
 	
+	/**
+	 * Constructor
+	 * @param object User object to be stored
+	 */
 	public AbstractOpenBISNode(Object object) {
 		super(object);
 	}
