@@ -63,7 +63,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Create a toolbar
 		toolBar = new JToolBar("Tools");
 		toolBar.setFloatable(false);
-		addButtons();
+		// TODO: Add tools...
 		add(toolBar, BorderLayout.NORTH);
 
 		// Add the metadata viewer
@@ -150,6 +150,8 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 	/**
 	 * Add buttons to the toolbar
+	 * 
+	 * TODO: Currently this is not in use!
 	 */
 	private void addButtons() {
 
