@@ -4,9 +4,11 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,6 +42,7 @@ abstract public class AbstractViewer extends Observable
 	protected DefaultMutableTreeNode rootNode;
 	protected JScrollPane treeView;
 	protected JScrollPane htmlView;
+	protected JButton rescanButton;
 	protected JLabel metadataView;
 	protected JTable metadataViewTable;
 	protected JScrollPane metadataViewPane;	
@@ -99,11 +102,18 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.45;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 5, 0, 5);
 		panel.add(treeView, constraints);
 
-		// Add a simple label
-		metadataView = new JLabel("Metadata viewer");
-		metadataView.setVerticalAlignment(SwingConstants.TOP);
+		// Add a rescan button
+		rescanButton = new JButton("Scan");
+		rescanButton.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+                scan();
+            }
+        });  
 
 		// Add to the layout
 		constraints.gridx = 0;
@@ -112,6 +122,21 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
+		constraints.insets = new Insets(0, 0, 0, 0);
+		panel.add(rescanButton, constraints);
+		
+		// Add a simple label
+		metadataView = new JLabel("Metadata viewer");
+		metadataView.setVerticalAlignment(SwingConstants.TOP);
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 5, 5, 5);
 		panel.add(metadataView, constraints);
 		
 		// Add the table
@@ -126,7 +151,7 @@ abstract public class AbstractViewer extends Observable
 		
 		// Add to the layout
 		constraints.gridx = 0;
-		constraints.gridy = 3;
+		constraints.gridy = 4;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.20;
 		constraints.gridwidth = 1;
@@ -139,7 +164,7 @@ abstract public class AbstractViewer extends Observable
 
 		// Add to the layout
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = 5;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
@@ -158,7 +183,7 @@ abstract public class AbstractViewer extends Observable
         
 		// Add to the layout
 		constraints.gridx = 0;
-		constraints.gridy = 5;
+		constraints.gridy = 6;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.05;
 		constraints.gridwidth = 1;

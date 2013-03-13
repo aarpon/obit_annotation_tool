@@ -48,7 +48,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	public AnnotationToolWindow() {
 
 		// Call the frame's constructor
-		super("Single-Cell Unit openBIS Importer v" + version);
+		super("openBIS Importer Toolset :: Annotation Tool v" + version);
 
 		// Use the system default look-and-feel
 		try {
@@ -141,24 +141,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		// React to the context menu
-		if (e.getActionCommand().equals("Log in")) {
-			boolean status = openBISViewer.login();
-			if (status) {
-				openBISViewer.scan();
-			}
-		} else if (e.getActionCommand().equals("Log out")) {
-			try {
-				openBISViewer.logout();
- 			} catch (RemoteAccessException ex) {
- 				JOptionPane.showMessageDialog(this,
- 						"Could not log out from openBIS: " + 
- 							"the server is no longer reachable.",	
- 							"Connection error",
- 							JOptionPane.ERROR_MESSAGE);
-			}
-		} else if (e.getActionCommand().equals("Scan")) {
-			metadataViewer.scan();
-		} else if (e.getActionCommand().equals("Quit")) {
+		if (e.getActionCommand().equals("Quit")) {
 				QuitApplication();
 		} else {
 			// Nothing
@@ -174,21 +157,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
         toolBar.add(createButton("icons/quit.png", "Quit",
         		"Quit", "Quit the application"));
 
-        toolBar.addSeparator();
-
-        // Log in
-        toolBar.add(createButton("icons/login.png", "Log in",
-        		"Log in", "Log in to openBIS"));
-
-        // Log out
-        toolBar.add(createButton("icons/logout.png", "Log out",
-        		"Log out", "Log out from openBIS"));
-
-        toolBar.addSeparator();
-
-        // Scan incoming file
-        toolBar.add(createButton("icons/scan.png", "Scan",
-        		"Scan", "Scan data mover incoming folder"));
      }
 	
 	/**
