@@ -86,7 +86,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// we return success)
 		if (divafcsprocessor.validator.isAnnotated) {
 			outputPane.log("Dataset \"" + divafcsprocessor.folderDescriptor + 
-					"\" is already annotated. Skipping.");
+					"\" is annotated.");
 			return true;
 		}
 

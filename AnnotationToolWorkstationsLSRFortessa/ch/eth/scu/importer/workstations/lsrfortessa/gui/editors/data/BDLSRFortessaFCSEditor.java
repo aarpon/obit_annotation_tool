@@ -62,7 +62,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	protected JLabel labelFolderName;
 	protected JLabel labelExpName;
 	protected JComboBox<String> comboGeometryList;
-	protected JComboBox<OpenBISProjectNode> comboProjectList;
+	protected JComboBox<OpenBISProjectNodeWrapper> comboProjectList;
 	protected JTextArea expDescription;
 	
 	/**
@@ -526,12 +526,12 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		 */
 		
 		// Store the project in a JCombo box
-		comboProjectList = new JComboBox<OpenBISProjectNode>();
+		comboProjectList = new JComboBox<OpenBISProjectNodeWrapper>();
 		
 		for (OpenBISProjectNode s : openBISProjects) {
 
 			// Add the BDLSRFortessaFCSMetadata object
-			comboProjectList.addItem(s);
+			comboProjectList.addItem(new OpenBISProjectNodeWrapper(s));
 
 		}
 		
@@ -546,11 +546,12 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
 					// Get the BDLSRFortessaFCSMetadata object
-					OpenBISProjectNode projectNode =
-							(OpenBISProjectNode)
-							((JComboBox<OpenBISProjectNode>)
+					OpenBISProjectNodeWrapper projectNodeWrapper =
+							(OpenBISProjectNodeWrapper)
+							((JComboBox<OpenBISProjectNodeWrapper>)
 									e.getSource()).getSelectedItem();
-					
+					OpenBISProjectNode projectNode = projectNodeWrapper.node;
+
 					// Update the metadata object with the new projects
 					experimentMetadata.get(
 							currentExperimentIndex).openBISProjectNode =
@@ -643,11 +644,15 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 			for (int j = 0; j < n; j++) {
 
-				// Get the node
+				// Get the OpenBISProjectNode
 				OpenBISProjectNode openBISProjectNode = 
 						(OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
 
-				// Add it to the list
+				// Add it to the list: we wrap it into a wrapper 
+				// class to override the toString() method; we do 
+				// this because in constrast to what happens in the
+				// openBIS viewer, here we need the (openBIS) identifier
+				//  instead of the code.
 				openBISProjects.add(openBISProjectNode);
 
 			}
@@ -696,4 +701,26 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		metadata.description = expDescription.getText();
     }
 	
+	/**
+	 * Wrapper class that "overrides" OpenBISProjectNode's toString()
+	 * method to use in the Editor. 
+	 * @author Aaron Ponti
+	 *
+	 */
+	public class OpenBISProjectNodeWrapper  {
+		public OpenBISProjectNode node;
+		
+		/**
+		 * Constructor.
+		 * @param node An OpenBISProjectNode node.
+		 */
+		public OpenBISProjectNodeWrapper(OpenBISProjectNode node) {
+			this.node = node;
+		}
+		
+		// "Override" the toString method of OpenBISProjectNode
+		public String toString() {
+			return node.getIdentifier();
+		}
+	}
 }
