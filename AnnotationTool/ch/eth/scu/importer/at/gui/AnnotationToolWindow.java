@@ -134,6 +134,22 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		
 	}
 
+//	/**
+//	 * Returns the minimum window size 
+//	 * @return  the minimum size
+//	 */
+//	public Dimension getMinimumSize() {
+//		return new Dimension(1250, 700);
+//	}
+//
+//	/**
+//	 * Returns the maximum window size 
+//	 * @return  the maximum size
+//	 */
+//	public Dimension getMaximumSize() {
+//		return new Dimension(1500, 1500);
+//	}
+//	
 	/**
 	 * Implements the actionPerformed callback.
 	 * @param e The ActionEvent 

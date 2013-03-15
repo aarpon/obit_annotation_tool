@@ -2,15 +2,14 @@ package ch.eth.scu.importer.atadmin.gui.dialogs;
 
 import javax.swing.*;
 
+import net.miginfocom.swing.MigLayout;
+
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DefaultProperties;
 
 import java.io.File;
 import java.io.IOException;
 import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -48,24 +47,12 @@ public class AnnotationToolAdminDialog extends JDialog {
 		setResizable(false);
 		
 		// Create a GridBagLayout
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		setLayout(gridBagLayout);
-		
-		// Constraints
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.anchor = GridBagConstraints.NORTHWEST;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.insets = new Insets(10, 10, 10, 10);
-		constraints.weightx = 1;
-		constraints.weighty = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.gridwidth = 2;
+		setLayout(new MigLayout("insets 10"));
 
 		// Add a label for the selection of the openBIS URL
 		JLabel urlLabel = new JLabel("Set the openBIS URL");
-		add(urlLabel, constraints);
-
+		add(urlLabel, "wrap, width 100%");
+		
 		// Add a drop-down menu for the selection of the URL
 		String openBISURL = appProperties.getProperty("OpenBISURL");
 		ArrayList<String> openBISURLOptions = 
@@ -93,14 +80,12 @@ public class AnnotationToolAdminDialog extends JDialog {
         		}
             }
         });
-		constraints.gridy = 1;
-		add(openBISURLList, constraints);		
+		add(openBISURLList, "wrap, width 100%");
 		
 		// Add a label for the selection of the acquisition machine
 		JLabel acqLabel = new JLabel("Select the acquisition station");
-		constraints.gridy = 2;
-		add(acqLabel, constraints);
-		
+		add(acqLabel, "wrap, width 100%");
+
 		// Add a drop-down menu for the selection of the acquisition machine
 		String acqStation = appProperties.getProperty("AcquisitionStation");
 		ArrayList<String> acqStations = 
@@ -128,19 +113,16 @@ public class AnnotationToolAdminDialog extends JDialog {
         		}
             }
         });
-		constraints.gridy = 3;
-		add(acqStationsList, constraints);
+		add(acqStationsList, "wrap, width 100%");
 		
 		// Add a label for the directory
 		JLabel dirLabel = new JLabel("Data mover incoming directory");
-		constraints.gridy = 4;
-		add(dirLabel, constraints);
+		add(dirLabel, "wrap, width 100%");
 		
 		// Add a pushButton to choose the directory
 		// Create a text field for the user name
 		selIncomingDir = appProperties.getProperty("DatamoverIncomingDir");
 		dirButton = new JButton(selIncomingDir);
-		constraints.gridy = 5;
 		dirButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	String dir = pickDir();
@@ -159,13 +141,10 @@ public class AnnotationToolAdminDialog extends JDialog {
             	}
             }
         });		
-		add(dirButton, constraints);
-
+		add(dirButton, "wrap, width 100%");
+		
 		// Create a Save button
 		saveButton = new JButton("Save");
-		constraints.gridx = 0;
-		constraints.gridy = 6;
-		constraints.gridwidth = 1;
 		saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
@@ -192,13 +171,10 @@ public class AnnotationToolAdminDialog extends JDialog {
             	}
             }
         });
-		add(saveButton, constraints);
+		add(saveButton, "tag ok, span, split 2");
 
 		// Create a cancel button
 		cancelButton = new JButton("Cancel");
-		constraints.gridx = 1;
-		constraints.gridy = 6;
-		constraints.gridwidth = 1;
 		cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	// If we cancel the admin mode, we quit the application
@@ -208,13 +184,13 @@ public class AnnotationToolAdminDialog extends JDialog {
             	System.exit(0);
             }
         });
-		add(cancelButton, constraints);
+		add(cancelButton, "tag cancel, span, split 2");
 		
 		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(saveButton);
 
 		// Display the dialog
-		setMinimumSize(new Dimension(600, 50));
+		setMinimumSize(new Dimension(600, 100));
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);

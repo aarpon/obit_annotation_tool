@@ -85,8 +85,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		// If the subfolder is already annotated, we skip it (but still
 		// we return success)
 		if (divafcsprocessor.validator.isAnnotated) {
-			outputPane.warn("Dataset \"" + divafcsprocessor.folderDescriptor + 
-					"\" is already annotated.");
+			outputPane.log("Dataset \"" + divafcsprocessor.folderDescriptor + 
+					"\" is already annotated. Skipping.");
 			return true;
 		}
 
