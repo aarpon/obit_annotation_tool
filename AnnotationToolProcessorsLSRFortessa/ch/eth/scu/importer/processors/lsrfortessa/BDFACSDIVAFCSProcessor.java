@@ -592,7 +592,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				validator.isValid = false;
 				validator.isAnnotated = false;
 				validator.errorMessages.add("Experiment export");
-				continue;
+				return;
 			}
 
 			// Do we have an unknown file? If we do, we move on to the next.

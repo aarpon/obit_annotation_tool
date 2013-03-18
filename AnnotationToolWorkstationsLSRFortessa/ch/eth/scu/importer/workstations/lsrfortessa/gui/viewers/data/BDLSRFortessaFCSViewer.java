@@ -101,9 +101,9 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				err.append("(").append(nError).append(") ").append(errorString);
 			}
 			model.addRow(new Object[] {folder.getName(), err});
-			outputPane.err("Could not process folder \"" + 
+			outputPane.err("Folder \"" + 
 				divafcsprocessor.folderDescriptor + 
-				"\" (see \"Invalid datasets\")");
+				"\" failed validation. Please fix or remove.");
 			return false;
 		}
 
