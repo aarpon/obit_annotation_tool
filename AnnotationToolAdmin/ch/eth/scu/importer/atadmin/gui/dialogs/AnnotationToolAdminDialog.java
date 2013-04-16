@@ -34,25 +34,30 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> acqStationsList;
 	protected JComboBox<Object> openBISURLList;
 	
+	private static final String version = "0.1.0";
+	
 	/**
 	 * Constructor
 	 */
 	public AnnotationToolAdminDialog() {
-		
+
+		// Set the dialog title
+		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" + version);
+
 		// Read the properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();
-		
+
 		// Make the dialog modal and not resizable
 		setModal(true);
 		setResizable(false);
-		
+
 		// Create a GridBagLayout
 		setLayout(new MigLayout("insets 10"));
 
 		// Add a label for the selection of the openBIS URL
 		JLabel urlLabel = new JLabel("Set the openBIS URL");
 		add(urlLabel, "wrap, width 100%");
-		
+
 		// Add a drop-down menu for the selection of the URL
 		String openBISURL = appProperties.getProperty("OpenBISURL");
 		ArrayList<String> openBISURLOptions = 
