@@ -39,8 +39,8 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 		this.openBISViewer = openBISViewer;
 		
 		// Set the preferred and minimum size
-		panel.setMinimumSize(new Dimension(450, 700));
-		panel.setPreferredSize(new Dimension(450, 700));
+		panel.setMinimumSize(new Dimension(400, 700));
+		panel.setPreferredSize(new Dimension(400, 700));
 		
 	}
 

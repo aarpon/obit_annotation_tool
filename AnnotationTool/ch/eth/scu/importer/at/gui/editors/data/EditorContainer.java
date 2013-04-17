@@ -77,8 +77,8 @@ public class EditorContainer extends JPanel implements ActionListener {
 		add(uploadButton, constraints);
 		
 		// Set the preferred and minimum size
-		this.setMinimumSize(new Dimension(450, 700));
-		this.setPreferredSize(new Dimension(450, 700));
+		this.setMinimumSize(new Dimension(400, 700));
+		this.setPreferredSize(new Dimension(400, 700));
 		
 
 	}
