@@ -4,11 +4,11 @@
 	<classpathentry kind="src" path="AnnotationToolAdmin"/>
 	<classpathentry kind="src" path="AnnotationToolCommon"/>
 	<classpathentry kind="src" path="AnnotationToolProcessors"/>
-	<classpathentry kind="src" path="AnnotationToolWorkstationsLSRFortessa"/>
-	<classpathentry kind="src" path="AnnotationToolWorkstationsLeicaSP5"/>
+	<classpathentry kind="src" path="AnnotationToolUIElementsLSRFortessa"/>
+	<classpathentry kind="src" path="AnnotationToolUIElementsLeicaSP5"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsLSRFortessa"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsLeicaSP5"/>
-	<classpathentry kind="src" path="AnnotationToolWorkstationsNikon"/>
+	<classpathentry kind="src" path="AnnotationToolUIElementsNikon"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsNikon"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>

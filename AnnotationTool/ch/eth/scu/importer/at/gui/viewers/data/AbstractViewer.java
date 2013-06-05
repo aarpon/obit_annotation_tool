@@ -24,7 +24,7 @@ import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
-import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.model.RootNode;
+import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.RootNode;
 
 /**
  * Abstract viewer for processors

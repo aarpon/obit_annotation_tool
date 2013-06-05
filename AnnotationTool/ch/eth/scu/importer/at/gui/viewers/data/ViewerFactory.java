@@ -3,9 +3,9 @@ package ch.eth.scu.importer.at.gui.viewers.data;
 import java.util.Properties;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.workstations.leicasp5.gui.viewers.data.LeicaSP5Viewer;
-import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
-import ch.eth.scu.importer.workstations.nikon.gui.viewers.data.NikonViewer;
+import ch.eth.scu.importer.ui_elements.leicasp5.gui.viewers.data.LeicaSP5Viewer;
+import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
+import ch.eth.scu.importer.ui_elements.nikon.gui.viewers.data.NikonViewer;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
