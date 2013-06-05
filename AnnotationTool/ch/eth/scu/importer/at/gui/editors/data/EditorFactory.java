@@ -7,6 +7,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.workstations.leicasp5.gui.editors.data.LeicaSP5Editor;
 import ch.eth.scu.importer.workstations.lsrfortessa.gui.editors.data.BDLSRFortessaFCSEditor;
+import ch.eth.scu.importer.workstations.nikon.gui.editors.data.NikonEditor;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
@@ -34,6 +35,8 @@ public class EditorFactory {
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
 		if (acqStation.equals("LSRFortessaFCS")) {
 			metadataEditor = new BDLSRFortessaFCSEditor(dataViewer, openBISViewer);
+		} else if (acqStation.equals("Nikon")) {
+			metadataEditor = new NikonEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("LeicaSP5")) {
 			metadataEditor = new LeicaSP5Editor(dataViewer, openBISViewer);
 		} else {

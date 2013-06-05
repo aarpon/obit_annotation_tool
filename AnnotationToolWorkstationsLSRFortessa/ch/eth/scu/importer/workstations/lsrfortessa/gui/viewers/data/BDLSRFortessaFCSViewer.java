@@ -34,7 +34,7 @@ import java.util.Properties;
 import java.io.FileFilter;
 
 /**
- * Simple graphical viewer for the BDDIVAXMLProcessor
+ * Simple graphical viewer for the BDFACSDIVAFCSProcessor
  * @author Aaron Ponti
  */
 public class BDLSRFortessaFCSViewer extends AbstractViewer {

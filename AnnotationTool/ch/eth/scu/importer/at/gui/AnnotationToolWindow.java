@@ -206,6 +206,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	 * Quits the application properly
 	 */
 	private void QuitApplication() {
+		// Ask the user for confirmation
         if (JOptionPane.showConfirmDialog(this, 
         		"Do you really want to quit?", "Question",
         		JOptionPane.YES_NO_OPTION,

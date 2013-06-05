@@ -6,7 +6,7 @@ import ch.eth.scu.importer.at.gui.AnnotationToolWindow;
 import ch.eth.scu.importer.common.properties.AppProperties;
 
 /**
- * SCUImporter is an application to drive the import of data from the 
+ * AnnotationTool is an application to drive the import of data from the 
  * acquisition stations into openBIS.
  * @author Aaron Ponti
  */

@@ -5,6 +5,7 @@ import java.util.Properties;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.workstations.leicasp5.gui.viewers.data.LeicaSP5Viewer;
 import ch.eth.scu.importer.workstations.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
+import ch.eth.scu.importer.workstations.nikon.gui.viewers.data.NikonViewer;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
@@ -29,6 +30,8 @@ public class ViewerFactory {
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
 		if (acqStation.equals("LSRFortessaFCS")) {
 			metadataViewer = new BDLSRFortessaFCSViewer();
+		} else if (acqStation.equals("Nikon")) {
+			metadataViewer = new NikonViewer();
 		} else if (acqStation.equals("LeicaSP5")) {
 			metadataViewer = new LeicaSP5Viewer();
 		} else {

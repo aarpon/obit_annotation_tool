@@ -41,6 +41,7 @@ public class DefaultProperties {
 			options.add("https://openbis-csb.ethz.ch/openbis");		
 		} else if (property.equals("AcquisitionStation")) {
 			options.add("LSRFortessaFCS");
+			options.add("Nikon");
 			options.add("LeicaSP5");
 		} else if (property.equals("DatamoverIncomingDir")) {
 			options.add("");

@@ -8,6 +8,8 @@
 	<classpathentry kind="src" path="AnnotationToolWorkstationsLeicaSP5"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsLSRFortessa"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsLeicaSP5"/>
+	<classpathentry kind="src" path="AnnotationToolWorkstationsNikon"/>
+	<classpathentry kind="src" path="AnnotationToolProcessorsNikon"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dropbox/datastore_server.jar"/>
