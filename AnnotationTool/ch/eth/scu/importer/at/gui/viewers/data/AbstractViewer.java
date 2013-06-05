@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 import java.util.Observable;
 
 import javax.swing.JButton;
@@ -272,6 +273,23 @@ abstract public class AbstractViewer extends Observable
 			    model.removeRow(i);
 			}
 		}
+	}
+
+	/**
+	 * Adds all key-value pairs from an attributes Map to the metadata
+	 * view table 
+	 * @param attributes Map of attributes returned by the various
+	 * processors.
+	 */
+	protected void addAttributesToMetadataTable(Map<String, String> attributes) {
+		DefaultTableModel model =
+				(DefaultTableModel) metadataViewTable.getModel();
+		for (String key: attributes.keySet() ) {
+			String value = attributes.get(key);
+			model.addRow(new Object[] {key, value});
+		}
+		// Sort the table by the first column
+		metadataViewTable.getRowSorter().toggleSortOrder(0);
 	}
 
 	/**
