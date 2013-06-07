@@ -16,10 +16,7 @@ public class DataViewerTreeCellRenderer extends DefaultTreeCellRenderer{
     /**   
     * Constructor  
     */ 
-    public DataViewerTreeCellRenderer() 
-    { 
-        // Call base constructor 
-        super(); 
+    public DataViewerTreeCellRenderer() { 
     }
     
     /**  

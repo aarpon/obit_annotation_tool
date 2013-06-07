@@ -17,10 +17,7 @@ public class OpenBISViewerTreeCellRenderer extends DefaultTreeCellRenderer{
     /**   
     * Constructor  
     */ 
-    public OpenBISViewerTreeCellRenderer() 
-    { 
-        // Call base constructor 
-        super(); 
+    public OpenBISViewerTreeCellRenderer() { 
     }
     
     /**  

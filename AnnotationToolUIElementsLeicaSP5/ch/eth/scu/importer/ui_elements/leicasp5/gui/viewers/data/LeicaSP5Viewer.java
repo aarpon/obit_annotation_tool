@@ -36,9 +36,6 @@ public class LeicaSP5Viewer extends AbstractViewer
 	 * Constructor
 	 */
 	public LeicaSP5Viewer() {
-		
-		// Call the AbstractViewer's constructor (to create the panel)
-		super();
 	}
 
 	/**
