@@ -35,10 +35,6 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 * Constructor
 	 */
 	public BDLSRFortessaFCSViewer() {
-		
-		// Call the AbstractViewer's constructor (to create the panel)
-		super();
-
 	}
 
 	/**

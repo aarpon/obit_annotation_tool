@@ -17,10 +17,6 @@ public class NikonViewer extends AbstractViewer {
 	 * Constructor
 	 */
 	public NikonViewer() {
-		
-		// Call the AbstractViewer's constructor (to create the panel)
-		super();
-
 	}
 
 	@Override
