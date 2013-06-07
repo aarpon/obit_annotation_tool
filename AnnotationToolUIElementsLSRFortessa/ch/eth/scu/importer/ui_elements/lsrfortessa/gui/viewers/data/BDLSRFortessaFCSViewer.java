@@ -3,7 +3,6 @@ package ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Well;
 import ch.eth.scu.importer.processors.lsrfortessa.FCSProcessor;
@@ -11,11 +10,9 @@ import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experim
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Specimen;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tube;
-import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FCSFileNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FolderNode;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.SpecimenNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.TrayNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.TubeNode;
@@ -23,14 +20,10 @@ import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.WellNo
 
 import java.awt.event.*;
 
-import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
-import java.io.FileFilter;
 
 /**
  * Simple graphical viewer for the BDFACSDIVAFCSProcessor
@@ -53,7 +46,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 */
 	public boolean parse(File folder, String userName) {
 
-		// Process the file
+		// Process the file or folder
 		BDFACSDIVAFCSProcessor divafcsprocessor;
 		try {
 			divafcsprocessor = new BDFACSDIVAFCSProcessor(
@@ -317,79 +310,5 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 */
 	public void actionPerformed(ActionEvent e) {
     }
-
-	/**
-	 * Scans the user subfolder of the datamover incoming directory for
-	 * datasets to be processed
-	 */
-	public void scan() {
-
-		// Global status of the user folder scanning
-		boolean globalStatus = true;
-
-		// Inform
-		outputPane.log("Scanning user data folder...");
-		
-		// Make sure to clear the table of invalid datasets and
-		// metadata
-		clearInvalidDatasetsTable();
-		clearMetadataTable();
-		
-		// Get the datamover incoming folder from the application properties
-		// to which we append the user name to personalize the working space
-		Properties appProperties = AppProperties.readPropertiesFromFile();
-		File dropboxIncomingFolder = new File(
-				appProperties.getProperty("DatamoverIncomingDir") +
-				File.separator + userName);
-		
-		// Does the folder exist? If not, we create it. Please mind,
-		// if directory creation fails, the application will quit since
-		// this is a non-recoverable problem.
-		checkAndCreateFolderOrDie(dropboxIncomingFolder, "user directory");
-		
-		// We scan the user folder for all files and subfolders and
-		// pass them on to the processor for validation. Files at the
-		// root level are actually invalid datasets, but we will let
-		// the processor flag them as such.
-		File[] rootFilesAndFolders = dropboxIncomingFolder.listFiles();
-
-		// Parse all files and subfolders (and store success)
-		if (rootFilesAndFolders.length > 0) { 
-			for (File current : rootFilesAndFolders) {
-				globalStatus = globalStatus & parse(current, userName);
-			}
-		} else {
-			outputPane.warn("No data found in the user folder!");
-		}
-
-		// Prepare a new root node for the Tree
-		rootNode = new RootNode(new RootDescriptor("/" + userName));
-
-		// Create a tree that allows one selection at a time.
-		tree.setModel(new DefaultTreeModel(rootNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-
-		// Clear the metadata table
-		clearMetadataTable();
-		
-		// Set isReady to globalStatus
-		isReady = globalStatus;
-		
-		// Inform the user if isReady is false
-		if (!isReady) {
-			outputPane.err(
-					"Please fix the invalid datasets to continue!");
-		}
-	
-		// Notify observers that the scanning is done 
-		setChanged();
-		notifyObservers(new ObserverActionParameters(
-				ObserverActionParameters.Action.SCAN_COMPLETE,
-				null));
-	}
 
 }

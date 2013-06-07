@@ -1,11 +1,8 @@
 package ch.eth.scu.importer.processors.nikonnd2;
 
 import java.io.File;
-import java.util.Properties;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.AbstractProcessor;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Folder;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**

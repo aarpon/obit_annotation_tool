@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import javax.swing.event.TreeSelectionEvent;
 
@@ -34,13 +35,11 @@ public class NikonViewer extends AbstractViewer {
 
 	}
 
-	/**
-	 * Scans the user subfolder of the datamover incoming directory for
-	 * datasets to be processed
-	 */
-	public void scan() {
+	@Override
+	public boolean parse(File folder, String userName) {
 		// TODO Auto-generated method stub
-
+		return false;
 	}
+
 
 }

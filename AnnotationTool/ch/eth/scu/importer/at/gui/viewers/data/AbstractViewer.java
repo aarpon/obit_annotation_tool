@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -20,13 +21,16 @@ import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
+import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
+import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.RootNode;
 
@@ -67,13 +71,44 @@ abstract public class AbstractViewer extends Observable
 	protected OutputPane outputPane;
 	
 	/**
-	 * Scans the datamover incoming directory for datasets to be processed.
-	 * At the end of scanning, the function MUST set isReady to true.
-	 * setUserName() MUST be called before scan().
-	 * 
-	 * @see setUserName
+	 * Read-only table model
+	 * @author Aaron Ponti
+	 *
 	 */
-	abstract public void scan();
+	public class ReadOnlyTableModel extends DefaultTableModel {
+		private static final long serialVersionUID = 1L;
+		
+		/**
+		 * Constructor
+		 * @param mdData 2D data array
+		 * @param mdColumnNames Array of column names
+		 */
+		public ReadOnlyTableModel(Object[][] mdData, String mdColumnNames[]) {
+			super(mdData, mdColumnNames);
+		}
+
+		/**
+		 * Make sure the Table is non-editable
+		 * @param row number
+		 * @param column number
+		 */
+		@Override
+		public boolean isCellEditable(int row, int column) {
+			return false;
+		}
+		
+	}
+
+	/**
+	 * Parses current dataset (file or folder) by doing the necessary
+	 * preparation work and then calling the needed Processor.
+	 * 
+	 * @param folder	 Full folder (or file) name
+	 * @param userName Name of the user currently logged on
+	 * @return true if the scanning of the dataset was successful, false
+	 * otherwise.
+	 */
+	abstract public boolean parse(File folder, String userName); 
 	
 	/**
 	 * Constructor
@@ -158,7 +193,7 @@ abstract public class AbstractViewer extends Observable
 		Object[][] mdData = { };
 		String mdColumnNames[] = { "Name", "Value" };
 		metadataViewTable = new JTable(
-				new DefaultTableModel(mdData, mdColumnNames));
+				new ReadOnlyTableModel(mdData, mdColumnNames));
 		metadataViewTable.setShowGrid(false);
 		metadataViewTable.setFillsViewportHeight(true);
 		metadataViewTable.setAutoCreateRowSorter(true);
@@ -190,7 +225,7 @@ abstract public class AbstractViewer extends Observable
 		Object[][] data = { };
 		String columnNames[] = { "File or folder", "Problem" };
 		invalidDatasetsTable = new JTable(
-				new DefaultTableModel(data, columnNames));
+				new ReadOnlyTableModel(data, columnNames));
 		invalidDatasetsTable.setShowGrid(false);
 		invalidDatasetsTable.setFillsViewportHeight(true);
 		invalidDatasetsTable.setAutoCreateRowSorter(true);
@@ -211,6 +246,26 @@ abstract public class AbstractViewer extends Observable
 
 	}
 
+	/** 
+	 * Deletes safely-to-remove files like .DS_Store, Thumbs.db, ...
+	 * @return true if the file was recognized as a useless hidden
+	 * file and deleted, false if the file is a relevant file to be 
+	 * processed. 
+	 */
+	protected boolean deleteIfKnownUselessFile(File file) {
+		String name = file.getName();
+		if (file.isDirectory()) {
+			return false;
+		}
+		if (name.equals(".DS_Store") ||
+				name.equals("Thumbs.db")) {
+			file.delete();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Sets the user name to be used for scanning the user folder
 	 * @param userName User name
@@ -236,6 +291,86 @@ abstract public class AbstractViewer extends Observable
 		// Store the OutputPane reference
 		this.outputPane = outputPane;
 	
+	}
+	
+	/**
+	 * Scans the datamover incoming directory for datasets to be processed.
+	 * At the end of scanning, the function MUST set isReady to true.
+	 * setUserName() MUST be called before scan().
+	 * 
+	 * @see setUserName
+	 */
+	public void scan() {
+
+		// Global status of the user folder scanning
+		boolean globalStatus = true;
+
+		// Inform
+		outputPane.log("Scanning user data folder...");
+		
+		// Make sure to clear the table of invalid datasets and
+		// metadata
+		clearInvalidDatasetsTable();
+		clearMetadataTable();
+		
+		// Get the datamover incoming folder from the application properties
+		// to which we append the user name to personalize the working space
+		Properties appProperties = AppProperties.readPropertiesFromFile();
+		File dropboxIncomingFolder = new File(
+				appProperties.getProperty("DatamoverIncomingDir") +
+				File.separator + userName);
+		
+		// Does the folder exist? If not, we create it. Please mind,
+		// if directory creation fails, the application will quit since
+		// this is a non-recoverable problem.
+		checkAndCreateFolderOrDie(dropboxIncomingFolder, "user directory");
+		
+		// We scan the user folder for all files and subfolders and
+		// pass them on to the processor for validation. Files at the
+		// root level are actually invalid datasets, but we will let
+		// the processor flag them as such.
+		File[] rootFilesAndFolders = dropboxIncomingFolder.listFiles();
+
+		// Parse all files and subfolders (and store success)
+		if (rootFilesAndFolders.length > 0) { 
+			for (File current : rootFilesAndFolders) {
+				if (!deleteIfKnownUselessFile(current)) {
+					globalStatus = globalStatus & 
+							parse(current, userName);
+				}
+			}
+		} else {
+			outputPane.warn("No data found in the user folder!");
+		}
+
+		// Prepare a new root node for the Tree
+		rootNode = new RootNode(new RootDescriptor("/" + userName));
+
+		// Create a tree that allows one selection at a time.
+		tree.setModel(new DefaultTreeModel(rootNode));
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
+
+		// Clear the metadata table
+		clearMetadataTable();
+		
+		// Set isReady to globalStatus
+		isReady = globalStatus;
+		
+		// Inform the user if isReady is false
+		if (!isReady) {
+			outputPane.err(
+					"Please fix the invalid datasets to continue!");
+		}
+	
+		// Notify observers that the scanning is done 
+		setChanged();
+		notifyObservers(new ObserverActionParameters(
+				ObserverActionParameters.Action.SCAN_COMPLETE,
+				null));
 	}
 	
 	/**
@@ -300,8 +435,8 @@ abstract public class AbstractViewer extends Observable
 	 */
 	protected void clearInvalidDatasetsTable() {
 		if (invalidDatasetsTable != null) {
-			DefaultTableModel model =
-					(DefaultTableModel) invalidDatasetsTable.getModel();
+			ReadOnlyTableModel model =
+					(ReadOnlyTableModel) invalidDatasetsTable.getModel();
 			for (int i = model.getRowCount() - 1; i >= 0; i--) {
 			    model.removeRow(i);
 			}
@@ -313,8 +448,8 @@ abstract public class AbstractViewer extends Observable
 	 */
 	protected void clearMetadataTable() {
 		if (metadataViewTable != null) {
-			DefaultTableModel model =
-					(DefaultTableModel) metadataViewTable.getModel();
+			ReadOnlyTableModel model =
+					(ReadOnlyTableModel) metadataViewTable.getModel();
 			for (int i = model.getRowCount() - 1; i >= 0; i--) {
 			    model.removeRow(i);
 			}
@@ -328,8 +463,8 @@ abstract public class AbstractViewer extends Observable
 	 * processors.
 	 */
 	protected void addAttributesToMetadataTable(Map<String, String> attributes) {
-		DefaultTableModel model =
-				(DefaultTableModel) metadataViewTable.getModel();
+		ReadOnlyTableModel model =
+				(ReadOnlyTableModel) metadataViewTable.getModel();
 		for (String key: attributes.keySet() ) {
 			String value = attributes.get(key);
 			model.addRow(new Object[] {key, value});

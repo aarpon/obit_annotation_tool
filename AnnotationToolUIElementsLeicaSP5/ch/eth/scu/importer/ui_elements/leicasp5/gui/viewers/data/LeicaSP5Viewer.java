@@ -20,9 +20,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Properties;
 
-import loci.common.services.DependencyException;
-import loci.common.services.ServiceException;
-
 /**
  * Simple graphical viewer for the BDDIVAXMLProcessor
  * @author Aaron Ponti
@@ -200,5 +197,11 @@ public class LeicaSP5Viewer extends AbstractViewer
 			lifImageNode.add(subImageNode);
 
 		}
+	}
+
+	@Override
+	public boolean parse(File folder, String userName) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

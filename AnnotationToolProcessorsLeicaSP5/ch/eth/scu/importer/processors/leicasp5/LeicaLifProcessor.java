@@ -1,21 +1,12 @@
 package ch.eth.scu.importer.processors.leicasp5;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.processors.BaseBioFormatsProcessor;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
-import loci.common.services.DependencyException;
-import loci.common.services.ServiceException;
-import loci.common.services.ServiceFactory;
-import loci.formats.*;
-import loci.formats.meta.IMetadata;
-import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
-import loci.plugins.util.LociPrefs;
 
 /**
  * LeicaLifProcessor parses Leica LIF files.
