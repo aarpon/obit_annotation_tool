@@ -38,17 +38,6 @@ import java.io.FileFilter;
  */
 public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
-	// The valueChanged() method is fired twice when selection is changed in 
-	// a JTree, so we keep track of the last processed node to avoid parsing
-	// the same FCS file twice every time the node is changed.
-	private String lastSelectedNode;
-	
-	// When selecting an entry in the tree, the editor might be refreshed
-	// in response. This should happen only if a new folder is selected -
-	// as long as one changes between nodes within an experiment no
-	// editor refresh is needed.
-	private AbstractNode lastSelectedFolder;
-
 	/**
 	 * Constructor
 	 */
@@ -100,7 +89,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				err.append("(").append(nError).append(") ").append(errorString);
 			}
 			model.addRow(new Object[] {folder.getName(), err});
-			outputPane.err("Folder \"" + 
+			outputPane.err("Dataset \"" + 
 				divafcsprocessor.folderDescriptor + 
 				"\" failed validation. Please fix or remove.");
 			return false;
@@ -332,13 +321,11 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	/**
 	 * Scans the user subfolder of the datamover incoming directory for
 	 * datasets to be processed
-	 * @param userName user name that must correspond to the subfolder name in
-	 * the dropboxIncomingFolder
 	 */
 	public void scan() {
 
-		// The user name MUST be set
-		assert(this.userName == "");
+		// Global status of the user folder scanning
+		boolean globalStatus = true;
 
 		// Inform
 		outputPane.log("Scanning user data folder...");
@@ -355,44 +342,28 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				appProperties.getProperty("DatamoverIncomingDir") +
 				File.separator + userName);
 		
-		// Does the folder exist? If not, we create it
-		if (!dropboxIncomingFolder.exists()) {
-			outputPane.warn("User directory not found! Creating...");
-			try {
-				dropboxIncomingFolder.mkdirs();
-				outputPane.log("User directory created successfully.");
-			} catch (Exception e) {
-				outputPane.err("Failed creating user directory!");
-				JOptionPane.showMessageDialog(null,
-					    "Failed creating user directory!\n" +
-				"Please contact your administrator. The application\n" +
-					    		"will now exit!",
-					    "Error",
-					    JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
-			}
-		}
+		// Does the folder exist? If not, we create it. Please mind,
+		// if directory creation fails, the application will quit since
+		// this is a non-recoverable problem.
+		checkAndCreateFolderOrDie(dropboxIncomingFolder, "user directory");
 		
-		// Get a list of all subfolders (each representing a dataset)
-		File[] rootSubFolders = dropboxIncomingFolder.listFiles(
-				new FileFilter() {
-					public boolean accept(File file) {
-						return file.isDirectory();
-					}
-				});
+		// We scan the user folder for all files and subfolders and
+		// pass them on to the processor for validation. Files at the
+		// root level are actually invalid datasets, but we will let
+		// the processor flag them as such.
+		File[] rootFilesAndFolders = dropboxIncomingFolder.listFiles();
 
-		// Prepare a new root node for the Tree
-		rootNode = new RootNode(new RootDescriptor("/" + userName));
-
-		// Parse all subfolders (and store success)
-		boolean globalStatus = true;
-		if (rootSubFolders.length > 0) { 
-			for (File subfolder : rootSubFolders) {
-				globalStatus = globalStatus & parse(subfolder, userName);
+		// Parse all files and subfolders (and store success)
+		if (rootFilesAndFolders.length > 0) { 
+			for (File current : rootFilesAndFolders) {
+				globalStatus = globalStatus & parse(current, userName);
 			}
 		} else {
 			outputPane.warn("No data found in the user folder!");
 		}
+
+		// Prepare a new root node for the Tree
+		rootNode = new RootNode(new RootDescriptor("/" + userName));
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
@@ -410,7 +381,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		
 		// Inform the user if isReady is false
 		if (!isReady) {
-			outputPane.err("Please fix the invalid datasets to continue!");
+			outputPane.err(
+					"Please fix the invalid datasets to continue!");
 		}
 	
 		// Notify observers that the scanning is done 

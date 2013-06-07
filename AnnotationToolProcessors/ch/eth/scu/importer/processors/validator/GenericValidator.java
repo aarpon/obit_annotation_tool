@@ -11,8 +11,12 @@ import java.util.ArrayList;
  *    - and an array of Strings listing all problems found in case
  *      the dataset is invalid.
  * In this implementation, the actual validation is performed by the 
- * processor. 
+ * processor. The validator is just used to keep track of the state. 
  * 
+ * AbstractProcessor holds a public reference to the GenericValidator.
+ * It is the task of the concrete Processors to instantiate the
+ * GenericValidator or any specialization of it.
+ *  
  * Extend this class for more specific use.
  * @author Aaron Ponti
  */
@@ -29,7 +33,7 @@ public class GenericValidator {
 	public boolean isAnnotated = false;
 
 	/**
-	 * String containing the reason why a dataset is invalid.
+	 * List of Strings containing the reasons why a dataset is invalid.
 	 */
 	public ArrayList<String> errorMessages = new ArrayList<String>();
 	

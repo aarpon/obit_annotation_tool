@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
-import ch.eth.scu.importer.processors.AbstractProcessor;
+import ch.eth.scu.importer.processors.BaseBioFormatsProcessor;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
 import loci.common.services.DependencyException;
@@ -21,7 +21,7 @@ import loci.plugins.util.LociPrefs;
  * LeicaLifProcessor parses Leica LIF files.
  * @author Aaron Ponti
  */
-public class LeicaLifProcessor extends AbstractProcessor {
+public class LeicaLifProcessor extends BaseBioFormatsProcessor {
 
 	/* Private instance variables */
 	private String filename;
@@ -39,42 +39,23 @@ public class LeicaLifProcessor extends AbstractProcessor {
 	 * @param filename Name with full path of the file to be opened.
 	 */
 	public LeicaLifProcessor(String filename) {
-		this.filename = filename;
+		super(filename);
 	}
 	
+	/**
+	 * Parse the file
+	 */
 	@Override
-	public boolean parse() throws DependencyException, ServiceException {
+	public boolean parse() {
 
 		// Create a new image
 		image = new ImageDescriptor(filename);
 
-		// Create the reader
-		reader = new ImageProcessorReader(
-				new ChannelSeparator(LociPrefs.makeImageReader()));
-
-		// Set OME-XML metadata
-		ServiceFactory factory = new ServiceFactory();
-		OMEXMLService service = factory.getInstance(OMEXMLService.class);
-		IMetadata omexmlMeta = service.createOMEXMLMetadata();
-		reader.setMetadataStore(omexmlMeta);
-
-		// Try to open the image file
-		try {
-		      reader.setId(filename);
-		} catch (FormatException e) {
-			JOptionPane.showMessageDialog(null,
-				    "Could not open file. Error was: " + e.getMessage(),
-				    "Error",
-				    JOptionPane.ERROR_MESSAGE);
-			return false;
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null,
-				    "Could not open file. Error was: " + e.getMessage(),
-				    "Error",
-				    JOptionPane.ERROR_MESSAGE);
+		// Initialize the reader and the OMEXML metadata store
+		if (!initReader()) {
 			return false;
 		}
-		
+
 		// Number of series
 		int numSeries = reader.getSeriesCount();
 		
@@ -106,7 +87,7 @@ public class LeicaLifProcessor extends AbstractProcessor {
 
 	/**
 	 * Return a simplified class name to use in XML.
-	 * @return simplidied class name.
+	 * @return simplified class name.
 	 */
 	@Override	
 	public String getType() {

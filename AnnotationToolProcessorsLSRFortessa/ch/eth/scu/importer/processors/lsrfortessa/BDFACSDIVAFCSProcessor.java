@@ -25,6 +25,9 @@ import ch.eth.scu.importer.processors.validator.GenericValidator;
  * Please notice that DIVA FCS files generated in this mode are different
  * from files accompanying the XML file generated when exporting as an 
  * experiment.
+ * 
+ * Datasets exported as XML are flagged as invalid and are not processed.
+ * 
  * @author Aaron Ponti
  */
 public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
@@ -47,12 +50,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Instantiate the validator
 		validator = new GenericValidator();
 
-		// Make sure rootFolderName is a valid directory
+		// fullFolderName could in principle be a file instead of a 
+		// directory; the parse() function will take care of that.
 		File folder = new File(fullFolderName);
-		if (!folder.isDirectory()) {
-			System.err.println("Expected directory name.");
-			return;
-		}
 		
 		// Store the incoming dir (to build relative paths)
 		Properties appProperties = AppProperties.readPropertiesFromFile();
@@ -76,11 +76,25 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Parse the file to extract data and metadata. 
+	 * Parse the file to extract data and metadata.
 	 * @return true if parsing was successful, false otherwise.
 	 */
 	@Override
 	public boolean parse() {
+
+		// First, make sure this.topFolder is indeed a folder
+		if (!this.topFolder.isDirectory()) {
+			this.validator.isAnnotated = false;
+			this.validator.isValid = false;
+			this.validator.errorMessages.add(
+					"Expected folder, found file.");
+			this.errorMessage = "Only folders allowed at root level.";
+			
+			// We return true because the parsing succeeded. However,
+			// we recognized the file as an invalid dataset and we 
+			// dutifully set the appropriate flags in the validator.
+			return true;
+		}
 
 		// First we check if the dataset is already annotated. An  
 		// annotated dataset has a file ending in _properties.six
@@ -108,11 +122,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		try {
 			recursiveDir(this.topFolder);
 		} catch (IOException e) {
-			System.err.println("Could not parse the folder.");
+			this.errorMessage = "Could not parse the folder."; 
+			System.err.println(errorMessage);
 			return false;
 		}
 		
 		// Success
+		this.errorMessage = "";
 		return true;
 		
 	}

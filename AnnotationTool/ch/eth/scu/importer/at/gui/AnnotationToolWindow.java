@@ -87,9 +87,9 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		openBISViewer = new OpenBISViewer(outputPane);
 		add(openBISViewer.getPanel(), BorderLayout.EAST);
 		
-		// Add the editor: it is important to create this object as the last
-		// one, since it requires non-null references to the metadata and
-		// the openBIS viewers, and the output pane!
+		// Add the editor: it is important to create this object as
+		// the last one, since it requires non-null references to the 
+		// metadata, the openBIS viewers, and the output pane!
 		editorContainer = new EditorContainer(
 				metadataViewer, openBISViewer, outputPane);
 		add(editorContainer, BorderLayout.CENTER);

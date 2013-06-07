@@ -7,7 +7,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.ui_elements.leicasp5.gui.editors.data.LeicaSP5Editor;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.editors.data.BDLSRFortessaFCSEditor;
-import ch.eth.scu.importer.ui_elements.nikon.gui.editors.data.NikonEditor;
+import ch.eth.scu.importer.ui_elements.nikonnd2.gui.editors.data.NikonEditor;
 
 /**
  * The Viewer factory creates a viewer based on the application properties

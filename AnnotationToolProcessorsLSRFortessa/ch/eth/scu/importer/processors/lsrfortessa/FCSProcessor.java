@@ -110,8 +110,9 @@ public class FCSProcessor extends AbstractProcessor {
 		
 		} catch (IOException e) {
 			
-			System.err.println("Could not open file.");
-				
+			errorMessage = "Could not open file.";
+			System.err.println(errorMessage);
+
 		} finally {
 
 			// Always close the stream
@@ -125,6 +126,9 @@ public class FCSProcessor extends AbstractProcessor {
 
 		}
 
+		// Reset the error message
+		errorMessage = "";
+		
 		// Store and return state
 		isFileParsed = (in != null); 
 		return isFileParsed;
@@ -272,7 +276,8 @@ public class FCSProcessor extends AbstractProcessor {
 		byte[] VERSION = new byte[6];
 		in.read(VERSION);
 		if (!(new String(VERSION).equals("FCS3.0"))) {
-			System.out.println(filename + " is not a valid FCS3.0 file!");
+			errorMessage = filename + " is not a valid FCS3.0 file!";
+			System.out.println(errorMessage);
 			return false;
 		}
 		
@@ -375,8 +380,9 @@ public class FCSProcessor extends AbstractProcessor {
 		try {
 			dataOffset = Long.parseLong(TEXTMapStandard.get("$BEGINDATA").trim()); 
 		} catch (NumberFormatException e) {
-			System.out.println("Invalid offset for the DATA segment! " +
-					"This is a bug! Please report it.");
+			errorMessage = "Invalid offset for the DATA segment! " +
+					"This is a bug! Please report it.";
+			System.out.println(errorMessage);
 			return false;
 		}
 		if (dataOffset == 0) {
@@ -652,7 +658,8 @@ public class FCSProcessor extends AbstractProcessor {
 		} else if (endianity.equals("B")) {
 			endian = ByteOrder.BIG_ENDIAN;
 		} else {
-			System.out.println("Unknown endianity!");
+			errorMessage = "Unknown endianity!";
+			System.out.println(errorMessage);
 			return false;
 		}
 		
@@ -669,7 +676,8 @@ public class FCSProcessor extends AbstractProcessor {
 		try {
 			in.read(recordBuffer);
 		} catch (IOException e) {
-			System.out.println("Could not read the data segment from file!");
+			errorMessage = "Could not read the data segment from file!";
+			System.out.println(errorMessage);
 			return false;
 		}
 		
@@ -687,10 +695,15 @@ public class FCSProcessor extends AbstractProcessor {
 					"Additional processing is required which is not implemented yet!");
 			DATA = record.asCharBuffer();
 		} else {
-			System.out.println("Unknown data type!");
+			errorMessage = "Unknown data type!";
+			System.out.println(errorMessage);
 			return false;
 		}
 		
+		// Reset error message
+		errorMessage = "";
+		
+		// Return success
 		return true;
 	}
 	

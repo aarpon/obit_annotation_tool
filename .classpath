@@ -4,12 +4,12 @@
 	<classpathentry kind="src" path="AnnotationToolAdmin"/>
 	<classpathentry kind="src" path="AnnotationToolCommon"/>
 	<classpathentry kind="src" path="AnnotationToolProcessors"/>
-	<classpathentry kind="src" path="AnnotationToolUIElementsLSRFortessa"/>
-	<classpathentry kind="src" path="AnnotationToolUIElementsLeicaSP5"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsLSRFortessa"/>
 	<classpathentry kind="src" path="AnnotationToolProcessorsLeicaSP5"/>
-	<classpathentry kind="src" path="AnnotationToolUIElementsNikon"/>
-	<classpathentry kind="src" path="AnnotationToolProcessorsNikon"/>
+	<classpathentry kind="src" path="AnnotationToolProcessorsNikonND2"/>
+	<classpathentry kind="src" path="AnnotationToolUIElementsLSRFortessa"/>
+	<classpathentry kind="src" path="AnnotationToolUIElementsLeicaSP5"/>
+	<classpathentry kind="src" path="AnnotationToolUIElementsNikonND2"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dropbox/datastore_server.jar"/>

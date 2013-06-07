@@ -58,19 +58,9 @@ public class LeicaSP5Viewer extends AbstractViewer
 			leicalifprocessor = null;
 			return false;
 		}
-		try {
-			if (!leicalifprocessor.parse()) {
-				System.err.println("Could not parse file! (TODO: Use panel)");
-				leicalifprocessor = null;
-				return false;
-			}
-		} catch (DependencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		} catch (ServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!leicalifprocessor.parse()) {
+			System.err.println("Could not parse file! (TODO: Use panel)");
+			leicalifprocessor = null;
 			return false;
 		}
 
@@ -139,7 +129,7 @@ public class LeicaSP5Viewer extends AbstractViewer
 	public void scan() {
 
 		// The user name MUST be set
-		assert(this.userName == "");
+		assert(this.userName.equals(""));
 		
 		// Make sure to clear the table of invalid datasets and
 		// metadata

@@ -198,9 +198,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 		setMinimumSize(new Dimension(600, 100));
 		pack();
 		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setVisible(true);
-		
+
 	}
 
 	/**
