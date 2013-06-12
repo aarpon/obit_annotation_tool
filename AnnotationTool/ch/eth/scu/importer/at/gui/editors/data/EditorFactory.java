@@ -5,7 +5,6 @@ import java.util.Properties;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.ui_elements.leicasp5.gui.editors.data.LeicaSP5Editor;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.editors.data.BDLSRFortessaFCSEditor;
 import ch.eth.scu.importer.ui_elements.nikonnd2.gui.editors.data.NikonEditor;
 
@@ -37,8 +36,6 @@ public class EditorFactory {
 			metadataEditor = new BDLSRFortessaFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("Nikon")) {
 			metadataEditor = new NikonEditor(dataViewer, openBISViewer);
-		} else if (acqStation.equals("LeicaSP5")) {
-			metadataEditor = new LeicaSP5Editor(dataViewer, openBISViewer);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

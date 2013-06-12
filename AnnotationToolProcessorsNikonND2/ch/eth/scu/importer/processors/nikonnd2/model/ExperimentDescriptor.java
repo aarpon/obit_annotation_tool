@@ -1,4 +1,6 @@
-package ch.eth.scu.importer.processors.model;
+package ch.eth.scu.importer.processors.nikonnd2.model;
+
+import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 
 
 public class ExperimentDescriptor extends AbstractDescriptor{

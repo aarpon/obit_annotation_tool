@@ -8,27 +8,15 @@ import java.io.File;
  * @author Aaron Ponti
  *
  */
-abstract public class FirstLevelDescriptor extends AbstractDescriptor{
+abstract public class FirstLevelDescriptor extends PathAwareDescriptor {
 
 	/**
-	 * Relative path stored as a String
+	 * Constructor
+	 * @param baseDir: base directory (Datamover's incoming directory)
+	 * @param fullDir: full path ot the entity
 	 */
-	protected String relativePath = "";
-	
-	/**
-	 * Return the folder name containing the processed dataset relative 
-	 * to the Datamover incoming folder.
-	 */
-	public abstract String getRelativePath();
-	
-	/**
-	 * Return the full file name of the properties name (the XML file with 
-	 * all information needed by the dropbox to register the dataset).
-	 * 
-	 * Default implementation.
-	 */
-	public String getPropertiesNameForSaving() {
-		return this.getRelativePath() + File.separator + this.name +
-				"_properties.six"; 
+	public FirstLevelDescriptor(File fullPath) {
+		super(fullPath);
 	}
+
 }

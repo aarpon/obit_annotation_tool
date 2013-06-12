@@ -6,16 +6,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.AbstractProcessor;
+import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.lsrfortessa.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
-import ch.eth.scu.importer.processors.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
@@ -35,9 +33,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	/* Private instance variables */
 	private File topFolder;
 
-	/* Protected instance variables */
-	protected File incomingDir;
-
+	/* Private instance variables */
+	private int numberOfValidFiles = 0;
+	
 	/* Public instance variables */
 	public Folder folderDescriptor = null;
 
@@ -45,7 +43,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Constructor
 	 * @param fullFolderName Full path of the folder containing the exported experiment.
 	 */
-	public BDFACSDIVAFCSProcessor(String fullFolderName, String userName) {
+	public BDFACSDIVAFCSProcessor(String fullFolderName) {
 
 		// Instantiate the validator
 		validator = new GenericValidator();
@@ -54,15 +52,10 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// directory; the parse() function will take care of that.
 		File folder = new File(fullFolderName);
 		
-		// Store the incoming dir (to build relative paths)
-		Properties appProperties = AppProperties.readPropertiesFromFile();
-		this.incomingDir = new File(
-				appProperties.getProperty("DatamoverIncomingDir"));
-
 		// Set the root folder
 		this.topFolder = folder;
 
-		// Create a RootDescriptor
+		// Create a folderDescriptor
 		folderDescriptor = new Folder(folder); 
 
 	}
@@ -96,7 +89,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			return true;
 		}
 
-		// First we check if the dataset is already annotated. An  
+		// Then, we check if the dataset is already annotated. An  
 		// annotated dataset has a file ending in _properties.six
 		// at the root of the folder.
 		// In this case we set the validator.isAnnotated flag to true
@@ -229,11 +222,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 		public Folder(File fullFolder) {
 			
+			// Invoke parent constructor
+			super(fullFolder);
+			
 			// Set the descriptor name
 			this.name = fullFolder.getName();
-
-			// Store the relative path
-			storeRelativePath(fullFolder);
 
 		}
 		
@@ -242,44 +235,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			return "Folder";
 		}
 
-		/**
-		 * Return the folder name containing the processed dataset relative 
-		 * to the Datamover incoming folder.
-		 */
-		@Override
-		public String getRelativePath() {
-			return relativePath;
-		}
-
-		/**
-		 * Computes and store the folder path relative to the Datamover 
-		 * incoming folder.
-		 * @param fullFolder Folder with full path.
-		 */
-		private void storeRelativePath(File fullFolder) {
-			String incoming = "";
-			try {
-				incoming = incomingDir.getCanonicalPath();
-			} catch (IOException e) {
-				System.err.println("Error with incoming folder path " +
-						"("+ incomingDir + ")");
-				System.exit(1);
-			}
-			
-			// Extract the path relative to the incoming dir
-			String fullFolderStr = "";
-			try {
-				fullFolderStr = fullFolder.getCanonicalPath();
-			} catch (IOException e) {
-				System.err.println("Error with dataset folder path " +
-						"("+ fullFolder.toString() + ")");
-				System.exit(1);
-			}
-			this.relativePath = fullFolderStr.substring(incoming.length());
-			if (this.relativePath.startsWith(File.separator)) {
-				this.relativePath = this.relativePath.substring(1);
-			}
-		}
 	}
 	
 	/**
@@ -332,33 +287,29 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	public class FCSFile extends DatasetDescriptor {
 
-		private String fullFileName = "";
-		private String relativeFileName = "";
-
 		/**
 		 * Constructor.
 		 * @param fcsFileName FCS file name with full path
 		 */
-		public FCSFile(String fcsFileName) throws IOException {
+		public FCSFile(File fcsFileName) throws IOException {
+
+			// Call base constructor
+			super(fcsFileName);
 
 			// Store the file name
-			this.fullFileName = fcsFileName;
-			this.name = (new File(fcsFileName)).getName();
+			this.name = fcsFileName.getName();
 
-			// Store the relative file name (to the incoming dir)
-			storeRelativePath(fcsFileName);
-			
-			// Set the attribute relative file name. Since this will be used
-			// by the Datastore server running on a Unix machine, we make sure
-			// to use forward slashes for path separators when we set it as
-			// an attribute.
+			// Set the attribute relative file name. Since this will be 
+			// used by the openBIS dropboxes running on a Unix machine, 
+			// we make sure to use forward slashes for path separators 
+			// when we set it as an attribute.
 			attributes.put("relativeFileName",
-					this.relativeFileName.replace("\\", "/"));
+					this.relativePath.replace("\\", "/"));
 		}
 
 		/**
-		 * Return a String representation of the extracted Tube node.
-		 * @return String representation of the Tube node.
+		 * Return a String representation of the extracted FCS file.
+		 * @return String representation of the FCS file.
 		 */
 		@Override
 		public String toString() {
@@ -374,41 +325,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			return "FCSFile";
 		}
 
-		/**
-		 * Return the full FCS file name.
-		 * @return full FCS file name.
-		 */
-		public String getFileName() {
-			return this.fullFileName;
-		}
-
-		
-		/**
-		 * Return the file name with path relative to the global incoming dir
-		 * @return relative file name
-		 */
-		public String getRelativePathName() {
-			return relativeFileName;
-		}
-		
-		private void storeRelativePath(String fcsFileName) {
-			String incoming = "";
-			try {
-				incoming = incomingDir.getCanonicalPath();
-			} catch (IOException e) {
-				System.err.println("Error with incoming folder path " +
-                        "(" + incomingDir + ")");
-			}
-			
-			// Return the FCS path relative to the incoming dir
-			assert (incoming.length() <= fcsFileName.length()); 
-			
-			this.relativeFileName = 
-					fcsFileName.substring(incoming.length());
-			if (this.relativeFileName.startsWith(File.separator)) {
-				this.relativeFileName = this.relativeFileName.substring(1);
-			}
-		}
 	}
 	
 	/**
@@ -499,7 +415,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * with the Tube.
 		 * @throws IOException 
 		 */
-		public Tube(String name, String fcsFullFileName) 
+		public Tube(String name, File fcsFullFileName) 
 				throws IOException {
 	
 			this.name = name;
@@ -544,7 +460,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * with the Well.
 		 * @throws IOException 
 		 */
-		public Well(String name, String fcsFullFileName) 
+		public Well(String name, File fcsFullFileName) 
 				throws IOException {
 			
 			// Call base constructor
@@ -623,8 +539,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				System.err.println("File " + file.getCanonicalPath() + 
 						" could not be parsed! It will be skipped.");
 				continue;
+			} else {
+				// Add one to the number of valid files found
+				numberOfValidFiles++;
 			}
-		
+
 			// Create a new ExperimentDescriptor or reuse an existing one
 			Experiment expDesc;
 			String experimentName = getExperimentName(processor);
@@ -676,8 +595,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				String wellName = getTubeOrWellName(processor);
 				String wellKey = specKey + "_" + wellName;
 				if (! specDesc.tubes.containsKey(wellKey)) {
-					wellDesc = new Well(wellName,
-							file.getCanonicalPath());
+					wellDesc = new Well(wellName, file);
 					// Store attributes
 					wellDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
@@ -706,8 +624,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				String tubeName = getTubeOrWellName(processor);
 				String tubeKey = specKey + "_" + tubeName;
 				if (! specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName,
-							file.getCanonicalPath());	
+					tubeDesc = new Tube(tubeName, file);	
 					// Store attributes
 					tubeDesc.setAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
@@ -717,10 +634,15 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 	
 		}
-	
-		// Mark as valid and not annotated
-		this.validator.isValid = true;
+
+		// At this point, the dataset is for sure not annotated, but it
+		// could still be invalid (if no files were found)
+		this.validator.isValid = (numberOfValidFiles > 0);
 		this.validator.isAnnotated = false;
+		if (numberOfValidFiles == 0) {
+			this.validator.errorMessages.add("No FCS files found.");
+		}
+
 	}
 
 	/**

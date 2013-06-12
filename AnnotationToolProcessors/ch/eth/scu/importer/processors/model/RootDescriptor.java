@@ -1,5 +1,13 @@
 package ch.eth.scu.importer.processors.model;
 
+/**
+ * The RootDescriptor is the top node in the data model tree.
+ * 
+ * Its children MUST be of type FirstLevelDescriptor.
+ * 
+ * @author Aaron Ponti
+ *
+ */
 public class RootDescriptor extends AbstractDescriptor{
 
 	/**

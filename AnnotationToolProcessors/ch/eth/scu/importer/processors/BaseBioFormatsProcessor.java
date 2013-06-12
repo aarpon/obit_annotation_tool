@@ -3,9 +3,8 @@
  */
 package ch.eth.scu.importer.processors;
 
+import java.io.File;
 import java.io.IOException;
-
-import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
@@ -28,24 +27,29 @@ import loci.plugins.util.LociPrefs;
  * @author Aaron Ponti
  *
  */
-public class BaseBioFormatsProcessor extends AbstractProcessor {
+abstract public class BaseBioFormatsProcessor {
 
 	/* Protected instance variables */
-	protected String filename;
+	protected File filename;
 	protected ImageProcessorReader reader;
 
 	protected ServiceFactory factory;
 	protected OMEXMLService service;
 	protected IMetadata omexmlMeta;
+	
+	protected String errorMessage = "";
 
 	/**
 	 * Constructor
 	 */
-	public BaseBioFormatsProcessor(String filename) {
+	public BaseBioFormatsProcessor(File filename) {
+
+		// Store the filename
 		this.filename = filename;
 		
-		// Instantiate the validator
-		validator = new GenericValidator();
+		// Initialize
+		init();
+
 	}
 
 	/**
@@ -53,7 +57,7 @@ public class BaseBioFormatsProcessor extends AbstractProcessor {
 	 * @throws DependencyException 
 	 * @throws ServiceException 
 	 */
-	public boolean initReader() {
+	protected boolean init() {
 
 		// Create the reader
 		reader = new ImageProcessorReader(
@@ -86,7 +90,7 @@ public class BaseBioFormatsProcessor extends AbstractProcessor {
 
 		// Try to open the image file
 		try {
-		      reader.setId(filename);
+		      reader.setId(filename.getCanonicalPath());
 		} catch (FormatException e) {
 			this.errorMessage =
 					"Could not open file. Error was: " + e.getMessage();
@@ -99,36 +103,6 @@ public class BaseBioFormatsProcessor extends AbstractProcessor {
 
 		this.errorMessage = "";
 		return true;
-	}
-
-	/**
-	 * Parse the file
-	 * 
-	 * Please mind that the BaseBioFormatsProcessor sets up all is needed
-	 * to be able to parse the file, but does not parse! This is delegated 
-	 * to specialized classes. 
-	 */
-	@Override
-	public boolean parse() {
-		return false;
-	}
-
-	/**
-	 * Return information regarding the file format.
-	 * @return descriptive String for the Processor.
-	 */
-	public String info() {
-		return "Base bio-formats file reader. " + 
-	"To be extended for concrete types.";
-	}
-
-	/**
-	 * Return a simplified class name to use in XML.
-	 * @return simplified class name.
-	 */
-	@Override	
-	public String getType() {
-		return "BaseBioFormats";
 	}
 
 }

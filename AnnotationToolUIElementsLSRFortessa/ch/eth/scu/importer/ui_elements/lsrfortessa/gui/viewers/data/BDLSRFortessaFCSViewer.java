@@ -40,13 +40,13 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	/**
 	 *  Parse the FCS folder and append the resulting tree to the root
 	 */
-	public boolean parse(File folder, String userName) {
+	public boolean parse(File folder) {
 
 		// Process the file or folder
 		BDFACSDIVAFCSProcessor divafcsprocessor;
 		try {
 			divafcsprocessor = new BDFACSDIVAFCSProcessor(
-					folder.getCanonicalPath(), userName);
+					folder.getCanonicalPath());
 		} catch (IOException e) {
 			outputPane.err("Could not parse the folder " + folder + "!");
 			return false;
@@ -104,6 +104,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
+
+		// Get selected node		
 		AbstractNode node = (AbstractNode) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
@@ -151,7 +153,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			// Cast
 			BDFACSDIVAFCSProcessor.FCSFile fcsFile =
 					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;
-			String fcsFileName = fcsFile.getFileName();
+			String fcsFileName = fcsFile.getFullPath();
 			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
 			try {
 				fcs.parse();
@@ -165,7 +167,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		}
 
         // Get the folder name
-        AbstractNode folderNode = getFolderNode(node);
+        AbstractNode folderNode = getParentNodeByName(node, "Folder");
         if (folderNode != null && folderNode != lastSelectedFolder) {
         		
         		// Update the lastSelectedFolder property
@@ -177,39 +179,6 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
                 ObserverActionParameters.Action.EXPERIMENT_CHANGED, folderNode));
         }
 	}
-
-    /**
-     * Climb the JTree to find the folder node and return its name
-     * @param selectedNode Node selected in the JTree
-     * @return folder node name
-     */
-    protected AbstractNode getFolderNode(AbstractNode selectedNode) {
-
-        // Get the class name of the selected node
-        String className = selectedNode.getUserObject().getClass().getSimpleName();
-
-        // Try to get the folder name
-        if (className.equals("RootDescriptor")) {
-            // We are above the folder node, we return ""
-            return null;
-        } else if (className.equals("Folder")) {
-            // We are at the folder node , we return its name
-            return selectedNode;
-        } else {
-            // We are somewhere below the folder node: we climb up the tree
-            // until we find it and then return its name
-            AbstractNode parentNode = (AbstractNode) selectedNode.getParent();
-            while (parentNode != null) {
-                // Are we at the folder node?
-                if (parentNode.getUserObject().getClass().getSimpleName().equals("Folder")) {
-                    return parentNode;
-                } else {
-                    parentNode = (AbstractNode) parentNode.getParent();
-                }
-            }
-        }
-        return null;
-    }
 
     /**
          * Create the nodes for the tree

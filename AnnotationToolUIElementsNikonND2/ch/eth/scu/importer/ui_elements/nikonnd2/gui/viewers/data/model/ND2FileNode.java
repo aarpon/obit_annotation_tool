@@ -1,28 +1,28 @@
-package ch.eth.scu.importer.ui_elements.leicasp5.gui.viewers.data.model;
+package ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data.model;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.processors.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.model.DatasetDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different
  * Node types
  * @author Aaron Ponti 
  */
-public class ImageNode extends AbstractNode {
+public class ND2FileNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public ImageNode(AbstractDescriptor object) {
+	public ND2FileNode(DatasetDescriptor object) {
 		super(object);
 		this.type = object.getType();
 	}
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("icons/image.png"));
+				getClass().getResource("icons/nd2.png"));
 	}
 	
 	public String getTooltip() {
-		return "Image";
+		return "ND2 file";
 	}
 }

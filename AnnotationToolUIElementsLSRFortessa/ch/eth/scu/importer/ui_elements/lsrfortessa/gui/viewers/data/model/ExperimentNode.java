@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different

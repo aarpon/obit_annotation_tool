@@ -6,12 +6,11 @@ import java.util.Map;
 /**
  * Abstract class that represents an entity to be mapped to openBIS.
  * 
- * Derived classes of AbstractDescriptor will represent Experiments, Specimens,
- * Trays (Plates), Tubes, Images, SubImages that will be wrapped into the tree
- * viewers and will allow to map the entities to their final location in 
- * openBIS.
+ * Derived classes of AbstractDescriptor will represent Experiments, 
+ * Specimens, Trays (Plates), Tubes, Images, SubImages that will be 
+ * wrapped into the tree viewers and will allow to map the entities to
+ * their final location in openBIS.
  *  
- * Examples are Experiment, Specimen, Tray, Tube for the BDFACSDIVAXMLProcessor.
  * @author Aaron Ponti
  */
 abstract public class AbstractDescriptor {
@@ -144,5 +143,5 @@ abstract public class AbstractDescriptor {
 	public String userAttributesToString() {
 		String str = userAttributes.toString();
 		return str.substring(1, str.length() - 1);
-	}	
+	}
 }

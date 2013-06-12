@@ -3,7 +3,6 @@ package ch.eth.scu.importer.at.gui.viewers.data;
 import java.util.Properties;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.ui_elements.leicasp5.gui.viewers.data.LeicaSP5Viewer;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
 import ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data.NikonViewer;
 
@@ -32,8 +31,6 @@ public class ViewerFactory {
 			metadataViewer = new BDLSRFortessaFCSViewer();
 		} else if (acqStation.equals("Nikon")) {
 			metadataViewer = new NikonViewer();
-		} else if (acqStation.equals("LeicaSP5")) {
-			metadataViewer = new LeicaSP5Viewer();
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

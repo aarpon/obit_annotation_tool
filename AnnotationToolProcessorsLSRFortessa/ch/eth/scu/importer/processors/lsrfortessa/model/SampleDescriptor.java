@@ -1,4 +1,7 @@
-package ch.eth.scu.importer.processors.model;
+package ch.eth.scu.importer.processors.lsrfortessa.model;
+
+import ch.eth.scu.importer.processors.model.AbstractDescriptor;
+
 
 public abstract class SampleDescriptor extends AbstractDescriptor{
 

@@ -11,8 +11,7 @@ public class TestBDDIVAFCSProcessor {
 		
 		BDFACSDIVAFCSProcessor processor = 
 				new BDFACSDIVAFCSProcessor(
-						"/work/openbis/openbis_data/Quality Control MD",
-						"pontia");
+						"/work/data/incoming/pontia/Quality_Control_MD");
 
 		processor.parse();
 		
