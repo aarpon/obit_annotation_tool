@@ -1,6 +1,9 @@
 package ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -8,6 +11,7 @@ import java.util.Map;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
@@ -28,6 +32,35 @@ public class NikonViewer extends AbstractViewer {
 	 * Constructor
 	 */
 	public NikonViewer() {
+		
+		// Add a mouse listener to the DataViewerTree
+		MouseListener ml = new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				TreePath selPath = 
+						tree.getPathForLocation(e.getX(), e.getY());
+				if (selPath != null) {
+					AbstractNode node = 
+							(AbstractNode) selPath.getLastPathComponent();
+					if (node == null) {
+						return;
+					}
+
+					// Get the node object
+		        		Object nodeInfo = node.getUserObject();
+
+		        		// If the double-clicked on an ND2 file, scan it
+		        		String className = nodeInfo.getClass().getSimpleName();
+		        		if (className.equals("ND2File") && 
+		        				(e.getClickCount() == 2)) {
+		        			clearMetadataTable();
+		        			addAttributesToMetadataTable(
+		        					((NikonProcessor.ND2File) 
+		        							nodeInfo).scanFileAndGetAttributes());
+		        		}
+		         }
+		     }
+		 };
+		 tree.addMouseListener(ml);
 	}
 
 	@Override
@@ -86,7 +119,7 @@ public class NikonViewer extends AbstractViewer {
                 ObserverActionParameters.Action.EXPERIMENT_CHANGED, folderNode));
         }
 	}
-	
+
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
 	 * At the end of scanning, the function MUST set isReady to true.

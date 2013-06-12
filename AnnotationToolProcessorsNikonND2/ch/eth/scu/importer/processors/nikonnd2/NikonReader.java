@@ -65,6 +65,9 @@ public class NikonReader extends BaseBioFormatsProcessor {
 
 			reader.setSeries(i);
 
+			// Image name
+			attr.put("numSeries", Integer.toString(numSeries));
+
 			String key_series = "series" + i + "_"; 
 
 			// Image name

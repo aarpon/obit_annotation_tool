@@ -40,9 +40,6 @@ public class NikonProcessor extends AbstractProcessor {
 	 */
 	public NikonProcessor(String fullFolderName) {
 
-//		// Instantiate the reader
-//		nikonReader = new NikonReader();
-
 		// Instantiate the validator
 		validator = new GenericValidator();
 
@@ -207,22 +204,6 @@ public class NikonProcessor extends AbstractProcessor {
 
 	}
 
-//	/**
-//	 * Scans the ND2 file and stores metadata as attributes
-//	 * @param file Full path of file to scan
-//	 * @return true if scan was successful, false otherwise
-//	 */
-//	protected void scanFile(File file) {
-//
-//		// Initialize the reader
-//		nikonReader.init(file);
-//		
-//		// Scan
-//		nikonReader.scan();
-//		Map<String, String> attr = nikonReader.getAttributes();
-//
-//	}
-	
 	/**
 	 * Descriptor that represents a folder containing a dataset. 
 	 * @author Aaron Ponti
@@ -300,6 +281,17 @@ public class NikonProcessor extends AbstractProcessor {
 			// Store the file name
 			this.name = nd2FileName.getName();
 
+			// Append the attibute file size.
+			long s = nd2FileName.length();
+			float sMB = s / (1024 * 1024);
+			String unit = "MiB";
+			if (sMB > 750) {
+				sMB = sMB / 1024;
+				unit = "GiB";
+			}
+			attributes.put("fileSize",
+					String.format("%.2f", sMB) + " " + unit);
+
 			// Append the attribute relative file name. Since this  
 			// will be used by the openBIS dropboxes running on a Unix  
 			// machine, we make sure to use forward slashes for path 
@@ -332,8 +324,18 @@ public class NikonProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public Map<String, String> getAttributes() {
+
+			// Return the attributes
+			return attributes;
+		}
+		
+		/**
+		 * Scans the file and stores the metadata into the attributes
+		 * String-String map
+		 */
+		public Map<String, String> scanFileAndGetAttributes() {
 			
-			// File already scanned, just return the attributes
+			// If the file was already scanned we return the attributes
 			if (fileScanned) {
 				return attributes;
 			}
@@ -341,6 +343,11 @@ public class NikonProcessor extends AbstractProcessor {
 			// First scan
 			nikonReader = new NikonReader(this.fullPath);
 			attributes.putAll(nikonReader.getAttributes());
+			
+			// Set the fileScanned attributes to true
+			fileScanned = true;
+			
+			// Return the attributes
 			return attributes;
 		}
 	}
