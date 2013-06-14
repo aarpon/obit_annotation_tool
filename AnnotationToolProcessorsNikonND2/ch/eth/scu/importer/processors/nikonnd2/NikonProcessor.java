@@ -47,9 +47,6 @@ public class NikonProcessor extends AbstractProcessor {
 		File folder = new File(fullFolderName);
 		this.topFolder = folder;
 		
-		// Set the root folder
-		this.topFolder = folder;
-
 		// Create a RootDescriptor
 		experiments = new LinkedHashMap<String, Experiment>();
 
@@ -123,7 +120,7 @@ public class NikonProcessor extends AbstractProcessor {
 
 	@Override
 	public String getType() {
-		// TODO Auto-generated method stub
+		// Return type
 		return "NIKONND2";
 	}
 
