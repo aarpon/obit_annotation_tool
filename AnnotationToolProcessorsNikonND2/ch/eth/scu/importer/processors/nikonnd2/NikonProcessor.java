@@ -9,7 +9,6 @@ import java.util.Map;
 import ch.eth.scu.importer.processors.AbstractProcessor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
 import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
-import ch.eth.scu.importer.processors.nikonnd2.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
@@ -179,7 +178,7 @@ public class NikonProcessor extends AbstractProcessor {
 			if (experiments.containsKey(experimentName)) {
 				expDesc = experiments.get(experimentName);
 			} else {
-				expDesc = new Experiment(experimentName);
+				expDesc = new Experiment(dir);
 				experiments.put(experimentName, expDesc);
 			}
 
@@ -234,7 +233,7 @@ public class NikonProcessor extends AbstractProcessor {
 	 * Descriptor representing an experiment obtained from the FCS file.
 	 * @author Aaron Ponti
 	 */
-	public class Experiment extends ExperimentDescriptor {
+	public class Experiment extends FirstLevelDescriptor {
 
 		// Store the ND2 files associated with this Experiment
 		public Map<String, ND2File> nd2Files = 
@@ -244,9 +243,13 @@ public class NikonProcessor extends AbstractProcessor {
 		 * Constructor
 		 * @param name Name of the experiment.
 		 */
-		public Experiment(String name) {
+		public Experiment(File name) {
 			
-			this.name = name;
+			// Call base constructor
+			super(name);
+			
+			// Store the experiment name
+			this.name = name.getName();
 
 		}
 

@@ -9,7 +9,7 @@ package ch.eth.scu.importer.at.gui.editors.data.model;
  * @author Aaron Ponti
  *
  */
-public abstract class AbstractMetadata {
+public abstract class AbstractMetadataMapper {
 
 	/**
 	 * Get the openBIS Experiment Identifier
@@ -22,6 +22,4 @@ public abstract class AbstractMetadata {
 	 * @return the openBIS space identifier
 	 */
 	abstract public String getOpenBISSpaceIdentifier();
-	
-	
 }

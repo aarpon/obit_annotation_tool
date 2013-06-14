@@ -49,6 +49,7 @@ public class NikonViewer extends AbstractViewer {
 		        		Object nodeInfo = node.getUserObject();
 
 		        		// If the double-clicked on an ND2 file, scan it
+		        		// and update the metadata view
 		        		String className = nodeInfo.getClass().getSimpleName();
 		        		if (className.equals("ND2File") && 
 		        				(e.getClickCount() == 2)) {

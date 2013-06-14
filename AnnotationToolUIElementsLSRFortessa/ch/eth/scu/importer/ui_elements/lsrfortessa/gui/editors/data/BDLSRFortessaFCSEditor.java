@@ -52,7 +52,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	protected List<FolderNode> dataFolders = 
 			new ArrayList<FolderNode>();
 	
-	protected List<BDLSRFortessaFCSMetadata> experimentMetadata =
+	// List of metadata mappers
+	protected List<BDLSRFortessaFCSMetadata> metadataMappersList =
 			new ArrayList<BDLSRFortessaFCSMetadata>();
 
 	// Indicate which of the List<BDLSRFortessaFCSMetadata> is the 
@@ -117,12 +118,12 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	public boolean updateDataModel() {
 		
 		// Check whether we have some experiments to update
-		if (experimentMetadata.size() == 0) {
+		if (metadataMappersList.size() == 0) {
 			return false;
 		}
 
 		// Go over all experiments
-		for (BDLSRFortessaFCSMetadata metadata : experimentMetadata) {
+		for (BDLSRFortessaFCSMetadata metadata : metadataMappersList) {
 			
 			// Get the experiment node
 			ExperimentNode expNode = 
@@ -307,7 +308,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * Map the data and openBIS models
 	 * @throws Exception 
 	 */
-	private boolean initMetadata() {
+	protected boolean initMetadata() {
 		
 		// Make sure both viewers have completed their models
 		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
@@ -325,9 +326,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			return false;
 		}
 		
-		// Create all BDLSRFortessaFCSMetadata objects
+		// Create all BDLSRFortessaFCSMetadata objects and initially 
+		// assign each folder to the first project
 		for (FolderNode node : dataFolders) {
-			experimentMetadata.add(
+			metadataMappersList.add(
 					new BDLSRFortessaFCSMetadata(
 							node, openBISProjects.get(0)));
 		}
@@ -344,10 +346,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * Renders all widgets on the panel
 	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
-	private void createUIElements(ObserverActionParameters params) throws Exception {
+	protected void createUIElements(ObserverActionParameters params) throws Exception {
 
 		// Make sure both viewers have completed their models
-		if (experimentMetadata.size() == 0) {
+		if (metadataMappersList.size() == 0) {
 			return;
 		}
 
@@ -359,7 +361,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		}
 
 		// Get selected metadata element
-		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
+		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
 				currentExperimentIndex);
 		
 		/*
@@ -491,7 +493,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 									e.getSource()).getSelectedItem();
 					
 					// Update the metadata object with the new projects
-					experimentMetadata.get(
+					metadataMappersList.get(
 							currentExperimentIndex).trayGeometry =
 							geometry;
 
@@ -553,7 +555,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 					OpenBISProjectNode projectNode = projectNodeWrapper.node;
 
 					// Update the metadata object with the new projects
-					experimentMetadata.get(
+					metadataMappersList.get(
 							currentExperimentIndex).openBISProjectNode =
 							projectNode;
 
@@ -593,7 +595,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	private void updateUIElements() {
 		
 		// Get the active metadata object
-		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
+		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
 				currentExperimentIndex);
 
 		// Update the folder name
@@ -694,7 +696,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	protected void updateExpDescription() {
 
 		// Get the active metadata object
-		BDLSRFortessaFCSMetadata metadata = experimentMetadata.get(
+		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
 				currentExperimentIndex);
 		
 		// Store the experiment description

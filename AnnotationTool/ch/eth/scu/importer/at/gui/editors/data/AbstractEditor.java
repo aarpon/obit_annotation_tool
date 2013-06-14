@@ -7,9 +7,11 @@ import java.util.Observer;
 
 import javax.swing.JPanel;
 
+import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
+import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 
 /**
  * Abstract editor for processors
@@ -19,7 +21,14 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 
 	protected JPanel panel;
 	
+	/**
+	 * Reference to the data viewer  
+	 */
 	protected AbstractViewer dataViewer;
+	
+	/**
+	 * Reference to the openBIS viewer
+	 */
 	protected OpenBISViewer openBISViewer;
 	
 	/**
@@ -45,12 +54,36 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	}
 
 	/**
+	 * Function that maps the metadata information from the openBIS and
+	 * data viewers (when they notify being ready) and creates and 
+	 * renders all required UI widgets for metadata editing. 
+	 * @throws Exception if some of the openBIS identifiers cannot be computed
+	 */
+	protected void init(ObserverActionParameters params) throws Exception {
+		
+		// Make sure both viewers have completed their models
+		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
+			return;
+		}
+		
+		// Init the metadata
+		if (initMetadata()) {
+			
+			// Create the widgets
+			createUIElements(params);
+
+		}
+		
+	}
+	
+	/**
 	 * Observer update method
 	 * @param obs Observable object
 	 * @param arg Argument
 	 */
 	public void update(Observable obs, Object arg) {
-        // Get the ObserverAction
+
+		// Get the ObserverAction
         ObserverActionParameters observerActionParams = 
         		(ObserverActionParameters) arg;
 
@@ -78,12 +111,20 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	}
 
 	/**
-	 * Function that maps the metadata information from the openBIS and
-	 * data viewers (when they notify being ready) and creates and 
-	 * renders all required UI widgets for metadata editing. 
-	 * @throws Exception if some of the openBIS identifiers cannot be computed
+	 * Creates a list of MetadataMappers used to map data entities to
+	 * openBIS entities (with optionally additional metadata information
+	 * the user will provide through UI elements in the editor).
+	 * 
+	 * @see AbstractMetadataMapper
+	 * @throws Exception 
 	 */
-	abstract public void init(ObserverActionParameters params) throws Exception;
+	abstract protected boolean initMetadata();
+
+	/**
+	 * Renders all widgets on the panel
+	 * @throws Exception if some openBIS identifiers cannot be computed
+	 */
+	abstract protected void createUIElements(ObserverActionParameters params) throws Exception;
 	
 	/**
 	 * Function that updates the metadata and the UI widgets when the user
@@ -106,4 +147,35 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 		return panel;
 	}
 
+	
+	/**
+	 * Wrapper class that "overrides" OpenBISProjectNode's toString()
+	 * method to use in the Editor. 
+	 * 
+	 * The purpose of this class is to display the project with full path
+	 * in UI elements.
+	 * 
+	 * @author Aaron Ponti
+	 *
+	 */
+	public class OpenBISProjectNodeWrapper  {
+		
+		/**
+		 * The standard OpenBISProjectNode
+		 */
+		public OpenBISProjectNode node;
+		
+		/**
+		 * Constructor.
+		 * @param node An OpenBISProjectNode node.
+		 */
+		public OpenBISProjectNodeWrapper(OpenBISProjectNode node) {
+			this.node = node;
+		}
+		
+		// "Override" the toString method of OpenBISProjectNode
+		public String toString() {
+			return node.getIdentifier();
+		}
+	}	
 }

@@ -2,7 +2,7 @@ package ch.eth.scu.importer.ui_elements.lsrfortessa.gui.editors.data.model;
 
 import java.util.ArrayList;
 
-import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadata;
+import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FolderNode;
 
@@ -12,7 +12,7 @@ import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.Folder
  * @author Aaron Ponti
  *
  */
-public class BDLSRFortessaFCSMetadata extends AbstractMetadata {
+public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 
 	public FolderNode folderNode;
 	public OpenBISProjectNode openBISProjectNode;
