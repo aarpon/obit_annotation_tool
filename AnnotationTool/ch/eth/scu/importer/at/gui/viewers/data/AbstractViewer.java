@@ -257,6 +257,7 @@ abstract public class AbstractViewer extends Observable
 			return false;
 		}
 		if (name.equals(".DS_Store") ||
+				name.equals("._.DS_Store") ||
 				name.equals("Thumbs.db")) {
 			file.delete();
 			return true;

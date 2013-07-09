@@ -368,7 +368,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 */
 	public class Tray extends SampleDescriptor {
-	
+
 		/* Public instance variables */
 	
 		/**
@@ -377,6 +377,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public Map<String, Specimen> specimens = 
 				new LinkedHashMap<String, Specimen>();
 	
+		/**
+		 * Geometry associated to the plate
+		 */
+		public String geometry;
+		
 		/**
 		 * Constructor
 		 * @param name name of the Tray.

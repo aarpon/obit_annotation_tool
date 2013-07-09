@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
+import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
 import ch.eth.scu.importer.processors.lsrfortessa.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
@@ -62,10 +64,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 	protected JLabel labelFolderName;
 	protected JLabel labelExpName;
-	protected JComboBox<String> comboGeometryList;
+	protected Map<JComboBox<String>, Tray> comboGeometryList;
 	protected JComboBox<OpenBISProjectNodeWrapper> comboProjectList;
 	protected JTextArea expDescription;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -175,14 +177,16 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				firstLevelSample.setOpenBISAttributes(
 						firstLevelOpenBISAttributes);
 
-				// In case we have a Tray, we set the geometry
-				Map<String, String> firstLevelUserAttributes = 
-						new Hashtable<String, String>();
-				firstLevelUserAttributes.put(
-						"trayGeometry", 
-						metadata.trayGeometry);
-				firstLevelSample.setUserAttributes(
-						firstLevelUserAttributes);
+				// In case we have Trays, we set their geometry
+				if (firstLevelSample.getType().equals("Tray")) {
+					Tray tray = (Tray) firstLevelSample;
+					Map<String, String> firstLevelUserAttributes =
+							new Hashtable<String, String>();
+					firstLevelUserAttributes.put(
+							"trayGeometry", tray.geometry);
+					firstLevelSample.setUserAttributes(
+							firstLevelUserAttributes);
+				}
 
 				// Now go over the children
 				for (int j = 0; j < firstLevelSampleNode.getChildCount(); j++ ) {
@@ -300,8 +304,12 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			return;
 		}
 		
-		// Update the UI
-		updateUIElements();
+    	try {
+			createUIElements(params);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -348,6 +356,13 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 */
 	protected void createUIElements(ObserverActionParameters params) throws Exception {
 
+		// Get selected metadata element
+		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
+				currentExperimentIndex);
+
+		// Keep track of the y index of elements
+		int gridy = 0;
+
 		// Make sure both viewers have completed their models
 		if (metadataMappersList.size() == 0) {
 			return;
@@ -357,13 +372,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// child components already displayed.
 		if (panel.getComponentCount() > 0) {
 			panel.removeAll();
-			panel.revalidate(); 
+			panel.validate();
+			panel.repaint();
 		}
 
-		// Get selected metadata element
-		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
-				currentExperimentIndex);
-		
 		/*
 		 *  Folder name
 		 */
@@ -375,10 +387,10 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 		// Create a label for the folder
 		constraints.insets = new Insets(10, 10, 10, 10);
-		constraints.weightx = 1;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.gridy = gridy++;
 		labelFolderName = new JLabel(metadata.folderNode.toString());
 		labelFolderName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/folder.png")));
@@ -388,14 +400,15 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		 *  Experiment name
 		 */
 		
-		String expName = metadata.folderNode.getChildAt(0).toString();
+		String expName = metadata.getExperimentName();
 		
 		// Create a label for the experiment
 		constraints.insets = new Insets(0, 20, 0, 20);
-		constraints.weightx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 1;
+		constraints.gridy = gridy++;
 		labelExpName = new JLabel(expName);
 		labelExpName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/experiment.png")));		
@@ -407,10 +420,11 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		
 		// Create a label for the experiment description
 		constraints.insets = new Insets(0, 20, 0, 20);
-		constraints.weightx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = gridy++;
 		JLabel labelExpDescription = new JLabel("Description");
 		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpDescription, constraints);
@@ -418,10 +432,11 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		/*
 		 * Description text area
 		 */
-		constraints.weightx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 3;
+		constraints.gridy = gridy++;
 		expDescription = new JTextArea(metadata.description);
 		expDescription.setLineWrap(true);
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
@@ -454,10 +469,11 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 		// Create a label for the geometry combo box
 		constraints.insets = new Insets(10, 10, 10, 10);
-		constraints.weightx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = gridy++;
 		JLabel labelGeometry = new JLabel("Plate geometry");
 		labelGeometry.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelGeometry, constraints);
@@ -466,59 +482,105 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		 *  Tray geometry combo
 		 */
 		
-		// Display a combo box with the geometries
-		ArrayList<String> supportedGeometries =
-				metadata.supportedTrayGeometries;
-		comboGeometryList = new JComboBox<String>();
-		for (String geometry : supportedGeometries) {
+		// Get the number of plates contained in the Experiment
+		Map<String, Tray> trays = metadata.getTraysForExperiment();
 
-			// Add the geometry
-			comboGeometryList.addItem(geometry);
+		// Add one combo box per geometry
+		if (comboGeometryList == null) {
+			comboGeometryList = 
+					new LinkedHashMap<JComboBox<String>, Tray>();
+		}
+		comboGeometryList.clear();
 
-		}		
+		// Add geometry comboboxes (or a simple label if current 
+		// experiment has no plates).
+		if (trays.size() == 0) {
+			
+			constraints.insets = new Insets(0, 20, 0, 20);
+			constraints.gridwidth = 2;
+			constraints.weightx = 2;
+			constraints.weighty = 0;
+			constraints.gridx = 0;
+			constraints.gridy = gridy++;
+			panel.add(new JLabel("No plates in this experiment."),
+					constraints);
+			
+		} else {
+			ArrayList<String> supportedGeometries =
+					metadata.supportedTrayGeometries;
 
-		// Select the correct one
-		comboGeometryList.setSelectedIndex(supportedGeometries.indexOf(
-				metadata.trayGeometry));
+			for (String trayName : trays.keySet()) {
 
-		// When a geometry is selected, update the corresponding 
-		// experiment in the data model 
-		comboGeometryList.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (e.getActionCommand().equals("comboBoxChanged")) {
+				// Create a JComboBox with the supported geometries
+				JComboBox<String> c = new JComboBox<String>();
+				for (String geometry : supportedGeometries) {
 
-					String geometry =
-							(String)
-							((JComboBox<String>)
-									e.getSource()).getSelectedItem();
-					
-					// Update the metadata object with the new projects
-					metadataMappersList.get(
-							currentExperimentIndex).trayGeometry =
-							geometry;
+					// Add the geometry
+					c.addItem(geometry);
 
 				}
+
+				// Get current Tray
+				Tray tray = trays.get(trayName);
+
+				// Select current geometry
+				c.setSelectedItem(tray.geometry);
+
+				// When a geometry is selected, update the corresponding
+				// experiment in the data model
+				c.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						if (e.getActionCommand().equals("comboBoxChanged")) {
+
+							JComboBox<String> obj = (JComboBox<String>) e
+									.getSource();
+
+							// Get tray
+							Tray tray = comboGeometryList.get(obj);
+
+							// Set the geometry
+							tray.geometry = (String) obj.getSelectedItem();
+
+						}
+					}
+				});
+
+				// Add the geometry combo box
+				constraints.insets = new Insets(0, 20, 0, 20);
+				constraints.gridwidth = 1;
+				constraints.weightx = 1;
+				constraints.weighty = 0;
+				constraints.gridx = 0;
+				constraints.gridy = gridy;
+				panel.add(new JLabel(tray.getName()), constraints);
+
+				// Add the geometry combo box
+				constraints.insets = new Insets(0, 20, 0, 20);
+				constraints.gridwidth = 1;
+				constraints.weightx = 1;
+				constraints.weighty = 0;
+				constraints.gridx = 1;
+				constraints.gridy = gridy;
+				panel.add(c, constraints);
+
+				// Increase the y grid coordinate
+				gridy++;
+
+				comboGeometryList.put(c, tray);
 			}
-		});
-
-		// Add the geometry combo box
-		constraints.insets = new Insets(0, 20, 0, 20);
-		constraints.weightx = 1;
-		constraints.weighty = 0;
-		constraints.gridx = 0;
-		constraints.gridy = 5;
-		panel.add(comboGeometryList, constraints);
-
+		}
+		
 		/*
 		 *  Label openBIS projects
 		 */
 
 		// Create a label for the openBIS projects
 		constraints.insets = new Insets(10, 10, 10, 10);
-		constraints.weightx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 6;
+		constraints.gridy = gridy++;
 		JLabel labelProjects = new JLabel("Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
@@ -565,10 +627,11 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	
 		// Add the project combo box
 		constraints.insets = new Insets(0, 20, 0, 20);
-		constraints.weightx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 7;
+		constraints.gridy = gridy++;
 		panel.add(comboProjectList, constraints);
 
 		/*
@@ -576,45 +639,17 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		 */
 		
 		// Add a spacer
+		constraints.gridwidth = 2;
 		constraints.gridx = 0;
-		constraints.gridy = 8;
-		constraints.weightx = 1.0;
+		constraints.gridy = gridy++;
+		constraints.weightx = 2.0;
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
 		
-		// In case this was called when then window was already visible (i.e.
-		// if the login failed the first time and this panel was drawn without
-		// children)
-		panel.revalidate();
+		// Now redraw
+		panel.validate();
+		panel.repaint();
 
-	}
-
-	/**
-	 * Update all widgets on the panel
-	 */
-	private void updateUIElements() {
-		
-		// Get the active metadata object
-		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
-				currentExperimentIndex);
-
-		// Update the folder name
-		labelFolderName.setText(metadata.getFolderName());
-		
-		// Update the experiment name
-		labelExpName.setText(metadata.getExperimentName());
-
-		// Update the description
-		expDescription.setText(metadata.description);
-
-		// Update the geometry
-		comboGeometryList.setSelectedIndex(
-				metadata.supportedTrayGeometries.indexOf(
-				metadata.trayGeometry));
-
-		// Update the project
-		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
-				metadata.openBISProjectNode));
 	}
 	
 	/**
