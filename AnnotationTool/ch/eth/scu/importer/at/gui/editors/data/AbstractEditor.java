@@ -2,15 +2,19 @@ package ch.eth.scu.importer.at.gui.editors.data;
 
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JPanel;
+import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
+import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 
 /**
@@ -22,14 +26,20 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	protected JPanel panel;
 	
 	/**
-	 * Reference to the data viewer  
+	 * References to the data viewer and model  
 	 */
 	protected AbstractViewer dataViewer;
+	protected TreeModel dataModel;
 	
 	/**
-	 * Reference to the openBIS viewer
+	 * References to the openBIS viewer and model
 	 */
 	protected OpenBISViewer openBISViewer;
+	protected TreeModel openBISModel;
+	
+	// List of openBISProjects
+	protected List<OpenBISProjectNode> openBISProjects = 
+			new ArrayList<OpenBISProjectNode>();
 	
 	/**
 	 * Constructor
@@ -54,26 +64,15 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	}
 
 	/**
-	 * Function that maps the metadata information from the openBIS and
-	 * data viewers (when they notify being ready) and creates and 
-	 * renders all required UI widgets for metadata editing. 
-	 * @throws Exception if some of the openBIS identifiers cannot be computed
+	 * Clear elements from the editor.
 	 */
-	protected void init(ObserverActionParameters params) throws Exception {
-		
-		// Make sure both viewers have completed their models
-		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
-			return;
-		}
-		
-		// Init the metadata
-		if (initMetadata()) {
-			
-			// Create the widgets
-			createUIElements(params);
-
-		}
-		
+	protected void clearUIElements() {
+		// Remove elements and force a redraw of the panel
+		if (panel.getComponentCount() > 0) {
+			panel.removeAll();
+			panel.validate();
+			panel.repaint();
+		}	
 	}
 	
 	/**
@@ -99,7 +98,7 @@ abstract public class AbstractEditor implements ActionListener, Observer {
                 break;
             case EXPERIMENT_CHANGED:
                 try {
-                	updateAll(observerActionParams);
+                	updateUIElements(observerActionParams);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -108,6 +107,76 @@ abstract public class AbstractEditor implements ActionListener, Observer {
             default:
                 break;
         }
+	}
+
+	/**
+	 * Collects and stores openBIS projects for mapping
+	 * @return list of openBIS nodes
+	 */
+	protected void storeOpenBISProjects() {
+		
+		// Store the openBIS model
+		openBISModel = openBISViewer.getDataModel();
+		
+        // We extract all projects from the openBIS model and create a list
+		// with which we will then create JComboBox associated to each project
+		// from the data model
+		openBISProjects = new ArrayList<OpenBISProjectNode>();
+		
+		AbstractOpenBISNode openBISRoot = 
+				(AbstractOpenBISNode) openBISModel.getRoot();
+
+		// Iterate over the space nodes (there should be at least one)
+		for (int i = 0; i < openBISRoot.getChildCount(); i++) {
+
+			// Get the Space
+			AbstractOpenBISNode openBISSpaceNode = 
+					(AbstractOpenBISNode) openBISRoot.getChildAt(i);
+
+			// Go over the child Projects
+			int n = openBISSpaceNode.getChildCount();
+
+			for (int j = 0; j < n; j++) {
+
+				// Get the OpenBISProjectNode
+				OpenBISProjectNode openBISProjectNode = 
+						(OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
+
+				// Add it to the list: we wrap it into a wrapper 
+				// class to override the toString() method; we do 
+				// this because in constrast to what happens in the
+				// openBIS viewer, here we need the (openBIS) identifier
+				//  instead of the code.
+				openBISProjects.add(openBISProjectNode);
+
+			}
+		}
+	}
+
+	/**
+	 * Function that maps the metadata information from the openBIS and
+	 * data viewers (when they notify being ready) and creates and 
+	 * renders all required UI widgets for metadata editing. 
+	 * @throws Exception if some of the openBIS identifiers cannot be computed
+	 */
+	public void init(ObserverActionParameters params) throws Exception {
+		
+		// Make sure both viewers have completed their models
+		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
+			return;
+		}
+		
+		// Clear the editor
+		clearUIElements();
+		
+		// Init the metadata
+		if (initMetadata()) {
+			
+			// Create the widgets
+			createUIElements(params);
+
+		}
+		
 	}
 
 	/**
@@ -125,12 +194,12 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
 	abstract protected void createUIElements(ObserverActionParameters params) throws Exception;
-	
+
 	/**
-	 * Function that updates the metadata and the UI widgets when the user
-	 * edits something in the editor. 
+	 * Updates all widgets on the panel
+	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
-	abstract public void updateAll(ObserverActionParameters observerActionParams);
+	abstract protected void updateUIElements(ObserverActionParameters params);
 	
 	/**
 	 * Once the metadata has been completely filled, this method makes
@@ -147,35 +216,4 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 		return panel;
 	}
 
-	
-	/**
-	 * Wrapper class that "overrides" OpenBISProjectNode's toString()
-	 * method to use in the Editor. 
-	 * 
-	 * The purpose of this class is to display the project with full path
-	 * in UI elements.
-	 * 
-	 * @author Aaron Ponti
-	 *
-	 */
-	public class OpenBISProjectNodeWrapper  {
-		
-		/**
-		 * The standard OpenBISProjectNode
-		 */
-		public OpenBISProjectNode node;
-		
-		/**
-		 * Constructor.
-		 * @param node An OpenBISProjectNode node.
-		 */
-		public OpenBISProjectNodeWrapper(OpenBISProjectNode node) {
-			this.node = node;
-		}
-		
-		// "Override" the toString method of OpenBISProjectNode
-		public String toString() {
-			return node.getIdentifier();
-		}
-	}	
 }

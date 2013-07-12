@@ -3,8 +3,10 @@ package ch.eth.scu.importer.processors.lsrfortessa;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -246,6 +248,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
+		// Experiment description
+		public String description = "";
+		
 		/**
 		 * ArrayList of Tray's
 		 */
@@ -369,7 +374,9 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	public class Tray extends SampleDescriptor {
 
-		/* Public instance variables */
+		// Define the supported tray geometries as a static list
+		public final List<String> supportedTrayGeometries =
+				Arrays.asList("96_WELLS_8X12", "384_WELLS_16x24");
 	
 		/**
 		 * ArrayList of Specimen's
@@ -390,6 +397,8 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 			this.name = name;
 
+			// Initialize geometry
+			this.geometry = this.supportedTrayGeometries.get(0);
 		}
 	
 		/**

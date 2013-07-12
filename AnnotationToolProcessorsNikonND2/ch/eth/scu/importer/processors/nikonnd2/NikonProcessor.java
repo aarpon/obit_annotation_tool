@@ -232,6 +232,9 @@ public class NikonProcessor extends AbstractProcessor {
 	 */
 	public class Experiment extends FirstLevelDescriptor {
 
+		// Experiment description
+		public String description = "";
+			
 		// Store the ND2 files associated with this Experiment
 		public Map<String, ND2File> nd2Files = 
 				new LinkedHashMap<String, ND2File>();

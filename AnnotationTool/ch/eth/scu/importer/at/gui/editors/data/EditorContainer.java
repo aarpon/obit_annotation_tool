@@ -22,7 +22,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	private AbstractEditor metadataEditor;
-	private JButton uploadButton;
+	private JButton registerButton;
 
 	protected AbstractViewer dataViewer;
 	protected OpenBISViewer openBISViewer;
@@ -68,13 +68,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 		add(metadataEditor.getPanel(), constraints);
 		
 		// Add an upload button
-		uploadButton = new JButton("Upload to openBIS");
+		registerButton = new JButton("Register to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
-		uploadButton.addActionListener(this);
-		add(uploadButton, constraints);
+		registerButton.addActionListener(this);
+		add(registerButton, constraints);
 		
 		// Set the preferred and minimum size
 		this.setMinimumSize(new Dimension(400, 700));
@@ -89,7 +89,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getSource() == uploadButton) {
+		if (e.getSource() == registerButton) {
 			
 			// Make sure all models are ready
 			if (!dataViewer.isReady() || !openBISViewer.isReady()) {

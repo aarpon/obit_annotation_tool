@@ -2,6 +2,7 @@ package ch.eth.scu.importer.ui_elements.nikonnd2.gui.editors.data.model;
 
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.eth.scu.importer.processors.nikonnd2.NikonProcessor.Experiment;
 import ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data.model.ExperimentNode;
 
 /**
@@ -14,7 +15,6 @@ public class NikonMetadata extends AbstractMetadataMapper {
 
 	public ExperimentNode experimentNode;
 	public OpenBISProjectNode openBISProjectNode;
-	public String description;
 	
 	/** 
 	 * Constructor
@@ -26,8 +26,15 @@ public class NikonMetadata extends AbstractMetadataMapper {
 		this.experimentNode = experimentNode;
 		this.openBISProjectNode = openBISProjectNode;
 		
-		// Set default description
-		this.description = "";
+	}
+
+	/**
+	 * Get the experiment descriptor
+	 * @return the experiment descriptor
+	 */
+	public Experiment getExperiment() {
+		return (Experiment) 
+				this.experimentNode.getUserObject();
 	}
 
 	/**

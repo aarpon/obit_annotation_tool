@@ -21,7 +21,6 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 
 	public FolderNode folderNode;
 	public OpenBISProjectNode openBISProjectNode;
-	public String description;
 	public ArrayList<String> supportedTrayGeometries;
 	
 	/** 
@@ -38,16 +37,6 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 		this.supportedTrayGeometries = new ArrayList<String>();
 		this.supportedTrayGeometries.add("96_WELLS_8X12");
 		this.supportedTrayGeometries.add("384_WELLS_16x24");
-		
-		// Set default values for the tray geometry
-		Map<String, Tray> trays = getTraysForExperiment();
-		for (String key : trays.keySet()) {
-			trays.get(key).geometry =
-					this.supportedTrayGeometries.get(0);
-		}
-
-		// Set empty description
-		this.description = "";
 	}
 
 	/**
@@ -59,8 +48,8 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 	}
 	
 	/**
-	 * Get the experiment name
-	 * @return the experiment name
+	 * Get the experiment descriptor
+	 * @return the experiment descriptor
 	 */
 	public Experiment getExperiment() {
 		assert(folderNode.getChildCount() == 1);
@@ -76,7 +65,7 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 		assert(folderNode.getChildCount() == 1);
 		return folderNode.getChildAt(0).toString();
 	}
-	
+
 	/**
 	 * Get the project name
 	 * @return the experiment name
@@ -106,7 +95,7 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 		int indx = openBISProjectID.indexOf("/", 1);
 		
 		if (indx == -1) {
-			// This should not happen, sice the identifier came
+			// This should not happen, since the identifier came
 			// from openBIS in the first place.
 			System.err.println(
 					"Malformed openBIS project identifier!");

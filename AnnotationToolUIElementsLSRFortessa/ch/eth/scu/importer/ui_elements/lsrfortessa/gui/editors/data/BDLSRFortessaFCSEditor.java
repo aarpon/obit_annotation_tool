@@ -19,7 +19,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.at.gui.editors.data.AbstractEditor;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
@@ -27,7 +26,6 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
-import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
@@ -44,12 +42,6 @@ import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.Folder
  */
 public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
-	protected TreeModel dataModel;
-	protected TreeModel openBISModel;
-	
-	protected List<OpenBISProjectNode> openBISProjects = 
-			new ArrayList<OpenBISProjectNode>();
-
 	// List of experiments from the Data Model
 	protected List<FolderNode> dataFolders = 
 			new ArrayList<FolderNode>();
@@ -65,7 +57,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	protected JLabel labelFolderName;
 	protected JLabel labelExpName;
 	protected Map<JComboBox<String>, Tray> comboGeometryList;
-	protected JComboBox<OpenBISProjectNodeWrapper> comboProjectList;
+	protected JComboBox<String> comboProjectList;
 	protected JTextArea expDescription;
 
 	/**
@@ -88,42 +80,6 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * @param e The ActionEvent object
 	 */
 	public void actionPerformed(ActionEvent e) {
-	}
-
-	/**
-	 * Map the data and openBIS models
-	 * @throws Exception 
-	 */
-	public void init(ObserverActionParameters params) throws Exception {
-		
-		// Make sure both viewers have completed their models
-		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
-			return;
-		}
-		
-		// Clear the editor
-		clearUIElements();
-		
-		// Init the metadata
-		if (initMetadata()) {
-			
-			// Create the widgets
-			createUIElements(params);
-
-		}
-		
-	}
-
-	/**
-	 * Clear elements from the editor.
-	 */
-	protected void clearUIElements() {
-		// Remove elements and force a redraw of the panel
-		if (panel.getComponentCount() > 0) {
-			panel.removeAll();
-			panel.validate();
-			panel.repaint();
-		}	
 	}
 	
 	/**
@@ -162,7 +118,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			// Set the description
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
-			expUserAttributes.put("description", metadata.description); 
+			expUserAttributes.put("description", expDescr.description); 
 			expDescr.setUserAttributes(expUserAttributes);
 
 			// Now get the Trays and Specimens children of the Experiment
@@ -309,17 +265,14 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	}	
 
 	/**
-	 * Update metadata and UI
+	 * Update metadata and UI. Since the number of widgets changes 
+	 * between experiments, we force recreation.
 	 */
-	public void updateAll(ObserverActionParameters params) {
-	
+	public void updateUIElements(ObserverActionParameters params) {
+
 		// Update the currentExperimentIndex property
 		currentExperimentIndex = dataFolders.indexOf(params.node);
-//		if (currentExperimentIndex == -1) {
-//			return;
-//		}
-		
-    	try {
+		try {
 			createUIElements(params);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -357,10 +310,12 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 							node, openBISProjects.get(0)));
 		}
 		
-		// Initially we set the first openBIS project as a target
-		// for all experiments
-		currentExperimentIndex = 0;
-		
+		// Set the index of the experiment (if needed)
+		if (	currentExperimentIndex < 0 ||
+				currentExperimentIndex > (dataFolders.size() - 1)) {
+			currentExperimentIndex = 0;
+		}
+
 		// Return success
 		return true;
 	}
@@ -448,7 +403,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		expDescription = new JTextArea(metadata.description);
+		expDescription = new JTextArea(metadata.getExperiment().description);
 		expDescription.setLineWrap(true);
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -601,18 +556,24 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		 */
 		
 		// Store the project in a JCombo box
-		comboProjectList = new JComboBox<OpenBISProjectNodeWrapper>();
-		
+		comboProjectList = new JComboBox<String>();
+
 		for (OpenBISProjectNode s : openBISProjects) {
 
-			// Add the BDLSRFortessaFCSMetadata object
-			comboProjectList.addItem(new OpenBISProjectNodeWrapper(s));
+			// Add the project identifier
+			comboProjectList.addItem(
+					((OpenBISProjectNode)s).getIdentifier());
 
 		}
 		
 		// Select the correct one
-		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
-				metadata.openBISProjectNode));
+		for (int i = 0; i < openBISProjects.size(); i++) {
+			if (openBISProjects.get(i).getIdentifier().equals(
+					metadata.openBISProjectNode.getIdentifier())) {
+				comboProjectList.setSelectedIndex(i);
+				break;
+			}
+		}
 
 		// When a project is selected, update the corresponding 
 		// experiment in the data model 
@@ -620,17 +581,21 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
-					// Get the BDLSRFortessaFCSMetadata object
-					OpenBISProjectNodeWrapper projectNodeWrapper =
-							(OpenBISProjectNodeWrapper)
-							((JComboBox<OpenBISProjectNodeWrapper>)
+					// Get selected project identifier
+					String projectID =
+							(String)
+							((JComboBox<String>)
 									e.getSource()).getSelectedItem();
-					OpenBISProjectNode projectNode = projectNodeWrapper.node;
 
-					// Update the metadata object with the new projects
-					metadataMappersList.get(
-							currentExperimentIndex).openBISProjectNode =
-							projectNode;
+					// Get the ProjectNode that matches the identifier
+					for (OpenBISProjectNode projNode : openBISProjects) {
+						if (projNode.getIdentifier().equals(projectID)) {
+							metadataMappersList.get(
+									currentExperimentIndex).openBISProjectNode =
+											projNode;
+							break;
+						}
+					}
 
 				}
 			}
@@ -661,50 +626,6 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		panel.validate();
 		panel.repaint();
 
-	}
-	
-	/**
-	 * Collects and stores openBIS projects for mapping
-	 * @return list of openBIS nodes
-	 */
-	private void storeOpenBISProjects() {
-		
-		// Store the openBIS model
-		openBISModel = openBISViewer.getDataModel();
-		
-        // We extract all projects from the openBIS model and create a list
-		// with which we will then create JComboBox associated to each project
-		// from the data model
-		openBISProjects = new ArrayList<OpenBISProjectNode>();
-		
-		AbstractOpenBISNode openBISRoot = 
-				(AbstractOpenBISNode) openBISModel.getRoot();
-
-		// Iterate over the space nodes (there should be at least one)
-		for (int i = 0; i < openBISRoot.getChildCount(); i++) {
-
-			// Get the Space
-			AbstractOpenBISNode openBISSpaceNode = 
-					(AbstractOpenBISNode) openBISRoot.getChildAt(i);
-
-			// Go over the child Projects
-			int n = openBISSpaceNode.getChildCount();
-
-			for (int j = 0; j < n; j++) {
-
-				// Get the OpenBISProjectNode
-				OpenBISProjectNode openBISProjectNode = 
-						(OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
-
-				// Add it to the list: we wrap it into a wrapper 
-				// class to override the toString() method; we do 
-				// this because in constrast to what happens in the
-				// openBIS viewer, here we need the (openBIS) identifier
-				//  instead of the code.
-				openBISProjects.add(openBISProjectNode);
-
-			}
-		}
 	}
 
 	/**
@@ -746,29 +667,6 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				currentExperimentIndex);
 		
 		// Store the experiment description
-		metadata.description = expDescription.getText();
+		metadata.getExperiment().description = expDescription.getText();
     }
-	
-	/**
-	 * Wrapper class that "overrides" OpenBISProjectNode's toString()
-	 * method to use in the Editor. 
-	 * @author Aaron Ponti
-	 *
-	 */
-	public class OpenBISProjectNodeWrapper  {
-		public OpenBISProjectNode node;
-		
-		/**
-		 * Constructor.
-		 * @param node An OpenBISProjectNode node.
-		 */
-		public OpenBISProjectNodeWrapper(OpenBISProjectNode node) {
-			this.node = node;
-		}
-		
-		// "Override" the toString method of OpenBISProjectNode
-		public String toString() {
-			return node.getIdentifier();
-		}
-	}
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Properties;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -65,6 +66,7 @@ public class OpenBISViewer extends Observable
 	private IOpenbisServiceFacade facade;
 	
 	private JLabel title;
+	private JButton rescanButton;
 	private OpenBISUserNode userNode;
 	private OpenBISViewerTree tree;
 	private JScrollPane treeView;
@@ -138,6 +140,26 @@ public class OpenBISViewer extends Observable
 		constraints.weighty = 1.0;
 		panel.add(treeView, constraints);
 
+		// Add a rescan button
+		rescanButton = new JButton("Scan");
+		rescanButton.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+                scan();
+            }
+        });  
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.insets = new Insets(0, 0, 0, 0);
+		panel.add(rescanButton, constraints);
+		
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
 		panel.setPreferredSize(new Dimension(400, 700));

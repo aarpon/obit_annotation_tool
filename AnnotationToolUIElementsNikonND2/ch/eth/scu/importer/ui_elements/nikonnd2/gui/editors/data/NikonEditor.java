@@ -18,7 +18,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.tree.TreeModel;
 
 import ch.eth.scu.importer.at.gui.editors.data.AbstractEditor;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
@@ -26,7 +25,6 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
-import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.processors.nikonnd2.NikonProcessor.Experiment;
 import ch.eth.scu.importer.processors.nikonnd2.NikonProcessor.ND2File;
@@ -39,12 +37,6 @@ import ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data.model.Experimen
  *
  */
 public class NikonEditor extends AbstractEditor {
-
-	protected TreeModel dataModel;
-	protected TreeModel openBISModel;
-	
-	protected List<OpenBISProjectNode> openBISProjects = 
-			new ArrayList<OpenBISProjectNode>();
 
 	// List of experiments from the Data Model
 	protected List<ExperimentNode> experiments = 
@@ -59,7 +51,7 @@ public class NikonEditor extends AbstractEditor {
 
 	protected JLabel labelExpName;
 	protected JComboBox<String> comboGeometryList;
-	protected JComboBox<OpenBISProjectNodeWrapper> comboProjectList;
+	protected JComboBox<String> comboProjectList;
 	protected JTextArea expDescription;
 	
 	/**
@@ -119,7 +111,8 @@ public class NikonEditor extends AbstractEditor {
 			// Set the description
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
-			expUserAttributes.put("description", currentMetadata.description); 
+			expUserAttributes.put("description", 
+					currentMetadata.getExperiment().description); 
 			expDescr.setUserAttributes(expUserAttributes);
 
 			// Now get the ND2File children of the Experiment
@@ -155,21 +148,6 @@ public class NikonEditor extends AbstractEditor {
 	}	
 
 	/**
-	 * Update metadata and UI
-	 */
-	public void updateAll(ObserverActionParameters params) {
-	
-		// Update the currentExperimentIndex property
-		currentExperimentIndex = experiments.indexOf(params.node);
-		if (currentExperimentIndex == -1) {
-			return;
-		}
-		
-		// Update the UI
-		updateUIElements();
-	}
-
-	/**
 	 * Map the data and openBIS models
 	 * @throws Exception 
 	 */
@@ -199,9 +177,11 @@ public class NikonEditor extends AbstractEditor {
 							node, openBISProjects.get(0)));
 		}
 		
-		// Initially we set the first openBIS project as a target
-		// for all experiments
-		currentExperimentIndex = 0;
+		// Set the index of the experiment (if needed)
+		if (	currentExperimentIndex < 0 ||
+				currentExperimentIndex > (experiments.size() - 1)) {
+			currentExperimentIndex = 0;
+		}
 		
 		// Return success
 		return true;
@@ -213,22 +193,19 @@ public class NikonEditor extends AbstractEditor {
 	 */
 	protected void createUIElements(ObserverActionParameters params) throws Exception {
 
+		// Get selected metadata element
+		NikonMetadata metadata = metadataMappersList.get(
+				currentExperimentIndex);
+
+		// If we are repainting this panel, let's make sure we delete the
+		// child components already displayed.
+		clearUIElements();
+
 		// Make sure both viewers have completed their models
 		if (metadataMappersList.size() == 0) {
 			return;
 		}
 
-		// If we are repainting this panel, let's make sure we delete the
-		// child components already displayed.
-		if (panel.getComponentCount() > 0) {
-			panel.removeAll();
-			panel.revalidate(); 
-		}
-
-		// Get selected metadata element
-		NikonMetadata metadata = metadataMappersList.get(
-				currentExperimentIndex);
-		
 		/*
 		 *  Folder name
 		 */
@@ -237,17 +214,6 @@ public class NikonEditor extends AbstractEditor {
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
-
-//		// Create a label for the folder
-//		constraints.insets = new Insets(10, 10, 10, 10);
-//		constraints.weightx = 1;
-//		constraints.weighty = 0;
-//		constraints.gridx = 0;
-//		constraints.gridy = 0;
-//		labelFolderName = new JLabel(metadata.experimentNode.toString());
-//		labelFolderName.setIcon(new ImageIcon(
-//				this.getClass().getResource("icons/folder.png")));
-//		panel.add(labelFolderName, constraints);
 
 		/*
 		 *  Experiment name
@@ -287,7 +253,8 @@ public class NikonEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = 2;
-		expDescription = new JTextArea(metadata.description);
+		expDescription = new JTextArea(
+				metadata.getExperiment().description);
 		expDescription.setLineWrap(true);
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -312,67 +279,6 @@ public class NikonEditor extends AbstractEditor {
 		areaScrollPane.setMinimumSize(new Dimension(400, 50));
 		areaScrollPane.setPreferredSize(new Dimension(400, 50));
 		panel.add(areaScrollPane, constraints);
-		
-//		/*
-//		 *  Tray geometry label
-//		 */
-//
-//		// Create a label for the geometry combo box
-//		constraints.insets = new Insets(10, 10, 10, 10);
-//		constraints.weightx = 1;
-//		constraints.weighty = 0;
-//		constraints.gridx = 0;
-//		constraints.gridy = 4;
-//		JLabel labelGeometry = new JLabel("Plate geometry");
-//		labelGeometry.setHorizontalAlignment(JLabel.CENTER);
-//		panel.add(labelGeometry, constraints);
-		
-//		/*
-//		 *  Tray geometry combo
-//		 */
-//		
-//		// Display a combo box with the geometries
-//		ArrayList<String> supportedGeometries =
-//				metadata.supportedTrayGeometries;
-//		comboGeometryList = new JComboBox<String>();
-//		for (String geometry : supportedGeometries) {
-//
-//			// Add the geometry
-//			comboGeometryList.addItem(geometry);
-//
-//		}		
-//
-//		// Select the correct one
-//		comboGeometryList.setSelectedIndex(supportedGeometries.indexOf(
-//				metadata.trayGeometry));
-//
-//		// When a geometry is selected, update the corresponding 
-//		// experiment in the data model 
-//		comboGeometryList.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				if (e.getActionCommand().equals("comboBoxChanged")) {
-//
-//					String geometry =
-//							(String)
-//							((JComboBox<String>)
-//									e.getSource()).getSelectedItem();
-//					
-//					// Update the metadata object with the new projects
-//					metadataMappersList.get(
-//							currentExperimentIndex).trayGeometry =
-//							geometry;
-//
-//				}
-//			}
-//		});
-
-//		// Add the geometry combo box
-//		constraints.insets = new Insets(0, 20, 0, 20);
-//		constraints.weightx = 1;
-//		constraints.weighty = 0;
-//		constraints.gridx = 0;
-//		constraints.gridy = 5;
-//		panel.add(comboGeometryList, constraints);
 
 		/*
 		 *  Label openBIS projects
@@ -392,19 +298,26 @@ public class NikonEditor extends AbstractEditor {
 		 *  Tray openBIS projects
 		 */
 		
-		// Store the project in a JCombo box
-		comboProjectList = new JComboBox<OpenBISProjectNodeWrapper>();
+		// Add the project identifier
+		comboProjectList = new JComboBox<String>();
 		
 		for (OpenBISProjectNode s : openBISProjects) {
 
 			// Add the BDLSRFortessaFCSMetadata object
-			comboProjectList.addItem(new OpenBISProjectNodeWrapper(s));
+			comboProjectList.addItem(
+					((OpenBISProjectNode)s).getIdentifier());
 
 		}
 		
 		// Select the correct one
-		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
-				metadata.openBISProjectNode));
+		for (int i = 0; i < openBISProjects.size(); i++) {
+			System.out.println(openBISProjects.get(i).getIdentifier());
+			if (openBISProjects.get(i).getIdentifier().equals(
+					metadata.openBISProjectNode.getIdentifier())) {
+				comboProjectList.setSelectedIndex(i);
+				break;
+			}
+		}
 
 		// When a project is selected, update the corresponding 
 		// experiment in the data model 
@@ -412,17 +325,21 @@ public class NikonEditor extends AbstractEditor {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
-					// Get the BDLSRFortessaFCSMetadata object
-					OpenBISProjectNodeWrapper projectNodeWrapper =
-							(OpenBISProjectNodeWrapper)
-							((JComboBox<OpenBISProjectNodeWrapper>)
+					// Get selected project identifier
+					String projectID =
+							(String)
+							((JComboBox<String>)
 									e.getSource()).getSelectedItem();
-					OpenBISProjectNode projectNode = projectNodeWrapper.node;
 
-					// Update the metadata object with the new projects
-					metadataMappersList.get(
-							currentExperimentIndex).openBISProjectNode =
-							projectNode;
+					// Get the ProjectNode that matches the identifier
+					for (OpenBISProjectNode projNode : openBISProjects) {
+						if (projNode.getIdentifier().equals(projectID)) {
+							metadataMappersList.get(
+									currentExperimentIndex).openBISProjectNode =
+											projNode;
+							break;
+						}
+					}
 
 				}
 			}
@@ -457,8 +374,11 @@ public class NikonEditor extends AbstractEditor {
 	/**
 	 * Update all widgets on the panel
 	 */
-	private void updateUIElements() {
+	protected void updateUIElements(ObserverActionParameters params) {
 		
+		// Update the currentExperimentIndex property
+		currentExperimentIndex = experiments.indexOf(params.node);
+
 		// Get the active metadata object
 		NikonMetadata metadata = metadataMappersList.get(
 				currentExperimentIndex);
@@ -467,55 +387,18 @@ public class NikonEditor extends AbstractEditor {
 		labelExpName.setText(metadata.getExperimentName());
 
 		// Update the description
-		expDescription.setText(metadata.description);
+		expDescription.setText(
+				metadata.getExperiment().description);
 
-		// Update the project
-		comboProjectList.setSelectedIndex(openBISProjects.indexOf(
-				metadata.openBISProjectNode));
-	}
-	
-	/**
-	 * Collects and stores openBIS projects for mapping
-	 * @return list of openBIS nodes
-	 */
-	private void storeOpenBISProjects() {
-		
-		// Store the openBIS model
-		openBISModel = openBISViewer.getDataModel();
-		
-        // We extract all projects from the openBIS model and create a list
-		// with which we will then create JComboBox associated to each project
-		// from the data model
-		openBISProjects = new ArrayList<OpenBISProjectNode>();
-		
-		AbstractOpenBISNode openBISRoot = 
-				(AbstractOpenBISNode) openBISModel.getRoot();
-
-		// Iterate over the space nodes (there should be at least one)
-		for (int i = 0; i < openBISRoot.getChildCount(); i++) {
-
-			// Get the Space
-			AbstractOpenBISNode openBISSpaceNode = 
-					(AbstractOpenBISNode) openBISRoot.getChildAt(i);
-
-			// Go over the child Projects
-			int n = openBISSpaceNode.getChildCount();
-
-			for (int j = 0; j < n; j++) {
-
-				// Get the OpenBISProjectNode
-				OpenBISProjectNode openBISProjectNode = 
-						(OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
-
-				// Add it to the list: we wrap it into a wrapper 
-				// class to override the toString() method; we do 
-				// this because in constrast to what happens in the
-				// openBIS viewer, here we need the (openBIS) identifier
-				//  instead of the code.
-				openBISProjects.add(openBISProjectNode);
-
+		// Select the correct one
+		for (int i = 0; i < openBISProjects.size(); i++) {
+			if (openBISProjects.get(i).getIdentifier().equals(
+					metadata.openBISProjectNode.getIdentifier())) {
+				comboProjectList.setSelectedIndex(i);
+				break;
 			}
 		}
+
 	}
 
 	/**
@@ -558,7 +441,7 @@ public class NikonEditor extends AbstractEditor {
 				currentExperimentIndex);
 		
 		// Store the experiment description
-		metadata.description = expDescription.getText();
+		metadata.getExperiment().description = expDescription.getText();
     }
 
 }
