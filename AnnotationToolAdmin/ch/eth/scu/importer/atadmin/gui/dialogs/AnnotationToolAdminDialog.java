@@ -34,7 +34,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> acqStationsList;
 	protected JComboBox<Object> openBISURLList;
 	
-	private static final String version = "0.1.0";
+	private static final String version = "0.1.5";
 	
 	/**
 	 * Constructor
