@@ -171,7 +171,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		constraints.insets = new Insets(0, 0, 0, 0);
+		constraints.insets = new Insets(5, 5, 5, 5);
 		panel.add(rescanButton, constraints);
 		
 		// Add a simple label
