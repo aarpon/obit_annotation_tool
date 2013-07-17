@@ -27,5 +27,5 @@ COPY .\winrun4j\WinRun4J.exe .\win32\AnnotationToolAdmin.exe
 REM Generate 32-bit Windows executable
 .\winrun4j\RCEDIT.exe /I .\win32\AnnotationToolAdmin.exe .\win32\icon_admin.ico
 
-REM Delete the icon files since they were embedded in the executtables
+REM Delete the icon files since they were embedded in the executables
 DEL .\win32\*.ico
