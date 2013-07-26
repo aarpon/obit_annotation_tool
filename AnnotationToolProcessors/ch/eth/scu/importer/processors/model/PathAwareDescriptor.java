@@ -86,13 +86,14 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 
 	/**
 	 * Return the full file name of the properties name (the XML file with 
-	 * all information needed by the dropbox to register the dataset).
+	 * all information needed by the dropbox to register the dataset
+	 * or experiment).
 	 * 
 	 * Default implementation.
 	 */
-	public String getPropertiesNameForSaving() {
+	public String getPropertiesNameForSaving(String dataName) {
 		return this.getRelativePath() + 
-				File.separator + this.name + "_properties.six"; 
+				File.separator + dataName + "_properties.six"; 
 	}	
 	
 	/**

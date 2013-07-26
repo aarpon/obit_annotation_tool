@@ -65,32 +65,58 @@ public class DataViewerTreeToXML {
 					(AbstractDescriptor) topNode.getUserObject();
 
 			// Get the top level descriptor: top level descriptor MUST 
-			// extend the FirstLevelDescriptor abstract class
+			// extend the FirstLevelDescriptor abstract class - i.e. it
+			// must be mappable to a folder (and has to know its own
+			// absolute path)
 			assert (topDescr instanceof FirstLevelDescriptor);
 
-			// Construct the properties file name (which we also use as key
-			// for the map)
-			String key =
-					((FirstLevelDescriptor)topDescr).getPropertiesNameForSaving();
+			// Now go over all children - each child will have its own
+			// properties XML file for registration stored in the
+			// folder mapped by the firstLevelDescriptor. The name of the
+			// properties file will be the name of the experiment.
+			int nSecondLevelChildren = topNode.getChildCount();
+			for (int j = 0; j < nSecondLevelChildren; j++) {
 
-			// Now build the XML document
-			try {
-				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				document = builder.newDocument();
+				// Get current child
+				AbstractNode secondLevelNode = 
+						(AbstractNode) topNode.getChildAt(j);
 
-				Element root = document.createElement("scuOpenBisImporterXml");
-				root.setAttribute("version", "0");
+				AbstractDescriptor secondLevelDescr = 
+						(AbstractDescriptor) secondLevelNode.getUserObject();
+				
+				// Construct the properties file name (which we also use as key
+				// for the map)
+				String key =
+						((FirstLevelDescriptor)topDescr).
+						getPropertiesNameForSaving(
+								secondLevelDescr.getName());
 
-				addNode(document, root, topNode);
+				// Now build the XML document
+				try {
+					builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					document = builder.newDocument();
 
-				document.appendChild(root);
+					Element root = document.createElement("oBITXml");
+					root.setAttribute("version", "1");
+					
+					// Add the second level node
+					root.appendChild(
+							createElement(document, secondLevelNode));
+					
+					// Now add all children recursively 
+					addNodeChildren(document, root, secondLevelNode);
 
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
+					document.appendChild(root);
+
+				} catch (ParserConfigurationException e) {
+					e.printStackTrace();
+				}
+
+				// Store the document
+				documents.put(key, document);
+
 			}
 
-			// Store the document
-			documents.put(key, document);
 		}
 
 	}
@@ -128,11 +154,11 @@ public class DataViewerTreeToXML {
 	}
 
 	/**
-	 * Add a JTree node as a node to the XML document 
-	 * @param parentNode	The XML parent node to which to append current
+	 * Add a all children of JTree node as nodes to the XML document 
+	 * @param parentNode		The XML parent node to which to append
 	 * @param treeNode		The JTree node to append
 	 */
-	protected void addNode(Document document, Element parentNode,
+	protected void addNodeChildren(Document document, Element parentNode,
 			AbstractNode treeNode) {
 		// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
 		// This causes a warning in Java > 5.
@@ -142,7 +168,7 @@ public class DataViewerTreeToXML {
 			final AbstractNode node = children.nextElement();
 			final Element element = createElement(document, node);
 			parentNode.appendChild(element);
-			addNode(document, element, node);
+			addNodeChildren(document, element, node);
 		}
 	}
 

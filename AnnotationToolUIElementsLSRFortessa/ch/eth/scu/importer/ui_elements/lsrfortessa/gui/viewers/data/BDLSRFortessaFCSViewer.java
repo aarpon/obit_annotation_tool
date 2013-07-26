@@ -166,17 +166,18 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			clearMetadataTable();
 		}
 
-        // Get the folder name
-        AbstractNode folderNode = getParentNodeByName(node, "Folder");
-        if (folderNode != null && folderNode != lastSelectedFolder) {
+        // Get the experiment name
+        AbstractNode expNode = getParentNodeByName(node, "Experiment");
+        if (expNode != null && expNode != lastSelectedExperiment) {
         		
         		// Update the lastSelectedFolder property
-        		lastSelectedFolder = folderNode;
+        		lastSelectedExperiment = expNode;
         		
             // Notify the editor to update its view
             setChanged();
             notifyObservers(new ObserverActionParameters(
-                ObserverActionParameters.Action.EXPERIMENT_CHANGED, folderNode));
+                ObserverActionParameters.Action.EXPERIMENT_CHANGED,
+                expNode));
         }
 	}
 

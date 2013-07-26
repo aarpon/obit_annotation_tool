@@ -109,10 +109,10 @@ public class NikonViewer extends AbstractViewer {
 
         // Get the folder name
         AbstractNode folderNode = getParentNodeByName(node, "Experiment");
-        if (folderNode != null && folderNode != lastSelectedFolder) {
+        if (folderNode != null && folderNode != lastSelectedExperiment) {
         		
         		// Update the lastSelectedFolder property
-        		lastSelectedFolder = folderNode;
+        		lastSelectedExperiment = folderNode;
         		
             // Notify the editor to update its view
             setChanged();

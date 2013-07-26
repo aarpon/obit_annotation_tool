@@ -43,8 +43,8 @@ import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.Folder
 public class BDLSRFortessaFCSEditor extends AbstractEditor {
 
 	// List of experiments from the Data Model
-	protected List<FolderNode> dataFolders = 
-			new ArrayList<FolderNode>();
+	protected List<ExperimentNode> experiments = 
+			new ArrayList<ExperimentNode>();
 	
 	// List of metadata mappers
 	protected List<BDLSRFortessaFCSMetadata> metadataMappersList =
@@ -100,7 +100,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			
 			// Get the experiment node
 			ExperimentNode expNode = 
-					(ExperimentNode) metadata.folderNode.getChildAt(0);
+					(ExperimentNode) metadata.expNode;
 			assert(expNode.getType().equals("Experiment"));
 			
 			// We first start by updating the Experiment descriptor itself
@@ -271,7 +271,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	public void updateUIElements(ObserverActionParameters params) {
 
 		// Update the currentExperimentIndex property
-		currentExperimentIndex = dataFolders.indexOf(params.node);
+		currentExperimentIndex = experiments.indexOf(params.node);
 		try {
 			createUIElements(params);
 		} catch (Exception e) {
@@ -297,14 +297,14 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		
 		// Check that there is at least one entry in each of the 
 		// arrays
-		if (dataFolders.size() == 0 || openBISProjects.size() == 0) {
+		if (experiments.size() == 0 || openBISProjects.size() == 0) {
 			// TODO: Inform the user
 			return false;
 		}
 		
 		// Create all BDLSRFortessaFCSMetadata objects and initially 
 		// assign each folder to the first project
-		for (FolderNode node : dataFolders) {
+		for (ExperimentNode node : experiments) {
 			metadataMappersList.add(
 					new BDLSRFortessaFCSMetadata(
 							node, openBISProjects.get(0)));
@@ -312,7 +312,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		
 		// Set the index of the experiment (if needed)
 		if (	currentExperimentIndex < 0 ||
-				currentExperimentIndex > (dataFolders.size() - 1)) {
+				currentExperimentIndex > (experiments.size() - 1)) {
 			currentExperimentIndex = 0;
 		}
 
@@ -357,7 +357,8 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		labelFolderName = new JLabel(metadata.folderNode.toString());
+		labelFolderName = new JLabel(
+				metadata.expNode.getParent().toString());
 		labelFolderName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/folder.png")));
 		panel.add(labelFolderName, constraints);
@@ -635,7 +636,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	private void storeDataFolders() {
 
 		// Reset the dataFolders list
-		dataFolders = new ArrayList<FolderNode>();
+		experiments = new ArrayList<ExperimentNode>();
 
 		// Store the data model
 		dataModel = dataViewer.getDataModel();
@@ -651,8 +652,18 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 			// Get the FolderNode
 			FolderNode folderNode = (FolderNode) dataRoot.getChildAt(i);
 
+			// First level are the folder nodes 
+			int folderNChildren = folderNode.getChildCount();
+			
+			for (int j = 0;  j < folderNChildren; j++) {
+				
+				// Get the ExperimentNode
+				ExperimentNode expNode =
+						(ExperimentNode) folderNode.getChildAt(j);
+
 				// Store the reference to the ExperimentNode
-				dataFolders.add(folderNode);
+				experiments.add(expNode);
+			}
 		}        
 	}
 

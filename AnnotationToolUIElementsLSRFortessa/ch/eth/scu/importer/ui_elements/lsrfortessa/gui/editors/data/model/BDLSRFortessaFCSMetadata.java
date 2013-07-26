@@ -9,7 +9,6 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FolderNode;
 
 /**
  * Collects all relevant metadata to allow the registration of an
@@ -19,18 +18,18 @@ import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.Folder
  */
 public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 
-	public FolderNode folderNode;
+	public ExperimentNode expNode;
 	public OpenBISProjectNode openBISProjectNode;
 	public ArrayList<String> supportedTrayGeometries;
 	
 	/** 
 	 * Constructor
 	 */
-	public BDLSRFortessaFCSMetadata(FolderNode folderNode, 
+	public BDLSRFortessaFCSMetadata(ExperimentNode expNode, 
 			OpenBISProjectNode openBISProjectNode) {
 	
 		// Assign folder and openBIS project nodes
-		this.folderNode = folderNode;
+		this.expNode = expNode;
 		this.openBISProjectNode = openBISProjectNode;
 		
 		// Set the supported geometries
@@ -44,7 +43,7 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 	 * @return the folder name
 	 */
 	public String getFolderName() {
-		return folderNode.toString();
+		return expNode.getParent().toString();
 	}
 	
 	/**
@@ -52,9 +51,7 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 	 * @return the experiment descriptor
 	 */
 	public Experiment getExperiment() {
-		assert(folderNode.getChildCount() == 1);
-		ExperimentNode e = (ExperimentNode) folderNode.getChildAt(0);
-		return (Experiment) e.getUserObject();
+		return (Experiment) expNode.getUserObject();
 	}
 
 	/**
@@ -62,8 +59,7 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 	 * @return the experiment name
 	 */
 	public String getExperimentName() {
-		assert(folderNode.getChildCount() == 1);
-		return folderNode.getChildAt(0).toString();
+		return expNode.toString();
 	}
 
 	/**
@@ -115,21 +111,11 @@ public class BDLSRFortessaFCSMetadata extends AbstractMetadataMapper {
 		Map<String, Tray> emptySet = new LinkedHashMap<String, Tray>();
 		
 		// Do we have a folder node already?
-		if (this.folderNode == null) {
+		if (this.expNode == null) {
 			return emptySet;
 		}
 		
-		// Do we have experiments in the folder?
-		if (this.folderNode.getChildCount() == 0) {
-			return  emptySet;
-		}
-		
-		// The first (and only) child of a folder MUST be an Experiment 
-		assert(this.folderNode.getChildAt(0).getClass().
-				getSimpleName().equals("Experiment"));
-		
-		// Get the Experiment
-		ExperimentNode e = (ExperimentNode) this.folderNode.getChildAt(0);
-		return ((Experiment) e.getUserObject()).trays;
+		// Return the trays
+		return ((Experiment) this.expNode.getUserObject()).trays;
 	}
 }

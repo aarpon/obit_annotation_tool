@@ -50,7 +50,7 @@ abstract public class AbstractViewer extends Observable
 	// in response. This should happen only if a new folder is selected -
 	// as long as one changes between nodes within an experiment no
 	// editor refresh is needed.
-	protected AbstractNode lastSelectedFolder;
+	protected AbstractNode lastSelectedExperiment;
 	
 	protected boolean isReady = false;
 	protected String userName;
