@@ -124,7 +124,17 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 
 		// Print the attributes
 		String className = nodeInfo.getClass().getSimpleName();
-		if (className.equals("Experiment")) {
+		if (className.equals("Folder")) {
+			clearMetadataTable();
+			// Change to first experiment in the folder
+			if (node.getChildCount() == 0) {
+				return;
+			}
+			// Update the reference to the first contained experiment
+			// to force a refresh of the editor when a new folder is
+			// chosen
+			node = (AbstractNode)node.getChildAt(0);
+		} else if (className.equals("Experiment")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
                     ((BDFACSDIVAFCSProcessor.Experiment)
