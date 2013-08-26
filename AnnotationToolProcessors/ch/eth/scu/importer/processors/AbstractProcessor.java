@@ -1,5 +1,7 @@
 package ch.eth.scu.importer.processors;
 
+import java.io.File;
+
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
@@ -61,6 +63,27 @@ abstract public class AbstractProcessor {
 	 */
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+
+	/** 
+	 * Deletes safely-to-remove files like .DS_Store, Thumbs.db, ...
+	 * @return true if the file was recognized as a useless hidden
+	 * file and deleted, false if the file is a relevant file to be 
+	 * processed. 
+	 */
+	protected boolean deleteIfKnownUselessFile(File file) {
+		String name = file.getName();
+		if (file.isDirectory()) {
+			return false;
+		}
+		if (name.equals(".DS_Store") ||
+				name.equals("._.DS_Store") ||
+				name.equals("Thumbs.db")) {
+			file.delete();
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 }

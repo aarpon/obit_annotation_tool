@@ -293,7 +293,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		
 		// Store the and openBIS nodes
 		storeOpenBISProjects();
-		storeDataFolders();
+		storeExperiments();
 		
 		// Check that there is at least one entry in each of the 
 		// arrays
@@ -633,7 +633,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	 * Collects and stores data folders for mapping
 	 * @return list of openBIS nodes
 	 */
-	private void storeDataFolders() {
+	private void storeExperiments() {
 
 		// Reset the dataFolders list
 		experiments = new ArrayList<ExperimentNode>();

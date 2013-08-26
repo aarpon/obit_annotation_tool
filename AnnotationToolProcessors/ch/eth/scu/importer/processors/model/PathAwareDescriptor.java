@@ -32,7 +32,7 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	
 	/**
 	 * Constructor
-	 * @param fullDir: full path ot the entity
+	 * @param fullDir: full path of the entity
 	 */
 	public PathAwareDescriptor(File fullPath) {
 

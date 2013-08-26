@@ -245,27 +245,6 @@ abstract public class AbstractViewer extends Observable
 
 	}
 
-	/** 
-	 * Deletes safely-to-remove files like .DS_Store, Thumbs.db, ...
-	 * @return true if the file was recognized as a useless hidden
-	 * file and deleted, false if the file is a relevant file to be 
-	 * processed. 
-	 */
-	protected boolean deleteIfKnownUselessFile(File file) {
-		String name = file.getName();
-		if (file.isDirectory()) {
-			return false;
-		}
-		if (name.equals(".DS_Store") ||
-				name.equals("._.DS_Store") ||
-				name.equals("Thumbs.db")) {
-			file.delete();
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
 	/**
 	 * Sets the user name to be used for scanning the user folder
 	 * @param userName User name
@@ -299,9 +278,6 @@ abstract public class AbstractViewer extends Observable
 	 */
 	public void scan() {
 
-		// Global status of the user folder scanning
-		boolean globalStatus = true;
-
 		// Inform
 		outputPane.log("Scanning user data folder...");
 
@@ -325,23 +301,9 @@ abstract public class AbstractViewer extends Observable
 		// this is a non-recoverable problem.
 		checkAndCreateFolderOrDie(dropboxIncomingFolder, "user directory");
 		
-		// We scan the user folder for all files and subfolders and
-		// pass them on to the processor for validation. Files at the
-		// root level are actually invalid datasets, but we will let
-		// the processor flag them as such.
-		File[] rootFilesAndFolders = dropboxIncomingFolder.listFiles();
-
-		// Parse all files and subfolders (and store success)
-		if (rootFilesAndFolders.length > 0) { 
-			for (File current : rootFilesAndFolders) {
-				if (!deleteIfKnownUselessFile(current)) {
-					globalStatus = globalStatus & 
-							parse(current);
-				}
-			}
-		} else {
-			outputPane.warn("No data found in the user folder!");
-		}
+		// We parse the user folder: the actual processing is done
+		// by the processor.
+		Boolean status = parse(dropboxIncomingFolder);
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
@@ -355,7 +317,7 @@ abstract public class AbstractViewer extends Observable
 		clearMetadataTable();
 		
 		// Set isReady to globalStatus
-		isReady = globalStatus;
+		isReady = status;
 		
 		// Inform the user if isReady is false
 		if (!isReady) {

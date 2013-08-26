@@ -40,21 +40,21 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	/**
 	 *  Parse the FCS folder and append the resulting tree to the root
 	 */
-	public boolean parse(File folder) {
+	public boolean parse(File userFolder) {
 
-		// Process the file or folder
+		// Process the user folder
 		BDFACSDIVAFCSProcessor divafcsprocessor;
 		try {
 			divafcsprocessor = new BDFACSDIVAFCSProcessor(
-					folder.getCanonicalPath());
+					userFolder.getCanonicalPath());
 		} catch (IOException e) {
-			outputPane.err("Could not parse the folder " + folder + "!");
+			outputPane.err("Could not parse the folder " + userFolder + "!");
 			return false;
 		}
 
 		// We parse. If parsing fails, we just return (the dataset is invalid).
 		if (!divafcsprocessor.parse()) {
-			outputPane.err("Could not parse the folder " + folder + "!");
+			outputPane.err("Could not parse the folder " + userFolder + "!");
 			divafcsprocessor = null;
 			return false;
 		}
@@ -77,7 +77,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				nError++;
 				err.append("(").append(nError).append(") ").append(errorString);
 			}
-			model.addRow(new Object[] {folder.getName(), err});
+			model.addRow(new Object[] {userFolder.getName(), err});
 			outputPane.err("Dataset \"" + 
 				divafcsprocessor.folderDescriptor + 
 				"\" failed validation. Please fix or remove.");

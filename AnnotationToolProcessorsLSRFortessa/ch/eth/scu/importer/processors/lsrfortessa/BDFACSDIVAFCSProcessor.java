@@ -15,7 +15,7 @@ import ch.eth.scu.importer.processors.AbstractProcessor;
 import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.lsrfortessa.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
-import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
+import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
@@ -33,7 +33,7 @@ import ch.eth.scu.importer.processors.validator.GenericValidator;
 public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
-	private File topFolder;
+	private File userFolder;
 
 	/* Private instance variables */
 	private int numberOfValidFiles = 0;
@@ -43,19 +43,24 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/**
 	 * Constructor
-	 * @param fullFolderName Full path of the folder containing the exported experiment.
+	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
 	 */
-	public BDFACSDIVAFCSProcessor(String fullFolderName) {
+	public BDFACSDIVAFCSProcessor(String fullUserFolderName) {
 
 		// Instantiate the validator
 		validator = new GenericValidator();
 
-		// fullFolderName could in principle be a file instead of a 
-		// directory; the parse() function will take care of that.
-		File folder = new File(fullFolderName);
-		
+		// fullFolderName MUST be a folder! If it is not, there is 
+		// a major problem with the software setup!
+		File folder = new File(fullUserFolderName);
+		if (!folder.isDirectory()) {
+			// TODO Proper handling of this case.
+			System.err.println("Expected user folder, found file!");
+			System.exit(1);
+		}
+
 		// Set the root folder
-		this.topFolder = folder;
+		this.userFolder = folder;
 
 		// Create a folderDescriptor
 		folderDescriptor = new Folder(folder); 
@@ -77,45 +82,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	@Override
 	public boolean parse() {
 
-		// First, make sure this.topFolder is indeed a folder
-		if (!this.topFolder.isDirectory()) {
-			this.validator.isAnnotated = false;
-			this.validator.isValid = false;
-			this.validator.errorMessages.add(
-					"Expected folder, found file.");
-			this.errorMessage = "Only folders allowed at root level.";
-			
-			// We return true because the parsing succeeded. However,
-			// we recognized the file as an invalid dataset and we 
-			// dutifully set the appropriate flags in the validator.
-			return true;
-		}
-
-		// Then, we check if the dataset is already annotated. An  
-		// annotated dataset has a file ending in _properties.six
-		// at the root of the folder.
-		// In this case we set the validator.isAnnotated flag to true
-		// (as well as the validator.isValid flag) and return
-		// immediately without parsing.
-		File[] propertiesFile = this.topFolder.listFiles(
-				new FileFilter() {
-					public boolean accept(File file) {
-						return (file.isFile() && 
-							file.getName().endsWith("_properties.six"));
-					}
-				});
-		if (propertiesFile.length > 0) {
-			this.validator.isAnnotated = true;
-			this.validator.isValid = true;
-			return true;
-		} else {
-			this.validator.isAnnotated = false;
-		}
-
-		// Scan the root folder recursively to reconstruct the experiment
-		// structure.
+		// The constructor already made sure that this.userFolder is
+		// indeed a folder. So we can scan it recursively to find and
+		// reconstruct the structure of all contained experiments.
 		try {
-			recursiveDir(this.topFolder);
+			recursiveDir(this.userFolder);
 		} catch (IOException e) {
 			this.errorMessage = "Could not parse the folder."; 
 			System.err.println(errorMessage);
@@ -133,7 +104,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @return String containing a description of the BDFACSDIVAFCSProcessor. 
 	 */
 	public String toString() {
-		return topFolder.getName();
+		return userFolder.getName();
 	}
 
 	/**
@@ -146,78 +117,10 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}	
 
 	/**
-	 * Return a textual tree representation of the BDFACSDIVAFCSProcessor 
-	 * @return String containing a tree representation of the 
-	 * BDFACSDIVAFCSProcessor
-	 */	
-	public String treeView() {
-		String str = "[Folder] " + toString()+ ".\n|\n";        
-
-		for (String expKey : folderDescriptor.experiments.keySet()) {
-
-			Experiment e = folderDescriptor.experiments.get(expKey);
-			
-			str +=  "[ Experiment ], name: " + e.getName() + " (" +
-					e.attributesToString() + ").\n";
-
-			for (String trayKey : e.trays.keySet()) {
-
-				Tray t = e.trays.get(trayKey);
-				
-				str +=  "|__[ Tray ], name: " + t.getName() + " (" +
-						t.attributesToString() + ").\n";
-
-				for (String specimenKey : t.specimens.keySet()) {
-
-					Specimen s = t.specimens.get(specimenKey);
-					
-					str +=  "|____[ Specimen ], name: " + s.getName() + 
-							" (" +	s.attributesToString() + ").\n";
-
-					for (String tubeKey : s.tubes.keySet()) {
-
-						Tube tb =  s.tubes.get(tubeKey);
-						
-						str +=  "|______[ Tube ], name: " + tb.getName() +
-								" (" + tb.attributesToString() + ").\n";
-						
-						str +=  "|________[ File ], name: " + 
-								tb.fcsFile.getName() + "\n";
-					}
-				}
-
-			}
-
-			for (String specimenKey : e.specimens.keySet()) {
-
-				Specimen s = e.specimens.get(specimenKey);
-				
-				str +=  "|__[ Specimen ], name: " + s.getName() + "(" +
-						s.attributesToString() + ").\n";
-
-				for (String tubeKey : s.tubes.keySet()) {
-
-					Tube tb = s.tubes.get(tubeKey);
-					
-					str +=  "|____[ Tube ], name: " + tb.getName() + " (" +
-							tb.attributesToString() + ").\n";
-					
-					str +=  "|________[ File ], name: " + 
-							tb.fcsFile.getName() + "\n";
-
-				}
-			}
-
-		}
-		
-		return str;
-	}
-
-	/**
 	 * Descriptor that represents a folder containing a dataset. 
 	 * @author Aaron Ponti
 	 */
-	public class Folder extends FirstLevelDescriptor {
+	public class Folder extends PathAwareDescriptor {
 		
 		public Map<String, Experiment> experiments = 
 				new LinkedHashMap<String, Experiment>();
@@ -267,9 +170,10 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * Constructor
 		 * @param name Name of the experiment.
 		 */
-		public Experiment(String name) {
-			
-			this.name = name;
+		public Experiment(File fullPath) {
+
+			super(fullPath);
+			this.name = fullPath.getName();
 
 		}
 
@@ -510,7 +414,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 			// Is it a directory? Recurse into it
 			if (file.isDirectory()) {
-	
+				
 				// Recurse into the subfolder
 				recursiveDir(file);
 	
@@ -518,6 +422,11 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				continue;
 			}
 			
+			// Delete some known garbage
+			if (deleteIfKnownUselessFile(file)) {
+				continue;
+			}
+
 			// We ignore any file that is not an fcs file - but we pay 
 			// attention to the existence of XML files that indicate an
 			// Experiment export!
@@ -561,14 +470,16 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// Create a new ExperimentDescriptor or reuse an existing one
 			Experiment expDesc;
 			String experimentName = getExperimentName(processor);
-			if (folderDescriptor.experiments.containsKey(experimentName)) {
-				expDesc = folderDescriptor.experiments.get(experimentName);
+			File experimentPath = getExperimentPath(processor, file);
+			String experimentKey = experimentPath.getCanonicalPath();
+			if (folderDescriptor.experiments.containsKey(experimentKey)) {
+				expDesc = folderDescriptor.experiments.get(experimentKey);
 			} else {
 				expDesc = 
-						new Experiment(getExperimentName(processor));
+						new Experiment(experimentPath);
 				// Store attributes
 				expDesc.setAttributes(getExperimentAttributes(processor));
-				folderDescriptor.experiments.put(experimentName, expDesc);
+				folderDescriptor.experiments.put(experimentKey, expDesc);
 			}
 	
 			// Is the container a Tray or Specimen?
@@ -680,6 +591,30 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			name = processor.getCustomKeyword("TUBE NAME");
 		}
 		return name;
+	}
+
+	/**
+	 * Return the experiment name stored in the FCS file
+	 * @param processor with already scanned file
+	 * @return name of the experiment
+	 */
+	private File getExperimentPath(FCSProcessor processor, 
+			File fcsFilePath) {
+		String fcsFilePathStr = "";
+		try {
+			fcsFilePathStr = fcsFilePath.getCanonicalPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String experimentName = getExperimentName(processor);
+		int lastIndex = fcsFilePathStr.indexOf(experimentName);
+		if (lastIndex == -1) {
+			return new File("");
+		} else {
+			return new File(fcsFilePathStr.substring(0, 
+					lastIndex + experimentName.length()));
+		}
 	}
 	
 	/**

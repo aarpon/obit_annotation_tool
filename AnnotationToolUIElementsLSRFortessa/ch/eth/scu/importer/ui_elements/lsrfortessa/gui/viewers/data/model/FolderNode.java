@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
+import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different
@@ -12,7 +12,7 @@ public class FolderNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
-	public FolderNode(FirstLevelDescriptor object) {
+	public FolderNode(PathAwareDescriptor object) {
 		super(object);
 		this.type = "root";
 	}

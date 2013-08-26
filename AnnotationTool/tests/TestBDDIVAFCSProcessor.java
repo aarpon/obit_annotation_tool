@@ -15,7 +15,7 @@ public class TestBDDIVAFCSProcessor {
 
 		processor.parse();
 		
-		System.out.println(processor.treeView());
+		//System.out.println(processor.treeView());
 		
 	}
 }
