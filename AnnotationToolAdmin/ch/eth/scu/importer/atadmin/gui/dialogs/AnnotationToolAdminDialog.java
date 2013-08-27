@@ -3,7 +3,6 @@ package ch.eth.scu.importer.atadmin.gui.dialogs;
 import javax.swing.*;
 
 import net.miginfocom.swing.MigLayout;
-
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DefaultProperties;
 
@@ -26,15 +25,17 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 	protected String selAcqStation;
 	protected String selIncomingDir;
+	protected String selUserDataDir;
 	protected String selOpenBISURL;
 
 	protected JButton dirButton;
+	protected JButton userdirButton;
 	protected JButton saveButton;
 	protected JButton cancelButton;
 	protected JComboBox<Object> acqStationsList;
 	protected JComboBox<Object> openBISURLList;
 	
-	private static final String version = "0.1.5";
+	private static final String version = "0.2.0";
 	
 	/**
 	 * Constructor
@@ -70,9 +71,11 @@ public class AnnotationToolAdminDialog extends JDialog {
 			}
 		}
 		if (index == -1) {
-			System.err.println("Unknown openBIS URL! Defaulting to " +
+			String msg = "Unknown openBIS URL! Defaulting to " +
 					DefaultProperties.defaultValueForProperty("OpenBISURL") +
-					".");
+					".";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);
 			index = 0;
 		}
 		openBISURLList = new JComboBox<Object>(openBISURLOptions.toArray());
@@ -103,6 +106,11 @@ public class AnnotationToolAdminDialog extends JDialog {
 			}
 		}
 		if (index == -1) {
+			String msg = "Unknown acquisition station! Defaulting to " +
+					DefaultProperties.defaultValueForProperty("AcquisitionStation") +
+					".";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);			
 			System.err.println("Unknown acquisition station! Defaulting to " +
 					DefaultProperties.defaultValueForProperty("AcquisitionStation") +
 					".");
@@ -119,7 +127,35 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		add(acqStationsList, "wrap, width 100%");
+
+		// Add a label for the user directory
+		JLabel userdirLabel = new JLabel("User data directory");
+		add(userdirLabel, "wrap, width 100%");
 		
+		// Add a pushButton to choose the user directory
+		// Create a text field for the user name
+		selUserDataDir = appProperties.getProperty("UserDataDir");
+		userdirButton = new JButton(selUserDataDir);
+		userdirButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	String dir = pickDir();
+            	if (!dir.equals("")) {
+            		try {
+						selUserDataDir = (new File(dir)).getCanonicalPath();
+					} catch (IOException exc) {
+						// This really should not happen
+						selUserDataDir = "";
+						JOptionPane.showMessageDialog(null,
+							    "Invalid directory chosen!",
+							    "Error",
+							    JOptionPane.ERROR_MESSAGE);
+					}
+            		userdirButton.setText(selUserDataDir);
+            	}
+            }
+        });		
+		add(userdirButton, "wrap, width 100%");
+
 		// Add a label for the directory
 		JLabel dirLabel = new JLabel("Data mover incoming directory");
 		add(dirLabel, "wrap, width 100%");
@@ -154,7 +190,16 @@ public class AnnotationToolAdminDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
 
             	// The acquisition station and the openBIS URL are always set;
-            	// we make sure that the user also picked an incoming directory
+            	// we make sure that the user also picked an user data directory
+            	if (selUserDataDir.equals("")) {
+            		JOptionPane.showMessageDialog(null,
+            				"Please set the user data directory!", "Error",
+            				JOptionPane.ERROR_MESSAGE);
+
+            		return;
+            	}
+
+            	// ... and also the Datamover incoming directory
             	if (selIncomingDir.equals("")) {
             		JOptionPane.showMessageDialog(null,
             				"Please set the incoming directory!", "Error",
@@ -171,10 +216,18 @@ public class AnnotationToolAdminDialog extends JDialog {
             				JOptionPane.ERROR_MESSAGE);
             	} else {
 
-            		setVisible(false);
-            		dispose();
-            	}
+            		saveButton.setText("<html><b>Saved!</b></html>");
+            		ActionListener ls = new ActionListener() {
+          		      public void actionPerformed(ActionEvent evt) {
+                     		saveButton.setText("Save");
+             		      }
+              		  };
+            		Timer timer = new Timer(2000, ls);
+            		timer.setRepeats(false);
+            		timer.start();
+
             }
+          }
         });
 		add(saveButton, "tag ok, span, split 2");
 
@@ -228,13 +281,14 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Check that everything is set
 		if (selOpenBISURL.equals("") || selAcqStation.equals("") || 
+				selUserDataDir.equals("") || 
 				selIncomingDir.equals("")) {
 			return false;
 		}
 		
 		// Save the properties to file
 		return AppProperties.writePropertiesToFile(selOpenBISURL, 
-				selAcqStation, selIncomingDir);
+				selAcqStation, selUserDataDir, selIncomingDir);
 	}
 	
 }

@@ -18,6 +18,7 @@ public class DefaultProperties {
 		
 		names.add("OpenBISURL");
 		names.add("AcquisitionStation");
+		names.add("UserDataDir");
 		names.add("DatamoverIncomingDir");
 		
 		return names;
@@ -42,6 +43,8 @@ public class DefaultProperties {
 		} else if (property.equals("AcquisitionStation")) {
 			options.add("LSRFortessaFCS");
 			options.add("Nikon");
+		} else if (property.equals("UserDataDir")) {
+			options.add("");			
 		} else if (property.equals("DatamoverIncomingDir")) {
 			options.add("");
 		} else {

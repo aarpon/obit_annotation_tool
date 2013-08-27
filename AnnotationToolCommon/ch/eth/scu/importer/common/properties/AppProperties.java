@@ -7,13 +7,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.swing.JOptionPane;
+
 /**
  * Commodity class to manage the AnnotationTool application properties
  * @author Aaron Ponti
  */
 public class AppProperties {
 
-	static private final String propertiesVersion = "0.0";
+	static private final String propertiesVersion = "0.1";
 
 	// Public interface
 
@@ -37,12 +39,14 @@ public class AppProperties {
 		// Make sure the Properties file exists
 		if (!AppProperties.propertiesFileExists()) {
 			if (!AppProperties.initializePropertiesFile()) {
-				System.err.println("Could not initialize properties file " +
-						getPropertiesFileName() + ".");
+				String msg = "Could not initialize properties file " +
+						getPropertiesFileName() + ".";
+				JOptionPane.showMessageDialog(null, msg, "Error",
+					    JOptionPane.ERROR_MESSAGE);
 				return appProperties;
 			}
 		}
-		
+
 		// Open file
 		FileInputStream in;
 		try {
@@ -51,18 +55,33 @@ public class AppProperties {
 				appProperties.load(in);
 				in.close();
 			} catch (IOException e) {
-				System.err.println("Could not read from file. " +
+				String msg = "Could not read from file. " +
 						getPropertiesFileName() + ". " +
-						"Returning default properties.");
+						"Returning default properties.";
+				JOptionPane.showMessageDialog(null, msg, "Error",
+					    JOptionPane.ERROR_MESSAGE);
 				return appProperties;
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println("Could not read from file. " +
+			String msg = "Could not read from file. " +
 					getPropertiesFileName()  + ". " +
-					"Returning default properties.");
+					"Returning default properties.";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);
 			return appProperties;
 		}
 		
+		// Check that the properties file version is current, 
+		// otherwise inform the user and return default values
+		if (! appProperties.getProperty("PropertyFileVersion")
+				.equals(propertiesVersion)) {
+			String msg = "The properties file is old. " +
+					"Property values are reverted to defaults!";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			appProperties = getDefaultProperties(); 
+		}
+
 		// Return the Properties object
 		return appProperties;
 	}
@@ -72,13 +91,15 @@ public class AppProperties {
 	 * @return true if the properties were saved successfully, false otherwise
 	 */
 	static public boolean writePropertiesToFile(String openBISURL, 
-			String acqStation, String incomingDir) {
+			String acqStation, String userDataDir, String incomingDir) {
 
 		// Make sure the Properties file exists
 		if (!AppProperties.propertiesFileExists()) {
 			if (!AppProperties.initializePropertiesFile()) {
-				System.err.println("Could not initialize properties file " +
-						getPropertiesFileName() + ".");
+				String msg = "Could not initialize properties file " +
+						getPropertiesFileName() + ".";
+				JOptionPane.showMessageDialog(null, msg, "Error",
+					    JOptionPane.ERROR_MESSAGE);				
 			}
 		}
 		
@@ -91,17 +112,21 @@ public class AppProperties {
 		applicationProperties.setProperty(
 				"AcquisitionStation", acqStation);
 		applicationProperties.setProperty(
+				"UserDataDir", userDataDir);	
+		applicationProperties.setProperty(
 				"DatamoverIncomingDir", incomingDir);		
 
 		// Save to file
 		try {
 			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
 			applicationProperties.store(out, 
-					"AnnotationTool Default Properties Set");
+					"AnnotationTool Properties Set");
 			out.close();
 		} catch (IOException e) {
-			System.err.println("Could not write to file " +
-					getPropertiesFileName() + ".");
+			String msg = "Could not write to file " +
+					getPropertiesFileName() + ".";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);				
 			return false;
 		}
 		
@@ -140,7 +165,7 @@ public class AppProperties {
 		// Append the sub-path common to all platform
 
         return new File( applicationDataDir +
-                File.separator + "scu" + File.separator + "scuimporter");
+                File.separator + "scu" + File.separator + "obit");
 	}
 	
 	/**
@@ -190,8 +215,10 @@ public class AppProperties {
 			applicationProperties.store(out, "Default Properties Set");
 			out.close();
 		} catch (IOException e) {
-			System.err.println("Could not write to file " + 
-					getPropertiesFileName() + ".");
+			String msg = "Could not write to file " +
+					getPropertiesFileName() + ".";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);	
 			return false;
 		}
 
@@ -215,6 +242,9 @@ public class AppProperties {
 		applicationProperties.setProperty(
 				"AcquisitionStation",
 				DefaultProperties.defaultValueForProperty("AcquisitionStation"));
+		applicationProperties.setProperty(
+				"UserDataDir",
+				DefaultProperties.defaultValueForProperty("UserDataDir"));
 		applicationProperties.setProperty(
 				"DatamoverIncomingDir",
 				DefaultProperties.defaultValueForProperty("DatamoverIncomingDir"));
