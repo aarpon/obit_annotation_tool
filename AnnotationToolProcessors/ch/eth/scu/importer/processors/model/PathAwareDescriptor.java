@@ -39,7 +39,7 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 		// Store base and full path
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		this.basePath = new File(
-				appProperties.getProperty("DatamoverIncomingDir"));;
+				appProperties.getProperty("UserDataDir"));;
 		this.fullPath = fullPath;
 		
 		// Compute and store the relative path
@@ -85,18 +85,6 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	}
 
 	/**
-	 * Return the full file name of the properties name (the XML file with 
-	 * all information needed by the dropbox to register the dataset
-	 * or experiment).
-	 * 
-	 * Default implementation.
-	 */
-	public String getPropertiesNameForSaving(String dataName) {
-		return this.getRelativePath() + 
-				File.separator + dataName + "_properties.six"; 
-	}	
-	
-	/**
 	 * Computes and store the folder path relative to the Datamover 
 	 * incoming folder.
 	 * @param fullPath Folder with full path.
@@ -120,10 +108,21 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 					"("+ fullPath.toString() + ")");
 			System.exit(1);
 		}
-		this.relativePath = fullFolderStr.substring(basePathStr.length());
-		if (this.relativePath.startsWith(File.separator)) {
-			this.relativePath = this.relativePath.substring(1);
+		
+		// First check that the initial part of the paths overlap
+		String rel = "";
+		if (fullFolderStr.indexOf(basePathStr) == 0) {
+			try {
+				rel = fullFolderStr.substring(basePathStr.length());
+				if (rel.startsWith(File.separator) &&
+						rel.length() > 1) {
+					rel = rel.substring(1);
+				}
+			} catch (Exception e) {
+				rel = "/";
+			}
 		}
+		this.relativePath = rel;
 	}
 	
 }

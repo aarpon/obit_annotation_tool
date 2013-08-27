@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.processors;
 
 import java.io.File;
+import java.util.Map;
 
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 

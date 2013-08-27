@@ -8,7 +8,6 @@
 	<classpathentry kind="src" path="AnnotationToolProcessorsNikonND2"/>
 	<classpathentry kind="src" path="AnnotationToolUIElementsLSRFortessa"/>
 	<classpathentry kind="src" path="AnnotationToolUIElementsNikonND2"/>
-	<classpathentry kind="src" path="utils"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dropbox/datastore_server.jar"/>

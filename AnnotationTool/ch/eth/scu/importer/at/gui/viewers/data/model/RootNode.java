@@ -20,4 +20,9 @@ public class RootNode extends AbstractNode {
 		return new javax.swing.ImageIcon(
 				getClass().getResource("icons/root.png"));
 	}
+	
+	@Override
+	public String toString() {
+		return "/" + this.getUserObject().toString();
+	}
 }

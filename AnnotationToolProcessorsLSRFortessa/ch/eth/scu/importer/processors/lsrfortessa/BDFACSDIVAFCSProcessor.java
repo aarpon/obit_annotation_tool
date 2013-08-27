@@ -1,7 +1,6 @@
 package ch.eth.scu.importer.processors.lsrfortessa;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,6 +15,7 @@ import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.lsrfortessa.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
 import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
+import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
@@ -34,12 +34,12 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
-
-	/* Private instance variables */
 	private int numberOfValidFiles = 0;
-	
+	private Map<String, String> parsingData = 
+			new LinkedHashMap<String, String>();
+
 	/* Public instance variables */
-	public Folder folderDescriptor = null;
+	public UserFolder folderDescriptor = null;
 
 	/**
 	 * Constructor
@@ -63,7 +63,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		this.userFolder = folder;
 
 		// Create a folderDescriptor
-		folderDescriptor = new Folder(folder); 
+		folderDescriptor = new UserFolder(folder); 
 
 	}
 
@@ -117,15 +117,36 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}	
 
 	/**
-	 * Descriptor that represents a folder containing a dataset. 
+	 * Saves a snapshot of the information about the parsed data in
+	 * the user folder as a hashmap with experiment -> folder pointers.
+	 * The map is to be used to check what has been already processed
+	 * and for registration by the dropbox script.  
+	 * @return true if the snapshot could be saved successfully,
+	 * false otherwise.
+	 */
+	public boolean saveUserFolderParsingData() {
+		return true;	
+	}
+
+	/**
+	 * Loads a snapshot of the information about the parsed data in
+	 * the user folder.  
+	 * @return hashmap with experiment -> folder information.
+	 */
+	public Map<String, String> loadUserFolderParsingData() {
+		return new LinkedHashMap<String, String>();
+	}
+
+	/**
+	 * Descriptor that represents a the user top folder. 
 	 * @author Aaron Ponti
 	 */
-	public class Folder extends PathAwareDescriptor {
+	public class UserFolder extends RootDescriptor {
 		
 		public Map<String, Experiment> experiments = 
 				new LinkedHashMap<String, Experiment>();
 		
-		public Folder(File fullFolder) {
+		public UserFolder(File fullFolder) {
 			
 			// Invoke parent constructor
 			super(fullFolder);
@@ -751,4 +772,5 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		attributes.put("dataFilename", processor.getStandardKeyword("$FIL"));
 		return attributes;
 	}
+
 }

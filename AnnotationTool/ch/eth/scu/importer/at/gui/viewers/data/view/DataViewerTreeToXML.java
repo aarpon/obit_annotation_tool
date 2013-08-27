@@ -23,7 +23,7 @@ import org.w3c.dom.Element;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
-import ch.eth.scu.importer.processors.model.FirstLevelDescriptor;
+import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
 
 
 /**
@@ -65,10 +65,10 @@ public class DataViewerTreeToXML {
 					(AbstractDescriptor) topNode.getUserObject();
 
 			// Get the top level descriptor: top level descriptor MUST 
-			// extend the FirstLevelDescriptor abstract class - i.e. it
+			// extend the PathAwareDescriptor abstract class - i.e. it
 			// must be mappable to a folder (and has to know its own
 			// absolute path)
-			assert (topDescr instanceof FirstLevelDescriptor);
+			assert (topDescr instanceof PathAwareDescriptor);
 
 			// Now go over all children - each child will have its own
 			// properties XML file for registration stored in the
@@ -84,19 +84,19 @@ public class DataViewerTreeToXML {
 				AbstractDescriptor secondLevelDescr = 
 						(AbstractDescriptor) secondLevelNode.getUserObject();
 				
-				// Construct the properties file name (which we also use as key
-				// for the map)
+				// Construct the properties file name (which we also use
+				// as key for the map)
 				String key =
-						((FirstLevelDescriptor)topDescr).
-						getPropertiesNameForSaving(
-								secondLevelDescr.getName());
-
+					((PathAwareDescriptor)topDescr).getRelativePath() +
+					File.separator + secondLevelDescr.getName() +
+					"_properties.six";
+				
 				// Now build the XML document
 				try {
 					builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 					document = builder.newDocument();
 
-					Element root = document.createElement("oBITXml");
+					Element root = document.createElement("obitXML");
 					root.setAttribute("version", "1");
 					
 					// Add the second level node

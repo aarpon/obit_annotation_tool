@@ -281,9 +281,6 @@ abstract public class AbstractViewer extends Observable
 		// Inform
 		outputPane.log("Scanning user data folder...");
 
-		// Prepare a new root node for the Tree
-		rootNode = new RootNode(new RootDescriptor("/" + userName));
-				
 		// Make sure to clear the table of invalid datasets and
 		// metadata
 		clearInvalidDatasetsTable();
@@ -292,18 +289,21 @@ abstract public class AbstractViewer extends Observable
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
 		Properties appProperties = AppProperties.readPropertiesFromFile();
-		File dropboxIncomingFolder = new File(
-				appProperties.getProperty("DatamoverIncomingDir") +
+		File userDataFolder = new File(
+				appProperties.getProperty("UserDataDir") +
 				File.separator + userName);
 		
 		// Does the folder exist? If not, we create it. Please mind,
 		// if directory creation fails, the application will quit since
 		// this is a non-recoverable problem.
-		checkAndCreateFolderOrDie(dropboxIncomingFolder, "user directory");
+		checkAndCreateFolderOrDie(userDataFolder, "user directory");
+
+		// Prepare a new root node for the Tree
+		rootNode = new RootNode(new RootDescriptor(userDataFolder));
 		
 		// We parse the user folder: the actual processing is done
 		// by the processor.
-		Boolean status = parse(dropboxIncomingFolder);
+		Boolean status = parse(userDataFolder);
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
@@ -425,7 +425,7 @@ abstract public class AbstractViewer extends Observable
 	protected void clearTree() {
 
 		// Create the root node
-		rootNode = new RootNode(new RootDescriptor("/"));
+		rootNode = new RootNode(new RootDescriptor(new File("/")));
 
 		// Create a tree that allows one selection at a time.
 		tree = new DataViewerTree(rootNode);

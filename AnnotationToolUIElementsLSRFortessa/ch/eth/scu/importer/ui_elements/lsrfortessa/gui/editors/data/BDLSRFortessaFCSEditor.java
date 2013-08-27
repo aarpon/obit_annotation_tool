@@ -644,26 +644,17 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// We extract all experiments from the data model
 		RootNode dataRoot = (RootNode) dataModel.getRoot();
 		
-		// First level are the folder nodes 
+		// First level are the Experiment nodes 
 		int dataNChildren = dataRoot.getChildCount();
 
 		for (int i = 0; i < dataNChildren; i++) {
 
-			// Get the FolderNode
-			FolderNode folderNode = (FolderNode) dataRoot.getChildAt(i);
+			// Get the ExperimentNode
+			ExperimentNode expNode =
+						(ExperimentNode) dataRoot.getChildAt(i);
 
-			// First level are the folder nodes 
-			int folderNChildren = folderNode.getChildCount();
-			
-			for (int j = 0;  j < folderNChildren; j++) {
-				
-				// Get the ExperimentNode
-				ExperimentNode expNode =
-						(ExperimentNode) folderNode.getChildAt(j);
-
-				// Store the reference to the ExperimentNode
-				experiments.add(expNode);
-			}
+			// Store the reference to the ExperimentNode
+			experiments.add(expNode);
 		}        
 	}
 

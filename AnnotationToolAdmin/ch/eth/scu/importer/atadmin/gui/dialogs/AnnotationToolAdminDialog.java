@@ -31,7 +31,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JButton dirButton;
 	protected JButton userdirButton;
 	protected JButton saveButton;
-	protected JButton cancelButton;
+	protected JButton closeButton;
 	protected JComboBox<Object> acqStationsList;
 	protected JComboBox<Object> openBISURLList;
 	
@@ -47,6 +47,18 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 		// Read the properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();
+		boolean isUpToDate = 
+				AppProperties.isPropertiesFileVersionCurrent(appProperties);
+		if (appProperties == null || !isUpToDate) {
+			appProperties = AppProperties.initializePropertiesFile();
+			if (	appProperties == null) {
+				JOptionPane.showMessageDialog(null,
+						"Could not save application settings to disk!",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+		}
 
 		// Make the dialog modal and not resizable
 		setModal(true);
@@ -157,7 +169,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(userdirButton, "wrap, width 100%");
 
 		// Add a label for the directory
-		JLabel dirLabel = new JLabel("Data mover incoming directory");
+		JLabel dirLabel = new JLabel("Datamover incoming directory");
 		add(dirLabel, "wrap, width 100%");
 		
 		// Add a pushButton to choose the directory
@@ -237,18 +249,16 @@ public class AnnotationToolAdminDialog extends JDialog {
         });
 		add(saveButton, "tag ok, span, split 2");
 
-		// Create a cancel button
-		cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(new ActionListener() {
+		// Create a close button
+		closeButton = new JButton("Close");
+		closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	// If we cancel the admin mode, we quit the application
-            	// TODO Ask the user for confirmation
             	setVisible(false);
             	dispose();
             	System.exit(0);
             }
         });
-		add(cancelButton, "tag cancel, span, split 2");
+		add(closeButton, "tag cancel, span, split 2");
 		
 		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(saveButton);

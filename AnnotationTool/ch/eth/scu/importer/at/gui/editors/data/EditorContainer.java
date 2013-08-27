@@ -106,7 +106,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 			// Get the application properties
 			Properties appProperties = AppProperties.readPropertiesFromFile();
 			String outputDirectory = 
-					appProperties.getProperty("DatamoverIncomingDir");
+					appProperties.getProperty("UserDataDir");
 
 			// Save to XML
 			dataViewer.saveToXML(outputDirectory);

@@ -6,8 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-
-import javax.swing.JOptionPane;
+import java.util.Set;
 
 /**
  * Commodity class to manage the AnnotationTool application properties
@@ -21,31 +20,61 @@ public class AppProperties {
 
 	/**
 	 * Check whether the properties file already exists
-	 * @return 	true if the properties file already exists, false otherwise.
+	 * @return 	true if the properties file already exists, false
+	 * otherwise.
 	 */	
 	static public boolean propertiesFileExists() {
 		return getPropertiesFileName().exists();
 	}
 
 	/**
+	 * Check whether the Properties file is at current version
+	 * @param appProperties Properties object
+	 * @return true if the Properties file is at current version,
+	 * false otherwise.
+	 * 
+	 * Please note that this function will return true if the file does
+	 * not exist, since a new AppProperties object will be created and
+	 * tested for its version. 
+	 * 
+	 * @see propertiesFileExists
+	 */
+	static public boolean isPropertiesFileVersionCurrent(Properties appProperties) {
+		if (appProperties == null) { return false; }
+		return appProperties.getProperty("PropertyFileVersion")
+				.equals(propertiesVersion);
+	}
+
+	/**
+	 * Check whether all Properties in the file are set. 
+	 * @return true if all Properties in the file are set,
+	 * false otherwise.
+	 */
+	static public boolean areAllPropertiesSet(Properties appProperties) {
+		if (appProperties == null) { return false; }
+		Set<Object> keys = appProperties.keySet(); 
+		for (Object k : keys) {
+			String key = (String) k;
+			if (appProperties.getProperty(key).equals("")) {
+				return false; 
+			}
+		}
+		return true;
+	}
+	
+	/**
 	 * Read the properties from disk 
-	 * @return a Properties object
+	 * @return a Properties object or null if it could not be loaded
 	 */
 	static public Properties readPropertiesFromFile() {
 
-		// Initialize default Properties
-		Properties appProperties = getDefaultProperties();
-		
 		// Make sure the Properties file exists
 		if (!AppProperties.propertiesFileExists()) {
-			if (!AppProperties.initializePropertiesFile()) {
-				String msg = "Could not initialize properties file " +
-						getPropertiesFileName() + ".";
-				JOptionPane.showMessageDialog(null, msg, "Error",
-					    JOptionPane.ERROR_MESSAGE);
-				return appProperties;
-			}
+			return null;
 		}
+
+		// Instantiate Properties object
+		Properties appProperties = new Properties();
 
 		// Open file
 		FileInputStream in;
@@ -55,31 +84,16 @@ public class AppProperties {
 				appProperties.load(in);
 				in.close();
 			} catch (IOException e) {
-				String msg = "Could not read from file. " +
+				System.err.println("Could not read from file. " +
 						getPropertiesFileName() + ". " +
-						"Returning default properties.";
-				JOptionPane.showMessageDialog(null, msg, "Error",
-					    JOptionPane.ERROR_MESSAGE);
-				return appProperties;
+						"Returning default properties.");
+				return null;
 			}
 		} catch (FileNotFoundException e) {
-			String msg = "Could not read from file. " +
+			System.err.println("Could not read from file. " +
 					getPropertiesFileName()  + ". " +
-					"Returning default properties.";
-			JOptionPane.showMessageDialog(null, msg, "Error",
-				    JOptionPane.ERROR_MESSAGE);
-			return appProperties;
-		}
-		
-		// Check that the properties file version is current, 
-		// otherwise inform the user and return default values
-		if (! appProperties.getProperty("PropertyFileVersion")
-				.equals(propertiesVersion)) {
-			String msg = "The properties file is old. " +
-					"Property values are reverted to defaults!";
-			JOptionPane.showMessageDialog(null, msg, "Error",
-				    JOptionPane.ERROR_MESSAGE);
-			appProperties = getDefaultProperties(); 
+					"Returning default properties.");
+			return null;
 		}
 
 		// Return the Properties object
@@ -89,17 +103,19 @@ public class AppProperties {
 	/**
 	 * Write the properties to disk 
 	 * @return true if the properties were saved successfully, false otherwise
+	 * 
+	 * This function might require write access to a restricted system
+	 * folder. It should be used only in code run with admin privileges.
 	 */
 	static public boolean writePropertiesToFile(String openBISURL, 
 			String acqStation, String userDataDir, String incomingDir) {
 
 		// Make sure the Properties file exists
 		if (!AppProperties.propertiesFileExists()) {
-			if (!AppProperties.initializePropertiesFile()) {
-				String msg = "Could not initialize properties file " +
-						getPropertiesFileName() + ".";
-				JOptionPane.showMessageDialog(null, msg, "Error",
-					    JOptionPane.ERROR_MESSAGE);				
+			if (AppProperties.initializePropertiesFile() == null) {
+				System.err.println(
+						"Could not initialize properties file " +
+						getPropertiesFileName() + ".");				
 			}
 		}
 		
@@ -123,10 +139,8 @@ public class AppProperties {
 					"AnnotationTool Properties Set");
 			out.close();
 		} catch (IOException e) {
-			String msg = "Could not write to file " +
-					getPropertiesFileName() + ".";
-			JOptionPane.showMessageDialog(null, msg, "Error",
-				    JOptionPane.ERROR_MESSAGE);				
+			System.err.println("Could not write to file " +
+					getPropertiesFileName() + ".");				
 			return false;
 		}
 		
@@ -182,6 +196,9 @@ public class AppProperties {
 	 * Create the application data directory
 	 * @return 	true if the application data directory could be created
 	 * successfully, false otherwise.
+	 * 
+	 * This function might require write access to a restricted system
+	 * folder. It should be used only in code run with admin privileges.
 	 */
 	static private boolean createApplicationPropertiesDir() {
 		
@@ -194,15 +211,19 @@ public class AppProperties {
 	
 	/**
 	 * Initialize the properties file (if it does not exist)
-	 * @return 	true if the properties file was generated successfully, 
-	 * false otherwise.
+	 * @return 	the generated Properties object or null if it could not
+	 * be saved to disk.
+	 * 
+	 * This function might require write access to a restricted system
+	 * folder. It should be used only in code run with admin privileges.
+
 	 */	
-	static private boolean initializePropertiesFile() {
+	static public Properties initializePropertiesFile() {
 		
 		// Make sure the properties file exists
 		if (!AppProperties.propertiesFileExists()) {
 			if (!AppProperties.createApplicationPropertiesDir()) {
-				return false;
+				return null;
 			}
 		}
 		
@@ -212,18 +233,16 @@ public class AppProperties {
 		// Save them to file
 		try {
 			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
-			applicationProperties.store(out, "Default Properties Set");
+			applicationProperties.store(out, "AnnotationTool Properties Set");
 			out.close();
 		} catch (IOException e) {
-			String msg = "Could not write to file " +
-					getPropertiesFileName() + ".";
-			JOptionPane.showMessageDialog(null, msg, "Error",
-				    JOptionPane.ERROR_MESSAGE);	
-			return false;
+			System.err.println("Could not write to file " +
+					getPropertiesFileName() + ".");	
+			return null;
 		}
 
 		// Return success
-		return true;
+		return applicationProperties;
 	}
 	
 	/**

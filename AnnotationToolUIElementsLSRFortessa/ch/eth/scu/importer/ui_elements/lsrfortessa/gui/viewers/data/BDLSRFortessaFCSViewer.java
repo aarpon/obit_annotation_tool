@@ -3,6 +3,7 @@ package ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
+import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Well;
 import ch.eth.scu.importer.processors.lsrfortessa.FCSProcessor;
@@ -12,7 +13,6 @@ import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
 import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tube;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FCSFileNode;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FolderNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.SpecimenNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.TrayNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.TubeNode;
@@ -22,6 +22,7 @@ import java.awt.event.*;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.event.*;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -84,13 +85,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			return false;
 		}
 
-		// Create a folder note as a child of the root node
-		FolderNode folderNode = 
-				new FolderNode(divafcsprocessor.folderDescriptor);
-		rootNode.add(folderNode);
-		
 		// We will append the experiment nodes directly to the root node
-		createNodes(folderNode, divafcsprocessor.folderDescriptor);
+		createNodes((RootNode)rootNode, divafcsprocessor.folderDescriptor);
 		
 		// Inform the user
 		outputPane.log("Successfully processed folder \"" + 
@@ -196,8 +192,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
          * @param top Root node for the tree
          * @param folderDescriptor A folder descriptor object.
          */
-	protected void createNodes(AbstractNode top,
-			BDFACSDIVAFCSProcessor.Folder folderDescriptor) {
+	protected void createNodes(RootNode top,
+			BDFACSDIVAFCSProcessor.UserFolder folderDescriptor) {
 		
 		ExperimentNode experiment;
 		TrayNode tray;

@@ -1,21 +1,22 @@
 package ch.eth.scu.importer.processors.model;
 
+import java.io.File;
+
 /**
- * The RootDescriptor is the top node in the data model tree.
- * 
- * Its children MUST be of type FirstLevelDescriptor.
+ * The RootDescriptor is the top node in the data model tree and 
+ * maps to the user folder.
  * 
  * @author Aaron Ponti
  *
  */
-public class RootDescriptor extends AbstractDescriptor{
+public class RootDescriptor extends PathAwareDescriptor{
 
 	/**
 	 * Constructor.
-	 * @param rootString String to be displayed at the root node.
+	 * @param userName User name to be displayed at the root node.
 	 */
-	public RootDescriptor(String rootString) {
-		this.name = rootString;
+	public RootDescriptor(File fullUserFolderPath) {
+		super(fullUserFolderPath);
 	}
 	
 	/**
@@ -26,5 +27,13 @@ public class RootDescriptor extends AbstractDescriptor{
 	public String getType() {
 		return "Root";
 	}
-
+	
+	/*
+	 * Return the String representation of the descriptor
+	 * @return the relative path as String representation
+	 */
+	@Override
+	public String toString() {
+		return this.relativePath;
+	}
 }
