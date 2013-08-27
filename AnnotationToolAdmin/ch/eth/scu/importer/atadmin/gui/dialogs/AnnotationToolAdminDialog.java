@@ -184,6 +184,12 @@ public class AnnotationToolAdminDialog extends JDialog {
         });		
 		add(dirButton, "wrap, width 100%");
 		
+		// Add a label for the info text
+		JLabel infoLabel = new JLabel(
+				"<html>It is <b>highly recommended</b> to set " +
+		"both folders on the same file system.</html>");
+		add(infoLabel, "wrap, width 100%");
+		
 		// Create a Save button
 		saveButton = new JButton("Save");
 		saveButton.addActionListener(new ActionListener() {
