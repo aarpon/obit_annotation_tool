@@ -60,28 +60,39 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			return false;
 		}
 
-		// If the subfolder is already annotated, we skip it (but still
-		// we return success)
-		if (divafcsprocessor.validator.isAnnotated) {
-			outputPane.log("Dataset \"" + divafcsprocessor.folderDescriptor + 
-					"\" is annotated.");
-			return true;
-		}
+//		// If the subfolder is already annotated, we skip it (but still
+//		// we return success)
+//		if (divafcsprocessor.validator.isAnnotated) {
+//			outputPane.log("Dataset \"" + divafcsprocessor.folderDescriptor + 
+//					"\" is annotated.");
+//			return true;
+//		}
 
 		// Make sure we have a valid dataset
 		if (!divafcsprocessor.validator.isValid) {
 			DefaultTableModel model = 
 					(DefaultTableModel) invalidDatasetsTable.getModel();
-			int nError = 0;
-			StringBuilder err = new StringBuilder("");
-			for (String errorString : divafcsprocessor.validator.errorMessages) {
-				nError++;
-				err.append("(").append(nError).append(") ").append(errorString);
+//			int nError = 0;
+//			StringBuilder err = new StringBuilder("");
+//			for (String errorString : divafcsprocessor.validator.errorMessages) {
+//				nError++;
+//				err.append("(").append(nError).append(") ").append(errorString);
+//			}
+			for (File file : divafcsprocessor.validator.invalidFilesOrFolders.keySet()) {
+				String filePath;
+				try {
+					filePath = file.getCanonicalPath();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					filePath = "Unknown";
+				}
+				model.addRow(new Object[] {filePath,
+						divafcsprocessor.validator.invalidFilesOrFolders.get(file)});
 			}
-			model.addRow(new Object[] {userFolder.getName(), err});
-			outputPane.err("Dataset \"" + 
-				divafcsprocessor.folderDescriptor + 
-				"\" failed validation. Please fix or remove.");
+//			model.addRow(new Object[] {userFolder.getName(), err});
+//			outputPane.err("Dataset \"" + 
+//				divafcsprocessor.folderDescriptor + 
+//				"\" failed validation. Please fix or remove.");
 			return false;
 		}
 
@@ -159,8 +170,8 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			// Cast
 			BDFACSDIVAFCSProcessor.FCSFile fcsFile =
 					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;
-			String fcsFileName = fcsFile.getFullPath();
-			FCSProcessor fcs = new FCSProcessor(fcsFileName, false);
+			FCSProcessor fcs = new FCSProcessor(
+					new File(fcsFile.getFullPath()), false);
 			try {
 				fcs.parse();
 				clearMetadataTable();

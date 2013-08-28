@@ -77,11 +77,11 @@ abstract public class AbstractDescriptor {
 	public Map<String, String> getAttributes() { return attributes; }
 
 	/**
-	 * Set the entity attributes.
+	 * Appends the entity attributes to the existing ones.
 	 * @param attributes String-string map with attribute name:value pairs.
 	 */
-	public void setAttributes(Map<String, String> attributes) { 
-		this.attributes = attributes; 
+	public void addAttributes(Map<String, String> attributes) { 
+		this.attributes.putAll(attributes); 
 	}
 
 	/**
@@ -93,12 +93,12 @@ abstract public class AbstractDescriptor {
 	}
 
 	/**
-	 * Set the entity openBIS attributes.
+	 * Appends the entity openBIS attributes to the existing ones.
 	 * @param openBISAttributes String-string map with openBIS attribute 
 	 * name : value pairs.
 	 */
-	public void setOpenBISAttributes(Map<String, String> openBISAttributes) { 
-		this.openBISAttributes = openBISAttributes; 
+	public void addOpenBISAttributes(Map<String, String> openBISAttributes) { 
+		this.openBISAttributes.putAll(openBISAttributes); 
 	}
 
 	/**
@@ -110,12 +110,12 @@ abstract public class AbstractDescriptor {
 	}
 
 	/**
-	 * Set the entity user attributes.
+	 * Appends the entity user attributes to the existing ones.
 	 * @param userAttributes String-string map with openBIS attribute 
 	 * name : value pairs.
 	 */
-	public void setUserAttributes(Map<String, String> userAttributes) { 
-		this.userAttributes = userAttributes; 
+	public void addUserAttributes(Map<String, String> userAttributes) { 
+		this.userAttributes.putAll(userAttributes); 
 	}
 	
 	/**

@@ -1,15 +1,17 @@
 package ch.eth.scu.importer.processors.validator;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A dataset validator. In its simplest implementation, the validator 
- * contains:
- *    - a boolean flag to indicate whether the dataset is valid;
- *    - a boolean flag to indicate whether the dataset is already 
- *      annotated;
- *    - and an array of Strings listing all problems found in case
- *      the dataset is invalid.
+ * A validator for the user directory. In its simplest implementation, 
+ * the validator contains:
+ *    - a boolean flag to indicate whether the user folder contains
+ *    	valid datasets and is ready to be annotated and moved;
+ *    - a Map of invalid Files (or Folders) and the corresponding 
+ *   	String with the reason/error for being invalid.
+ *
  * In this implementation, the actual validation is performed by the 
  * processor. The validator is just used to keep track of the state. 
  * 
@@ -28,15 +30,12 @@ public class GenericValidator {
 	public boolean isValid = true;
 
 	/**
-	 * Boolean flag that indicates whether the has been annotated already.
+	 * Map of invalid Files (or Folders) that and the corresponding 
+	 * List of Strings with all reasons/errors for being invalid.
 	 */
-	public boolean isAnnotated = false;
+	public Map<File, String> invalidFilesOrFolders = 
+			new HashMap<File, String>();
 
-	/**
-	 * List of Strings containing the reasons why a dataset is invalid.
-	 */
-	public ArrayList<String> errorMessages = new ArrayList<String>();
-	
 	/**
 	 * Constructor
 	 */

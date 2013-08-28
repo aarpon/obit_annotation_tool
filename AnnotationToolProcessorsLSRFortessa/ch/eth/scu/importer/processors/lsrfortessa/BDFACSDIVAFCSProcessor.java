@@ -14,7 +14,6 @@ import ch.eth.scu.importer.processors.AbstractProcessor;
 import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.lsrfortessa.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
-import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
@@ -62,7 +61,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Set the root folder
 		this.userFolder = folder;
 
-		// Create a folderDescriptor
+		// Create a descriptor for the user folder
 		folderDescriptor = new UserFolder(folder); 
 
 	}
@@ -195,6 +194,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 			super(fullPath);
 			this.name = fullPath.getName();
+			
+			// Set the attribute relative path. Since this will be 
+			// used by the openBIS dropboxes running on a Unix machine, 
+			// we make sure to use forward slashes for path separators 
+			// when we set it as an attribute.
+			attributes.put("relativePath",
+					this.relativePath.replace("\\", "/"));
 
 		}
 
@@ -466,22 +472,27 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			String ext = fileName.substring(indx);
 			if (ext.equalsIgnoreCase(".xml")) {
 				validator.isValid = false;
-				validator.isAnnotated = false;
-				validator.errorMessages.add("Experiment export");
+				validator.invalidFilesOrFolders.put(
+						file, "Experiment export");
 				return;
 			}
 
 			// Do we have an unknown file? If we do, we move on to the next.
 			if (! ext.equalsIgnoreCase(".fcs")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "Unknown file format");
 				continue;
 			}
 			
 			// Is it an FCS file? Scan it and extract the information
-			FCSProcessor processor = 
-					new FCSProcessor(file.getCanonicalPath(), false);
+			FCSProcessor processor = new FCSProcessor(file, false);
 			if (!processor.parse()) {
 				System.err.println("File " + file.getCanonicalPath() + 
 						" could not be parsed! It will be skipped.");
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "Parsing failed");
 				continue;
 			} else {
 				// Add one to the number of valid files found
@@ -499,7 +510,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				expDesc = 
 						new Experiment(experimentPath);
 				// Store attributes
-				expDesc.setAttributes(getExperimentAttributes(processor));
+				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentKey, expDesc);
 			}
 	
@@ -516,7 +527,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					trayDesc = 
 							new Tray(trayName);
 					// Store attributes
-					trayDesc.setAttributes(getTrayAttributes(processor));
+					trayDesc.addAttributes(getTrayAttributes(processor));
 					// Store it in the experiment descriptor
 					expDesc.trays.put(trayKey, trayDesc);
 				}
@@ -531,7 +542,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					specDesc = 
 							new Specimen(specName);
 					// Store attributes
-					specDesc.setAttributes(getSpecimenAttributes(processor));
+					specDesc.addAttributes(getSpecimenAttributes(processor));
 					// Store it in the tray descriptor
 					trayDesc.specimens.put(specKey, specDesc);
 				}
@@ -543,7 +554,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				if (! specDesc.tubes.containsKey(wellKey)) {
 					wellDesc = new Well(wellName, file);
 					// Store attributes
-					wellDesc.setAttributes(getTubeAttributes(processor));
+					wellDesc.addAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(wellKey, wellDesc);
 				}
@@ -560,7 +571,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					specDesc = 
 							new Specimen(specName);	
 					// Store attributes
-					specDesc.setAttributes(getSpecimenAttributes(processor));
+					specDesc.addAttributes(getSpecimenAttributes(processor));
 					// Store it in the experiment descriptor
 					expDesc.specimens.put(specKey, specDesc);
 				}
@@ -572,21 +583,13 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				if (! specDesc.tubes.containsKey(tubeKey)) {
 					tubeDesc = new Tube(tubeName, file);	
 					// Store attributes
-					tubeDesc.setAttributes(getTubeAttributes(processor));
+					tubeDesc.addAttributes(getTubeAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
 	
 			}
 	
-		}
-
-		// At this point, the dataset is for sure not annotated, but it
-		// could still be invalid (if no files were found)
-		this.validator.isValid = (numberOfValidFiles > 0);
-		this.validator.isAnnotated = false;
-		if (numberOfValidFiles == 0) {
-			this.validator.errorMessages.add("No FCS files found.");
 		}
 
 	}
@@ -711,14 +714,16 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			acqHardwareString = "BD LSR Fortessa";
 		} else {
 			validator.isValid = false;
-			validator.errorMessages.add(
+			validator.invalidFilesOrFolders.put(
+					processor.getFile(),
 					"Wrong hardware string: " + acqHardwareString);
 		}
 		attributes.put("acq_hardware", acqHardwareString);
 		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
 		if (!acqSoftwareString.contains("BD FACSDiva Software")) {
 			validator.isValid = false;
-			validator.errorMessages.add(
+			validator.invalidFilesOrFolders.put(
+					processor.getFile(),
 					"Wrong software string: " + acqHardwareString);
 		} else {
 			// Check major and minor version (we ignore the patch)
@@ -727,13 +732,17 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			Matcher m = p.matcher(acqSoftwareString);
 			if (!m.matches()) {
 				validator.isValid = false;
-				validator.errorMessages.add("Unknown software version.");
+				validator.invalidFilesOrFolders.put(
+						processor.getFile(),
+						"Unknown software version.");
 			} else {
 				if (!m.group(2).equals("6") || !m.group(3).equals("1")) {
 					validator.isValid = false;
-					validator.errorMessages.add(
-					"Unsupported software version: " + m.group(2) + "." +
-							 m.group(3));
+					validator.invalidFilesOrFolders.put(
+							processor.getFile(),
+							"Unsupported software version: " + 
+							m.group(2) + "." +
+							m.group(3));
 				}
 			}
 		}

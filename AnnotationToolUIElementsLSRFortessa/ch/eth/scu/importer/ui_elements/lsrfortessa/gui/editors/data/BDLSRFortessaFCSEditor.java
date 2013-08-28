@@ -113,13 +113,13 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 					metadata.getOpenBISExerimentIdentifier());
 			expOpenBISAttributes.put("openBISSpaceIdentifier", 
 					metadata.getOpenBISSpaceIdentifier());
-			expDescr.setOpenBISAttributes(expOpenBISAttributes);
+			expDescr.addOpenBISAttributes(expOpenBISAttributes);
 
 			// Set the description
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", expDescr.description); 
-			expDescr.setUserAttributes(expUserAttributes);
+			expDescr.addUserAttributes(expUserAttributes);
 
 			// Now get the Trays and Specimens children of the Experiment
 			for (int i = 0; i < expNode.getChildCount(); i++) {
@@ -145,7 +145,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				firstLevelOpenBISAttributes.put(
 						"openBISExperimentIdentifier", 
 						metadata.getOpenBISExerimentIdentifier());
-				firstLevelSample.setOpenBISAttributes(
+				firstLevelSample.addOpenBISAttributes(
 						firstLevelOpenBISAttributes);
 
 				// In case we have Trays, we set their geometry
@@ -155,7 +155,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 							new Hashtable<String, String>();
 					firstLevelUserAttributes.put(
 							"trayGeometry", tray.geometry);
-					firstLevelSample.setUserAttributes(
+					firstLevelSample.addUserAttributes(
 							firstLevelUserAttributes);
 				}
 
@@ -183,7 +183,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 					secondLevelOpenBISAttributes.put(
 							"openBISExperimentIdentifier", 
 							metadata.getOpenBISExerimentIdentifier());
-					secondLevelSample.setOpenBISAttributes(
+					secondLevelSample.addOpenBISAttributes(
 							secondLevelOpenBISAttributes);					
 	
 					// Now go over the children
@@ -216,7 +216,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 							thirdLevelOpenBISAttributes.put(
 									"openBISExperimentIdentifier", 
 									metadata.getOpenBISExerimentIdentifier());
-							thirdLevelSample.setOpenBISAttributes(
+							thirdLevelSample.addOpenBISAttributes(
 									thirdLevelOpenBISAttributes);					
 							
 							// And now we set up the associated FCS file
@@ -235,7 +235,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 							fourthLevelOpenBISAttributes.put(
 									"openBISExperimentIdentifier", 
 									metadata.getOpenBISExerimentIdentifier());
-							fcsFile.setOpenBISAttributes(
+							fcsFile.addOpenBISAttributes(
 									fourthLevelOpenBISAttributes);	
 	
 						} else {
@@ -252,7 +252,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 							fourthLevelOpenBISAttributes.put(
 									"openBISExperimentIdentifier", 
 									metadata.getOpenBISExerimentIdentifier());
-							fcsFile.setOpenBISAttributes(
+							fcsFile.addOpenBISAttributes(
 									fourthLevelOpenBISAttributes);	
 
 						}

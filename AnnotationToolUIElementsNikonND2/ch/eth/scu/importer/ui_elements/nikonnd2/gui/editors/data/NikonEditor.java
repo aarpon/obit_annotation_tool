@@ -106,14 +106,14 @@ public class NikonEditor extends AbstractEditor {
 					currentMetadata.getOpenBISExerimentIdentifier());
 			expOpenBISAttributes.put("openBISSpaceIdentifier", 
 					currentMetadata.getOpenBISSpaceIdentifier());
-			expDescr.setOpenBISAttributes(expOpenBISAttributes);
+			expDescr.addOpenBISAttributes(expOpenBISAttributes);
 
 			// Set the description
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", 
 					currentMetadata.getExperiment().description); 
-			expDescr.setUserAttributes(expUserAttributes);
+			expDescr.addUserAttributes(expUserAttributes);
 
 			// Now get the ND2File children of the Experiment
 			for (int i = 0; i < expNode.getChildCount(); i++) {
@@ -138,7 +138,7 @@ public class NikonEditor extends AbstractEditor {
 				ND2FileOpenBISAttributes.put(
 						"openBISExperimentIdentifier", 
 						currentMetadata.getOpenBISExerimentIdentifier());
-				nd2FileDescriptor.setOpenBISAttributes(
+				nd2FileDescriptor.addOpenBISAttributes(
 						ND2FileOpenBISAttributes);
 
 			}

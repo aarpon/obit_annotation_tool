@@ -21,7 +21,7 @@ import ch.eth.scu.importer.processors.AbstractProcessor;
 public class FCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
-	private String filename;
+	private File filename;
 	private boolean enableDataParsing; 
 	private RandomAccessFile in = null;
 	private int TEXTbegin = 0;
@@ -61,7 +61,7 @@ public class FCSProcessor extends AbstractProcessor {
 	 * Constructor 
 	 * @param filename Name with full path of the file to be opened.
 	 */
-	public FCSProcessor(String filename, boolean parseData) {
+	public FCSProcessor(File filename, boolean parseData) {
 		this.filename = filename;
 		this.enableDataParsing = parseData;
 	}
@@ -85,19 +85,19 @@ public class FCSProcessor extends AbstractProcessor {
 		try {
 
 			// We use a RandomAccessFile to be able to seek around freely
-			in = new RandomAccessFile(new File(filename),"r");
-			
+			in = new RandomAccessFile(filename,"r");
+
 			// Read the HEADER
 			parseHeader();
-			
+
 			// Read the main TEXT
 			parseText();
-			
+
 			// Process the parameters
 			processParameters();
 
 			if (enableDataParsing) {
-				
+
 				// Read the DATA (events)
 				parseData();
 
@@ -140,7 +140,7 @@ public class FCSProcessor extends AbstractProcessor {
 	 * @return String containing the file name associated to the FCSProcessor. 
 	 */
 	public String toString() {
-		return (new File(filename)).getName();
+		return filename.getName();
 	}
 
 	/**
@@ -151,6 +151,15 @@ public class FCSProcessor extends AbstractProcessor {
 	public String getType() {
 		return "fcs";
 	}	
+	
+	/**
+	 * Returns the stored File object (pointing to the FCS file being 
+	 * processed)
+	 * @return File object pointing to the FCS file
+	 */
+	public File getFile() {
+		return filename;
+	}
 	
 	/**
 	 * Return the parsed FCSProcessor metadata information.
