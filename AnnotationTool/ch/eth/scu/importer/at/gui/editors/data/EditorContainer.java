@@ -68,7 +68,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		add(metadataEditor.getPanel(), constraints);
 		
 		// Add an upload button
-		registerButton = new JButton("Register to openBIS");
+		registerButton = new JButton("Send to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
 		constraints.weightx = 1.0;

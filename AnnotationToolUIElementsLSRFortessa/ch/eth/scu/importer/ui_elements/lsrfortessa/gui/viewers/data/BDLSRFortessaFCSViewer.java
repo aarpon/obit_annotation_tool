@@ -60,24 +60,10 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 			return false;
 		}
 
-//		// If the subfolder is already annotated, we skip it (but still
-//		// we return success)
-//		if (divafcsprocessor.validator.isAnnotated) {
-//			outputPane.log("Dataset \"" + divafcsprocessor.folderDescriptor + 
-//					"\" is annotated.");
-//			return true;
-//		}
-
 		// Make sure we have a valid dataset
 		if (!divafcsprocessor.validator.isValid) {
 			DefaultTableModel model = 
 					(DefaultTableModel) invalidDatasetsTable.getModel();
-//			int nError = 0;
-//			StringBuilder err = new StringBuilder("");
-//			for (String errorString : divafcsprocessor.validator.errorMessages) {
-//				nError++;
-//				err.append("(").append(nError).append(") ").append(errorString);
-//			}
 			for (File file : divafcsprocessor.validator.invalidFilesOrFolders.keySet()) {
 				String filePath;
 				try {
@@ -89,10 +75,6 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				model.addRow(new Object[] {filePath,
 						divafcsprocessor.validator.invalidFilesOrFolders.get(file)});
 			}
-//			model.addRow(new Object[] {userFolder.getName(), err});
-//			outputPane.err("Dataset \"" + 
-//				divafcsprocessor.folderDescriptor + 
-//				"\" failed validation. Please fix or remove.");
 			return false;
 		}
 
@@ -100,8 +82,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		createNodes((RootNode)rootNode, divafcsprocessor.folderDescriptor);
 		
 		// Inform the user
-		outputPane.log("Successfully processed folder \"" + 
-				divafcsprocessor.toString() + "\"");
+		outputPane.log("Successfully processed user data folder.");
 		return true;
 	}
 
