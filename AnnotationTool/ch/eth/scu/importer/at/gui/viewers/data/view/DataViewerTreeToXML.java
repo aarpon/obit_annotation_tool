@@ -22,8 +22,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
+import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
+import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 
 
 /**
@@ -49,73 +51,53 @@ public class DataViewerTreeToXML {
 		AbstractNode rootNode = 
 				(AbstractNode) tree.getModel().getRoot();
 
-		// We create and save an XML file for each top-level children in the
-		// data model. The name and path of the XML file is obtained from the 
-		// top node.
+		// We create and save an XML file for each Experiment in the
+		// data model. Experiments are at children of the Tree root,
+		// which is the UserFolder. The name and path of each XML file
+		// is obtained from the corresponding ExperimentDescriptor. 
 
-		// Get all children of the rootNode
+		// Get all children of the rootNode - these are the Experiments
 		int nTopLevelChildren = rootNode.getChildCount();
 
 		for (int i = 0; i < nTopLevelChildren; i++) {
 
-			// Get current child
-			AbstractNode topNode = (AbstractNode) rootNode.getChildAt(i);
+			// Get current Experiment
+			ExperimentNode expNode = 
+					(ExperimentNode) rootNode.getChildAt(i);
 
-			AbstractDescriptor topDescr = 
-					(AbstractDescriptor) topNode.getUserObject();
+			ExperimentDescriptor expDescr = 
+					(ExperimentDescriptor) expNode.getUserObject();
 
-			// Get the top level descriptor: top level descriptor MUST 
-			// extend the PathAwareDescriptor abstract class - i.e. it
-			// must be mappable to a folder (and has to know its own
-			// absolute path)
-			assert (topDescr instanceof PathAwareDescriptor);
-
-			// Now go over all children - each child will have its own
-			// properties XML file for registration stored in the
-			// folder mapped by the firstLevelDescriptor. The name of the
-			// properties file will be the name of the experiment.
-			int nSecondLevelChildren = topNode.getChildCount();
-			for (int j = 0; j < nSecondLevelChildren; j++) {
-
-				// Get current child
-				AbstractNode secondLevelNode = 
-						(AbstractNode) topNode.getChildAt(j);
-
-				AbstractDescriptor secondLevelDescr = 
-						(AbstractDescriptor) secondLevelNode.getUserObject();
-				
-				// Construct the properties file name (which we also use
-				// as key for the map)
-				String key =
-					((PathAwareDescriptor)topDescr).getRelativePath() +
-					File.separator + secondLevelDescr.getName() +
+			// Construct the properties file name (which we also use
+			// as key for the map)
+			String key = expDescr.getRelativePath() +
+					File.separator + expDescr.getName() +
 					"_properties.six";
+
+			// Now build the XML document
+			try {
+				builder = DocumentBuilderFactory.newInstance()
+						.newDocumentBuilder();
+				document = builder.newDocument();
+
+				Element root = document.createElement("obitXML");
+				root.setAttribute("version", "1");
 				
-				// Now build the XML document
-				try {
-					builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-					document = builder.newDocument();
+				// Add the second level node
+				root.appendChild(
+						createElement(document, expNode));
+				
+				// Now add all children recursively 
+				addNodeChildren(document, root, expNode);
 
-					Element root = document.createElement("obitXML");
-					root.setAttribute("version", "1");
-					
-					// Add the second level node
-					root.appendChild(
-							createElement(document, secondLevelNode));
-					
-					// Now add all children recursively 
-					addNodeChildren(document, root, secondLevelNode);
+				document.appendChild(root);
 
-					document.appendChild(root);
-
-				} catch (ParserConfigurationException e) {
-					e.printStackTrace();
-				}
-
-				// Store the document
-				documents.put(key, document);
-
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
 			}
+
+			// Store the document
+			documents.put(key, document);
 
 		}
 

@@ -477,6 +477,12 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				return;
 			}
 
+			if (fileName.contains("_properties.six")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "Experiment already annotated");
+				return;				
+			}
 			// Do we have an unknown file? If we do, we move on to the next.
 			if (! ext.equalsIgnoreCase(".fcs")) {
 				validator.isValid = false;
