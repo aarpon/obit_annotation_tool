@@ -395,10 +395,19 @@ abstract public class AbstractViewer extends Observable
 		// Does the folder exist? If not, we create it
 		if (!folder.exists()) {
 			outputPane.warn(firstUpper + " not found! Creating...");
+			boolean failed = false;
 			try {
-				folder.mkdirs();
-				outputPane.log(firstUpper + " created successfully.");
+				if (folder.mkdirs()) {
+					outputPane.log(firstUpper + " created successfully.");
+				} else {
+					failed = true;
+				}
 			} catch (Exception e) {
+				failed = true;
+			}
+
+			// Inform and exit
+			if (failed) {
 				outputPane.err("Failed creating " + allLower + "!");
 				JOptionPane.showMessageDialog(null,
 					    "Failed creating " + allLower + "!\n" +

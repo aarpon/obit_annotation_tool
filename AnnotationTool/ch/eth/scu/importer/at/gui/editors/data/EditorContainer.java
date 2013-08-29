@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import ch.eth.scu.importer.at.datamover.ATDataMover;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
@@ -108,10 +109,13 @@ public class EditorContainer extends JPanel implements ActionListener {
 			String outputDirectory = 
 					appProperties.getProperty("UserDataDir");
 
-			// Save to XML
+			// Save to XML	
 			dataViewer.saveToXML(outputDirectory);
-			outputPane.log("Metadata information stored. " +
-			"Data is now ready for transfer.");
+			outputPane.log("Annotations successfully written.");
+			
+			// Now move the user folder to the datamover incoming folder
+			new ATDataMover(openBISViewer.getUserName()).move();
+			outputPane.log("Data transferred.");
 			
 			// Re-scan
 			dataViewer.scan();
