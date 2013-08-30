@@ -4,13 +4,13 @@ import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Well;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Well;
 import ch.eth.scu.importer.processors.lsrfortessa.FCSProcessor;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Specimen;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tube;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Experiment;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Specimen;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Tray;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Tube;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FCSFileNode;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.SpecimenNode;
@@ -44,9 +44,9 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 	public boolean parse(File userFolder) {
 
 		// Process the user folder
-		BDFACSDIVAFCSProcessor divafcsprocessor;
+		BDLSRFortessaFCSProcessor divafcsprocessor;
 		try {
-			divafcsprocessor = new BDFACSDIVAFCSProcessor(
+			divafcsprocessor = new BDLSRFortessaFCSProcessor(
 					userFolder.getCanonicalPath());
 		} catch (IOException e) {
 			outputPane.err("Could not parse the folder " + userFolder + "!");
@@ -125,32 +125,32 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 		} else if (className.equals("Experiment")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-                    ((BDFACSDIVAFCSProcessor.Experiment)
+                    ((BDLSRFortessaFCSProcessor.Experiment)
                             nodeInfo).getAttributes());
 		} else if (className.equals("Tray")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((BDFACSDIVAFCSProcessor.Tray) 
+					((BDLSRFortessaFCSProcessor.Tray) 
 							nodeInfo).getAttributes());
 		} else if (className.equals("Specimen")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((BDFACSDIVAFCSProcessor.Specimen)
+					((BDLSRFortessaFCSProcessor.Specimen)
 							nodeInfo).getAttributes());
 		} else if (className.equals("Tube")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((BDFACSDIVAFCSProcessor.Tube)
+					((BDLSRFortessaFCSProcessor.Tube)
 							nodeInfo).getAttributes());
 		} else if (className.equals("Well")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((BDFACSDIVAFCSProcessor.Well)
+					((BDLSRFortessaFCSProcessor.Well)
 							nodeInfo).getAttributes());
 		} else if (className.equals("FCSFile")) {
 			// Cast
-			BDFACSDIVAFCSProcessor.FCSFile fcsFile =
-					(BDFACSDIVAFCSProcessor.FCSFile) nodeInfo;
+			BDLSRFortessaFCSProcessor.FCSFile fcsFile =
+					(BDLSRFortessaFCSProcessor.FCSFile) nodeInfo;
 			FCSProcessor fcs = new FCSProcessor(
 					new File(fcsFile.getFullPath()), false);
 			try {
@@ -185,7 +185,7 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
          * @param folderDescriptor A folder descriptor object.
          */
 	protected void createNodes(RootNode top,
-			BDFACSDIVAFCSProcessor.UserFolder folderDescriptor) {
+			BDLSRFortessaFCSProcessor.UserFolder folderDescriptor) {
 		
 		ExperimentNode experiment;
 		TrayNode tray;

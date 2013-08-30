@@ -6,8 +6,8 @@ import java.util.Map;
 
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Experiment;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Tray;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 
 /**

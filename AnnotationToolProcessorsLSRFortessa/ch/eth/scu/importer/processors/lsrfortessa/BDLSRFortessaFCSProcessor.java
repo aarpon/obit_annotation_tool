@@ -29,13 +29,10 @@ import ch.eth.scu.importer.processors.validator.GenericValidator;
  * 
  * @author Aaron Ponti
  */
-public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
+public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
-	private int numberOfValidFiles = 0;
-	private Map<String, String> parsingData = 
-			new LinkedHashMap<String, String>();
 
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
@@ -44,7 +41,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Constructor
 	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
 	 */
-	public BDFACSDIVAFCSProcessor(String fullUserFolderName) {
+	public BDLSRFortessaFCSProcessor(String fullUserFolderName) {
 
 		// Instantiate the validator
 		validator = new GenericValidator();
@@ -454,10 +451,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				continue;
 			}
 
-			// We ignore any file that is not an fcs file - but we pay 
-			// attention to the existence of XML files that indicate an
-			// Experiment export!
-			//
 			// The DIVA software can export FCS files in two modes: FCS export
 			// creates valid FCS 3.0-compliant files. Experiment export creates 
 			// files that cannot be used in subsequent analysis in third-party
@@ -477,7 +470,22 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				return;
 			}
 
-			if (fileName.contains("_properties.six")) {
+			// Check whether we find a data_structure.ois file. This 
+			// means that the whole folder has apparently been annotated
+			// already, but for some unknown reason it has not been
+			// moved into Datamover's incoming folder. We break here.
+			if (fileName.toLowerCase().equals("data_structure.ois")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "Failed registration to openBIS!");
+				return;
+			}
+
+			// Check whether an experiment is already annotated. Please
+			// mind that at this stage we do not know WHICH experiment
+			// was annotated. We just react to the fact that at least
+			// one has been annotated, somewhere.
+			if (fileName.contains("_properties.oix")) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
 						file, "Experiment already annotated");
@@ -500,9 +508,6 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				validator.invalidFilesOrFolders.put(
 						file, "Parsing failed");
 				continue;
-			} else {
-				// Add one to the number of valid files found
-				numberOfValidFiles++;
 			}
 
 			// Create a new ExperimentDescriptor or reuse an existing one

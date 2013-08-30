@@ -27,14 +27,13 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Experiment;
-import ch.eth.scu.importer.processors.lsrfortessa.BDFACSDIVAFCSProcessor.Tray;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Experiment;
+import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor.Tray;
 import ch.eth.scu.importer.processors.lsrfortessa.model.SampleDescriptor;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.editors.data.model.BDLSRFortessaFCSMetadata;
 import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.FolderNode;
 
 /**
  * Metadata editor panel.

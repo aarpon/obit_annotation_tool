@@ -6,12 +6,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Properties;
-import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -33,10 +34,10 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
-import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
-import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
+import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 
 /**
  * Abstract viewer for processors
@@ -536,6 +537,64 @@ abstract public class AbstractViewer extends Observable
 		DataViewerTreeToXML treeToXML = new DataViewerTreeToXML(tree);
 		return (treeToXML.saveToFile(outputDirectory));
 	
+	}
+
+	/**
+	 * Create and save a file containing a map of pointers to the
+	 * experiment setting files at the root of the user folder to
+	 * be used by the dropbox. The file name is structure.
+	 * @param outputDirectory Directory where XML property files are saved 
+	 * @return true if the XML file could be saved, false otherwise
+	 */	
+	public boolean saveDataStructureMap(String outputDirectory) {
+
+		// Is there a root node?
+		if (rootNode == null) {
+			return false;
+		}
+		
+		// Are there experiments?
+		int nExp = rootNode.getChildCount();
+		if (nExp == 0) {
+			return false;
+		}
+
+		// File name
+		File fileName = new File(outputDirectory + File.separator +
+				"data_structure.ois");
+
+		try {
+			
+			// Open file
+			BufferedWriter bw =
+					new BufferedWriter(new FileWriter(fileName, false));
+
+			// Go over all Experiments
+			for (int i = 0; i < nExp; i++) {
+				ExperimentNode expNode = 
+						(ExperimentNode) rootNode.getChildAt(i);
+				ExperimentDescriptor expDescr =
+						(ExperimentDescriptor)expNode.getUserObject();
+				
+				// We need Linux-compatible file separators
+				String propertiesFile = expDescr.getPropertiesFileNameWithRelPath();
+				propertiesFile.replace("\\", "/");
+
+				// Write them one per line
+				bw.write(propertiesFile);
+				bw.newLine();
+			}
+
+			// Close file 
+			bw.close();
+			 
+		} catch (IOException e) {
+			System.err.println("Failed writing to data structure file!");
+			return false;
+		}
+
+		// Return success
+		return true;
 	}
 
 	/**

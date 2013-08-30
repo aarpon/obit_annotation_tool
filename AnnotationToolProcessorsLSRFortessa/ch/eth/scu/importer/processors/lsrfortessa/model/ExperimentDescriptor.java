@@ -24,5 +24,14 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	public String getType() {
 		return "Experiment";
 	}
+	
+	/**
+	 * Returns the properties file name with relative path 
+	 * @returnthe properties file name with relative path
+	 */
+	public String getPropertiesFileNameWithRelPath() {
+		return (getRelativePath() + File.separator +
+				getName() + "_properties.oix");
+	}
 
 }

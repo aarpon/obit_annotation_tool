@@ -87,7 +87,7 @@ public class NikonProcessor extends AbstractProcessor {
 				new FileFilter() {
 					public boolean accept(File file) {
 						return (file.isFile() && 
-							file.getName().endsWith("_properties.six"));
+							file.getName().endsWith("_properties.oix"));
 					}
 				});
 		if (propertiesFile.length > 0) {

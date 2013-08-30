@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -94,7 +95,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 			
 			// Make sure all models are ready
 			if (!dataViewer.isReady() || !openBISViewer.isReady()) {
-				outputPane.warn("Data models not ready!");
+				outputPane.warn("Data is not ready to be sent to openBIS!");
 				return;
 			}
 
@@ -109,10 +110,26 @@ public class EditorContainer extends JPanel implements ActionListener {
 			String outputDirectory = 
 					appProperties.getProperty("UserDataDir");
 
-			// Save to XML	
-			dataViewer.saveToXML(outputDirectory);
-			outputPane.log("Annotations successfully written.");
-			
+			// Save to XML (*_properties.oix)
+			if (dataViewer.saveToXML(outputDirectory)) {
+				outputPane.log("Annotations successfully written.");
+			} else {
+				outputPane.err("Could not write annotations! " +
+					"Sending data to openBIS failed!");
+				return;
+			}
+
+			// Save the data structure file (data_structure.ois)
+			if (dataViewer.saveDataStructureMap(
+					outputDirectory + File.separator +
+					openBISViewer.getUserName())) {
+				outputPane.log("Data structure map successfully written.");
+			} else {
+				outputPane.err("Could not data structure map! " +
+					"Sending data to openBIS failed!");
+				return;
+			}
+
 			// Now move the user folder to the datamover incoming folder
 			new ATDataMover(openBISViewer.getUserName()).move();
 			outputPane.log("Data transferred.");

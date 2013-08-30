@@ -69,9 +69,7 @@ public class DataViewerTreeToXML {
 
 			// Construct the properties file name (which we also use
 			// as key for the map)
-			String key = expDescr.getRelativePath() +
-					File.separator + expDescr.getName() +
-					"_properties.six";
+			String key = expDescr.getPropertiesFileNameWithRelPath();
 
 			// Now build the XML document
 			try {
