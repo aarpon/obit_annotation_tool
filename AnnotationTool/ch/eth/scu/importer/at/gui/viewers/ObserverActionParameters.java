@@ -11,8 +11,9 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 public class ObserverActionParameters {
 
     public enum Action {
-        SCAN_COMPLETE,              /** Scan of the data folder or the openBIS space is complete */
-        EXPERIMENT_CHANGED          /** The user selected an experiment (or one of its children) in the data viewer */
+        ABOUT_TO_RESCAN,       /** About to start a rescan (metadata must be reset) */
+        SCAN_COMPLETE,         /** Scan of the data folder or the openBIS space is complete */
+        EXPERIMENT_CHANGED     /** The user selected an experiment (or one of its children) in the data viewer */
     }
 
 	public ObserverActionParameters.Action action;

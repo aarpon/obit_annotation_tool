@@ -70,7 +70,8 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		try {
 			metadataViewer = ViewerFactory.createViewer();
 		} catch (Exception e1) {
-			System.err.println("Unknown acquisition station! Aborting.");
+			System.err.println("There was a problem instantiating "
+					+ "the tools for current acquisition station.");
 			System.exit(1);
 		} 
 		add(metadataViewer.getPanel(), BorderLayout.WEST);

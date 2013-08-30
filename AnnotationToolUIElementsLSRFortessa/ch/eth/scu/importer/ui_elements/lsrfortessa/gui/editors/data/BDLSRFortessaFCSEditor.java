@@ -671,4 +671,17 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 		// Store the experiment description
 		metadata.getExperiment().description = expDescription.getText();
     }
+
+	/**
+	 * Discard metadata information since it went out of sync with the data
+	 * and openBIS models.
+	 */    
+	@Override
+	protected void resetMetadata(ObserverActionParameters p) {
+		// Make sure it is the correct action
+		if (p.action != ObserverActionParameters.Action.ABOUT_TO_RESCAN) {
+			return;
+		}
+		metadataMappersList = new ArrayList<BDLSRFortessaFCSMetadata>();
+	}
 }

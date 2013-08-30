@@ -7,9 +7,11 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Properties;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -31,6 +33,8 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
+import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
+import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 
@@ -138,8 +142,16 @@ abstract public class AbstractViewer extends Observable
 		constraints.insets = new Insets(5, 5, 5, 5);
 		panel.add(title, constraints);
 		
-		// Initialize the Tree
-		clearTree();
+		// Create the Tree
+		rootNode = new RootNode(new RootDescriptor(new File("/")));
+		
+		// Create a tree that allows one selection at a time.
+		tree = new DataViewerTree(rootNode);
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+		
+		// Listen for when the selection changes.
+		tree.addTreeSelectionListener(this);
 		
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
@@ -278,6 +290,15 @@ abstract public class AbstractViewer extends Observable
 	 */
 	public void scan() {
 
+		// Clear the tree
+		clearTree();
+		
+		// Notify observers that the scanning is about to start 
+		setChanged();
+		notifyObservers(new ObserverActionParameters(
+				ObserverActionParameters.Action.ABOUT_TO_RESCAN,
+				null));
+
 		// Inform
 		outputPane.log("Scanning user data folder...");
 
@@ -312,7 +333,7 @@ abstract public class AbstractViewer extends Observable
 
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
-
+		
 		// Clear the metadata table
 		clearMetadataTable();
 		
@@ -433,16 +454,33 @@ abstract public class AbstractViewer extends Observable
 	 */
 	protected void clearTree() {
 
-		// Create the root node
-		rootNode = new RootNode(new RootDescriptor(new File("/")));
+		// Is there already something in the tree?
+		if (tree != null) {
+			TreeModel model = tree.getModel();
+			if (model != null) {
+				DefaultMutableTreeNode rootNode = 
+						(DefaultMutableTreeNode) model.getRoot();
+				if (rootNode != null) {
+					rootNode.removeAllChildren();
+					((DefaultTreeModel) model).reload();
+					rootNode = null;
+					System.gc();
+				}
+			}
+		}
 
+		rootNode = new RootNode(new RootDescriptor(new File("/")));
+		
 		// Create a tree that allows one selection at a time.
-		tree = new DataViewerTree(rootNode);
+		tree.setModel(new DefaultTreeModel(rootNode));
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
+		
+		// Notify changes
+		((DefaultTreeModel) tree.getModel()).reload();
 	}
 
 	/**

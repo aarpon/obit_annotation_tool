@@ -20,6 +20,7 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeModel;
@@ -278,7 +279,7 @@ public class OpenBISViewer extends Observable
 	public boolean logout() throws RemoteAccessException {
 		if (facade != null && isLoggedIn) {
 			facade.logout();
-			clearTreeView();
+			clearTree();
 			isLoggedIn = false;
 			return true;
 		}
@@ -295,8 +296,23 @@ public class OpenBISViewer extends Observable
 	/**
 	 * Clear the tree view
 	 */
-	private void clearTreeView() {
+	private void clearTree() {
 
+		// Is there already something in the tree?
+		if (tree != null) {
+			TreeModel model = tree.getModel();
+			if (model != null) {
+				DefaultMutableTreeNode rootNode = 
+						(DefaultMutableTreeNode) model.getRoot();
+				if (rootNode != null) {
+					rootNode.removeAllChildren();
+					((DefaultTreeModel) model).reload();
+					rootNode = null;
+					System.gc();
+				}
+			}
+		}
+		
 		// Create the root node
 		userNode = new OpenBISUserNode(defaultRootNodeString);
 
@@ -318,7 +334,16 @@ public class OpenBISViewer extends Observable
 
 		OpenBISSpaceNode space;
 		OpenBISProjectNode project;
-		
+
+		// Clear the tree
+		clearTree();
+
+		// Notify observers that the scanning is about to start 
+		setChanged();
+		notifyObservers(new ObserverActionParameters(
+				ObserverActionParameters.Action.ABOUT_TO_RESCAN,
+				null));
+
 		// Do we have a connection with openBIS?
 		if (facade == null || !isLoggedIn) {
 			return;
@@ -335,7 +360,7 @@ public class OpenBISViewer extends Observable
 					JOptionPane.ERROR_MESSAGE);
 			facade = null;
 			isLoggedIn = false;
-			clearTreeView();
+			clearTree();
 			return;
 		}
 

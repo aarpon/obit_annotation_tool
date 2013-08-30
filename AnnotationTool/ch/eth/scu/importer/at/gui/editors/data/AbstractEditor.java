@@ -16,6 +16,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.editors.data.model.BDLSRFortessaFCSMetadata;
 
 /**
  * Abstract editor for processors
@@ -76,6 +77,11 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	}
 	
 	/**
+	 * Resets the metadata mapping
+	 */
+	abstract protected void resetMetadata(ObserverActionParameters p);
+	
+	/**
 	 * Observer update method
 	 * @param obs Observable object
 	 * @param arg Argument
@@ -88,6 +94,14 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 
         // Perform the correct action
         switch (observerActionParams.action) {
+        		case ABOUT_TO_RESCAN:
+        			try {
+        				resetMetadata(observerActionParams);
+                } catch (Exception e) {
+                     // TODO Auto-generated catch block
+                     e.printStackTrace();
+                }
+                break;
             case SCAN_COMPLETE:
                 try {
                     init(observerActionParams);
