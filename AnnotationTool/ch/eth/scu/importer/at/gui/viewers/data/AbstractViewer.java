@@ -235,7 +235,7 @@ abstract public class AbstractViewer extends Observable
 		
 		// Add the table
 		Object[][] data = { };
-		String columnNames[] = { "File or folder", "Problem(s)" };
+		String columnNames[] = { "File or folder", "Issue" };
 		invalidDatasetsTable = new JTable(
 				new ReadOnlyTableModel(data, columnNames));
 		invalidDatasetsTable.setShowGrid(false);

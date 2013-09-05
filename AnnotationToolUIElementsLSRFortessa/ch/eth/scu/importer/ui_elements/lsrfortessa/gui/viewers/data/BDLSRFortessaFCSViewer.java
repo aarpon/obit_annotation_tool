@@ -68,6 +68,11 @@ public class BDLSRFortessaFCSViewer extends AbstractViewer {
 				String filePath;
 				try {
 					filePath = file.getCanonicalPath();
+					// Build a relative path
+					int indx = filePath.indexOf(userName);
+					if (indx != -1) {
+						filePath = filePath.substring(indx);
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					filePath = "Unknown";
