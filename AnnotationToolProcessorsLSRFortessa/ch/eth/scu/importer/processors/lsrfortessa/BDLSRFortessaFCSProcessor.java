@@ -467,13 +467,14 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
 						file, "Experiment export");
-				return;
+				continue;
 			}
 
 			// Check whether we find a data_structure.ois file. This 
 			// means that the whole folder has apparently been annotated
 			// already, but for some unknown reason it has not been
-			// moved into Datamover's incoming folder. We break here.
+			// moved into Datamover's incoming folder. 
+			// We break here.
 			if (fileName.toLowerCase().equals("data_structure.ois")) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
