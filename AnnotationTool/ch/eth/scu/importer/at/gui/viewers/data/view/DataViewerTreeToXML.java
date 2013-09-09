@@ -87,7 +87,6 @@ public class DataViewerTreeToXML {
 
 				// Add all its children (recursively)
 				addNodeChildren(document, element, expNode);
-				
 
 				// Add the whole tree to the document (by adding the root node)
 				document.appendChild(root);
