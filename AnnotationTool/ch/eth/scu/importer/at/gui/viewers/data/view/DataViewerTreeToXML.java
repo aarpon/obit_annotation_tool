@@ -71,22 +71,25 @@ public class DataViewerTreeToXML {
 			// as key for the map)
 			String key = expDescr.getPropertiesFileNameWithRelPath();
 
-			// Now build the XML document
+			// Now build the XML document for current experiment
 			try {
 				builder = DocumentBuilderFactory.newInstance()
 						.newDocumentBuilder();
 				document = builder.newDocument();
 
+				// Create root element
 				Element root = document.createElement("obitXML");
 				root.setAttribute("version", "1");
-				
-				// Add the second level node
-				root.appendChild(
-						createElement(document, expNode));
-				
-				// Now add all children recursively 
-				addNodeChildren(document, root, expNode);
 
+				// Create and add the experiment
+				Element element = createElement(document, expNode); 
+				root.appendChild(element);
+
+				// Add all its children (recursively)
+				addNodeChildren(document, element, expNode);
+				
+
+				// Add the whole tree to the document (by adding the root node)
 				document.appendChild(root);
 
 			} catch (ParserConfigurationException e) {
