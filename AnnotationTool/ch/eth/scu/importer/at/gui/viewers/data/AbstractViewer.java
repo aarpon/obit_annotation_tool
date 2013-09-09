@@ -578,7 +578,7 @@ abstract public class AbstractViewer extends Observable
 				
 				// We need Linux-compatible file separators
 				String propertiesFile = expDescr.getPropertiesFileNameWithRelPath();
-				propertiesFile.replace("\\", "/");
+				propertiesFile = propertiesFile.replace("\\", "/");
 
 				// Write them one per line
 				bw.write(propertiesFile);

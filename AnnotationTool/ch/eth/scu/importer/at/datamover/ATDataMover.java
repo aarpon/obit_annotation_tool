@@ -86,13 +86,15 @@ public class ATDataMover {
 				sourceDir.getName());
 		
 		// Move
-		try {
-			Files.move(sourceDir.toPath(), fullTarget.toPath(), ATOMIC_MOVE);
-		} catch (IOException e) {
+		// Note: using Files.move() does not work
+		sourceDir.renameTo(fullTarget);
+		
+		// Check that moving worked
+		if (! fullTarget.exists()) {
 			JOptionPane.showMessageDialog(null,
 					"Failed copying " + sourceDir + " to " + 
 			fullTarget + "!\n" +
-			"Please contact your administrator. The application\n" +
+			"Please contact your administrator. The application " +
 			"will now exit!",
 			"Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
