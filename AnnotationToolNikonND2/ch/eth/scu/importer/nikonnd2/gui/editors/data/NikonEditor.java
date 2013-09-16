@@ -312,7 +312,6 @@ public class NikonEditor extends AbstractEditor {
 		
 		// Select the correct one
 		for (int i = 0; i < openBISProjects.size(); i++) {
-			System.out.println(openBISProjects.get(i).getIdentifier());
 			if (openBISProjects.get(i).getIdentifier().equals(
 					metadata.openBISProjectNode.getIdentifier())) {
 				comboProjectList.setSelectedIndex(i);
