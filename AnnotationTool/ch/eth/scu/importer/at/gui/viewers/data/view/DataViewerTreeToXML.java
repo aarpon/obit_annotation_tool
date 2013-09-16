@@ -22,9 +22,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
+import ch.eth.scu.importer.lsrfortessa.gui.viewers.data.model.ExperimentNode;
+import ch.eth.scu.importer.lsrfortessa.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.AbstractDescriptor;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 
 
 /**

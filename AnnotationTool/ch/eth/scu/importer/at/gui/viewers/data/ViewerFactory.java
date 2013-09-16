@@ -3,8 +3,8 @@ package ch.eth.scu.importer.at.gui.viewers.data;
 import java.util.Properties;
 
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
-import ch.eth.scu.importer.ui_elements.nikonnd2.gui.viewers.data.NikonViewer;
+import ch.eth.scu.importer.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
+import ch.eth.scu.importer.nikonnd2.gui.viewers.data.NikonViewer;
 
 /**
  * The Viewer factory creates a viewer based on the application properties

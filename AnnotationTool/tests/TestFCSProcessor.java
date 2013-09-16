@@ -3,7 +3,7 @@ package tests;
 import java.io.File;
 import java.io.IOException;
 
-import ch.eth.scu.importer.processors.lsrfortessa.FCSProcessor;
+import ch.eth.scu.importer.lsrfortessa.readers.FCSReader;
 
 public class TestFCSProcessor {
 
@@ -23,7 +23,7 @@ public class TestFCSProcessor {
 		//FCSProcessor processor = new FCSProcessor("/work/openbis/openbis_data/Quality Control MD/Kymb 090512/488 and 405 excitation_Tube_001.fcs", false);
 		
 		// Exported FCS - Tray
-		FCSProcessor processor = new FCSProcessor(new File("/work/openbis/openbis_data/Quality Control MD/Kymb 090512/96 Well - V bottom/Specimen_001_A10_A10.fcs"), false);
+		FCSReader processor = new FCSReader(new File("/work/openbis/openbis_data/Quality Control MD/Kymb 090512/96 Well - V bottom/Specimen_001_A10_A10.fcs"), false);
 		
 		try {
 			processor.parse();

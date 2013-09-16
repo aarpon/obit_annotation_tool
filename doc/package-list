@@ -20,7 +20,7 @@ ch.eth.scu.importer.atadmin.gui.dialogs
 ch.eth.scu.importer.common.properties
 ch.eth.scu.importer.processors
 ch.eth.scu.importer.processors.leicasp5
-ch.eth.scu.importer.processors.lsrfortessa
+ch.eth.scu.importer.lsrfortessa.processors
 ch.eth.scu.importer.processors.model
 ch.eth.scu.importer.processors.validator
 ch.eth.scu.importer.workstations.leicasp5

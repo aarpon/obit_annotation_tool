@@ -35,9 +35,9 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.processors.lsrfortessa.model.ExperimentDescriptor;
+import ch.eth.scu.importer.lsrfortessa.gui.viewers.data.model.ExperimentNode;
+import ch.eth.scu.importer.lsrfortessa.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
-import ch.eth.scu.importer.ui_elements.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 
 /**
  * Abstract viewer for processors

@@ -1,6 +1,6 @@
 package tests;
 
-import ch.eth.scu.importer.processors.lsrfortessa.BDLSRFortessaFCSProcessor;
+import ch.eth.scu.importer.lsrfortessa.processors.BDLSRFortessaFCSProcessor;
 
 public class TestBDDIVAFCSProcessor {
 

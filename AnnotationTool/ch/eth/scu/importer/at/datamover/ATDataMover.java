@@ -1,10 +1,6 @@
 package ch.eth.scu.importer.at.datamover;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
-
-import static java.nio.file.StandardCopyOption.*;
 
 import javax.swing.JOptionPane;
 
