@@ -1,8 +1,6 @@
-package ch.eth.scu.importer.lsrfortessa.processors.model;
+package ch.eth.scu.importer.processors.model;
 
 import java.io.File;
-
-import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
 
 
 public class ExperimentDescriptor extends PathAwareDescriptor{
@@ -23,10 +21,10 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	public String getType() {
 		return "Experiment";
 	}
-	
+
 	/**
 	 * Returns the properties file name with relative path 
-	 * @returnthe properties file name with relative path
+	 * @return the properties file name with relative path
 	 */
 	public String getPropertiesFileNameWithRelPath() {
 		return (getRelativePath() + File.separator +

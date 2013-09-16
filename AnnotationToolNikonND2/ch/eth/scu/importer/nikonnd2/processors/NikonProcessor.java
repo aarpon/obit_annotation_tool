@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import ch.eth.scu.importer.nikonnd2.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.nikonnd2.readers.NikonReader;
 import ch.eth.scu.importer.processors.AbstractProcessor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
+import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;

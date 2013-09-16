@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.eth.scu.importer.lsrfortessa.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.lsrfortessa.processors.model.SampleDescriptor;
 import ch.eth.scu.importer.lsrfortessa.readers.FCSReader;
 import ch.eth.scu.importer.processors.AbstractProcessor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
+import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 

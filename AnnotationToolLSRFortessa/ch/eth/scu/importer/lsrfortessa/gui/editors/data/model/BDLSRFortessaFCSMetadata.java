@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
+import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.lsrfortessa.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.lsrfortessa.processors.BDLSRFortessaFCSProcessor.Experiment;
 import ch.eth.scu.importer.lsrfortessa.processors.BDLSRFortessaFCSProcessor.Tray;
 

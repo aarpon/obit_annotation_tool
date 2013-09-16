@@ -1,9 +1,7 @@
 package ch.eth.scu.importer.nikonnd2.processors.model;
 
-import java.io.File;
-
 import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
-
+import java.io.File;
 
 public class ExperimentDescriptor extends PathAwareDescriptor{
 
@@ -26,7 +24,7 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 
 	/**
 	 * Returns the properties file name with relative path 
-	 * @returnthe properties file name with relative path
+	 * @return the properties file name with relative path
 	 */
 	public String getPropertiesFileNameWithRelPath() {
 		return (getRelativePath() + File.separator +

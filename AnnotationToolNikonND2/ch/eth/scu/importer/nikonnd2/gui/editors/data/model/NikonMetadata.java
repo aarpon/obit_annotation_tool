@@ -1,8 +1,8 @@
 package ch.eth.scu.importer.nikonnd2.gui.editors.data.model;
 
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
+import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.nikonnd2.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.nikonnd2.processors.NikonProcessor.Experiment;
 
 /**

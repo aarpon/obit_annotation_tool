@@ -31,12 +31,12 @@ import javax.swing.tree.TreeSelectionModel;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
+import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.lsrfortessa.gui.viewers.data.model.ExperimentNode;
-import ch.eth.scu.importer.lsrfortessa.processors.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 
 /**
