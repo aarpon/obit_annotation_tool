@@ -235,6 +235,7 @@ public class OpenBISViewer extends Observable
 		
 		// Try logging in with current credentials
 		try {
+			System.setProperty("force-accept-ssl-certificate", "true");
 			facade = OpenbisServiceFacadeFactory.tryCreate(
 					userName, userPassword, openBISURL, timeout);
 		} catch (UserFailureException e) {
@@ -370,7 +371,21 @@ public class OpenBISViewer extends Observable
 		// Get spaces
 		List<SpaceWithProjectsAndRoleAssignments> spaces =
 				facade.getSpacesWithProjects();
+		if (spaces.isEmpty()) {
+			JOptionPane.showMessageDialog(this.panel,
+					"Sorry, there are no (accessible) spaces.\n\n" + 
+						"Please ask your administrator to create a " +
+						"space for you or to grant you access to an " +
+						"existing one.\nNo data registration will be " +
+						"possible until this issue is fixed.",
+					"Warning",
+					JOptionPane.WARNING_MESSAGE);
+			// We do not need to return, this case is treated below
+		}
 
+		// Keep a count of the usable projects
+		int nProjects = 0;
+		
 		for (SpaceWithProjectsAndRoleAssignments s : spaces) {
 
 			// Add the space
@@ -387,12 +402,12 @@ public class OpenBISViewer extends Observable
 				// Add the project
 				project = new OpenBISProjectNode(p);
 				space.add(project);
-
+				nProjects++;
 			}
 			
 		    
 		}
-		
+
 		// Update the view
 		tree.setModel(new DefaultTreeModel(userNode));
 		tree.getSelectionModel().setSelectionMode(
@@ -404,14 +419,28 @@ public class OpenBISViewer extends Observable
 		// Listen for when a node is about to be opened (for lazy loading)
 		tree.addTreeWillExpandListener(this);		
 		
-		// Set isReady to true
-		isReady = true;
+		if (nProjects > 0) {
 		
-		// Notify observers that the scanning is done 
-		setChanged();
-		notifyObservers(new ObserverActionParameters(
+			// Set isReady to true
+			isReady = true;
+		
+			// Notify observers that the scanning is done 
+			setChanged();
+			notifyObservers(new ObserverActionParameters(
 				ObserverActionParameters.Action.SCAN_COMPLETE,
 				null));
+		} else {
+			JOptionPane.showMessageDialog(this.panel,
+					"Sorry, there are no (accessible) projects.\n\n" + 
+						"You will need to create one yourself or " +
+						"ask your space administrator to do it " +
+						"for you.\nNo data registration will be " +
+						"possible until this issue is fixed.",
+					"Warning",
+					JOptionPane.WARNING_MESSAGE);
+			// We do not need to return, this case is treated below
+
+		}
 	}
 
 	/**

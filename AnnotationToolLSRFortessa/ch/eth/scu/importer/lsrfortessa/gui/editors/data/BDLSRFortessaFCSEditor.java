@@ -21,6 +21,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import ch.eth.scu.importer.at.gui.editors.data.AbstractEditor;
+import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
@@ -326,6 +327,9 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 	protected void createUIElements(ObserverActionParameters params) throws Exception {
 
 		// Get selected metadata element
+		if (metadataMappersList.size() < (currentExperimentIndex + 1)) {
+			return;
+		}
 		BDLSRFortessaFCSMetadata metadata = metadataMappersList.get(
 				currentExperimentIndex);
 
