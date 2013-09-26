@@ -717,7 +717,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 			validator.isValid = false;
 			validator.invalidFilesOrFolders.put(
 					processor.getFile(),
-					"Wrong software string: " + acqHardwareString);
+					"Wrong software string: " + acqSoftwareString);
 		} else {
 			// Check major and minor version (we ignore the patch)
 			Pattern p = Pattern.compile(

@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
+import ch.eth.scu.utils.QueryOS;
+
 /**
  * Commodity class to manage the AnnotationTool application properties
  * @author Aaron Ponti
@@ -164,11 +166,10 @@ public class AppProperties {
 		File applicationDataDir;
 		
 		// Build the path as a function of the operating system
-		String OS = System.getProperty("os.name").toUpperCase();
-		if (OS.contains("MAC")) {
+		if (QueryOS.isMac()) {
 			applicationDataDir = new File(
 					"/Users/Shared/Library/Application Support/");			
-		} else if (OS.contains("WINDOWS")) {
+		} else if (QueryOS.isWindows()) {
 			applicationDataDir = new File(
 					"C:/Users/All Users/Application Data");
 		} else {

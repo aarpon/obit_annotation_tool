@@ -6,6 +6,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,8 +18,10 @@ import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -38,6 +42,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
+import ch.eth.scu.utils.QueryOS;
 
 /**
  * Abstract viewer for processors
@@ -72,6 +77,7 @@ abstract public class AbstractViewer extends Observable
 	protected JScrollPane metadataViewPane;	
 	protected JLabel invalidDatasets;
 	protected JTable invalidDatasetsTable;
+	protected File invalidDataset;
 	protected JScrollPane invalidDatasetsPane;
 	protected OutputPane outputPane;
 	
@@ -243,6 +249,32 @@ abstract public class AbstractViewer extends Observable
 		invalidDatasetsTable.setAutoCreateRowSorter(true);
 		invalidDatasetsPane = new JScrollPane(invalidDatasetsTable);
         
+		// Add a context menu
+		invalidDatasetsTable.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mousePressed(MouseEvent e) {
+		    		invalidDataset = null;
+		        int r = invalidDatasetsTable.rowAtPoint(e.getPoint());
+		        if (r >= 0 && r < invalidDatasetsTable.getRowCount()) {
+		        		invalidDatasetsTable.setRowSelectionInterval(r, r);
+		        } else {
+		        		invalidDatasetsTable.clearSelection();
+		        }
+
+		        // Store the selected file
+		        int rowIndex = invalidDatasetsTable.getSelectedRow();
+		        if (rowIndex < 0)
+		            return;
+		        if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
+			        invalidDataset = new File((String)
+			        		invalidDatasetsTable.getModel().getValueAt(
+			        				rowIndex, 0));
+		        		JPopupMenu popup = createInvalidDatasetsPopup();
+		            popup.show(e.getComponent(), e.getX(), e.getY());
+		        }
+		    }
+		});
+		
 		// Add to the layout
 		constraints.gridx = 0;
 		constraints.gridy = 6;
@@ -610,4 +642,100 @@ abstract public class AbstractViewer extends Observable
 	public JPanel getPanel() {
 		return panel;
 	}
+
+	/**
+	 * Create a popup menu with actions for handling invalid datasets
+	 * @return a JPopupMenu for the passed item
+	 */
+	private JPopupMenu createInvalidDatasetsPopup() {
+		
+		// Create abd return the popup menu.
+	    JPopupMenu popup = new JPopupMenu();
+	    
+	    String menuEntry = "";
+	    if (QueryOS.isWindows()) {
+	    		menuEntry = "Show in Windows Explorer";
+	    } else if (QueryOS.isMac()) {
+	    		menuEntry = "Show in Finder";
+	    } else {
+			throw new UnsupportedOperationException(
+					"Operating system not supported.");
+	    }
+	    JMenuItem menuItem = new JMenuItem(menuEntry);
+	    menuItem.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+        			Properties appProperties =
+        					AppProperties.readPropertiesFromFile();
+        			File userDataFolder = new File(
+        				appProperties.getProperty("UserDataDir"));
+            		String execStr = "";
+            		
+            		// Command
+            		String command = "";
+            		String commandName = "";
+            		if (QueryOS.isWindows()) {
+            			command = "Explorer.exe";
+            			commandName = "Windows Explorer";
+            		} else if (QueryOS.isMac()) {
+            			command = "open";
+            			commandName = "Finder";
+            		} else {
+            			throw new UnsupportedOperationException(
+            					"Operating system not supported.");
+            		}
+            		
+            		try {
+
+                		// Arguments for the command
+            			File fullPath = new File(userDataFolder +
+            					File.separator + invalidDataset);
+            			String folder = "";
+            			if (fullPath.isDirectory()) {
+            				folder = fullPath.getCanonicalPath();
+            				outputPane.log("Opening invalid folder \"" +
+            						folder + "\" in " + commandName);
+            			} else {
+            				folder = fullPath.getParent();
+            				outputPane.log("Opening folder \"" +
+            						folder + 
+            						"\" containing invalid file \"" +
+            						fullPath.getName() + 
+            						"\" in " + commandName);    							
+            			}
+				
+            			// Execute the command
+            			String [] commandArgs = {command, folder};
+            			Runtime.getRuntime().exec(commandArgs);
+            		} catch (IOException e1) {
+            			outputPane.err("Could not open file/folder in " +
+            					commandName + "!");
+				}
+            }
+        });
+
+	    popup.add(menuItem);
+	    menuItem = new JMenuItem("Move to...");
+	    menuItem.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+                outputPane.warn("Move to... To be implemented!");
+            }
+        });
+	    popup.add(menuItem);
+	    menuItem = new JMenuItem("Delete");
+	    menuItem.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+                outputPane.warn("Delete... To be implemented!");
+            }
+        });
+	    popup.add(menuItem);
+	
+	    return popup;
+	}
+
 }
