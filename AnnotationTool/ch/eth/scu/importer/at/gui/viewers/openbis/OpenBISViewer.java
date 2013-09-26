@@ -224,7 +224,7 @@ public class OpenBISViewer extends Observable
 				status = askForCredentials();
 			}
 		}
-
+		
 		// Are we already logged in?
 		if (isLoggedIn) {
 			return true;

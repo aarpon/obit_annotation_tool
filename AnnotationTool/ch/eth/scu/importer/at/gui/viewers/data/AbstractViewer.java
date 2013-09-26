@@ -669,53 +669,64 @@ abstract public class AbstractViewer extends Observable
  
             public void actionPerformed(ActionEvent e)
             {
+            	// Build the full path of the invalid dataset
             	Properties appProperties =
             			AppProperties.readPropertiesFromFile();
         		File userDataFolder = new File(
         				appProperties.getProperty("UserDataDir"));
 
-            	// Command
+            	// Full path to the invalid dataset
+				File fullPath = new File(userDataFolder +
+						File.separator + invalidDataset);
+
+				String fullPathStr;
+				try {
+					fullPathStr = fullPath.getCanonicalPath();
+				} catch (IOException e1) {
+					outputPane.err("Could not retrieve full path " +
+							"of selected invalid dataset!");
+					return;
+				}
+
+				// Command arguments
             	String command = "";
             	String commandName = "";
-            	if (QueryOS.isWindows()) {
-            		command = "Explorer.exe";
-            		commandName = "Windows Explorer";
-            	} else if (QueryOS.isMac()) {
+            	String commandArgument = "";
+				if (QueryOS.isMac()) {
             		command = "open";
             		commandName = "Finder";
-            	} else {
+					commandArgument = "-R";
+				} else if (QueryOS.isWindows()) {
+            		command = "Explorer.exe";
+            		commandName = "Windows Explorer";
+					commandArgument = "/select,";
+				} else {
             		throw new UnsupportedOperationException(
             				"Operating system not supported.");
-            	}
+            	} 
 
-            	try {
+				// Inform
+				outputPane.log("Showing invalid dataset \"" +
+						invalidDataset + "\" in " + commandName);
 
-                	// Arguments for the command
-            		File fullPath = new File(userDataFolder +
-            				File.separator + invalidDataset);
-            		String folder = "";
-            		if (fullPath.isDirectory()) {
-            			folder = fullPath.getCanonicalPath();
-            				outputPane.log("Opening invalid folder \"" +
-            				folder + "\" in " + commandName);
-            		} else {
-            			folder = fullPath.getParent();
-            			outputPane.log("Opening folder \"" +
-            				folder + 
-            				"\" containing invalid file \"" +
-            				fullPath.getName() + 
-            				"\" in " + commandName);    							
-            		}
-
-            		// Execute the command
-            		String [] commandArgs = {command, folder};
-            		Runtime.getRuntime().exec(commandArgs);
-
-            	} catch (IOException e1) {
-            		outputPane.err("Could not open file/folder in " +
-            				commandName + "!");
+				// Execute the command
+	        	String [] commandArray = new String[3];
+	        	commandArray[0] = command;
+	        	commandArray[1] = commandArgument;
+	        	commandArray[2] = fullPathStr;
+	        	try {
+					Process p = Runtime.getRuntime().exec(commandArray);
+					p.waitFor();
+				} catch (IOException e1) {
+					outputPane.err("Could not show invalid dataset "
+							+ "in " + commandName + "!");
+					return;
+				} catch (InterruptedException e1) {
+					outputPane.err("Could not show invalid dataset "
+							+ "in " + commandName + "!");
 				}
-            }
+
+			}
         });
 
 	    // Move to...
