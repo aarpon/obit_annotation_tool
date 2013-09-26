@@ -82,7 +82,6 @@ public class ATDataMover {
 				sourceDir.getName());
 		
 		// Move
-		// Note: using Files.move() does not work
 		sourceDir.renameTo(fullTarget);
 		
 		// Check that moving worked
@@ -134,4 +133,37 @@ public class ATDataMover {
 		return success;
 	}
 
+	/**
+	 * Static function to delete a folder recursively.
+	 * @param folder Folder to be deleted recursively. It folder is a
+	 * file, it will be deleted and the function will return immediately.
+	 * @return true if deletion was successful, false otherwise.
+	 */
+	public static void deleteRecursively(File folder) {
+		
+		// This capture the case that the first call has a 
+		// file as an argument. In all successive recursive
+		// calls the argument is guaranteed to be a folder.
+		if (!folder.isDirectory()) {
+			folder.delete();
+			return;
+		}
+		
+		// Get a list of files/folders in folder
+		File [] files = folder.listFiles();
+
+		// Some virtual machines return null instead of an empty list
+		if (files != null) {
+			for (File f : files) {
+				if (folder.isDirectory()) {
+					deleteRecursively(f);
+				} else {
+					f.delete();
+				}
+			}
+		}
+
+		return;
+	}
+	
 }

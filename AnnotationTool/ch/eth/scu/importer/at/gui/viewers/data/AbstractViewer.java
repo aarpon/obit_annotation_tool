@@ -17,6 +17,7 @@ import java.util.Observable;
 import java.util.Properties;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -32,6 +33,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
+import ch.eth.scu.importer.at.datamover.ATDataMover;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
@@ -302,9 +304,9 @@ abstract public class AbstractViewer extends Observable
 
 		// Store the user name
 		this.userName = userName;
-	
+
 	}
-	
+
 	/**
 	 * Sets the reference to the OutputPane
 	 * @param outputPane A reference to the main window output pane to be 
@@ -314,9 +316,9 @@ abstract public class AbstractViewer extends Observable
 
 		// Store the OutputPane reference
 		this.outputPane = outputPane;
-	
+
 	}
-	
+
 	/**
 	 * Scans the datamover incoming directory for datasets to be processed.
 	 * At the end of scanning, the function MUST set isReady to true.
@@ -325,7 +327,7 @@ abstract public class AbstractViewer extends Observable
 
 		// Clear the tree
 		clearTree();
-		
+
 		// Notify observers that the scanning is about to start 
 		setChanged();
 		notifyObservers(new ObserverActionParameters(
@@ -651,7 +653,8 @@ abstract public class AbstractViewer extends Observable
 		
 		// Create abd return the popup menu.
 	    JPopupMenu popup = new JPopupMenu();
-	    
+
+	    // Show in Explorer/Finder
 	    String menuEntry = "";
 	    if (QueryOS.isWindows()) {
 	    		menuEntry = "Show in Windows Explorer";
@@ -666,71 +669,124 @@ abstract public class AbstractViewer extends Observable
  
             public void actionPerformed(ActionEvent e)
             {
-        			Properties appProperties =
-        					AppProperties.readPropertiesFromFile();
-        			File userDataFolder = new File(
+            	Properties appProperties =
+            			AppProperties.readPropertiesFromFile();
+        		File userDataFolder = new File(
         				appProperties.getProperty("UserDataDir"));
-            		String execStr = "";
-            		
-            		// Command
-            		String command = "";
-            		String commandName = "";
-            		if (QueryOS.isWindows()) {
-            			command = "Explorer.exe";
-            			commandName = "Windows Explorer";
-            		} else if (QueryOS.isMac()) {
-            			command = "open";
-            			commandName = "Finder";
-            		} else {
-            			throw new UnsupportedOperationException(
-            					"Operating system not supported.");
-            		}
-            		
-            		try {
 
-                		// Arguments for the command
-            			File fullPath = new File(userDataFolder +
-            					File.separator + invalidDataset);
-            			String folder = "";
-            			if (fullPath.isDirectory()) {
-            				folder = fullPath.getCanonicalPath();
+            	// Command
+            	String command = "";
+            	String commandName = "";
+            	if (QueryOS.isWindows()) {
+            		command = "Explorer.exe";
+            		commandName = "Windows Explorer";
+            	} else if (QueryOS.isMac()) {
+            		command = "open";
+            		commandName = "Finder";
+            	} else {
+            		throw new UnsupportedOperationException(
+            				"Operating system not supported.");
+            	}
+
+            	try {
+
+                	// Arguments for the command
+            		File fullPath = new File(userDataFolder +
+            				File.separator + invalidDataset);
+            		String folder = "";
+            		if (fullPath.isDirectory()) {
+            			folder = fullPath.getCanonicalPath();
             				outputPane.log("Opening invalid folder \"" +
-            						folder + "\" in " + commandName);
-            			} else {
-            				folder = fullPath.getParent();
-            				outputPane.log("Opening folder \"" +
-            						folder + 
-            						"\" containing invalid file \"" +
-            						fullPath.getName() + 
-            						"\" in " + commandName);    							
-            			}
-				
-            			// Execute the command
-            			String [] commandArgs = {command, folder};
-            			Runtime.getRuntime().exec(commandArgs);
-            		} catch (IOException e1) {
-            			outputPane.err("Could not open file/folder in " +
-            					commandName + "!");
+            				folder + "\" in " + commandName);
+            		} else {
+            			folder = fullPath.getParent();
+            			outputPane.log("Opening folder \"" +
+            				folder + 
+            				"\" containing invalid file \"" +
+            				fullPath.getName() + 
+            				"\" in " + commandName);    							
+            		}
+
+            		// Execute the command
+            		String [] commandArgs = {command, folder};
+            		Runtime.getRuntime().exec(commandArgs);
+
+            	} catch (IOException e1) {
+            		outputPane.err("Could not open file/folder in " +
+            				commandName + "!");
 				}
             }
         });
 
+	    // Move to...
 	    popup.add(menuItem);
 	    menuItem = new JMenuItem("Move to...");
 	    menuItem.addActionListener(new ActionListener() {
  
             public void actionPerformed(ActionEvent e)
             {
-                outputPane.warn("Move to... To be implemented!");
+            	// Create a file chooser
+            	final JFileChooser f = new JFileChooser();
+            	f.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            	int val = f.showDialog(null, "Move to");
+            	if (val != JFileChooser.APPROVE_OPTION) {
+            		return;
+            	}
+            	
+            	// Build the full path of the file/folder to move
+            	Properties appProperties =
+            			AppProperties.readPropertiesFromFile();
+        		File userDataFolder = new File(
+        				appProperties.getProperty("UserDataDir"));
+            	File fullPath = new File(userDataFolder +
+        				File.separator + invalidDataset);
+            	
+            	// Build full target
+            	File fullTarget = new File(
+            			f.getSelectedFile() + File.separator +
+            			fullPath.getName());
+            	
+            	// Move
+            	outputPane.log("Moving \"" + fullPath + "\" to \"" +
+            			fullTarget + "\"");
+            	fullPath.renameTo(fullTarget);
+            	outputPane.warn("Please rescan the data folder when you have " +
+            			"fixed all invalid datasets!");            	
+
             }
         });
 	    popup.add(menuItem);
+
+	    // Delete
 	    menuItem = new JMenuItem("Delete");
 	    menuItem.addActionListener(new ActionListener() {
  
             public void actionPerformed(ActionEvent e)
             {
-                outputPane.warn("Delete... To be implemented!");
+            	// Build the full path of the file/folder to delete
+            	Properties appProperties =
+            			AppProperties.readPropertiesFromFile();
+        		File userDataFolder = new File(
+        				appProperties.getProperty("UserDataDir"));
+            	File fullPath = new File(userDataFolder +
+        				File.separator + invalidDataset);
+            	
+            	// Ask the user for confirmation
+                if (JOptionPane.showConfirmDialog(null, 
+                		"Are you sure you want to delete\n\"" +
+                				invalidDataset + "\" ?", 
+                				"Question",
+                		JOptionPane.YES_NO_OPTION,
+                		JOptionPane.QUESTION_MESSAGE) == 
+                		JOptionPane.YES_OPTION) {
+                	
+                	// Delete
+                	outputPane.log("Deleting \"" + fullPath + "\"");
+                	ATDataMover.deleteRecursively(fullPath);
+                	outputPane.warn("Please rescan the data folder when you have " +
+                			"fixed all invalid datasets!");            	
+                
+                }
             }
         });
 	    popup.add(menuItem);

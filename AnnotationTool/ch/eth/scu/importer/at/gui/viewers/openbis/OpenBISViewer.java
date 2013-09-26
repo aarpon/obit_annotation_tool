@@ -235,9 +235,22 @@ public class OpenBISViewer extends Observable
 		
 		// Try logging in with current credentials
 		try {
-			System.setProperty("force-accept-ssl-certificate", "true");
+			
+			// Should we accept self-signed certificates?
+			Properties appProperties = AppProperties.readPropertiesFromFile();
+			String acceptSelfSignedCerts = 
+					appProperties.getProperty("AcceptSelfSignedCertificates");
+
+			// Set the force-accept-ssl-certificate option if requested
+			// by the administrator
+			if (acceptSelfSignedCerts.equals("yes")) {
+				System.setProperty("force-accept-ssl-certificate", "true");
+			}
+			
+			// Login
 			facade = OpenbisServiceFacadeFactory.tryCreate(
 					userName, userPassword, openBISURL, timeout);
+
 		} catch (UserFailureException e) {
 			JOptionPane.showMessageDialog(this.panel,
 					"Login failed. Please try again.");
@@ -247,8 +260,7 @@ public class OpenBISViewer extends Observable
 			return false;
 		} catch (RemoteConnectFailureException e) {
 			JOptionPane.showMessageDialog(this.panel,
-					"Could not connect to openBIS: " + 
-							"the server appears to be down.\n" +
+					"Could not connect to openBIS.\n" +
 							"Please try again later.\n\n" +
 							"The application will now quit.",	
 					"Connection error",

@@ -17,6 +17,7 @@ public class DefaultProperties {
 		ArrayList<String> names = new ArrayList<String>();
 		
 		names.add("OpenBISURL");
+		names.add("AcceptSelfSignedCertificates");
 		names.add("AcquisitionStation");
 		names.add("UserDataDir");
 		names.add("DatamoverIncomingDir");
@@ -40,7 +41,10 @@ public class DefaultProperties {
 			options.add("https://openbis-scu.ethz.ch/openbis");
 			options.add("https://bs-lamp09.ethz.ch:8443/openbis/");
 			options.add("https://sprint-openbis.ethz.ch:8446/openbis/");
-			options.add("https://openbis-csb.ethz.ch/openbis");		
+			options.add("https://openbis-csb.ethz.ch/openbis");	
+		} else if (property.equals("AcceptSelfSignedCertificates")) {
+			options.add("no");
+			options.add("yes");
 		} else if (property.equals("AcquisitionStation")) {
 			options.add("LSRFortessaFCS");
 			options.add("Nikon");

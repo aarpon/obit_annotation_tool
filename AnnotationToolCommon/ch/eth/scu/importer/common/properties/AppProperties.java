@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ import ch.eth.scu.utils.QueryOS;
  */
 public class AppProperties {
 
-	static private final String propertiesVersion = "0.1";
+	static private final String propertiesVersion = "0.2";
 
 	// Public interface
 
@@ -109,8 +110,9 @@ public class AppProperties {
 	 * This function might require write access to a restricted system
 	 * folder. It should be used only in code run with admin privileges.
 	 */
-	static public boolean writePropertiesToFile(String openBISURL, 
-			String acqStation, String userDataDir, String incomingDir) {
+	static public boolean writePropertiesToFile(String openBISURL,
+			String acceptSelfSignedCerts, String acqStation, 
+			String userDataDir, String incomingDir) {
 
 		// Make sure the Properties file exists
 		if (!AppProperties.propertiesFileExists()) {
@@ -127,6 +129,9 @@ public class AppProperties {
 				"PropertyFileVersion", propertiesVersion );
 		applicationProperties.setProperty(
 				"OpenBISURL", openBISURL);
+		applicationProperties.setProperty(
+				"AcceptSelfSignedCertificates",
+				acceptSelfSignedCerts);
 		applicationProperties.setProperty(
 				"AcquisitionStation", acqStation);
 		applicationProperties.setProperty(
@@ -252,22 +257,21 @@ public class AppProperties {
 	 */		
 	private static Properties getDefaultProperties() {
 
-		// Create and return default properties
+		// Get property names
+		ArrayList<String> propertyNames = DefaultProperties.propertyNames();
+		
+		// Create a Properties object with current version file
 		Properties applicationProperties = new Properties();
 		applicationProperties.setProperty(
 				"PropertyFileVersion", propertiesVersion );
-		applicationProperties.setProperty(
-				"OpenBISURL", 
-				DefaultProperties.defaultValueForProperty("OpenBISURL"));		
-		applicationProperties.setProperty(
-				"AcquisitionStation",
-				DefaultProperties.defaultValueForProperty("AcquisitionStation"));
-		applicationProperties.setProperty(
-				"UserDataDir",
-				DefaultProperties.defaultValueForProperty("UserDataDir"));
-		applicationProperties.setProperty(
-				"DatamoverIncomingDir",
-				DefaultProperties.defaultValueForProperty("DatamoverIncomingDir"));
+		
+		// Fill it with default values
+		for (String name : propertyNames) {
+			applicationProperties.setProperty(name,
+					DefaultProperties.defaultValueForProperty(name));
+		}
+
+		// Return
 		return applicationProperties;
 	}
 

@@ -24,6 +24,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	protected String selAcqStation;
+	protected String selAcceptSelfSignedCerts;
 	protected String selIncomingDir;
 	protected String selUserDataDir;
 	protected String selOpenBISURL;
@@ -34,6 +35,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JButton closeButton;
 	protected JComboBox<Object> acqStationsList;
 	protected JComboBox<Object> openBISURLList;
+	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
 	private static final String version = "0.2.0";
 	
@@ -101,7 +103,50 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		add(openBISURLList, "wrap, width 100%");
+
+		// Add a label for the options of accepting self-signed
+		// certificates
+		JLabel certLabel = new JLabel("Accept self-signed SSL certificates "
+				+ "when logging in to openBIS");
+		add(certLabel, "wrap, width 100%");
 		
+		// Add a drop-down menu for the options of accepting self-signed
+		// certificates
+		String acceptSelfSignedCerts =
+				appProperties.getProperty("AcceptSelfSignedCertificates");
+		ArrayList<String> acceptSelfSignedCertsOptions = 
+				DefaultProperties.possibleValuesForProperty(
+						"AcceptSelfSignedCertificates");
+		index = -1;
+		for (int i = 0; i < acceptSelfSignedCertsOptions.size(); i++) {
+			if (acceptSelfSignedCertsOptions.get(i).equals(
+					acceptSelfSignedCerts)) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) {
+			String msg = "Unknown option for accepting self-signed " + 
+					"certificates! Defaulting to \"" +
+					DefaultProperties.defaultValueForProperty(
+							"AcceptSelfSignedCertificates") +
+					"\".";
+			JOptionPane.showMessageDialog(null, msg, "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			index = 0;
+		}
+		acceptSelfSignedCertsList = new JComboBox<Object>(acceptSelfSignedCertsOptions.toArray());
+		acceptSelfSignedCertsList.setSelectedIndex(index);
+		selAcceptSelfSignedCerts = acceptSelfSignedCertsOptions.get(index);
+		acceptSelfSignedCertsList.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+        		if (e.getActionCommand().equals("comboBoxChanged")) {
+        			selAcceptSelfSignedCerts = (String) acceptSelfSignedCertsList.getSelectedItem();
+        		}
+            }
+        });
+		add(acceptSelfSignedCertsList, "wrap, width 100%");
+
 		// Add a label for the selection of the acquisition machine
 		JLabel acqLabel = new JLabel("Select the acquisition station");
 		add(acqLabel, "wrap, width 100%");
@@ -207,7 +252,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-            	// The acquisition station and the openBIS URL are always set;
+            	// The acquisition station, the openBIS URL and the
+            	// option for accepting self-signed certificates are always set;
             	// we make sure that the user also picked an user data directory
             	if (selUserDataDir.equals("")) {
             		JOptionPane.showMessageDialog(null,
@@ -264,7 +310,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		getRootPane().setDefaultButton(saveButton);
 
 		// Display the dialog
-		setMinimumSize(new Dimension(600, 150));
+		setMinimumSize(new Dimension(600, 180));
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -296,15 +342,17 @@ public class AnnotationToolAdminDialog extends JDialog {
 	private boolean saveProperties() {
 		
 		// Check that everything is set
-		if (selOpenBISURL.equals("") || selAcqStation.equals("") || 
+		if (selOpenBISURL.equals("") || selAcqStation.equals("") ||
+				selAcceptSelfSignedCerts.equals("") ||
 				selUserDataDir.equals("") || 
 				selIncomingDir.equals("")) {
 			return false;
 		}
 		
 		// Save the properties to file
-		return AppProperties.writePropertiesToFile(selOpenBISURL, 
-				selAcqStation, selUserDataDir, selIncomingDir);
+		return AppProperties.writePropertiesToFile(selOpenBISURL,
+				selAcceptSelfSignedCerts, selAcqStation, 
+				selUserDataDir, selIncomingDir);
 	}
 	
 }
