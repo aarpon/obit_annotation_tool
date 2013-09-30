@@ -253,18 +253,24 @@ abstract public class AbstractViewer extends Observable
         
 		// Add a context menu
 		invalidDatasetsTable.addMouseListener(new MouseAdapter() {
-			
-		    @Override
-		    public void mousePressed(MouseEvent e) {
-		    	setListenerOnJTable(e);
-		    }
 
-		    @Override
-		    public void mouseReleased(MouseEvent e) {
-		    	setListenerOnJTable(e);
-		    }
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (QueryOS.isWindows()) {
+					return;
+				}
+				setListenerOnJTable(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (QueryOS.isMac()) {
+					return;
+				}
+				setListenerOnJTable(e);
+			}
 		});
-		
+
 		// Add to the layout
 		constraints.gridx = 0;
 		constraints.gridy = 6;
