@@ -155,13 +155,16 @@ public class ATDataMover {
 		// Some virtual machines return null instead of an empty list
 		if (files != null) {
 			for (File f : files) {
-				if (folder.isDirectory()) {
+				if (f.isDirectory()) {
 					deleteRecursively(f);
 				} else {
 					f.delete();
 				}
 			}
 		}
+
+		// Now delete the folder itself
+		folder.delete();
 
 		return;
 	}
