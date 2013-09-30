@@ -6,7 +6,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.table.DefaultTableModel;
@@ -18,7 +17,6 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
-import ch.eth.scu.importer.lsrfortessa.processors.BDLSRFortessaFCSProcessor;
 import ch.eth.scu.importer.nikonnd2.gui.viewers.data.model.ND2FileNode;
 import ch.eth.scu.importer.nikonnd2.processors.NikonProcessor;
 import ch.eth.scu.importer.nikonnd2.processors.NikonProcessor.Experiment;

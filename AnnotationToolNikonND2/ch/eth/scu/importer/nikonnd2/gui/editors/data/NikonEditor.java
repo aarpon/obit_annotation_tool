@@ -27,7 +27,6 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.lsrfortessa.gui.editors.data.model.BDLSRFortessaFCSMetadata;
 import ch.eth.scu.importer.nikonnd2.gui.editors.data.model.NikonMetadata;
 import ch.eth.scu.importer.nikonnd2.processors.NikonProcessor.Experiment;
 import ch.eth.scu.importer.nikonnd2.processors.NikonProcessor.ND2File;
