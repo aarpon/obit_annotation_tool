@@ -310,7 +310,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		getRootPane().setDefaultButton(saveButton);
 
 		// Display the dialog
-		setMinimumSize(new Dimension(600, 180));
+		setMinimumSize(new Dimension(600, 220));
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

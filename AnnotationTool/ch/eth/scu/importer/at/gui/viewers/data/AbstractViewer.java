@@ -253,27 +253,15 @@ abstract public class AbstractViewer extends Observable
         
 		// Add a context menu
 		invalidDatasetsTable.addMouseListener(new MouseAdapter() {
+			
 		    @Override
 		    public void mousePressed(MouseEvent e) {
-		    		invalidDataset = null;
-		        int r = invalidDatasetsTable.rowAtPoint(e.getPoint());
-		        if (r >= 0 && r < invalidDatasetsTable.getRowCount()) {
-		        		invalidDatasetsTable.setRowSelectionInterval(r, r);
-		        } else {
-		        		invalidDatasetsTable.clearSelection();
-		        }
+		    	setListenerOnJTable(e);
+		    }
 
-		        // Store the selected file
-		        int rowIndex = invalidDatasetsTable.getSelectedRow();
-		        if (rowIndex < 0)
-		            return;
-		        if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
-			        invalidDataset = new File((String)
-			        		invalidDatasetsTable.getModel().getValueAt(
-			        				rowIndex, 0));
-		        		JPopupMenu popup = createInvalidDatasetsPopup();
-		            popup.show(e.getComponent(), e.getX(), e.getY());
-		        }
+		    @Override
+		    public void mouseReleased(MouseEvent e) {
+		    	setListenerOnJTable(e);
 		    }
 		});
 		
@@ -805,4 +793,30 @@ abstract public class AbstractViewer extends Observable
 	    return popup;
 	}
 
+
+	/**
+	 * Sets a mouse event listener on the JTable
+	 * @param e Mouse event
+	 */
+	private void setListenerOnJTable(MouseEvent e) {
+		invalidDataset = null;
+        int r = invalidDatasetsTable.rowAtPoint(e.getPoint());
+        if (r >= 0 && r < invalidDatasetsTable.getRowCount()) {
+        		invalidDatasetsTable.setRowSelectionInterval(r, r);
+        } else {
+        		invalidDatasetsTable.clearSelection();
+        }
+
+        // Store the selected file
+        int rowIndex = invalidDatasetsTable.getSelectedRow();
+        if (rowIndex < 0)
+            return;
+        if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
+	        invalidDataset = new File((String)
+	        		invalidDatasetsTable.getModel().getValueAt(
+	        				rowIndex, 0));
+        		JPopupMenu popup = createInvalidDatasetsPopup();
+            popup.show(e.getComponent(), e.getX(), e.getY());
+        }
+	}
 }
