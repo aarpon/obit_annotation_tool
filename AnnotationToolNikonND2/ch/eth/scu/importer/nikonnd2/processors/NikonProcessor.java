@@ -205,7 +205,7 @@ public class NikonProcessor extends AbstractProcessor {
 			super(fullFolder);
 			
 			// Set the descriptor name
-			this.name = fullFolder.getName();
+			this.setName(fullFolder.getName());
 
 		}
 		
@@ -239,7 +239,7 @@ public class NikonProcessor extends AbstractProcessor {
 			super(name);
 			
 			// Store the experiment name
-			this.name = name.getName();
+			this.setName(name.getName());
 
 		}
 
@@ -269,7 +269,7 @@ public class NikonProcessor extends AbstractProcessor {
 			super(fullFolder);
 			
 			// Set the descriptor name
-			this.name = fullFolder.getName();
+			this.setName(fullFolder.getName());
 
 		}
 		
@@ -298,7 +298,7 @@ public class NikonProcessor extends AbstractProcessor {
 			super(nd2FileName);
 
 			// Store the file name
-			this.name = nd2FileName.getName();
+			this.setName(nd2FileName.getName());
 
 			// Append the attibute file size.
 			long s = nd2FileName.length();
@@ -325,7 +325,7 @@ public class NikonProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public String toString() {
-			return this.name;
+			return getName();
 		}
 
 		/**

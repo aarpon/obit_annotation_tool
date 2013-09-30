@@ -20,7 +20,7 @@ abstract public class AbstractDescriptor {
 	 * 
 	 * This is displayed in the viewers and in openBIS.
 	 */
-	protected String name = "";
+	private String name = "";
 
 	/**
 	 * String-string map of data attribute key:value pair.
@@ -60,7 +60,8 @@ abstract public class AbstractDescriptor {
 	public String getName() { return name; }
 
 	/**
-	 * Set the name of the entity.
+	 * Set the name of the descriptor. 
+	 * @param name Name of the Descriptor. 
 	 */
 	public void setName(String name) { this.name = name; }
 

@@ -128,7 +128,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 			super(fullFolder);
 			
 			// Set the descriptor name
-			this.name = fullFolder.getName();
+			this.setName(fullFolder.getName());
 
 		}
 		
@@ -170,7 +170,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		public Experiment(File fullPath) {
 
 			super(fullPath);
-			this.name = fullPath.getName();
+			this.setName(fullPath.getName());
 			
 			// Set the attribute relative path. Since this will be 
 			// used by the openBIS dropboxes running on a Unix machine, 
@@ -210,7 +210,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 			super(fcsFileName);
 
 			// Store the file name
-			this.name = fcsFileName.getName();
+			this.setName(fcsFileName.getName());
 
 			// Set the attribute relative file name. Since this will be 
 			// used by the openBIS dropboxes running on a Unix machine, 
@@ -226,7 +226,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public String toString() {
-			return this.name;
+			return getName();
 		}
 
 		/**
@@ -261,7 +261,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		 */
 		public Specimen(String name) {
 	
-			this.name = name;
+			this.setName(name);
 	
 		}
 	
@@ -303,7 +303,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		 */
 		public Tray(String name) {
 	
-			this.name = name;
+			this.setName(name);
 
 			// Initialize geometry
 			this.geometry = this.supportedTrayGeometries.get(0);
@@ -340,7 +340,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		public Tube(String name, File fcsFullFileName) 
 				throws IOException {
 	
-			this.name = name;
+			this.setName(name);
 
 			// Associate the FCS file to the Tube
 			fcsFile = new FCSFile(fcsFullFileName);
@@ -353,7 +353,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		 */
 		@Override
 		public String toString() {
-			return this.name;
+			return getName();
 		}
 	
 		/**
