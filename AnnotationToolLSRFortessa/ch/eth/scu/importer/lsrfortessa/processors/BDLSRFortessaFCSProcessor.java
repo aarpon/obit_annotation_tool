@@ -165,7 +165,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 
 		/**
 		 * Constructor
-		 * @param name Name of the experiment.
+		 * @param fullPath Full path of the experiment.
 		 */
 		public Experiment(File fullPath) {
 
@@ -181,6 +181,25 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 
 		}
 
+		/**
+		 * Alternative constructor
+		 * @param fullPath Full path of the experiment.
+		 * @param name Name of the experiment.
+		 */
+		public Experiment(File fullPath, String name) {
+
+			super(fullPath);
+			this.setName(name);
+			
+			// Set the attribute relative path. Since this will be 
+			// used by the openBIS dropboxes running on a Unix machine, 
+			// we make sure to use forward slashes for path separators 
+			// when we set it as an attribute.
+			attributes.put("relativePath",
+					this.relativePath.replace("\\", "/"));
+
+		}
+		
 		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
@@ -425,7 +444,7 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 				// Move on to the next file
 				continue;
 			}
-			
+
 			// Delete some known garbage
 			if (deleteIfKnownUselessFile(file)) {
 				continue;
@@ -480,6 +499,14 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 						file, "Unknown file format");
 				continue;
 			}
+
+			// An FCS file cannot be at the user folder root!
+			if (file.getParent().equals(this.userFolder.toString())) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "File must be in subfolder.");
+				continue;
+			}
 			
 			// Is it an FCS file? Scan it and extract the information
 			FCSReader processor = new FCSReader(file, false);
@@ -495,18 +522,24 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 			// Create a new ExperimentDescriptor or reuse an existing one
 			Experiment expDesc;
 			String experimentName = getExperimentName(processor);
-			File experimentPath = getExperimentPath(processor, file);
-			String experimentKey = experimentPath.getCanonicalPath();
+			String experimentPath = getExperimentPath(processor, file);
+			if (experimentPath == "") {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file,
+						"Folder name does not match experiment name.");
+				continue;				
+			}
+			String experimentKey = experimentPath;
 			if (folderDescriptor.experiments.containsKey(experimentKey)) {
 				expDesc = folderDescriptor.experiments.get(experimentKey);
 			} else {
-				expDesc = 
-						new Experiment(experimentPath);
+				expDesc = new Experiment(new File(experimentPath),
+						experimentName);
 				// Store attributes
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentKey, expDesc);
 			}
-	
+
 			// Is the container a Tray or Specimen?
 			if (identifyContainerType(processor).equals("TRAY")) {
 				
@@ -611,27 +644,36 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Return the experiment name stored in the FCS file
+	 * Return the experiment path the folder name matches the experiment
+	 * name stored in the FCS file
 	 * @param processor with already scanned file
-	 * @return name of the experiment
+	 * @param fcsFilePath full file path of the FCS file
+	 * @return experiment path
 	 */
-	private File getExperimentPath(FCSReader processor, 
+	private String getExperimentPath(FCSReader processor, 
 			File fcsFilePath) {
-		String fcsFilePathStr = "";
-		try {
-			fcsFilePathStr = fcsFilePath.getCanonicalPath();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		String experimentName = getExperimentName(processor);
-		int lastIndex = fcsFilePathStr.indexOf(experimentName);
-		if (lastIndex == -1) {
-			return new File("");
-		} else {
-			return new File(fcsFilePathStr.substring(0, 
-					lastIndex + experimentName.length()));
+		String experimentPath = "";
+		while (fcsFilePath != null) {
+			
+			String expNameFromPath = fcsFilePath.getName();
+			
+			if (experimentName.equals(expNameFromPath)) {
+				try {
+					experimentPath = fcsFilePath.getCanonicalPath();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fcsFilePath = null;
+			} else {
+				fcsFilePath = fcsFilePath.getParentFile();
+			}
+
 		}
+		
+		return experimentPath;
 	}
 	
 	/**
