@@ -432,6 +432,12 @@ public class FCSReader extends AbstractReader {
 	 * We make sure that TEXT is assigned the lower and DATA the higher offset.
 	 */
 	private void swapOffsetsIfNeeded() {
+		// If the data block is larger than 99,999,999 bytes,
+		// DATAbegin will be 0. 
+		// In this case we do NOT want to swap!
+		if (DATAbegin == 0) {
+			return;
+		}
 		if (TEXTbegin > DATAbegin) {
 			int tmp;
 			tmp = TEXTbegin;
