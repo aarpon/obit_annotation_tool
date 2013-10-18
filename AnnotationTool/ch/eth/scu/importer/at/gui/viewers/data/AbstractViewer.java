@@ -645,7 +645,7 @@ abstract public class AbstractViewer extends Observable
 	 */
 	private JPopupMenu createInvalidDatasetsPopup() {
 		
-		// Create abd return the popup menu.
+		// Create the popup menu.
 	    JPopupMenu popup = new JPopupMenu();
 
 	    // Show in Explorer/Finder

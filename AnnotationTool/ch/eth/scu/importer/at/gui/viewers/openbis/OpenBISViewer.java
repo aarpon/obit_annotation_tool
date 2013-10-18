@@ -6,15 +6,22 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -41,6 +48,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.utils.QueryOS;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
@@ -49,6 +57,10 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
+import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.FacadeFactory;
+import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.IQueryApiFacade;
+import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.AggregationServiceDescription;
+import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -65,6 +77,7 @@ public class OpenBISViewer extends Observable
 	private String userPassword = "";
 	private int timeout = 60000;
 	private IOpenbisServiceFacade facade;
+	private IQueryApiFacade queryFacade;
 	
 	private JLabel title;
 	private JButton rescanButton;
@@ -81,6 +94,8 @@ public class OpenBISViewer extends Observable
 	
 	protected OutputPane outputPane;
 	
+	AggregationServiceDescription createProjectService = null;
+
 	/**
 	 * Constructor
 	 */
@@ -131,6 +146,26 @@ public class OpenBISViewer extends Observable
 		// Listen for when a node is about to be opened (for lazy loading)
 		tree.addTreeWillExpandListener(this);
 		
+		// Add a context menu
+		tree.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (QueryOS.isWindows()) {
+					return;
+				}
+				setListenerOnJTree(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (QueryOS.isMac()) {
+					return;
+				}
+				setListenerOnJTree(e);
+			}
+		});
+
 		// Create the scroll pane and add the tree to it. 
 		treeView = new JScrollPane(tree);
 		
@@ -247,9 +282,18 @@ public class OpenBISViewer extends Observable
 				System.setProperty("force-accept-ssl-certificate", "true");
 			}
 			
-			// Login
+			// Create an IOpenbisServiceFacade to query openBIS for
+			// projects, experiments and samples.
+			// If the factory returns a valid object, it means that
+			// the credentials provided were accepted and the user
+			// was successfully logged in.
 			facade = OpenbisServiceFacadeFactory.tryCreate(
 					userName, userPassword, openBISURL, timeout);
+
+			// Create also an IQueryApiFacade to access the reporting
+			// plugins on the server.
+			queryFacade = FacadeFactory.create(openBISURL,
+					userName, userPassword);
 
 		} catch (UserFailureException e) {
 			JOptionPane.showMessageDialog(this.panel,
@@ -556,4 +600,147 @@ public class OpenBISViewer extends Observable
 		
 	}
 
+	/**
+	 * Sets a mouse event listener on the JTree
+	 * @param e Mouse event
+	 */
+	private void setListenerOnJTree(MouseEvent e) {
+		
+		if (e.isPopupTrigger() && 
+				e.getComponent() instanceof OpenBISViewerTree ) {
+
+			// Position of mouse click
+			int x = e.getPoint().x;
+			int y = e.getPoint().y;
+			
+			// Get selected node
+			TreePath p = tree.getPathForLocation(x, y);
+        		AbstractOpenBISNode node = 
+        			(AbstractOpenBISNode) p.getLastPathComponent();
+        		
+        		// Type of node
+        		String nodeType = node.getClass().getSimpleName();
+        		
+        		// Add relevant context menu
+        		if (nodeType.equals("OpenBISSpaceNode")) {
+
+        			JPopupMenu popup =
+        					createSpacePopup((OpenBISSpaceNode) node);
+        			popup.show(e.getComponent(), x, y);
+        		}
+		}
+	}
+
+	/**
+	 * Create a popup menu with actions for a space node
+	 * @return a JPopupMenu for the passed item
+	 */
+	private JPopupMenu createSpacePopup(final OpenBISSpaceNode node) {
+		
+		// Create the popup menu.
+	    JPopupMenu popup = new JPopupMenu();
+
+	    // Create new project
+	    String menuEntry = "Create new project";
+	    JMenuItem menuItem = new JMenuItem(menuEntry);
+	    menuItem.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+            		if (createNewProject(node)) {
+            			// Rescan
+            			scan();
+            		}
+
+			}
+        });
+	    popup.add(menuItem);
+	
+	    return popup;
+	}
+
+	/**
+	 * Asks the user to give a project name and will then try to create
+	 * it as a child of the passed OpenBISSpaceNode
+	 * @param node An OpenBISSpaceNode
+	 * @return true if creation was successfull, false otherwise.
+	 */
+	private boolean createNewProject(final OpenBISSpaceNode node) {
+		
+		// Retrieve and store the createProject service
+		if (createProjectService == null) {
+			if (!retrieveAndStoreServices()) {
+				
+				// TODO Throw an exception to distinguish the case where
+				// the project could not be created.
+				return false;
+			}
+		}
+
+		// Get the space object from the openBIS node
+		SpaceWithProjectsAndRoleAssignments space =
+				(SpaceWithProjectsAndRoleAssignments) 
+				node.getUserObject();
+
+		// Get the space code
+		String spaceCode = space.getCode();
+
+		// Ask the user to specify a project name
+		String projectCode = JOptionPane.showInputDialog(
+				"Please enter new project name (code)"); 
+
+		// Set the parameters
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("spaceCode", spaceCode.toUpperCase());
+		parameters.put("projectCode", projectCode.toUpperCase());
+		
+		// Call the ingestion server and collect the output
+		QueryTableModel tableModel = 
+				queryFacade.createReportFromAggregationService(
+						createProjectService, parameters);
+
+		// Display the output
+		String success= "";
+		String message = "";
+		List<Serializable[]> rows = tableModel.getRows();
+		for (Serializable[] row : rows) {
+			success = (String)row[0];
+			message = (String)row[1];
+			if (success.equals("true")) {
+				outputPane.log(message);
+				outputPane.warn("Please rescan to update.");
+				return true;
+			}
+		}
+		outputPane.err(message);
+		return false;
+	}
+
+	/**
+	 * Retrieve and store the create_project ingestion service from the
+	 * server.
+	 * @return true if the service could be retrieved successfully,
+	 * false otherwise.
+	 */
+	public boolean retrieveAndStoreServices() {
+
+		// Retrieve the create_project ingestion service from the server
+		List<AggregationServiceDescription> aggregationServices = 
+				queryFacade.listAggregationServices();
+
+		// Go over all returned services and store a reference to the
+		// create_project ingestion plug-in.
+		for (AggregationServiceDescription service : aggregationServices)
+        {
+			if (service.getServiceKey().equals("create_project")) {
+				createProjectService = service;
+				
+				// Found, we can return success
+				return true;
+			}
+        }
+		
+		// Not found, we return failure
+		return false;
+	}
 }

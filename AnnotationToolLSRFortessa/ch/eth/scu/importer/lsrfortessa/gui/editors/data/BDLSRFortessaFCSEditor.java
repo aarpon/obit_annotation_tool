@@ -501,6 +501,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("comboBoxChanged")) {
 
+							@SuppressWarnings("unchecked")
 							JComboBox<String> obj = (JComboBox<String>) e
 									.getSource();
 
@@ -585,6 +586,7 @@ public class BDLSRFortessaFCSEditor extends AbstractEditor {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
 					// Get selected project identifier
+					@SuppressWarnings("unchecked")
 					String projectID =
 							(String)
 							((JComboBox<String>)
