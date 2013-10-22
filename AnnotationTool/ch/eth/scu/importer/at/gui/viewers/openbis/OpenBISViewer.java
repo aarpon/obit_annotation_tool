@@ -334,8 +334,9 @@ public class OpenBISViewer extends Observable
 	 * @return true if logging out was successful, false otherwise.
 	 */
 	public boolean logout() throws RemoteAccessException {
-		if (facade != null && isLoggedIn) {
+		if (facade != null && isLoggedIn && queryFacade != null) {
 			facade.logout();
+			queryFacade.logout();
 			clearTree();
 			isLoggedIn = false;
 			return true;
@@ -402,11 +403,14 @@ public class OpenBISViewer extends Observable
 				null));
 
 		// Do we have a connection with openBIS?
+		// We just need an active facade for scanning; the queryFacade
+		// should actually be on as well, but we do not need it here. 
 		if (facade == null || !isLoggedIn) {
 			return;
 		}
 		
-		// TODO Check that the session is still open
+		// Check that the session is still open (we just check the
+		// facade, the queryFacade is not necessary
 		try {
 			facade.checkSession();
 		} catch ( InvalidSessionException e ) {
@@ -695,6 +699,9 @@ public class OpenBISViewer extends Observable
 		parameters.put("projectCode", projectCode.toUpperCase());
 		
 		// Call the ingestion server and collect the output
+		// TODO:
+		// - check that the session is still on
+		// - check that the user has the right to create a project
 		QueryTableModel tableModel = 
 				queryFacade.createReportFromAggregationService(
 						createProjectService, parameters);
