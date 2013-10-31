@@ -691,7 +691,11 @@ public class OpenBISViewer extends Observable
 
 		// Ask the user to specify a project name
 		String projectCode = JOptionPane.showInputDialog(
-				"Please enter new project name (code)"); 
+				"Please enter new project name (code)");
+		if (projectCode == null || projectCode.equals("")) {
+			outputPane.warn("Creation of new project aborted by user.");
+			return false;
+		}
 
 		// Set the parameters
 		Map<String, Object> parameters = new HashMap<String, Object>();
