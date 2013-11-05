@@ -429,6 +429,14 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 	
 		// Get the directory listing
 		String [] files = dir.list();
+		
+		// Empty subfolders are not accepted
+		if (files.length == 0 && !dir.equals(this.userFolder)) {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(
+					dir, "Empty folder");
+			return;
+		}
 
 		// Go over the files and folders
 		for (String f : files) {

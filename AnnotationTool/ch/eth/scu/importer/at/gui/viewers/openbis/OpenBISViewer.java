@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSampleListNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSampleNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
@@ -56,6 +58,7 @@ import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.FacadeFactory;
 import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.IQueryApiFacade;
@@ -558,7 +561,7 @@ public class OpenBISViewer extends Observable
 		if (node.isLoaded()) {
 			return;
 		}
-		
+
 		// Get the user object stored in the node
 		Object obj = node.getUserObject();
 		
@@ -586,14 +589,34 @@ public class OpenBISViewer extends Observable
 			Experiment e = (Experiment) obj;
 			List<String> sampleId = new ArrayList<String>();
 			sampleId.add(e.getIdentifier());
+
+			// To be restored -- and extended -- in the future.
+
+			//EnumSet<SampleFetchOption> opts = EnumSet.of(SampleFetchOption.PROPERTIES);
+			//List<Sample> samples = 
+			//		facade.listSamplesForExperiments(sampleId, opts);
+			//for (Sample sm : samples) {
+			//	// Add the samples
+			//	OpenBISSampleNode sample = new OpenBISSampleNode(sm);
+			//	node.add(sample);
+			//}
+
+			// Temporarily, we just display the number of contained 
+			// samples in the Experiment, until we will have uncoupled
+			// the openBIS Viewer from the customizable openBIS 
+			// Processor.
 			List<Sample> samples = 
 					facade.listSamplesForExperiments(sampleId);
-			for (Sample sm : samples) {
-				// Add the samples
-				OpenBISSampleNode sample = new OpenBISSampleNode(sm);
-				node.add(sample);
+			int nSamples = samples.size();
+			String title = ""; 
+			if (nSamples == 0) {
+				title = "No samples";
+			} else if (nSamples == 1) {
+				title = "One sample";
+			} else {
+				title = nSamples + " samples";
 			}
-
+			node.add(new OpenBISSampleListNode(title));
 		} else {
 			
 			// We do nothing for other openBIS object types

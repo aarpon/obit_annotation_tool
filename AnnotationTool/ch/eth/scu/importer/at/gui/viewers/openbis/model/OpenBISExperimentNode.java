@@ -1,5 +1,7 @@
 package ch.eth.scu.importer.at.gui.viewers.openbis.model;
 
+import java.util.Map;
+
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 
 /**
@@ -34,7 +36,14 @@ public class OpenBISExperimentNode extends AbstractOpenBISNode {
 	 * @return String representation of the node
 	 */			
 	@Override
-	public String toString() { return e.getCode(); }
+	public String toString() { 
+		// Get the name if present or fall back to the experiment code
+		Map<String, String> properties = e.getProperties();
+		if (properties.containsKey("LSR_FORTESSA_EXPERIMENT_NAME")) {
+			return properties.get("LSR_FORTESSA_EXPERIMENT_NAME");
+		}
+		return e.getCode(); 
+	}
 
 	/**
 	 * Experiment code
@@ -64,7 +73,7 @@ public class OpenBISExperimentNode extends AbstractOpenBISNode {
 	 * over the Node in the JTree
 	 * @return the tooltip to be displayed over the Node
 	 */	
-	public String getTooltip() { return "openBIS experiment"; }
+	public String getTooltip() { return e.getCode(); }
 
 	/**
 	 * Experiment has children and is therefore not a leaf

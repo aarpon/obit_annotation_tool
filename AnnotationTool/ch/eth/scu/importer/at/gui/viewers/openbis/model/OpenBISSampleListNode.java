@@ -1,25 +1,24 @@
 package ch.eth.scu.importer.at.gui.viewers.openbis.model;
 
-import java.util.Map;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-
 /**
- * A Custom Sample TreeNode
+ * This Node is to be used temporarily and discarded as soon as the
+ * refactoring of the OpenBISViewer class into Viewer and separate
+ * (customizable) Processor is completed.
+ * 
  * @author Aaron Ponti
  *
  */	
-public class OpenBISSampleNode extends AbstractOpenBISNode {
+public class OpenBISSampleListNode extends AbstractOpenBISNode {
 	
 	private static final long serialVersionUID = 1L;
 
-	private Sample s;
+	String s;
 
 	/**
 	 * Constructor 
 	 * @param s Sample object
 	 */		
-	public OpenBISSampleNode(Sample s) {
+	public OpenBISSampleListNode(String s) {
 		super(s);
 		this.s = s;
 	}
@@ -29,7 +28,7 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
 	 * @return Type of the node
 	 */			
 	@Override
-	public String getType() { return "Sample"; }
+	public String getType() { return "SampleList"; }
 
 	/**
 	 * String representation of the node
@@ -37,20 +36,7 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
 	 */			
 	@Override
 	public String toString() {
-		// Get the name if present or fall back to the sample code
-		Map<String, String> properties = s.getProperties();
-		if (properties.containsKey("LSR_FORTESSA_PLATE_NAME")) {
-			return properties.get("LSR_FORTESSA_PLATE_NAME");
-		} else if (properties.containsKey("LSR_FORTESSA_WELL_NAME")) {
-			return properties.get("LSR_FORTESSA_WELL_NAME");
-		} else if (properties.containsKey("LSR_FORTESSA_TUBE_NAME")) {
-			return properties.get("LSR_FORTESSA_TUBE_NAME");
-		} else {
-			if (properties.isEmpty()) {
-				return "Tubeset";
-			}
-		}
-		return s.getCode();
+		return this.s;
 	}
 
 	/**
@@ -58,14 +44,14 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
 	 * @return Sample code
 	 */			
 	@Override
-	public String getCode() { return s.getCode(); }
+	public String getCode() { return "None"; }
 	
 	/**
 	 * Sample identifier
 	 * @return Sample identifier
 	 */			
 	@Override
-	public String getIdentifier() { return s.getIdentifier(); }
+	public String getIdentifier() { return "None"; }
 
 	/**
 	 * Get the icon to be displayed in the JTree
@@ -81,7 +67,9 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
 	 * over the Node in the JTree
 	 * @return the tooltip to be displayed over the Node
 	 */	
-	public String getTooltip() { return s.getCode(); }
+	public String getTooltip() { 
+		return "Total number of samples in current Experiment";
+	}
 	
 	/**
 	 * Sample does not have children and is therefore a leaf

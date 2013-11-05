@@ -40,7 +40,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
 	
-	private static final String version = "0.2.0";
+	private static final String version = "0.3.0";
 	
 	/**
 	 * Constructor
@@ -170,10 +170,8 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	 * @param toolTipText		tooltip String for the button 
 	 * @return a JButton ready to be added to the toolbar
 	 */
-	private JButton createButton( String imgLocation,
-								  String text,
-								  String actionCommand,
-								  String toolTipText) {
+	private JButton createButton(String imgLocation,
+			String text, String actionCommand, String toolTipText) {
 
 		// Create, initialize and return the button.
 		JButton button = new JButton(text);
