@@ -12,7 +12,7 @@ REM Copy all jar packages (common to both tools)
 COPY /Y .\AnnotationToolExe\*.jar .\win32\lib\
 
 REM Copy necessary files to generate AnnotationTool.exe for 32-bit Windows
-COPY .\AnnotationToolIni\AnnotationTool.ini .\win32\
+COPY .\AnnotationToolIni\AnnotationTool32bit.ini .\win32\AnnotationTool.ini
 COPY .\AnnotationToolIni\icon.ico .\win32\
 COPY .\winrun4j\WinRun4J.exe .\win32\AnnotationTool.exe
 
@@ -20,7 +20,7 @@ REM Generate 32-bit Windows executable
 .\winrun4j\RCEDIT.exe /I .\win32\AnnotationTool.exe .\win32\icon.ico
 
 REM Copy necessary files to generate AnnotationToolAdmin.exe for 32-bit Windows
-COPY .\AnnotationToolAdminIni\AnnotationToolAdmin.ini .\win32\
+COPY .\AnnotationToolAdminIni\AnnotationToolAdmin32bit.ini .\win32\AnnotationToolAdmin.ini
 COPY .\AnnotationToolAdminIni\icon_admin.ico .\win32\
 COPY .\winrun4j\WinRun4J.exe .\win32\AnnotationToolAdmin.exe
 
