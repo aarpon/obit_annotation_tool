@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.boris.winrun4j.eclipse.launch">
+<stringAttribute key="dde.class" value=""/>
+<booleanAttribute key="dde.enabled" value="false"/>
+<stringAttribute key="dde.server" value=""/>
+<stringAttribute key="dde.topic" value=""/>
+<stringAttribute key="dde.window" value=""/>
+<stringAttribute key="log" value=""/>
+<stringAttribute key="log.level" value=""/>
+<booleanAttribute key="log.overwrite" value="true"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/scu_annotation_tool/AnnotationToolAdmin/ch/eth/scu/importer/atadmin/AnnotationToolAdmin.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.eth.scu.importer.atadmin.AnnotationToolAdmin"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="scu_annotation_tool"/>
+<stringAttribute key="process.priority" value=""/>
+<stringAttribute key="single.instance" value=""/>
+<booleanAttribute key="splash.autohide" value="true"/>
+<stringAttribute key="splash.image" value=""/>
+</launchConfiguration>

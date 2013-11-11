@@ -1,0 +1,3 @@
+Copy "wr4i_AnnotationTool.launch" and "wr4i_AnnotationToolAdmin.launch" to
+{eclipse_workspace}/.metadata/.plugins/org.eclipse.debug.core/.launches/
+to add the WinRun4J launchers to eclipse.
