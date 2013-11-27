@@ -755,6 +755,8 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 		if (acqHardwareString.equals("LSRII")) {
 			// LSRII is generic. We replace it here with "BD LSR Fortessa"
 			acqHardwareString = "BD LSR Fortessa";
+		} else if (acqHardwareString.equals("FACSAriaIII")) {
+			acqHardwareString = "BD FACSAria III";
 		} else {
 			validator.isValid = false;
 			validator.invalidFilesOrFolders.put(
@@ -779,13 +781,26 @@ public class BDLSRFortessaFCSProcessor extends AbstractProcessor {
 						processor.getFile(),
 						"Unknown software version.");
 			} else {
-				if (!m.group(2).equals("6") || !m.group(3).equals("1")) {
+				int major;
+				int minor;
+				try {
+					major = Integer.parseInt(m.group(2));
+					minor = Integer.parseInt(m.group(3));
+					// Known valid versions are 6.1 and 7.0
+					if (!((major == 6 && minor == 1) ||
+							(major == 7 && minor == 0))) {
+						validator.isValid = false;
+						validator.invalidFilesOrFolders.put(
+								processor.getFile(),
+								"Unsupported software version: " + 
+								m.group(2) + "." +
+								m.group(3));
+					}
+				} catch (NumberFormatException n) {
 					validator.isValid = false;
 					validator.invalidFilesOrFolders.put(
 							processor.getFile(),
-							"Unsupported software version: " + 
-							m.group(2) + "." +
-							m.group(3));
+							"Unknown software version.");
 				}
 			}
 		}
