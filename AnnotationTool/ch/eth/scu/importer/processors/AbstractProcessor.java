@@ -59,7 +59,7 @@ abstract public class AbstractProcessor {
 	 * something goes wrong, the state is set to false and the
 	 * errorMessage String is set property. 
 	 * 
-	 *  This function returns last error message.
+	 * This function returns last error message.
 	 */
 	public String getErrorMessage() {
 		return errorMessage;

@@ -7,7 +7,8 @@ import java.util.*;
 import ch.eth.scu.importer.readers.AbstractReader;
 
 /**
- * FCSReader parses "Data File Standard for Flow Cytometry, Version FCS3.0" files.
+ * FCSReader parses "Data File Standard for Flow Cytometry, 
+ * Version FCS3.0 or FCS3.1" files.
  * 
  * Parsing is currently not complete:
  * 	 - additional byte buffer manipulation needed for datatype "A" (ASCII)
@@ -24,6 +25,7 @@ public class FCSReader extends AbstractReader {
 	private File filename;
 	private boolean enableDataParsing; 
 	private RandomAccessFile in = null;
+	private String fcsVersion = "";
 	private int TEXTbegin = 0;
 	private int TEXTend   = 0;
 	private int DATAbegin = 0;
@@ -42,12 +44,12 @@ public class FCSReader extends AbstractReader {
 	public ArrayList<Parameter> parameters = new ArrayList<Parameter>();
 	
 	/**
-	 * String-to-string map of key-value pairs for the standard FCS 3.0 keywords
+	 * String-to-string map of key-value pairs for the standard FCS 3.0/3.1 keywords
 	 */
 	public Map<String, String> TEXTMapStandard = new LinkedHashMap<String, String>();
 
 	/**
-	 * String-to-string map of key-value pairs for custom FCS 3.0 keywords
+	 * String-to-string map of key-value pairs for custom FCS 3.0/3.1 keywords
 	 */
 	public Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
 
@@ -71,7 +73,8 @@ public class FCSReader extends AbstractReader {
 	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
-		return "Data File Standard for Flow Cytometry, Version FCS3.0.";
+		return "Data File Standard for Flow Cytometry, "
+				+ "Version FCS3.0 and FCS3.1.";
 	}
 	
 	/**
@@ -172,7 +175,7 @@ public class FCSReader extends AbstractReader {
 		}
 
 		String str = 
-				"Valid FCS3.0 file with TEXT: "     + 
+				"Valid " + fcsVersion + " file with TEXT: "     + 
 						TEXTbegin     + " - " + TEXTend     + ", DATA: " +
 						DATAbegin     + " - " + DATAend     + ", ANALYSIS: " +
 						ANALYSISbegin + " - " + ANALYSISend + ", OTHER: " +
@@ -215,15 +218,15 @@ public class FCSReader extends AbstractReader {
 	}
 
 	/**
-	 * Returns all standard FCS 3.0 keywords as a String - String map
-	 * @return The String - String Map of all standard FCS 3.0 keywords
+	 * Returns all standard FCS 3.0/3.1 keywords as a String - String map
+	 * @return The String - String Map of all standard FCS 3.0/3.1 keywords
 	 */
 	public Map<String, String> getStandardKeywords() {
 		return TEXTMapStandard;
 	}
 
 	/**
-	 * Return the value associated to a standard FCS 3.0 keyword or empty
+	 * Return the value associated to a standard FCS 3.0/3.1 keyword or empty
 	 * @param key One of the standard keywords (staring with "$")
 	 * @return The value associated with the passed keyword or empty String
 	 * if not found
@@ -237,18 +240,18 @@ public class FCSReader extends AbstractReader {
 	}
 
 	/**
-	 * Returns all custom, non FCS 3.0-compliant keywords as a String - 
+	 * Returns all custom, non FCS 3.0/3.1-compliant keywords as a String - 
 	 * String map
 	 * @return The String - String Map of all custom, non FCS 
-	 * 3.0-compliant keywords
+	 * 3.0/3.1-compliant keywords
 	 */
 	public Map<String, String> getCustomKeywords() {
 		return TEXTMapStandard;
 	}
 	
 	/**
-	 * Return the value associated with a custom, non FCS 3.0-compliant keyword
-	 * or empty
+	 * Return the value associated with a custom, non FCS 3.0/3.1-compliant
+	 * keyword or empty
 	 * @param key A custom keywords (without $ at the beginning)
 	 * @return The value associated with the passed keyword or empty String
 	 * if not found
@@ -262,7 +265,7 @@ public class FCSReader extends AbstractReader {
 	}
 	
 	/**
-	 * Returns all keywords as a String - String map (FCS 3.0-compliant 
+	 * Returns all keywords as a String - String map (FCS 3.0/3.1-compliant 
 	 * and custom)
 	 * @return The String - String Map of all keywords
 	 */
@@ -284,8 +287,11 @@ public class FCSReader extends AbstractReader {
 		in.seek(0);
 		byte[] VERSION = new byte[6];
 		in.read(VERSION);
-		if (!(new String(VERSION).equals("FCS3.0"))) {
-			errorMessage = filename + " is not a valid FCS3.0 file!";
+		fcsVersion = new String(VERSION);
+		if (!(fcsVersion.equals("FCS3.0") || 
+				fcsVersion.equals("FCS3.1"))) {
+			errorMessage = filename + 
+					" is not a valid FCS version 3.0 or 3.1 file!";
 			System.out.println(errorMessage);
 			return false;
 		}
