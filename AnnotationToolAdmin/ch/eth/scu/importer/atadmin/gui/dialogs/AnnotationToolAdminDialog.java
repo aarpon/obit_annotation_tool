@@ -37,7 +37,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> openBISURLList;
 	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
-	private static final String version = "0.2.0";
+	private static final String version = "0.3.0";
 	
 	/**
 	 * Constructor
