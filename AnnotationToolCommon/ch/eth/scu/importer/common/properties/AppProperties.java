@@ -40,13 +40,11 @@ public class AppProperties {
 	 * not exist, since a new AppProperties object will be created and
 	 * tested for its version. 
 	 * 
-	 * @see propertiesFileExists
 	 */
 	static public boolean isPropertiesFileVersionCurrent(Properties appProperties) {
-		if (appProperties == null) { return false; }
-		return appProperties.getProperty("PropertyFileVersion")
-				.equals(propertiesVersion);
-	}
+        return appProperties != null &&
+        	appProperties.getProperty("PropertyFileVersion").equals(propertiesVersion);
+    }
 
 	/**
 	 * Check whether all Properties in the file are set. 

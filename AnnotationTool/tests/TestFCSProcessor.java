@@ -3,7 +3,7 @@ package tests;
 import java.io.File;
 import java.io.IOException;
 
-import ch.eth.scu.importer.lsrfortessa.readers.FCSReader;
+import ch.eth.scu.importer.bdfacsdivafcs.readers.FCSReader;
 
 public class TestFCSProcessor {
 

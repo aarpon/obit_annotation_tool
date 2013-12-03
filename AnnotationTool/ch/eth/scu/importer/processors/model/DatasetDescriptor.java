@@ -8,8 +8,7 @@ public class DatasetDescriptor extends PathAwareDescriptor{
 
 	/**
 	 * Constructor
-	 * @param baseDir: base directory (Datamover's incoming directory)
-	 * @param fullDir: full path ot the entity
+	 * @param fullPath Full path of the entity
 	 */
 	public DatasetDescriptor(File fullPath) {
 		super(fullPath);

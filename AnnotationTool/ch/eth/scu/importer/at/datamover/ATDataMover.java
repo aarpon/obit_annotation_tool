@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.math.BigInteger;
 
 /**
- * Moves the user folder from the data folder to datamover incoming folder.
+ * Moves the user folder to the Datamover incoming folder.
  * @author Aaron Ponti
  *
  */
@@ -137,7 +137,6 @@ public class ATDataMover {
 	 * Static function to delete a folder recursively.
 	 * @param folder Folder to be deleted recursively. It folder is a
 	 * file, it will be deleted and the function will return immediately.
-	 * @return true if deletion was successful, false otherwise.
 	 */
 	public static void deleteRecursively(File folder) {
 		
@@ -166,7 +165,6 @@ public class ATDataMover {
 		// Now delete the folder itself
 		folder.delete();
 
-		return;
 	}
 	
 }

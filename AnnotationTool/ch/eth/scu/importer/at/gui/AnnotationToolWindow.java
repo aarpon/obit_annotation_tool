@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -33,14 +34,11 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private EditorContainer editorContainer;
-	private OutputPane outputPane; 
-	private JScrollPane outputWindow;
-	private OpenBISViewer openBISViewer;
+    private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
-	
-	private static final String version = "0.3.0";
+	private Icon appIcon; 
+	private static final String version = "0.3.1";
 	
 	/**
 	 * Constructor
@@ -56,6 +54,10 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		} catch (Exception e) {
 			System.err.println("Couldn't set look and feel.");
 		}
+
+		// Icon
+		appIcon = new ImageIcon(
+				this.getClass().getResource("icons/icon.png"));
 
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
@@ -76,9 +78,13 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		} 
 		add(metadataViewer.getPanel(), BorderLayout.WEST);
 
-		// Create the HTML viewing pane.
-		outputPane = new OutputPane();
-		outputWindow = new JScrollPane(outputPane);
+		// Create the HTML viewing pane. We set a maximum size to
+		// try to work around a strange behavior in Windows XP where
+		// the output panel keeps growing in (vertical) size even 
+		// though there is a JScrollPane that should prevent that... 
+        OutputPane outputPane = new OutputPane();
+        outputPane.setMaximumSize(new Dimension(1500, 100));
+        JScrollPane outputWindow = new JScrollPane(outputPane);
 		add(outputWindow, BorderLayout.SOUTH);
 
 		// Set the output pane to the viewer
@@ -91,8 +97,8 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Add the editor: it is important to create this object as
 		// the last one, since it requires non-null references to the 
 		// metadata, the openBIS viewers, and the output pane!
-		editorContainer = new EditorContainer(
-				metadataViewer, openBISViewer, outputPane);
+        EditorContainer editorContainer = new EditorContainer(
+                metadataViewer, openBISViewer, outputPane);
 		add(editorContainer, BorderLayout.CENTER);
 
 		// Add observers to the viewers
@@ -193,7 +199,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
         if (JOptionPane.showConfirmDialog(this, 
         		"Do you really want to quit?", "Question",
         		JOptionPane.YES_NO_OPTION,
-        		JOptionPane.QUESTION_MESSAGE) == 
+        		JOptionPane.QUESTION_MESSAGE, appIcon) == 
         		JOptionPane.YES_OPTION) {
         	try {
         		openBISViewer.logout();
@@ -210,13 +216,10 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 							"Do you want to wait and retry later or to " +
 							"force close the application?",
 						"Connection error",
-						JOptionPane.ERROR_MESSAGE,
-						JOptionPane.YES_NO_OPTION,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
 						null, options, options[0]);
-				if (n==0) {
-					// Wait
-					return;
-				} else {
+				if (n!=0) {
 					// Force close
 					System.exit(1);
 				}

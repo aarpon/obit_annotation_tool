@@ -79,21 +79,16 @@ public class OpenBISViewer extends Observable
 	private String userName = "";
 	private String userPassword = "";
 	private int timeout = 60000;
-	private IOpenbisServiceFacade facade;
+    private IOpenbisServiceFacade facade;
 	private IQueryApiFacade queryFacade;
-	
-	private JLabel title;
-	private JButton rescanButton;
-	private OpenBISUserNode userNode;
+
+    private OpenBISUserNode userNode;
 	private OpenBISViewerTree tree;
-	private JScrollPane treeView;
-	private String defaultRootNodeString = "Please login to openBIS...";
+    private String defaultRootNodeString = "Please login to openBIS...";
 
 	private boolean isLoggedIn = false;
-	
-	private OpenBISLoginDialog loginDialog;
-	
-	private boolean isReady = false;
+
+    private boolean isReady = false;
 	
 	protected OutputPane outputPane;
 	
@@ -125,7 +120,7 @@ public class OpenBISViewer extends Observable
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		// Add a title JLabel
-		title = new JLabel("openBIS viewer");
+        JLabel title = new JLabel("openBIS viewer");
 
 		// Add the tree viewer to the layout
 		constraints.gridx = 0;
@@ -170,7 +165,7 @@ public class OpenBISViewer extends Observable
 		});
 
 		// Create the scroll pane and add the tree to it. 
-		treeView = new JScrollPane(tree);
+        JScrollPane treeView = new JScrollPane(tree);
 		
 		// Add the tree viewer to the layout
 		constraints.gridx = 0;
@@ -180,11 +175,10 @@ public class OpenBISViewer extends Observable
 		panel.add(treeView, constraints);
 
 		// Add a rescan button
-		rescanButton = new JButton("Scan");
+        JButton rescanButton = new JButton("Scan");
 		rescanButton.addActionListener(new ActionListener() {
- 
-            public void actionPerformed(ActionEvent e)
-            {
+
+            public void actionPerformed(ActionEvent e) {
                 scan();
             }
         });  
@@ -240,7 +234,7 @@ public class OpenBISViewer extends Observable
 
 		// Modal dialog: stops here until the dialog is disposed
 		// (when a username and password have been provided)
-		loginDialog = new OpenBISLoginDialog();
+        OpenBISLoginDialog loginDialog = new OpenBISLoginDialog();
 		userName = loginDialog.getUsername();
 		userPassword = loginDialog.getPassword();
 		return (! userName.isEmpty());
@@ -290,7 +284,7 @@ public class OpenBISViewer extends Observable
 			// If the factory returns a valid object, it means that
 			// the credentials provided were accepted and the user
 			// was successfully logged in.
-			facade = OpenbisServiceFacadeFactory.tryCreate(
+            facade = OpenbisServiceFacadeFactory.tryCreate(
 					userName, userPassword, openBISURL, timeout);
 
 			// Create also an IQueryApiFacade to access the reporting
@@ -587,14 +581,14 @@ public class OpenBISViewer extends Observable
 		
 			// If we have an Experiment, we load the contained Samples
 			Experiment e = (Experiment) obj;
-			List<String> sampleId = new ArrayList<String>();
-			sampleId.add(e.getIdentifier());
+			List<String> experimentId = new ArrayList<String>();
+			experimentId.add(e.getIdentifier());
 
 			// To be restored -- and extended -- in the future.
 
 			//EnumSet<SampleFetchOption> opts = EnumSet.of(SampleFetchOption.PROPERTIES);
 			//List<Sample> samples = 
-			//		facade.listSamplesForExperiments(sampleId, opts);
+			//		facade.listSamplesForExperiments(experimentID, opts);
 			//for (Sample sm : samples) {
 			//	// Add the samples
 			//	OpenBISSampleNode sample = new OpenBISSampleNode(sm);
@@ -606,7 +600,7 @@ public class OpenBISViewer extends Observable
 			// the openBIS Viewer from the customizable openBIS 
 			// Processor.
 			List<Sample> samples = 
-					facade.listSamplesForExperiments(sampleId);
+					facade.listSamplesForExperiments(experimentId);
 			int nSamples = samples.size();
 			String title = ""; 
 			if (nSamples == 0) {
@@ -631,32 +625,36 @@ public class OpenBISViewer extends Observable
 	 * Sets a mouse event listener on the JTree
 	 * @param e Mouse event
 	 */
-	private void setListenerOnJTree(MouseEvent e) {
-		
-		if (e.isPopupTrigger() && 
-				e.getComponent() instanceof OpenBISViewerTree ) {
+    private void setListenerOnJTree(MouseEvent e) {
 
-			// Position of mouse click
-			int x = e.getPoint().x;
-			int y = e.getPoint().y;
-			
-			// Get selected node
-			TreePath p = tree.getPathForLocation(x, y);
-        		AbstractOpenBISNode node = 
-        			(AbstractOpenBISNode) p.getLastPathComponent();
-        		
-        		// Type of node
-        		String nodeType = node.getClass().getSimpleName();
-        		
-        		// Add relevant context menu
-        		if (nodeType.equals("OpenBISSpaceNode")) {
+        if (e.isPopupTrigger() &&
+                e.getComponent() instanceof OpenBISViewerTree) {
 
-        			JPopupMenu popup =
-        					createSpacePopup((OpenBISSpaceNode) node);
-        			popup.show(e.getComponent(), x, y);
-        		}
-		}
-	}
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+
+            // Get selected node
+            TreePath p = tree.getPathForLocation(x, y);
+            if (p == null) {
+                // There is nothing usable at that location
+                return;
+            }
+            AbstractOpenBISNode node =
+                    (AbstractOpenBISNode) p.getLastPathComponent();
+
+            // Type of node
+            String nodeType = node.getClass().getSimpleName();
+
+            // Add relevant context menu
+            if (nodeType.equals("OpenBISSpaceNode")) {
+
+                JPopupMenu popup =
+                        createSpacePopup((OpenBISSpaceNode) node);
+                popup.show(e.getComponent(), x, y);
+            }
+        }
+    }
 
 	/**
 	 * Create a popup menu with actions for a space node
@@ -742,7 +740,6 @@ public class OpenBISViewer extends Observable
 			message = (String)row[1];
 			if (success.equals("true")) {
 				outputPane.log(message);
-				outputPane.warn("Please rescan to update.");
 				return true;
 			}
 		}

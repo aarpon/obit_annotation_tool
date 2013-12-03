@@ -25,10 +25,7 @@ public class NikonProcessor extends AbstractProcessor {
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
 
-	/* BioFormats reader */
-	private NikonReader nikonReader;
-
-	/**
+    /**
 	 * Constructor
 	 */
 	/**
@@ -290,7 +287,7 @@ public class NikonProcessor extends AbstractProcessor {
 
 		/**
 		 * Constructor.
-		 * @param fcsFileName FCS file name with full path
+		 * @param nd2FileName ND2 file name with full path
 		 */
 		public ND2File(File nd2FileName) throws IOException {
 
@@ -360,7 +357,7 @@ public class NikonProcessor extends AbstractProcessor {
 			}
 			
 			// First scan
-			nikonReader = new NikonReader(this.fullPath);
+            NikonReader nikonReader = new NikonReader(this.fullPath);
 			attributes.putAll(nikonReader.getAttributes());
 			
 			// Set the fileScanned attributes to true

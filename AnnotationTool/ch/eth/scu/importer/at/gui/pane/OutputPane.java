@@ -25,7 +25,7 @@ public class OutputPane extends JTextPane {
 	/**
 	 * Message type
 	 */
-	private enum Type { LOG, WARN, ERR };
+	private enum Type { LOG, WARN, ERR }
 
 	/**
 	 * Document

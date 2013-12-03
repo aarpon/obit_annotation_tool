@@ -2,8 +2,8 @@ package ch.eth.scu.importer.at.gui.viewers.data;
 
 import java.util.Properties;
 
+import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.BDFACSDIVAFCSViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.lsrfortessa.gui.viewers.data.BDLSRFortessaFCSViewer;
 import ch.eth.scu.importer.nikonnd2.gui.viewers.data.NikonViewer;
 
 /**
@@ -27,8 +27,9 @@ public class ViewerFactory {
 		
 		// Return the viewer that fits the "AcquisitionStation"
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaFCS")) {
-			metadataViewer = new BDLSRFortessaFCSViewer();
+		if (acqStation.equals("LSRFortessaFCS") ||
+				acqStation.equals("LSRAriaIII")) {
+			metadataViewer = new BDFACSDIVAFCSViewer();
 		} else if (acqStation.equals("Nikon")) {
 			metadataViewer = new NikonViewer();
 		} else {

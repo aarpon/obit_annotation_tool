@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="AnnotationTool"/>
 	<classpathentry kind="src" path="AnnotationToolAdmin"/>
 	<classpathentry kind="src" path="AnnotationToolCommon"/>
-	<classpathentry kind="src" path="AnnotationToolLSRFortessa"/>
+	<classpathentry kind="src" path="AnnotationToolBDFACSDIVAFCS"/>
 	<classpathentry kind="src" path="AnnotationToolNikonND2"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>

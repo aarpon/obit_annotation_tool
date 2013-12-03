@@ -273,10 +273,10 @@ public class AnnotationToolAdminDialog extends JDialog {
             	}
 
             	// Save the selection to the properties file
-            	if (saveProperties() == false) {
+            	if (!saveProperties()) {
             		JOptionPane.showMessageDialog(null,
-            				new String( "Could not save settings! " +
-            		"Make sure you have administrator rights!"), "Error",
+                            "Could not save settings! " +
+                                    "Make sure you have administrator rights!", "Error",
             				JOptionPane.ERROR_MESSAGE);
             	} else {
 

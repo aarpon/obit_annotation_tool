@@ -1,6 +1,6 @@
 package tests;
 
-import ch.eth.scu.importer.lsrfortessa.processors.BDLSRFortessaFCSProcessor;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor;
 
 public class TestBDDIVAFCSProcessor {
 
@@ -9,8 +9,8 @@ public class TestBDDIVAFCSProcessor {
 	 */
 	public static void main(String[] args) {
 		
-		BDLSRFortessaFCSProcessor processor = 
-				new BDLSRFortessaFCSProcessor(
+		BDFACSDIVAFCSProcessor processor = 
+				new BDFACSDIVAFCSProcessor(
 						"/work/data/incoming/pontia/Quality_Control_MD");
 
 		processor.parse();

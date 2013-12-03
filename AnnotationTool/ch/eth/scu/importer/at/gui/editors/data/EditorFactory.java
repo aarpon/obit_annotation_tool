@@ -4,8 +4,8 @@ import java.util.Properties;
 
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
+import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.BDFACSDIVAFCSEditor;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.lsrfortessa.gui.editors.data.BDLSRFortessaFCSEditor;
 import ch.eth.scu.importer.nikonnd2.gui.editors.data.NikonEditor;
 
 /**
@@ -32,8 +32,9 @@ public class EditorFactory {
 
 		// Create the concrete editor
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaFCS")) {
-			metadataEditor = new BDLSRFortessaFCSEditor(dataViewer, openBISViewer);
+		if (acqStation.equals("LSRFortessaFCS") ||
+				acqStation.equals("LSRAriaIII")) {
+			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("Nikon")) {
 			metadataEditor = new NikonEditor(dataViewer, openBISViewer);
 		} else {

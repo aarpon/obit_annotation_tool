@@ -10,7 +10,7 @@ import java.util.Map;
 import ch.eth.scu.importer.readers.BaseBioFormatsReader;
 
 /**
- * @author pontia
+ * @author Aaron Ponti
  *
  */
 public class NikonReader extends BaseBioFormatsReader {
@@ -54,7 +54,7 @@ public class NikonReader extends BaseBioFormatsReader {
 	/**
 	 * Scan the file for metadata information and stores it as a 
 	 * String-String map of key-value attributes.
-	 * @return 
+	 * @return true if parsing was successful, false otherwise.
 	 */
 	@Override
 	public boolean parse() {

@@ -291,8 +291,6 @@ abstract public class AbstractViewer extends Observable
 	 * @param userName User name
 	 * 
 	 * This must be called before scan() can be called!
-	 * 
-	 * @see scan()
 	 */
 	public void setUserName(String userName) {
 
@@ -714,7 +712,6 @@ abstract public class AbstractViewer extends Observable
 				} catch (IOException e1) {
 					outputPane.err("Could not show invalid dataset "
 							+ "in " + commandName + "!");
-					return;
 				} catch (InterruptedException e1) {
 					outputPane.err("Could not show invalid dataset "
 							+ "in " + commandName + "!");

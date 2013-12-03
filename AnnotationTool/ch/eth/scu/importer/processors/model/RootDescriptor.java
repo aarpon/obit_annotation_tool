@@ -13,7 +13,7 @@ public class RootDescriptor extends PathAwareDescriptor{
 
 	/**
 	 * Constructor.
-	 * @param userName User name to be displayed at the root node.
+	 * @param fullUserFolderPath Full user folder path.
 	 */
 	public RootDescriptor(File fullUserFolderPath) {
 		super(fullUserFolderPath);

@@ -32,14 +32,14 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	
 	/**
 	 * Constructor
-	 * @param fullDir: full path of the entity
+	 * @param fullPath Full path of the entity
 	 */
 	public PathAwareDescriptor(File fullPath) {
 
 		// Store base and full path
 		Properties appProperties = AppProperties.readPropertiesFromFile();
 		this.basePath = new File(
-				appProperties.getProperty("UserDataDir"));;
+				appProperties.getProperty("UserDataDir"));
 		this.fullPath = fullPath;
 		
 		// Compute and store the relative path
@@ -87,8 +87,7 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	/**
 	 * Computes and store the folder path relative to the Datamover 
 	 * incoming folder.
-	 * @param fullPath Folder with full path.
-	 */
+     */
 	private void computeAndStoreRelativePath() {
 		String basePathStr = "";
 		try {

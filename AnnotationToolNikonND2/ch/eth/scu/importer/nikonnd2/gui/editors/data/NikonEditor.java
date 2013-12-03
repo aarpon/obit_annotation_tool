@@ -303,7 +303,7 @@ public class NikonEditor extends AbstractEditor {
 		
 		for (OpenBISProjectNode s : openBISProjects) {
 
-			// Add the BDLSRFortessaFCSMetadata object
+			// Add the openBIS Project node
 			comboProjectList.addItem(
 					((OpenBISProjectNode)s).getIdentifier());
 

@@ -8,11 +8,8 @@ public class QueryOS {
 	 */
 	static public boolean isMac() {
 		String OS = System.getProperty("os.name").toUpperCase();
-		if (OS.contains("MAC")) {
-			return true;
-		}
-		return false;
-	}
+        return OS.contains("MAC");
+    }
 	
 	/**
 	 * Check if the application is running on Windows
@@ -20,10 +17,7 @@ public class QueryOS {
 	 */
 	static public boolean isWindows() {
 		String OS = System.getProperty("os.name").toUpperCase();
-		if (OS.contains("WINDOWS")) {
-			return true;
-		}
-		return false;
-	}
+        return OS.contains("WINDOWS");
+    }
 
 }
