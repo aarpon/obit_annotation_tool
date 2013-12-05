@@ -32,8 +32,8 @@ public class EditorFactory {
 
 		// Create the concrete editor
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaFCS") ||
-				acqStation.equals("LSRAriaIII")) {
+		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
+				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("Nikon")) {
 			metadataEditor = new NikonEditor(dataViewer, openBISViewer);

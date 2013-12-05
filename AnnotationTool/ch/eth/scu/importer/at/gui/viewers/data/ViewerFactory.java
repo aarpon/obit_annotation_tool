@@ -27,8 +27,8 @@ public class ViewerFactory {
 		
 		// Return the viewer that fits the "AcquisitionStation"
 		String acqStation = appProperties.getProperty("AcquisitionStation");	
-		if (acqStation.equals("LSRFortessaFCS") ||
-				acqStation.equals("LSRAriaIII")) {
+		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
+				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataViewer = new BDFACSDIVAFCSViewer();
 		} else if (acqStation.equals("Nikon")) {
 			metadataViewer = new NikonViewer();

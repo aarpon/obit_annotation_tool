@@ -17,7 +17,7 @@ import ch.eth.scu.utils.QueryOS;
  */
 public class AppProperties {
 
-	static private final String propertiesVersion = "0.2";
+	static private final String propertiesVersion = "0.3";
 
 	// Public interface
 

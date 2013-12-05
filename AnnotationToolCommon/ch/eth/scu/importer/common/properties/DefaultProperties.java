@@ -46,8 +46,8 @@ public class DefaultProperties {
 			options.add("no");
 			options.add("yes");
 		} else if (property.equals("AcquisitionStation")) {
-			options.add("LSRFortessaFCS");
-			options.add("LSRAriaIII");
+			options.add("BD LSRFortessa cell analyzer");
+			options.add("BD FACSAria III cell sorter");
 			options.add("Nikon");
 		} else if (property.equals("UserDataDir")) {
 			options.add("");			

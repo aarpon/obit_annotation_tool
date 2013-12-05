@@ -849,6 +849,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	private Map<String, String> getTubeAttributes(FCSReader processor) {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("dataFilename", processor.getStandardKeyword("$FIL"));
+		attributes.put("indexSort", isIndexSort(processor) ? "true" : "false");
 		return attributes;
 	}
 

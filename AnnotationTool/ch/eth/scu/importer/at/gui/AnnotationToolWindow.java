@@ -38,7 +38,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
 	private Icon appIcon; 
-	private static final String version = "0.3.1";
+	private static final String version = "0.4.0";
 	
 	/**
 	 * Constructor

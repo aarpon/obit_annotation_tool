@@ -37,7 +37,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> openBISURLList;
 	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
-	private static final String version = "0.3.0";
+	private static final String version = "0.4.0";
 	
 	/**
 	 * Constructor
@@ -186,7 +186,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(acqStationsList, "wrap, width 100%");
 
 		// Add a label for the user directory
-		JLabel userdirLabel = new JLabel("User data directory");
+		JLabel userdirLabel = new JLabel("Set user data directory");
 		add(userdirLabel, "wrap, width 100%");
 		
 		// Add a pushButton to choose the user directory
@@ -195,7 +195,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		userdirButton = new JButton(selUserDataDir);
 		userdirButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	String dir = pickDir();
+            	String dir = pickDir("Set the user data directory");
             	if (!dir.equals("")) {
             		try {
 						selUserDataDir = (new File(dir)).getCanonicalPath();
@@ -214,7 +214,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(userdirButton, "wrap, width 100%");
 
 		// Add a label for the directory
-		JLabel dirLabel = new JLabel("Datamover incoming directory");
+		JLabel dirLabel = new JLabel("Set Datamover incoming directory");
 		add(dirLabel, "wrap, width 100%");
 		
 		// Add a pushButton to choose the directory
@@ -223,7 +223,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		dirButton = new JButton(selIncomingDir);
 		dirButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	String dir = pickDir();
+            	String dir = pickDir("Set the datamover incoming directory");
             	if (!dir.equals("")) {
             		try {
 						selIncomingDir = (new File(dir)).getCanonicalPath();
@@ -322,10 +322,10 @@ public class AnnotationToolAdminDialog extends JDialog {
 	 * Asks the user to pick a directory
 	 * @return the absolute path of the selected directory
 	 */
-	private String pickDir() {
+	private String pickDir(String dialogTitle) {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new java.io.File("."));
-		chooser.setDialogTitle("Set the datamover incoming directory");
+		chooser.setDialogTitle(dialogTitle);
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setAcceptAllFileFilterUsed(false);
 		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
