@@ -45,6 +45,12 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
 			return properties.get("LSR_FORTESSA_WELL_NAME");
 		} else if (properties.containsKey("LSR_FORTESSA_TUBE_NAME")) {
 			return properties.get("LSR_FORTESSA_TUBE_NAME");
+		} else if (properties.containsKey("FACS_ARIA_PLATE_NAME")) {
+				return properties.get("FACS_ARIA_PLATE_NAME");
+		} else if (properties.containsKey("FACS_ARIA_WELL_NAME")) {
+				return properties.get("FACS_ARIA_WELL_NAME");
+		} else if (properties.containsKey("FACS_ARIA_TUBE_NAME")) {
+				return properties.get("FACS_ARIA_TUBE_NAME");		
 		} else {
 			if (properties.isEmpty()) {
 				return "Tubeset";
