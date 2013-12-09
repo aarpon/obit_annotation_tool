@@ -37,15 +37,20 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> openBISURLList;
 	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
+	// Program version
 	private static final String version = "0.4.0";
 	
+	// Version status: "alpha", "beta", or "" for a stable release
+	private static final String status = "alpha 1";
+
 	/**
 	 * Constructor
 	 */
 	public AnnotationToolAdminDialog() {
 
 		// Set the dialog title
-		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" + version);
+		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" +
+		version + " " + status);
 
 		// Read the properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();

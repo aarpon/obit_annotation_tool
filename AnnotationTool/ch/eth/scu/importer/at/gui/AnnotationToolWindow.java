@@ -38,15 +38,21 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
 	private Icon appIcon; 
+	
+	// Program version
 	private static final String version = "0.4.0";
 	
+	// Version status: "alpha", "beta", or "" for a stable release
+	private static final String status = "alpha 1";
+
 	/**
 	 * Constructor
 	 */
 	public AnnotationToolWindow() {
 
 		// Call the frame's constructor
-		super("openBIS Importer Toolset :: Annotation Tool v" + version);
+		super("openBIS Importer Toolset :: Annotation Tool v" +
+		version + " " + status);
 
 		// Use the system default look-and-feel
 		try {
