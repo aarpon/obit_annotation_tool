@@ -588,7 +588,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				if (! specDesc.tubes.containsKey(wellKey)) {
 					wellDesc = new Well(wellName, file);
 					// Store attributes
-					wellDesc.addAttributes(getTubeAttributes(processor));
+					wellDesc.addAttributes(getTubeOrWellAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(wellKey, wellDesc);
 				}
@@ -617,7 +617,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				if (! specDesc.tubes.containsKey(tubeKey)) {
 					tubeDesc = new Tube(tubeName, file);	
 					// Store attributes
-					tubeDesc.addAttributes(getTubeAttributes(processor));
+					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
@@ -846,7 +846,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @param processor FCSProcessor with already scanned file
 	 * @return a key-value map of attributes
 	 */
-	private Map<String, String> getTubeAttributes(FCSReader processor) {
+	private Map<String, String> getTubeOrWellAttributes(FCSReader processor) {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("dataFilename", processor.getStandardKeyword("$FIL"));
 		attributes.put("indexSort", isIndexSort(processor) ? "true" : "false");
