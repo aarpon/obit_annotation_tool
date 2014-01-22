@@ -5,6 +5,7 @@ import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DefaultProperties;
+import ch.eth.scu.importer.common.version.VersionInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +38,6 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> openBISURLList;
 	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
-	// Program version
-	private static final String version = "0.4.0";
-	
-	// Version status: "alpha", "beta", or "" for a stable release
-	private static final String status = "alpha 1";
-
 	/**
 	 * Constructor
 	 */
@@ -50,7 +45,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 		// Set the dialog title
 		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" +
-		version + " " + status);
+		VersionInfo.version + " " + VersionInfo.status);
 
 		// Read the properties
 		Properties appProperties = AppProperties.readPropertiesFromFile();
