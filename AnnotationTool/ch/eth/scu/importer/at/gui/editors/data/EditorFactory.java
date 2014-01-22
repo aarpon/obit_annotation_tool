@@ -6,7 +6,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.BDFACSDIVAFCSEditor;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.nikonnd2.gui.editors.data.NikonEditor;
+import ch.eth.scu.importer.microscopy.gui.editors.data.MicroscopyEditor;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
@@ -36,7 +36,7 @@ public class EditorFactory {
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("Nikon")) {
-			metadataEditor = new NikonEditor(dataViewer, openBISViewer);
+			metadataEditor = new MicroscopyEditor(dataViewer, openBISViewer);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

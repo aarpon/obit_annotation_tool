@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.BDFACSDIVAFCSViewer;
 import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.nikonnd2.gui.viewers.data.NikonViewer;
+import ch.eth.scu.importer.microscopy.gui.viewers.data.MicroscopyViewer;
 
 /**
  * The Viewer factory creates a viewer based on the application properties
@@ -31,7 +31,7 @@ public class ViewerFactory {
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataViewer = new BDFACSDIVAFCSViewer();
 		} else if (acqStation.equals("Nikon")) {
-			metadataViewer = new NikonViewer();
+			metadataViewer = new MicroscopyViewer();
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

@@ -38,10 +38,10 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
 	// Program version
-	private static final String version = "0.4.0";
+	private static final String version = "0.5.0";
 	
 	// Version status: "alpha", "beta", or "" for a stable release
-	private static final String status = "alpha 1";
+	private static final String status = "alpha";
 
 	/**
 	 * Constructor
