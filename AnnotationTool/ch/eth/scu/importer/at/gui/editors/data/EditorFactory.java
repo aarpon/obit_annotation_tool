@@ -36,7 +36,7 @@ public class EditorFactory {
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
 		} else if (acqStation.equals("Generic light microscope")) {
-			metadataEditor = new NikonEditor(dataViewer, openBISViewer);
+			metadataEditor = new MicroscopyEditor(dataViewer, openBISViewer);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

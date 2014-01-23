@@ -31,7 +31,7 @@ public class ViewerFactory {
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataViewer = new BDFACSDIVAFCSViewer();
 		} else if (acqStation.equals("Generic light microscope")) {
-			metadataViewer = new NikonViewer();
+			metadataViewer = new MicroscopyViewer();
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);
