@@ -17,7 +17,9 @@ import ch.eth.scu.utils.QueryOS;
  */
 public class AppProperties {
 
-	static private final String propertiesVersion = "0.3";
+	static private final String propertiesVersion = "0.4";
+
+	static protected String errorMessage = "";
 
 	// Public interface
 
@@ -85,15 +87,17 @@ public class AppProperties {
 				appProperties.load(in);
 				in.close();
 			} catch (IOException e) {
-				System.err.println("Could not read from file. " +
+				errorMessage = "Could not read from file. " +
 						getPropertiesFileName() + ". " +
-						"Returning default properties.");
+						"Returning default properties.";
+				System.err.println(errorMessage);
 				return null;
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println("Could not read from file. " +
+			errorMessage = "Could not read from file. " +
 					getPropertiesFileName()  + ". " +
-					"Returning default properties.");
+					"Returning default properties.";
+			System.err.println(errorMessage);
 			return null;
 		}
 
@@ -108,16 +112,17 @@ public class AppProperties {
 	 * This function might require write access to a restricted system
 	 * folder. It should be used only in code run with admin privileges.
 	 */
-	static public boolean writePropertiesToFile(String openBISURL,
-			String acceptSelfSignedCerts, String acqStation, 
-			String userDataDir, String incomingDir) {
+	static public boolean writePropertiesToFile(
+			String openBISURL, String acceptSelfSignedCerts,
+			String acqStation, String userDataDir, String incomingDir) {
 
 		// Make sure the Properties file exists
 		if (!AppProperties.propertiesFileExists()) {
 			if (AppProperties.initializePropertiesFile() == null) {
-				System.err.println(
-						"Could not initialize properties file " +
-						getPropertiesFileName() + ".");				
+				errorMessage = "Could not initialize properties file " +
+						getPropertiesFileName() + ".";
+				System.err.println(errorMessage);
+				return false;
 			}
 		}
 		
@@ -144,8 +149,9 @@ public class AppProperties {
 					"AnnotationTool Properties Set");
 			out.close();
 		} catch (IOException e) {
-			System.err.println("Could not write to file " +
-					getPropertiesFileName() + ".");				
+			errorMessage = "Could not write to file " +
+					getPropertiesFileName() + ".";
+			System.err.println(errorMessage);
 			return false;
 		}
 		
@@ -155,6 +161,43 @@ public class AppProperties {
 		
 	// Private methods
 	
+	/**
+	 * Initialize the properties file (if it does not exist)
+	 * @return 	the generated Properties object or null if it could not
+	 * be saved to disk.
+	 * 
+	 * This function might require write access to a restricted system
+	 * folder. It should be used only in code run with admin privileges.
+	
+	 */	
+	static public Properties initializePropertiesFile() {
+		
+		// Make sure the properties file exists
+		if (!AppProperties.propertiesFileExists()) {
+			if (!AppProperties.createApplicationPropertiesDir()) {
+				return null;
+			}
+		}
+		
+		// Get default properties to store
+		Properties applicationProperties = getDefaultProperties();
+		
+		// Save them to file
+		try {
+			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
+			applicationProperties.store(out, "AnnotationTool Properties Set");
+			out.close();
+		} catch (IOException e) {
+			errorMessage = "Could not write to file " +
+					getPropertiesFileName() + ".";
+			System.err.println(errorMessage);
+			return null;
+		}
+	
+		// Return success
+		return applicationProperties;
+	}
+
 	/**
 	 * Returns the application data directory
 	 * @return 	path to the folder where the application properties will
@@ -174,7 +217,7 @@ public class AppProperties {
 					"/Users/Shared/Library/Application Support/");			
 		} else if (QueryOS.isWindows()) {
 			applicationDataDir = new File(
-					"C:/Users/All Users/Application Data");
+					"C:/Users/All Users/");
 		} else {
 			throw new UnsupportedOperationException(
 					"Operating system not supported.");
@@ -183,7 +226,7 @@ public class AppProperties {
 		// Append the sub-path common to all platform
 
         return new File( applicationDataDir +
-                File.separator + "scu" + File.separator + "obit");
+                File.separator + "oBIT" + File.separator + "AnnotationTool");
 	}
 	
 	/**
@@ -212,43 +255,15 @@ public class AppProperties {
 		// Create it if not there
         return scuFolder.exists() || scuFolder.mkdirs();
     }
-	
+
 	/**
-	 * Initialize the properties file (if it does not exist)
-	 * @return 	the generated Properties object or null if it could not
-	 * be saved to disk.
-	 * 
-	 * This function might require write access to a restricted system
-	 * folder. It should be used only in code run with admin privileges.
-
-	 */	
-	static public Properties initializePropertiesFile() {
-		
-		// Make sure the properties file exists
-		if (!AppProperties.propertiesFileExists()) {
-			if (!AppProperties.createApplicationPropertiesDir()) {
-				return null;
-			}
-		}
-		
-		// Get default properties to store
-		Properties applicationProperties = getDefaultProperties();
-		
-		// Save them to file
-		try {
-			FileOutputStream out = new FileOutputStream(getPropertiesFileName());
-			applicationProperties.store(out, "AnnotationTool Properties Set");
-			out.close();
-		} catch (IOException e) {
-			System.err.println("Could not write to file " +
-					getPropertiesFileName() + ".");	
-			return null;
-		}
-
-		// Return success
-		return applicationProperties;
+	 * Return last error message.
+	 * @return last error message.
+	 */
+	public static String getLastErrorMessage() {
+		return errorMessage;
 	}
-	
+
 	/**
 	 * Return default properties 
 	 * @return 	Properties with default values.

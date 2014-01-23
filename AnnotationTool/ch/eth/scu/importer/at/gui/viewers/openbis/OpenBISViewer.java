@@ -294,7 +294,9 @@ public class OpenBISViewer extends Observable
 
 		} catch (UserFailureException e) {
 			JOptionPane.showMessageDialog(this.panel,
-					"Login failed. Please try again.");
+					"Login failed. Please try again.",
+					"Authentication error",
+					JOptionPane.ERROR_MESSAGE);
 			userName = "";
 			userPassword = "";
 			facade = null;

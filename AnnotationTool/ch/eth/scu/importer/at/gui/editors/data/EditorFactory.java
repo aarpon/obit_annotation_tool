@@ -35,8 +35,8 @@ public class EditorFactory {
 		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
-		} else if (acqStation.equals("Nikon")) {
-			metadataEditor = new MicroscopyEditor(dataViewer, openBISViewer);
+		} else if (acqStation.equals("Generic light microscope")) {
+			metadataEditor = new NikonEditor(dataViewer, openBISViewer);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

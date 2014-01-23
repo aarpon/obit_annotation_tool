@@ -30,8 +30,8 @@ public class ViewerFactory {
 		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataViewer = new BDFACSDIVAFCSViewer();
-		} else if (acqStation.equals("Nikon")) {
-			metadataViewer = new MicroscopyViewer();
+		} else if (acqStation.equals("Generic light microscope")) {
+			metadataViewer = new NikonViewer();
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);
