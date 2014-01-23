@@ -29,6 +29,7 @@ ch.eth.scu.importer.bdfacsdivafcs.processors
 ch.eth.scu.importer.bdfacsdivafcs.processors.model
 ch.eth.scu.importer.bdfacsdivafcs.readers
 ch.eth.scu.importer.common.properties
+ch.eth.scu.importer.common.version
 ch.eth.scu.importer.microscopy
 ch.eth.scu.importer.microscopy.gui.editors.data
 ch.eth.scu.importer.microscopy.gui.editors.data.icons
@@ -44,3 +45,4 @@ ch.eth.scu.importer.processors.model
 ch.eth.scu.importer.processors.validator
 ch.eth.scu.importer.readers
 ch.eth.scu.utils
+tests
