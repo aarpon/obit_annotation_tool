@@ -19,10 +19,10 @@ public class MicroscopyFileNode extends AbstractNode {
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("icons/nd2.png"));
+				getClass().getResource("icons/loci.png"));
 	}
 	
 	public String getTooltip() {
-		return "ND2 file";
+		return "Microscopy file";
 	}
 }
