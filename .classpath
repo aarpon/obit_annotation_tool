@@ -23,9 +23,6 @@
 	<classpathentry kind="lib" path="lib/dss_client/jline.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/jython.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/log4j.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/poi-3.7-20101029.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-3.7-20101029.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-schemas-3.7-20101029.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-schemas.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi.jar"/>
