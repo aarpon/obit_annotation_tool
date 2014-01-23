@@ -6,6 +6,6 @@ public class VersionInfo {
 	public static final String version = "0.4.0";
 	
 	// Version status: "alpha", "beta", or "" for a stable release
-	public static final String status = "alpha 1";
+	public static final String status = "alpha 2";
 
 }

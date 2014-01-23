@@ -83,7 +83,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel urlLabel = new JLabel("Set the openBIS URL");
 		constraints.gridx = 0;
 		constraints.gridy = 0;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -96,7 +96,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	    openBISURLInput.setHorizontalAlignment(JTextField.CENTER);
 		constraints.gridx = 0;
 		constraints.gridy = 1;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -109,7 +109,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 				+ "when logging in to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -153,17 +153,17 @@ public class AnnotationToolAdminDialog extends JDialog {
         });
 		constraints.gridx = 0;
 		constraints.gridy = 3;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		add(acceptSelfSignedCertsList, constraints);
 
 		// Add a label for the selection of the acquisition machine
-		JLabel acqLabel = new JLabel("Select the acquisition station");
+		JLabel acqLabel = new JLabel("Select the acquisition station or type");
 		constraints.gridx = 0;
 		constraints.gridy = 4;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -204,7 +204,7 @@ public class AnnotationToolAdminDialog extends JDialog {
         });
 		constraints.gridx = 0;
 		constraints.gridy = 5;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -215,7 +215,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel userdirLabel = new JLabel("Set user data directory");
 		constraints.gridx = 0;
 		constraints.gridy = 6;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -247,7 +247,7 @@ public class AnnotationToolAdminDialog extends JDialog {
         });		
 		constraints.gridx = 0;
 		constraints.gridy = 7;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -258,7 +258,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel dirLabel = new JLabel("Set Datamover incoming directory");
 		constraints.gridx = 0;
 		constraints.gridy = 8;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -290,7 +290,7 @@ public class AnnotationToolAdminDialog extends JDialog {
         });		
 		constraints.gridx = 0;
 		constraints.gridy = 9;
-		constraints.gridwidth = 20;
+		constraints.gridwidth = 8;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -314,9 +314,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel spacerLabel = new JLabel("");
 		constraints.gridx = 0;
 		constraints.gridy = 11;
-		constraints.gridwidth = 6;
+		constraints.gridwidth = 4;
 		constraints.gridheight = 1;		
-		constraints.weightx = 0.6;
+		constraints.weightx = 0.5;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(spacerLabel, constraints);
@@ -365,11 +365,11 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
           }
         });
-		constraints.gridx = 12;
+		constraints.gridx = 4;
 		constraints.gridy = 11;
-		constraints.gridwidth = 4;
+		constraints.gridwidth = 2;
 		constraints.gridheight = 1;		
-		constraints.weightx = 0.2;
+		constraints.weightx = 0.25;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(saveButton, constraints);
@@ -383,11 +383,11 @@ public class AnnotationToolAdminDialog extends JDialog {
             	System.exit(0);
             }
         });
-		constraints.gridx = 16;
+		constraints.gridx = 6;
 		constraints.gridy = 11;
-		constraints.gridwidth = 4;
+		constraints.gridwidth = 2;
 		constraints.gridheight = 1;			
-		constraints.weightx = 0.2;
+		constraints.weightx = 0.25;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(closeButton, constraints);
