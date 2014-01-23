@@ -175,6 +175,8 @@ public class AppProperties {
 		// Make sure the properties file exists
 		if (!AppProperties.propertiesFileExists()) {
 			if (!AppProperties.createApplicationPropertiesDir()) {
+				errorMessage = "Could not create application settings folder.";
+				System.err.println(errorMessage);
 				return null;
 			}
 		}
@@ -196,6 +198,14 @@ public class AppProperties {
 	
 		// Return success
 		return applicationProperties;
+	}
+
+	/**
+	 * Return last error message.
+	 * @return last error message.
+	 */
+	public static String getLastErrorMessage() {
+		return errorMessage;
 	}
 
 	/**
@@ -255,14 +265,6 @@ public class AppProperties {
 		// Create it if not there
         return scuFolder.exists() || scuFolder.mkdirs();
     }
-
-	/**
-	 * Return last error message.
-	 * @return last error message.
-	 */
-	public static String getLastErrorMessage() {
-		return errorMessage;
-	}
 
 	/**
 	 * Return default properties 

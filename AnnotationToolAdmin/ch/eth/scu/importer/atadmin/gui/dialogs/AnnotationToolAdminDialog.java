@@ -59,7 +59,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 			appProperties = AppProperties.initializePropertiesFile();
 			if (appProperties == null) {
 				JOptionPane.showMessageDialog(null,
-						"Could not save application settings to disk!",
+						AppProperties.getLastErrorMessage() + "\n\n" +
+						"Please contact your administrator. \n" +
+						"The application will now close.",
 						"Error",
 						JOptionPane.ERROR_MESSAGE);
 				System.exit(1);
