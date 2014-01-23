@@ -2,14 +2,18 @@ package ch.eth.scu.importer.atadmin.gui.dialogs;
 
 import javax.swing.*;
 
-import net.miginfocom.swing.MigLayout;
 import ch.eth.scu.importer.common.properties.AppProperties;
 import ch.eth.scu.importer.common.properties.DefaultProperties;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -30,12 +34,12 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected String selUserDataDir;
 	protected String selOpenBISURL;
 
+	protected JTextField openBISURLInput;
 	protected JButton dirButton;
 	protected JButton userdirButton;
 	protected JButton saveButton;
 	protected JButton closeButton;
 	protected JComboBox<Object> acqStationsList;
-	protected JComboBox<Object> openBISURLList;
 	protected JComboBox<Object> acceptSelfSignedCertsList;
 	
 	/**
@@ -53,7 +57,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 				AppProperties.isPropertiesFileVersionCurrent(appProperties);
 		if (appProperties == null || !isUpToDate) {
 			appProperties = AppProperties.initializePropertiesFile();
-			if (	appProperties == null) {
+			if (appProperties == null) {
 				JOptionPane.showMessageDialog(null,
 						"Could not save application settings to disk!",
 						"Error",
@@ -67,48 +71,50 @@ public class AnnotationToolAdminDialog extends JDialog {
 		setResizable(false);
 
 		// Create a GridBagLayout
-		setLayout(new MigLayout("insets 10"));
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		setLayout(gridBagLayout);
 
+		// Common constraints
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		constraints.fill = GridBagConstraints.BOTH;
+		
 		// Add a label for the selection of the openBIS URL
 		JLabel urlLabel = new JLabel("Set the openBIS URL");
-		add(urlLabel, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(urlLabel, constraints);
 
-		// Add a drop-down menu for the selection of the URL
+		// Add a formatted text info that validates URLs
 		String openBISURL = appProperties.getProperty("OpenBISURL");
-		ArrayList<String> openBISURLOptions = 
-				DefaultProperties.possibleValuesForProperty("OpenBISURL");
-		int index = -1;
-		for (int i = 0; i < openBISURLOptions.size(); i++) {
-			if (openBISURLOptions.get(i).equals(openBISURL)) {
-				index = i;
-				break;
-			}
-		}
-		if (index == -1) {
-			String msg = "Unknown openBIS URL! Defaulting to " +
-					DefaultProperties.defaultValueForProperty("OpenBISURL") +
-					".";
-			JOptionPane.showMessageDialog(null, msg, "Error",
-				    JOptionPane.ERROR_MESSAGE);
-			index = 0;
-		}
-		openBISURLList = new JComboBox<Object>(openBISURLOptions.toArray());
-		openBISURLList.setSelectedIndex(index);
-		selOpenBISURL = openBISURLOptions.get(index);
-		openBISURLList.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-        		if (e.getActionCommand().equals("comboBoxChanged")) {
-        			selOpenBISURL = (String) openBISURLList.getSelectedItem();
-        		}
-            }
-        });
-		add(openBISURLList, "wrap, width 100%");
-
+	    openBISURLInput = new JTextField(openBISURL);
+	    openBISURLInput.setHorizontalAlignment(JTextField.CENTER);
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(openBISURLInput, constraints);
+	
 		// Add a label for the options of accepting self-signed
 		// certificates
 		JLabel certLabel = new JLabel("Accept self-signed SSL certificates "
 				+ "when logging in to openBIS");
-		add(certLabel, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(certLabel, constraints);
 		
 		// Add a drop-down menu for the options of accepting self-signed
 		// certificates
@@ -117,7 +123,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		ArrayList<String> acceptSelfSignedCertsOptions = 
 				DefaultProperties.possibleValuesForProperty(
 						"AcceptSelfSignedCertificates");
-		index = -1;
+		int index = -1;
 		for (int i = 0; i < acceptSelfSignedCertsOptions.size(); i++) {
 			if (acceptSelfSignedCertsOptions.get(i).equals(
 					acceptSelfSignedCerts)) {
@@ -145,11 +151,24 @@ public class AnnotationToolAdminDialog extends JDialog {
         		}
             }
         });
-		add(acceptSelfSignedCertsList, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		add(acceptSelfSignedCertsList, constraints);
 
 		// Add a label for the selection of the acquisition machine
 		JLabel acqLabel = new JLabel("Select the acquisition station");
-		add(acqLabel, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 4;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(acqLabel, constraints);
 
 		// Add a drop-down menu for the selection of the acquisition machine
 		String acqStation = appProperties.getProperty("AcquisitionStation");
@@ -183,11 +202,25 @@ public class AnnotationToolAdminDialog extends JDialog {
         		}
             }
         });
-		add(acqStationsList, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 5;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(acqStationsList, constraints);
 
 		// Add a label for the user directory
 		JLabel userdirLabel = new JLabel("Set user data directory");
-		add(userdirLabel, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 6;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(userdirLabel, constraints);
 		
 		// Add a pushButton to choose the user directory
 		// Create a text field for the user name
@@ -208,14 +241,29 @@ public class AnnotationToolAdminDialog extends JDialog {
 							    JOptionPane.ERROR_MESSAGE);
 					}
             		userdirButton.setText(selUserDataDir);
+            		pack();
             	}
             }
         });		
-		add(userdirButton, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 7;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(userdirButton, constraints);
 
 		// Add a label for the directory
 		JLabel dirLabel = new JLabel("Set Datamover incoming directory");
-		add(dirLabel, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 8;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(dirLabel, constraints);
 		
 		// Add a pushButton to choose the directory
 		// Create a text field for the user name
@@ -236,17 +284,43 @@ public class AnnotationToolAdminDialog extends JDialog {
 							    JOptionPane.ERROR_MESSAGE);
 					}
             		dirButton.setText(selIncomingDir);
+            		pack();
             	}
             }
         });		
-		add(dirButton, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 9;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(dirButton, constraints);
 		
 		// Add a label for the info text
 		JLabel infoLabel = new JLabel(
 				"<html>It is <b>highly recommended</b> to set " +
 		"both folders on the same file system.</html>");
-		add(infoLabel, "wrap, width 100%");
+		constraints.gridx = 0;
+		constraints.gridy = 10;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(infoLabel, constraints);
 		
+		// Some spacer
+		JLabel spacerLabel = new JLabel("");
+		constraints.gridx = 0;
+		constraints.gridy = 11;
+		constraints.gridwidth = 6;
+		constraints.gridheight = 1;		
+		constraints.weightx = 0.6;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(spacerLabel, constraints);
+
 		// Create a Save button
 		saveButton = new JButton("Save");
 		saveButton.addActionListener(new ActionListener() {
@@ -272,12 +346,10 @@ public class AnnotationToolAdminDialog extends JDialog {
             		return;
             	}
 
-            	// Save the selection to the properties file
+            	// Save the selection to the properties file. We leave eventual error messages 
+            	// to be displayed by savePorperties() or the functions called by it.
             	if (!saveProperties()) {
-            		JOptionPane.showMessageDialog(null,
-                            "Could not save settings! " +
-                                    "Make sure you have administrator rights!", "Error",
-            				JOptionPane.ERROR_MESSAGE);
+            		return;
             	} else {
 
             		saveButton.setText("<html><b>Saved!</b></html>");
@@ -293,8 +365,15 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
           }
         });
-		add(saveButton, "tag ok, span, split 2");
-
+		constraints.gridx = 12;
+		constraints.gridy = 11;
+		constraints.gridwidth = 4;
+		constraints.gridheight = 1;		
+		constraints.weightx = 0.2;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(saveButton, constraints);
+		
 		// Create a close button
 		closeButton = new JButton("Close");
 		closeButton.addActionListener(new ActionListener() {
@@ -304,7 +383,14 @@ public class AnnotationToolAdminDialog extends JDialog {
             	System.exit(0);
             }
         });
-		add(closeButton, "tag cancel, span, split 2");
+		constraints.gridx = 16;
+		constraints.gridy = 11;
+		constraints.gridwidth = 4;
+		constraints.gridheight = 1;			
+		constraints.weightx = 0.2;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(closeButton, constraints);
 		
 		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(saveButton);
@@ -341,18 +427,49 @@ public class AnnotationToolAdminDialog extends JDialog {
 	 */
 	private boolean saveProperties() {
 		
+		// Get the openBIS URL
+		selOpenBISURL = openBISURLInput.getText();
+		
+		// Is the URL a valid URL?
+		try {
+			new URL(selOpenBISURL);
+		} catch (MalformedURLException e) {
+			JOptionPane.showMessageDialog(null,
+					"Malformed openBIS server URL", "Error",
+    				JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+
 		// Check that everything is set
 		if (selOpenBISURL.equals("") || selAcqStation.equals("") ||
 				selAcceptSelfSignedCerts.equals("") ||
 				selUserDataDir.equals("") || 
 				selIncomingDir.equals("")) {
+			JOptionPane.showMessageDialog(null,
+    				"Please set all fields!", "Error",
+    				JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		
+		// Check that the two paths do not point to the same folder
+		if (selUserDataDir.equalsIgnoreCase(selIncomingDir)) {
+    		JOptionPane.showMessageDialog(null,
+    				"User and working directory must point to different locations!",
+    				"Error", JOptionPane.ERROR_MESSAGE);
+    		return false;
+		}
+		
 		// Save the properties to file
-		return AppProperties.writePropertiesToFile(selOpenBISURL,
-				selAcceptSelfSignedCerts, selAcqStation, 
+		boolean success = AppProperties.writePropertiesToFile(
+				selOpenBISURL, selAcceptSelfSignedCerts, selAcqStation, 
 				selUserDataDir, selIncomingDir);
+		if (! success) {
+    		JOptionPane.showMessageDialog(null,
+    				AppProperties.getLastErrorMessage(),
+    				"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		
+		return success;
 	}
-	
+
 }
