@@ -547,38 +547,46 @@ public class AnnotationToolAdminDialog extends JDialog {
 	 * @return true if saving was successful, false otherwise
 	 */
 	private boolean saveProperties() {
-		
-		// Get the openBIS URL
-		selOpenBISURL = openBISURLInput.getText();
-		
-		// Is the URL a valid URL?
-		try {
-			new URL(selOpenBISURL);
-		} catch (MalformedURLException e) {
-			JOptionPane.showMessageDialog(null,
-					"Malformed openBIS server URL", "Error",
-    				JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
 
-		// Check that everything is set
-		if (selOpenBISURL.equals("") || selAcqStation.equals("") ||
-				selAcceptSelfSignedCerts.equals("") ||
-				selUserDataDir.equals("") || 
-				selIncomingDir.equals("")) {
+		// Check that everything was set
+		if (!AppSettingsManager.areAllPropertiesSet(appSettings)) {
 			JOptionPane.showMessageDialog(null,
     				"Please set all fields!", "Error",
     				JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
+
+//		// Get the openBIS URL
+//		selOpenBISURL = openBISURLInput.getText();
+//		
+//		// Is the URL a valid URL?
+//		try {
+//			new URL(selOpenBISURL);
+//		} catch (MalformedURLException e) {
+//			JOptionPane.showMessageDialog(null,
+//					"Malformed openBIS server URL", "Error",
+//    				JOptionPane.ERROR_MESSAGE);
+//			return false;
+//		}
+//
+//		// Check that everything is set
+//		if (selOpenBISURL.equals("") || selAcqStation.equals("") ||
+//				selAcceptSelfSignedCerts.equals("") ||
+//				selUserDataDir.equals("") || 
+//				selIncomingDir.equals("")) {
+//			JOptionPane.showMessageDialog(null,
+//    				"Please set all fields!", "Error",
+//    				JOptionPane.ERROR_MESSAGE);
+//			return false;
+//		}
 		
-		// Check that the two paths do not point to the same folder
-		if (selUserDataDir.equalsIgnoreCase(selIncomingDir)) {
-    		JOptionPane.showMessageDialog(null,
-    				"User and working directory must point to different locations!",
-    				"Error", JOptionPane.ERROR_MESSAGE);
-    		return false;
-		}
+//		// Check that the two paths do not point to the same folder
+//		if (selUserDataDir.equalsIgnoreCase(selIncomingDir)) {
+//    		JOptionPane.showMessageDialog(null,
+//    				"User and working directory must point to different locations!",
+//    				"Error", JOptionPane.ERROR_MESSAGE);
+//    		return false;
+//		}
 		
 		// Save the properties to file
 		boolean success = AppSettingsManager.writeSettingsToFile(appSettings);
@@ -628,15 +636,48 @@ public class AnnotationToolAdminDialog extends JDialog {
      */
     private void changeCurrentSettingIndex(int index) {
     	
-    	// Get the corresponding AppSetting if it already exists or create a
-    	// new one
-    	if (appSettings.size() > (index + 1)) {
-    		currentSetting = appSettings.get(index);
-        	currentSettingIndex = index;
-    	} else {
-    		appSettings.add(new AppSetting());
-        	currentSettingIndex = appSettings.size() - 1;
+    	if (index < 0 && index > (appSettings.size() - 1)) {
+    		throw new ArrayIndexOutOfBoundsException();
     	}
+    	
+    	currentSetting = appSettings.get(index);
+        currentSettingIndex = index;
+    	
+    	// Now update the UI with the new settings
+    	updateUI();
+    	
+    }
+    
+    /**
+     * Changes the currently active AppSetting
+     * @param index of the AppSetting in the AppSettings array.
+     */
+    private void addNewSetting() {
+    	
+   		appSettings.add(new AppSetting());
+       	currentSettingIndex = appSettings.size() - 1;
+    	
+    	// Now update the UI with the new settings
+    	updateUI();
+    	
+    }
+
+    /**
+     * Changes the currently active AppSetting
+     * @param index of the AppSetting in the AppSettings array.
+     */
+    private void removeSetting(int index) {
+    	
+    	if (index < 0 && index > (appSettings.size() - 1)) {
+    		throw new ArrayIndexOutOfBoundsException();
+    	}
+    	
+   		appSettings.remove(index);
+   		index--;
+   		if (index < 0) {
+   			index = 0;
+   		}
+       	currentSettingIndex = index;
     	
     	// Now update the UI with the new settings
     	updateUI();
