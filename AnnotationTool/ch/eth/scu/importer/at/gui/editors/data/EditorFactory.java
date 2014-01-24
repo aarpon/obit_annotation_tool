@@ -5,7 +5,7 @@ import java.util.Properties;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.BDFACSDIVAFCSEditor;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.microscopy.gui.editors.data.MicroscopyEditor;
 
 /**
@@ -25,7 +25,7 @@ public class EditorFactory {
 			OpenBISViewer openBISViewer) {
 
 		// Get the application properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 
 		// Declare an AbstractEditor
 		AbstractEditor metadataEditor = null;

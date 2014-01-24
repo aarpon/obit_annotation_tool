@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 
 /**
  * Provides utility methods to handle path-related information for the
@@ -37,7 +37,7 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	public PathAwareDescriptor(File fullPath) {
 
 		// Store base and full path
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 		this.basePath = new File(
 				appProperties.getProperty("UserDataDir"));
 		this.fullPath = fullPath;

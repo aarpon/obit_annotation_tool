@@ -17,7 +17,7 @@ import ch.eth.scu.importer.at.datamover.ATDataMover;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 
 public class EditorContainer extends JPanel implements ActionListener {
 
@@ -106,7 +106,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 			}
 
 			// Get the application properties
-			Properties appProperties = AppProperties.readPropertiesFromFile();
+			Properties appProperties = AppSettingsManager.readSettingsFromFile();
 			String outputDirectory = 
 					appProperties.getProperty("UserDataDir");
 

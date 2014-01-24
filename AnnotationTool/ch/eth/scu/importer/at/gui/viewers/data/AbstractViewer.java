@@ -41,7 +41,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.utils.QueryOS;
@@ -336,7 +336,7 @@ abstract public class AbstractViewer extends Observable
 		
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 		File userDataFolder = new File(
 				appProperties.getProperty("UserDataDir") +
 				File.separator + userName);
@@ -663,7 +663,7 @@ abstract public class AbstractViewer extends Observable
             {
             	// Build the full path of the invalid dataset
             	Properties appProperties =
-            			AppProperties.readPropertiesFromFile();
+            			AppSettingsManager.readSettingsFromFile();
         		File userDataFolder = new File(
         				appProperties.getProperty("UserDataDir"));
 
@@ -737,7 +737,7 @@ abstract public class AbstractViewer extends Observable
             	
             	// Build the full path of the file/folder to move
             	Properties appProperties =
-            			AppProperties.readPropertiesFromFile();
+            			AppSettingsManager.readSettingsFromFile();
         		File userDataFolder = new File(
         				appProperties.getProperty("UserDataDir"));
             	File fullPath = new File(userDataFolder +
@@ -767,7 +767,7 @@ abstract public class AbstractViewer extends Observable
             {
             	// Build the full path of the file/folder to delete
             	Properties appProperties =
-            			AppProperties.readPropertiesFromFile();
+            			AppSettingsManager.readSettingsFromFile();
         		File userDataFolder = new File(
         				appProperties.getProperty("UserDataDir"));
             	File fullPath = new File(userDataFolder +

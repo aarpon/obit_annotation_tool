@@ -4,7 +4,7 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 
 import java.security.SecureRandom;
 import java.util.Properties;
@@ -34,7 +34,7 @@ public class ATDataMover {
 		random = new SecureRandom();
 
 		// Get the folder from the properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 		if (appProperties == null ) {
 			JOptionPane.showMessageDialog(null,
 					"Could not read application settings!\n" +

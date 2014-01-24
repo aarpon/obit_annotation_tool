@@ -5,7 +5,7 @@ import java.util.Properties;
 import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.at.gui.AnnotationToolWindow;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 
 /**
  * AnnotationTool is an application to drive the import of data from the 
@@ -22,7 +22,7 @@ public class AnnotationTool {
 		// Check whether the application has been set up already.
 		// If not, we inform the user and quit.
 
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 
 		if (appProperties == null) {
 			JOptionPane.showMessageDialog(null,
@@ -34,7 +34,7 @@ public class AnnotationTool {
 			System.exit(0);
 		}
 		
-		if (!AppProperties.isPropertiesFileVersionCurrent(appProperties)) {
+		if (!AppSettingsManager.isPropertiesFileVersionCurrent(appProperties)) {
 			JOptionPane.showMessageDialog(null,
 				    "The application settings are obsolete.\n" +
 			"Please ask an administrator to re-configure the "
@@ -45,7 +45,7 @@ public class AnnotationTool {
 			System.exit(0);
 		}		
 
-		if (!AppProperties.areAllPropertiesSet(appProperties)) {
+		if (!AppSettingsManager.areAllPropertiesSet(appProperties)) {
 			JOptionPane.showMessageDialog(null,
 				    "The application has not ben configured yet.\n" +
 			"Please ask an administrator to do it for you.\n\n"

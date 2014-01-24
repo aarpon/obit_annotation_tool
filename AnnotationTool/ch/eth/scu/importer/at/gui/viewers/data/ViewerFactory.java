@@ -3,7 +3,7 @@ package ch.eth.scu.importer.at.gui.viewers.data;
 import java.util.Properties;
 
 import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.BDFACSDIVAFCSViewer;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.MicroscopyViewer;
 
 /**
@@ -20,7 +20,7 @@ public class ViewerFactory {
 	public static AbstractViewer createViewer() {
 
 		// Get the application properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 
 		// Declare an AbstractViewer
 		AbstractViewer metadataViewer = null;

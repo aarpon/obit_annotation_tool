@@ -49,7 +49,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSampleNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.utils.QueryOS;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
@@ -106,7 +106,7 @@ public class OpenBISViewer extends Observable
 		panel = new JPanel();
 		
 		// Get the openBIS URL from the appProperties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		Properties appProperties = AppSettingsManager.readSettingsFromFile();
 		
 		// Set the URL
 		this.openBISURL = appProperties.getProperty("OpenBISURL");
@@ -269,7 +269,7 @@ public class OpenBISViewer extends Observable
 		try {
 			
 			// Should we accept self-signed certificates?
-			Properties appProperties = AppProperties.readPropertiesFromFile();
+			Properties appProperties = AppSettingsManager.readSettingsFromFile();
 			String acceptSelfSignedCerts = 
 					appProperties.getProperty("AcceptSelfSignedCertificates");
 
