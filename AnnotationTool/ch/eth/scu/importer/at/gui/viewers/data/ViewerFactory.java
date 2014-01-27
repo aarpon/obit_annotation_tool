@@ -1,7 +1,5 @@
 package ch.eth.scu.importer.at.gui.viewers.data;
 
-import java.util.Properties;
-
 import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.BDFACSDIVAFCSViewer;
 import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.MicroscopyViewer;
@@ -20,13 +18,13 @@ public class ViewerFactory {
 	public static AbstractViewer createViewer() {
 
 		// Get the application properties
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
+		AppSettingsManager manager = new AppSettingsManager();
 
 		// Declare an AbstractViewer
 		AbstractViewer metadataViewer = null;
 		
 		// Return the viewer that fits the "AcquisitionStation"
-		String acqStation = appProperties.getProperty("AcquisitionStation");	
+		String acqStation = manager.getSettingValue("AcquisitionStation");	
 		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataViewer = new BDFACSDIVAFCSViewer();

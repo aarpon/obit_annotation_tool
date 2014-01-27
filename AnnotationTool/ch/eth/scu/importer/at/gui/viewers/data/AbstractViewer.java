@@ -14,7 +14,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -336,9 +335,9 @@ abstract public class AbstractViewer extends Observable
 		
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
+		AppSettingsManager manager = new AppSettingsManager();
 		File userDataFolder = new File(
-				appProperties.getProperty("UserDataDir") +
+				manager.getSettingValue("UserDataDir") +
 				File.separator + userName);
 		
 		// Does the folder exist? If not, we create it. Please mind,
@@ -662,10 +661,9 @@ abstract public class AbstractViewer extends Observable
             public void actionPerformed(ActionEvent e)
             {
             	// Build the full path of the invalid dataset
-            	Properties appProperties =
-            			AppSettingsManager.readSettingsFromFile();
+            	AppSettingsManager manager = new AppSettingsManager();
         		File userDataFolder = new File(
-        				appProperties.getProperty("UserDataDir"));
+        				manager.getSettingValue("UserDataDir"));
 
             	// Full path to the invalid dataset
 				File fullPath = new File(userDataFolder +
@@ -736,10 +734,9 @@ abstract public class AbstractViewer extends Observable
             	}
             	
             	// Build the full path of the file/folder to move
-            	Properties appProperties =
-            			AppSettingsManager.readSettingsFromFile();
+            	AppSettingsManager manager = new AppSettingsManager();
         		File userDataFolder = new File(
-        				appProperties.getProperty("UserDataDir"));
+        				manager.getSettingValue("UserDataDir"));
             	File fullPath = new File(userDataFolder +
         				File.separator + invalidDataset);
             	
@@ -766,10 +763,9 @@ abstract public class AbstractViewer extends Observable
             public void actionPerformed(ActionEvent e)
             {
             	// Build the full path of the file/folder to delete
-            	Properties appProperties =
-            			AppSettingsManager.readSettingsFromFile();
+            	AppSettingsManager manager = new AppSettingsManager();
         		File userDataFolder = new File(
-        				appProperties.getProperty("UserDataDir"));
+        				manager.getSettingValue("UserDataDir"));
             	File fullPath = new File(userDataFolder +
         				File.separator + invalidDataset);
             	

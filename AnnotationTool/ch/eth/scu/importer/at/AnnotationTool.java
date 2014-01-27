@@ -1,7 +1,5 @@
 package ch.eth.scu.importer.at;
 
-import java.util.Properties;
-
 import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.at.gui.AnnotationToolWindow;
@@ -21,10 +19,7 @@ public class AnnotationTool {
 
 		// Check whether the application has been set up already.
 		// If not, we inform the user and quit.
-
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
-
-		if (appProperties == null) {
+		if (!AppSettingsManager.settingsFileExists()) {
 			JOptionPane.showMessageDialog(null,
 				    "The application has not ben configured yet.\n" +
 			"Please ask an administrator to do it for you.\n\n"
@@ -34,7 +29,20 @@ public class AnnotationTool {
 			System.exit(0);
 		}
 		
-		if (!AppSettingsManager.isPropertiesFileVersionCurrent(appProperties)) {
+		AppSettingsManager manager = new AppSettingsManager();
+
+		if (!manager.isFileRead()) {
+			JOptionPane.showMessageDialog(null,
+				    "The application settings could not be read.\n" +
+			"Please ask an administrator to re-configure the "
+			+ "application.\n\n"
+			+ "The application will close now.",
+				    "Obsolete settings",
+				    JOptionPane.WARNING_MESSAGE);
+			System.exit(0);
+		}		
+		
+		if (!manager.isFileCurrent()) {
 			JOptionPane.showMessageDialog(null,
 				    "The application settings are obsolete.\n" +
 			"Please ask an administrator to re-configure the "
@@ -45,7 +53,7 @@ public class AnnotationTool {
 			System.exit(0);
 		}		
 
-		if (!AppSettingsManager.areAllPropertiesSet(appProperties)) {
+		if (!manager.allSet()) {
 			JOptionPane.showMessageDialog(null,
 				    "The application has not ben configured yet.\n" +
 			"Please ask an administrator to do it for you.\n\n"

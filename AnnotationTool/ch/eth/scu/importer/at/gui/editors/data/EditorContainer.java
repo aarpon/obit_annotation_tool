@@ -7,7 +7,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -106,9 +105,9 @@ public class EditorContainer extends JPanel implements ActionListener {
 			}
 
 			// Get the application properties
-			Properties appProperties = AppSettingsManager.readSettingsFromFile();
+			AppSettingsManager manager = new AppSettingsManager();
 			String outputDirectory = 
-					appProperties.getProperty("UserDataDir");
+					manager.getSettingValue("UserDataDir");
 
 			// Save to XML (*_properties.oix)
 			if (dataViewer.saveToXML(outputDirectory)) {

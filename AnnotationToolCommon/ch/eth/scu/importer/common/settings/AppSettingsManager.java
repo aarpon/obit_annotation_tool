@@ -1,16 +1,12 @@
 package ch.eth.scu.importer.common.settings;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -94,11 +90,24 @@ public class AppSettingsManager {
 	}
 
 	/**
+	 * Add a new server
+	 */
+	public void add(String openBISURL) {
+		add();
+		setSettingValue("OpenBISURL", openBISURL);
+	}
+
+	/**
      * Remove the Setting with given index
      * @param index of the AppSettings in the listAppSettings array.
      */
 	public void remove(int index) throws ArrayIndexOutOfBoundsException {
     	
+		// We do not allow to remove all settings
+		if (listAppSettings.size() <= 1) {
+			return;
+		}
+
     	if (index < 0 && index > (listAppSettings.size() - 1)) {
     		throw new ArrayIndexOutOfBoundsException();
     	}
@@ -110,6 +119,38 @@ public class AppSettingsManager {
    		}
    		currentSettingsIndex = index;
     	
+    }
+
+	/**
+     * Move the Setting with given index down one position
+     * @param index of the AppSettings in the listAppSettings array.
+     */
+	public void moveDown(int index) {
+    	
+		// We cannot push down the last one
+		if (index == (listAppSettings.size())) {
+			return;
+		}
+		
+		Collections.swap(listAppSettings, index, index + 1);
+		currentSettingsIndex = index + 1;
+    	
+    }
+
+	/**
+     * Move the Setting with given index up one position
+     * @param index of the AppSettings in the listAppSettings array.
+     */
+	public void moveUp(int index) {
+    	
+		// We cannot push down the first one
+		if (index == 0) {
+			return;
+		}
+		
+		Collections.swap(listAppSettings, index, index - 1);
+		currentSettingsIndex = index - 1;
+
     }
 
 	/**
@@ -148,10 +189,24 @@ public class AppSettingsManager {
 	}
 
 	/**
+	 * Return all configured openBIS servers
+	 * @return
+	 */
+	public ArrayList<String> getAllServers() {
+	
+		ArrayList<String> servers = new ArrayList<String>();
+		for (AppSettings current : listAppSettings) {
+			servers.add(current.getOpenBISURL());
+		}
+		
+		return servers;
+	}
+	
+	/**
 	 * Return the index of currently active setting
 	 * @return index of currently active setting.
 	 */
-	public int getCurrent() {
+	public int getCurrentIndex() {
 		return currentSettingsIndex;
 	}
 
@@ -208,6 +263,17 @@ public class AppSettingsManager {
 		listAppSettings.get(currentSettingsIndex).setOpenBISURL(openBISURL);
 	}
 
+	/**
+	 * Selects the server by URL
+	 * @param openBISURL Server URL.
+	 */
+	public void selectServer(String openBISURL) {
+		int indx = listAppSettings.indexOf(openBISURL);
+		if (indx != -1) {
+			currentSettingsIndex = indx;
+		}
+	}
+	
 	/**
 	 * Check whether all Properties in the file are set. 
 	 * @return true if all Properties in the file are set,
@@ -378,7 +444,7 @@ public class AppSettingsManager {
 	 * @throws 	UnsupportedOperationException if the operating system is not one 
 	 * 			of Mac OS X or Windows 7.
 	 */
-	private File getSettingsPropertiesDir() 
+	static private File getSettingsPropertiesDir() 
 			throws UnsupportedOperationException {
 
 		// Initialize the applicationDir variable
@@ -406,37 +472,9 @@ public class AppSettingsManager {
 	 * Returns the properties file name with full path
 	 * @return 	name with full path of the properties files
 	 */
-	private File getSettingsFileName() {
+	static private File getSettingsFileName() {
 		return new File(getSettingsPropertiesDir() + 
 				File.separator + "settings.xml");	
-	}
-
-	/**
-	 * Get the version of the settings XML file. It parses the file first.
-	 * @return the settings file number or -1 if the file does not exist.
-	 */
-	private int getSettingsFileVersion() {
-		Document doc = readXMLFile();
-		if (doc == null) {
-			return -1;
-		}
-		Element root = doc.getDocumentElement();
-		int version = -1;
-		try {
-			version = Integer.parseInt(root.getAttribute("version")); 
-		} catch (NumberFormatException n) {
-			return -1;
-		}
-		return version;
-	}
-
-	/**
-	 * Get the version of the settings XML file
-	 * @param doc Parsed XML document
-	 */
-	private int getSettingsFileVersion(Document doc) {
-		Element root = doc.getDocumentElement();
-		return Integer.parseInt(root.getAttribute("version"));	
 	}
 
 	/**
@@ -447,9 +485,6 @@ public class AppSettingsManager {
 		listAppSettings = new ArrayList<AppSettings>();
 		listAppSettings.add(new AppSettings());
 		currentSettingsIndex = 0;
-		fileVersion = -1;
-		isFileRead = false;
-		isFileCurrent = false;
 	}
 
 	/**
@@ -459,8 +494,8 @@ public class AppSettingsManager {
 	private boolean readSettingsFromFile() {
 	
 		// Make sure the Properties file exists
-		if (!settingsFileExists()) {
-			fileExists = false;
+		fileExists = settingsFileExists();
+		if (!fileExists) {
 			isFileRead = false;
 			isFileCurrent = false;
 			fileVersion = -1;
@@ -468,6 +503,7 @@ public class AppSettingsManager {
 			return false;
 		}
 	
+
 		// Instantiate new Settings
 		ArrayList<AppSettings> loadedAppSettings = new ArrayList<AppSettings>();
 	
@@ -486,12 +522,6 @@ public class AppSettingsManager {
 			fileVersion = Integer.parseInt(rootNode.getAttribute("version")); 
 		} catch (NumberFormatException n) {
 			fileVersion = -1;
-		}
-
-		// Check that the file version is current
-		if (fileVersion != VersionInfo.propertiesVersion) {
-			errorMessage = "The settings file is obsolete.";
-			return false;
 		}
 
 		// Now process all children
@@ -523,8 +553,17 @@ public class AppSettingsManager {
 		listAppSettings = loadedAppSettings;
 		currentSettingsIndex = 0;
 		isFileRead = true;
-		isFileCurrent = true;
 
+		// Check that the file version is current
+		if (fileVersion != VersionInfo.propertiesVersion) {
+			errorMessage = "The settings file is obsolete.";
+			isFileCurrent = false;
+			return false;
+		}
+		
+		// Set file to be current
+		isFileCurrent = true;
+		
 		// Reset error message
 		errorMessage = "";
 
@@ -567,16 +606,12 @@ public class AppSettingsManager {
 		return doc;
 	}
 	
-	
-
-	// Public interface
-	
 	/**
 	 * Check whether the properties file already exists
 	 * @return 	true if the properties file already exists, false
 	 * otherwise.
 	 */	
-	private boolean settingsFileExists() {
+	static public boolean settingsFileExists() {
 		return getSettingsFileName().exists();
 	}
 }

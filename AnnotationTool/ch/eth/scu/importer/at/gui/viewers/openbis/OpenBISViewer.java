@@ -106,10 +106,10 @@ public class OpenBISViewer extends Observable
 		panel = new JPanel();
 		
 		// Get the openBIS URL from the appProperties
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
+		AppSettingsManager manager = new AppSettingsManager();
 		
 		// Set the URL
-		this.openBISURL = appProperties.getProperty("OpenBISURL");
+		this.openBISURL = manager.getSettingValue("OpenBISURL");
 		
 		// Set a grid bag layout
 		panel.setLayout(new GridBagLayout());
@@ -269,9 +269,9 @@ public class OpenBISViewer extends Observable
 		try {
 			
 			// Should we accept self-signed certificates?
-			Properties appProperties = AppSettingsManager.readSettingsFromFile();
+			AppSettingsManager manager = new AppSettingsManager();
 			String acceptSelfSignedCerts = 
-					appProperties.getProperty("AcceptSelfSignedCertificates");
+					manager.getSettingValue("AcceptSelfSignedCertificates");
 
 			// Set the force-accept-ssl-certificate option if requested
 			// by the administrator

@@ -1,7 +1,5 @@
 package ch.eth.scu.importer.at.gui.editors.data;
 
-import java.util.Properties;
-
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.BDFACSDIVAFCSEditor;
@@ -25,13 +23,13 @@ public class EditorFactory {
 			OpenBISViewer openBISViewer) {
 
 		// Get the application properties
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
+		AppSettingsManager manager = new AppSettingsManager();
 
 		// Declare an AbstractEditor
 		AbstractEditor metadataEditor = null;
 
 		// Create the concrete editor
-		String acqStation = appProperties.getProperty("AcquisitionStation");	
+		String acqStation = manager.getSettingValue("AcquisitionStation");	
 		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);

@@ -7,6 +7,8 @@ import ch.eth.scu.importer.common.version.VersionInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -24,7 +26,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 	/* Private instance variables */
 	private static final long serialVersionUID = 1L;
 
-    protected JButton addOpenBISURLButton;
+	protected JLabel urlLabel;
+	protected JButton editOpenBISURLButton;
+	protected JButton addOpenBISURLButton;
     protected JButton remOpenBISURLButton;
     protected JButton lowerOpenBISURLButton;
     protected JButton higherOpenBISURLButton;   	
@@ -65,8 +69,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		// Add a label for the selection of the openBIS URL
-		JLabel urlLabel = new JLabel("Set the openBIS URL " +
-		"(the first will be default for the users)");
+		urlLabel = new JLabel("Set the openBIS URL");
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridwidth = 20;
@@ -77,9 +80,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(urlLabel, constraints);
 
         // Add a drop-down menu for the selection of the URL
+        ArrayList<String> openBISURLOptions = manager.getAllServers();
         String openBISURL = manager.getServer();
-        ArrayList<String> openBISURLOptions = 
-                manager.possibleValuesForSetting("OpenBISURL");
         int index = -1;
         for (int i = 0; i < openBISURLOptions.size(); i++) {
             if (openBISURLOptions.get(i).equals(openBISURL)) {
@@ -103,19 +105,59 @@ public class AnnotationToolAdminDialog extends JDialog {
         openBISURLList.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (e.getActionCommand().equals("comboBoxChanged")) {
-                	String selURL = (String) openBISURLList.getSelectedItem();
-                	manager.setServer(selURL);
+                	int index = openBISURLList.getSelectedIndex();
+                	changeCurrentSettingIndex(index);
                 }
             }
         });
         constraints.gridx = 0;
         constraints.gridy = 1;
-        constraints.gridwidth = 16;
+        constraints.gridwidth = 15;
         constraints.gridheight = 1;     
         constraints.weightx = 0.9;
         constraints.weighty = 1.0;
         constraints.insets = new Insets(5, 5, 5, 0);
         add(openBISURLList, constraints);
+
+        // Create the "Edit openBIS URL" button ("...")
+        editOpenBISURLButton = new JButton("...");
+        editOpenBISURLButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Ask the user to specify a new openBIS URL
+                String url = JOptionPane.showInputDialog(
+                        "Edit openBIS URL:",
+                        manager.getServer());
+                if (url == null || url.equals("")) {
+                    return;
+                }
+                // TODO Validate URL better
+                try {
+                	new URL(url);
+                } catch (MalformedURLException u) {
+					JOptionPane.showMessageDialog(null,
+						    "Malformed URL! Please try again.",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+                
+                // Update URL
+                manager.setServer(url);
+
+                // Update UI
+                refillServerList();
+                updateUI();
+                
+            }
+        });
+        constraints.gridx = 15;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.05;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        add(editOpenBISURLButton, constraints);
 
         // Create the "Add openBIS URL" button ("+")
         addOpenBISURLButton = new JButton(Character.toString('\u002B'));
@@ -127,14 +169,24 @@ public class AnnotationToolAdminDialog extends JDialog {
                 if (url == null || url.equals("")) {
                     return;
                 }
-                // TODO Validate URL
+                // TODO Validate URL better
+                try {
+                	new URL(url);
+                } catch (MalformedURLException u) {
+					JOptionPane.showMessageDialog(null,
+						    "Malformed URL! Please try again.",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
                 
-                // Add and select it
-                openBISURLList.addItem(url);
-                openBISURLList.setSelectedIndex(openBISURLList.getItemCount() - 1);
+                // Add a new server to the list of settings
+                manager.add(url);
                 
-                // Validate URL list
-                validateOpenBISURLList();
+                // Update UI
+                refillServerList();
+                updateUI();
+
             }
         });
         constraints.gridx = 16;
@@ -150,16 +202,17 @@ public class AnnotationToolAdminDialog extends JDialog {
         remOpenBISURLButton = new JButton(Character.toString('\u2212'));
         remOpenBISURLButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (openBISURLList.getItemCount() == 0) {
-                    return;
-                }
-                int indx = openBISURLList.getSelectedIndex();
-                if (indx != -1) {
-                    openBISURLList.removeItemAt(indx);
-                }
-                
-                // Make sure to clean up
-                validateOpenBISURLList();
+            	int index = openBISURLList.getSelectedIndex();
+            	try {
+            		manager.remove(index);
+            	} catch (ArrayIndexOutOfBoundsException a) {
+            		return;
+            	}
+
+            	// Update UI
+            	refillServerList();
+            	updateUI();
+
             }
         });
         constraints.gridx = 17;
@@ -175,7 +228,16 @@ public class AnnotationToolAdminDialog extends JDialog {
         higherOpenBISURLButton = new JButton(Character.toString('\u25B2'));
         higherOpenBISURLButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Implement
+            	int index = openBISURLList.getSelectedIndex();
+            	try {
+            		manager.moveUp(index);
+            	} catch (ArrayIndexOutOfBoundsException a) {
+            		return;
+            	}
+
+            	// Update UI
+            	refillServerList();
+            	updateUI();
             }
         });
         constraints.gridx = 18;
@@ -191,7 +253,16 @@ public class AnnotationToolAdminDialog extends JDialog {
         lowerOpenBISURLButton = new JButton(Character.toString('\u25BC'));
         lowerOpenBISURLButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Implement
+            	int index = openBISURLList.getSelectedIndex();
+            	try {
+            		manager.moveDown(index);
+            	} catch (ArrayIndexOutOfBoundsException a) {
+            		return;
+            	}
+
+            	// Update UI
+            	refillServerList();
+            	updateUI();
             }
         });
         constraints.gridx = 19;
@@ -497,6 +568,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(saveButton);
 
+    	// Enable/disable buttons
+    	toggleDynamicWidgets();
+    	
 		// Display the dialog
 		setMinimumSize(new Dimension(600, 220));
 		pack();
@@ -523,42 +597,23 @@ public class AnnotationToolAdminDialog extends JDialog {
 		}
 	}
 
-	/**
-     * Validate the list of openBISURLs. In particular, removes empty strings.
-     */
-    private void validateOpenBISURLList() {
-        
-        // Store the selected item
-        String current = (String)openBISURLList.getSelectedItem();
-        for (int i = openBISURLList.getItemCount() - 1; i >= 0; i --) {
-            String sel = openBISURLList.getItemAt(i);
-            if (sel.equals("")) {
-                // Remove
-                openBISURLList.removeItemAt(i);
-            }
-        }
-        
-        // Are there still URLs?
-        if (openBISURLList.getItemCount() == 0) {
-            openBISURLList.addItem("");
-            openBISURLList.setSelectedIndex(0);
-            return;
-        }
-        
-        // Reselect the object if valid, otherwise point to first entry
-        if (! current.equals("")) {
-            openBISURLList.setSelectedItem(current);
-        } else {
-            openBISURLList.setSelectedIndex(0);
-        }
-    }
-
     /**
      * Changes the currently active AppSettings
      * @param index of the AppSettings in the listAppSettings array.
      */
     private void changeCurrentSettingIndex(int index) {
     	
+    	if (index == -1) {
+    		// This happens when the server list is cleared 
+    		return;
+    	}
+    			
+    	// Check that we really need to change
+    	if (index == manager.getCurrentIndex()) {
+    		// Nothing to do
+    		return;
+    	}
+
     	// Try changing the index 
     	try {
     		manager.setCurrent(index);
@@ -576,39 +631,28 @@ public class AnnotationToolAdminDialog extends JDialog {
     }
     
     /**
-     * Changes the currently active AppSettings
-     * @param index of the AppSettings in the listAppSettings array.
+     * Refills the list of opeenBIS servers when their number has changed after
+     * a user action.
      */
-    private void addNewSetting() {
+    private void refillServerList() {
     	
-    	manager.add();
-    	
-    	// Now update the UI with the new settings
-    	updateUI();
-    	
+    	// Disable action listeners while we refill the list
+    	ActionListener[] actionListeners = openBISURLList.getActionListeners();
+    	for (ActionListener a : actionListeners) {
+    		openBISURLList.removeActionListener(a);
+    	}
+    	ArrayList<String> openBISURLOptions = manager.getAllServers();
+        openBISURLList.removeAllItems();
+        for (String currOpenBISURL : openBISURLOptions) {
+            openBISURLList.addItem(currOpenBISURL);
+        }
+        openBISURLList.setSelectedItem(manager.getServer());
+        // Add the action listeners back
+    	for (ActionListener a : actionListeners) {
+    		openBISURLList.addActionListener(a);
+    	}
     }
 
-    /**
-     * Changes the currently active AppSettings
-     * @param index of the AppSettings in the listAppSettings array.
-     */
-    private void removeSetting(int index) {
-    	
-    	try {
-    		manager.remove(index);
-    	} catch (ArrayIndexOutOfBoundsException e) {
-    		JOptionPane.showMessageDialog(null,
-    				"There was a mistake removing current server.\n\n" + 
-    		"This is a bug, please inform your administrator!",
-    				"Error", JOptionPane.ERROR_MESSAGE);
-    		return;   
-    	}
-    	
-    	// Now update the UI with the new settings
-    	updateUI();
-    	
-    }
-    
     /**
      * Updates all fields with the values from current AppSettings
      */
@@ -618,5 +662,41 @@ public class AnnotationToolAdminDialog extends JDialog {
     	acceptSelfSignedCertsList.setSelectedItem(manager.getSettingValue("AcceptSelfSignedCertificates"));
     	userdirButton.setText(manager.getSettingValue("UserDataDir"));
     	dirButton.setText(manager.getSettingValue("DatamoverIncomingDir"));
+    	
+    	// Enable/disable buttons
+    	toggleDynamicWidgets();
+
+    }
+
+    /**
+     * Enable/disable buttons depending on current selections
+     */
+    private void toggleDynamicWidgets() {
+    	boolean state = true;
+    	if (manager.getAllServers().size() < 2) {
+    		state = false;
+    	}
+        remOpenBISURLButton.setEnabled(state);
+        lowerOpenBISURLButton.setEnabled(state);
+        higherOpenBISURLButton.setEnabled(state);
+
+        state = true;
+        if (manager.getCurrentIndex() == 0) {
+        	state = false;
+        }
+        higherOpenBISURLButton.setEnabled(state);
+
+        state = true;
+        if (manager.getCurrentIndex() == (manager.getAllServers().size() - 1)) {
+        	state = false;
+        }
+        lowerOpenBISURLButton.setEnabled(state);
+        
+    	if (openBISURLList.getSelectedIndex() != 0) {
+    		urlLabel.setText("Set the openBIS URL (current default: " +
+    	(String) openBISURLList.getItemAt(0) + ")");
+    	} else {
+    		urlLabel.setText("Set the openBIS URL (this is current default)");
+    	}
     }
 }

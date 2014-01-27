@@ -3,11 +3,11 @@ package ch.eth.scu.importer.at.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -26,6 +26,7 @@ import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
 /**
@@ -141,7 +142,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Make window visible
 		setVisible(true);
-		
+
 	}
 
     /**

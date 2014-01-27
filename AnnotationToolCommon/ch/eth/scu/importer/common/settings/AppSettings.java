@@ -3,7 +3,6 @@ package ch.eth.scu.importer.common.settings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Class to store Annotation Tool settings for one specific openBIS server

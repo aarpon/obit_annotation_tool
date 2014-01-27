@@ -37,9 +37,9 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	public PathAwareDescriptor(File fullPath) {
 
 		// Store base and full path
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
+		AppSettingsManager manager = new AppSettingsManager();
 		this.basePath = new File(
-				appProperties.getProperty("UserDataDir"));
+				manager.getSettingValue("UserDataDir"));
 		this.fullPath = fullPath;
 		
 		// Compute and store the relative path

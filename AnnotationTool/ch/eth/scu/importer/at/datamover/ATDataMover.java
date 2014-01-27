@@ -7,7 +7,6 @@ import javax.swing.JOptionPane;
 import ch.eth.scu.importer.common.settings.AppSettingsManager;
 
 import java.security.SecureRandom;
-import java.util.Properties;
 import java.math.BigInteger;
 
 /**
@@ -34,8 +33,8 @@ public class ATDataMover {
 		random = new SecureRandom();
 
 		// Get the folder from the properties
-		Properties appProperties = AppSettingsManager.readSettingsFromFile();
-		if (appProperties == null ) {
+		AppSettingsManager manager = new AppSettingsManager();
+		if (! manager.isFileRead() || ! manager.isFileCurrent()) {
 			JOptionPane.showMessageDialog(null,
 					"Could not read application settings!\n" +
 			"Please contact your administrator. The application\n" +
@@ -45,14 +44,14 @@ public class ATDataMover {
 		}
 
 		// Get the user data dir
-		sourceDir = new File(appProperties.getProperty("UserDataDir") +
+		sourceDir = new File(manager.getSettingValue("UserDataDir") +
 				File.separator + userName);
 		if (!sourceDir.isDirectory()) {
 			throw new IllegalArgumentException("sourceDir must be a directory!");
 		}
 		
 		// Get the datamover incoming dir
-		targetDir = new File(appProperties.getProperty("DatamoverIncomingDir"));
+		targetDir = new File(manager.getSettingValue("DatamoverIncomingDir"));
 		if (!targetDir.isDirectory()) {
 			throw new IllegalArgumentException("sourceDir must be a directory!");
 		}
