@@ -9,7 +9,7 @@ import java.util.Properties;
  * Class to store Annotation Tool settings for one specific openBIS server
  * @author Aaron Ponti
  */
-public class AppSetting {
+public class AppSettings {
 
 	// String-string map of setting name - values
 	protected Map<String, String> settings = new HashMap<String, String>();
@@ -17,10 +17,10 @@ public class AppSetting {
 	/**
 	 * Constructor
 	 */
-	public AppSetting() {
-		ArrayList<String> names = settingsNames();
+	public AppSettings() {
+		ArrayList<String> names = getSettingsNames();
 		for (String name : names) {
-			setSetting(name, defaultValueForSetting(name));
+			setSettingValue(name, defaultValueForSetting(name));
 		}
 	}
 
@@ -28,13 +28,13 @@ public class AppSetting {
 	 * Constructor
 	 * @param openBISURL: URL of the openBIS server  
 	 */
-	public AppSetting(String openBISURL) {
-		ArrayList<String> names = settingsNames();
+	public AppSettings(String openBISURL) {
+		ArrayList<String> names = getSettingsNames();
 		for (String name : names) {
 			if (name.equals("OpenBISURL")) {
-				setSetting("OpenBISURL", openBISURL);
+				setSettingValue("OpenBISURL", openBISURL);
 			} else {
-				setSetting(name, defaultValueForSetting(name));
+				setSettingValue(name, defaultValueForSetting(name));
 			}
 		}
 	}
@@ -47,7 +47,7 @@ public class AppSetting {
 		if (settings.containsKey("OpenBISURL")) {
 			return settings.get("OpenBISURL");
 		} else {
-			return AppSetting.defaultValueForSetting("OpenBISURL");
+			return AppSettings.defaultValueForSetting("OpenBISURL");
 		}
 	}
 
@@ -56,7 +56,7 @@ public class AppSetting {
 	 * @param openBISURL: openBIS URL
 	 */
 	public void setOpenBISURL(String openBISURL) {
-		setSetting("OpenBISURL", openBISURL);
+		setSettingValue("OpenBISURL", openBISURL);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class AppSetting {
 	 * @param name: setting name
 	 * @param value: setting value
 	 */
-	public void setSetting(String name, String value) {
+	public void setSettingValue(String name, String value) {
 		settings.put(name, value);
 	}
 	
@@ -131,7 +131,7 @@ public class AppSetting {
 	 * Return all known settings 
 	 * @return an ArrayList<String> with all known setting names
 	 */
-	public static ArrayList<String> settingsNames() {
+	public static ArrayList<String> getSettingsNames() {
 		
 		ArrayList<String> names = new ArrayList<String>();
 		
@@ -149,7 +149,7 @@ public class AppSetting {
 	 * @return true if all settings are set, false otherwise.
 	 */
 	public boolean allSet() {
-		ArrayList<String> names = settingsNames();
+		ArrayList<String> names = getSettingsNames();
 		for (String name : names) {
 			if (getSettingValue(name).equals("")) {
 				return false;

@@ -38,53 +38,184 @@ import ch.eth.scu.utils.QueryOS;
  */
 public class AppSettingsManager {
 
-	static protected String errorMessage = "";
+	protected ArrayList<AppSettings> listAppSettings = null;
+	protected int currentSettingsIndex;
+	protected String errorMessage = "";
+	private boolean isFileRead = false;
+	private boolean isFileCurrent = false;
+	private boolean fileExists = false;
+	private int fileVersion = -1;
 
 	// Public interface
 
 	/**
-	 * Check whether the properties file already exists
-	 * @return 	true if the properties file already exists, false
-	 * otherwise.
-	 */	
-	static public boolean settingsFileExists() {
-		return getSettingsFileName().exists();
+	 * Constructor
+	 */
+	public AppSettingsManager() {
+		
+		// Try to load, otherwise initialize
+		if (!load()) {
+			initializeSettings();
+		}
+
+	}
+	
+
+	/**
+	 * Return true if the settings file exists
+	 * @return true if the settings file exists
+	 */
+	public boolean fileExists() {
+		return fileExists;
 	}
 
 	/**
-	 * Initialize application settings with default values.
-	 * @return ArrayList of AppSetting containing one element.
+	 * Return true if the settings file was found and read
+	 * @return true if the settings file was found and read, false otherwise
 	 */
-	static public ArrayList<AppSetting> initializeSettings() {
-		ArrayList<AppSetting> appSettings = new ArrayList<AppSetting>();
-		appSettings.add(new AppSetting());
-		return appSettings;
+	public boolean isFileRead() {
+		return isFileRead;
+	}
+
+	/**
+	 * Return true if the settings file version is current
+	 * @return true if the settings file version is current, false otherwise
+	 */
+	public boolean isFileCurrent() {
+		return isFileCurrent;
+	}
+
+	/**
+	 * Add a new server
+	 */
+	public void add() {
+   		listAppSettings.add(new AppSettings());
+   		currentSettingsIndex = listAppSettings.size() - 1;
+	}
+
+	/**
+     * Remove the Setting with given index
+     * @param index of the AppSettings in the listAppSettings array.
+     */
+	public void remove(int index) throws ArrayIndexOutOfBoundsException {
+    	
+    	if (index < 0 && index > (listAppSettings.size() - 1)) {
+    		throw new ArrayIndexOutOfBoundsException();
+    	}
+    	
+   		listAppSettings.remove(index);
+   		index--;
+   		if (index < 0) {
+   			index = 0;
+   		}
+   		currentSettingsIndex = index;
+    	
     }
 
 	/**
-	 * Check whether the Properties file is at current version
-	 * @param appProperties Properties object
-	 * @return true if the Properties file is at current version,
-	 * false otherwise.
+	 * Try reading settings from file. If loading fails, current settings are 
+	 * left untouched.
 	 * 
-	 * Please note that this function will return true if the file does
-	 * not exist, since a new AppSettingsManager object will be created and
-	 * tested for its version. 
-	 * 
+	 * @return true if the settings were loaded correctly, false otherwise.
 	 */
-	static public boolean isSettingsFileVersionCurrent() {
-		int fileVersion = getSettingsFileVersion();
-		return fileVersion == VersionInfo.propertiesVersion;
-    }
+	public boolean load() {
+	
+		return readSettingsFromFile();
+
+	}
+	
+	/**
+	 * Resets settings.
+	 * 
+	 * @return true if the settings were loaded correctly, false otherwise.
+	 */
+	public void reset() {
+	
+		initializeSettings();
+
+	}
+
+	/**
+	 * Try writing settings to file. If writing fails, use getLastErrorMessage()
+	 * to get the details.
+	 * 
+	 * @return true if the settings were saved correctly, false otherwise.
+	 */
+	public boolean save() {
+	
+		return writeSettingsToFile();
+
+	}
+
+	/**
+	 * Return the index of currently active setting
+	 * @return index of currently active setting.
+	 */
+	public int getCurrent() {
+		return currentSettingsIndex;
+	}
+
+	/**
+	 * Return the index of currently active setting
+	 * @return index of currently active setting.
+	 */
+	public boolean setCurrent(int newCurrent) throws ArrayIndexOutOfBoundsException {
+		if (newCurrent < 0 || newCurrent > (listAppSettings.size() - 1)) {
+			throw new ArrayIndexOutOfBoundsException();
+		}
+		currentSettingsIndex = newCurrent;
+		return true;
+	}
+	
+	/**
+	 * Returns the properties file name with full path
+	 * @return 	name with full path of the properties files
+	 */
+	public ArrayList<String> getSettingsNames() {
+		return AppSettings.getSettingsNames();
+	}
+
+	/**
+	 * Return the value of the setting for current server.
+	 * @param attribute: Attribute name
+	 * @return the value of the attribute for current setting.
+	 */
+	public String getSettingValue(String name) {
+		return listAppSettings.get(currentSettingsIndex).getSettingValue(name);
+	}
+
+	/**
+	 * Set the URL of current openBIS server
+	 * @param openBISURL URL for current openBIS server
+	 */
+	public void setSettingValue(String name, String value) {
+		listAppSettings.get(currentSettingsIndex).setSettingValue(name, value);
+	}
+
+	/**
+	 * Return the URL of current openBIS server
+	 * @return the URL of current openBIS server.
+	 */
+	public String getServer() {
+		return listAppSettings.get(currentSettingsIndex).getOpenBISURL();
+	}
+
+	/**
+	 * Set the URL of current openBIS server
+	 * @param openBISURL URL for current openBIS server
+	 */
+	public void setServer(String openBISURL) {
+		listAppSettings.get(currentSettingsIndex).setOpenBISURL(openBISURL);
+	}
 
 	/**
 	 * Check whether all Properties in the file are set. 
 	 * @return true if all Properties in the file are set,
 	 * false otherwise.
 	 */
-	static public boolean areAllPropertiesSet(ArrayList<AppSetting> appSettings) {
-		for (AppSetting appSetting : appSettings) {
-			if (! appSetting.allSet()) {
+	public boolean allSet() {
+		for (AppSettings appSettings : listAppSettings) {
+			if (! appSettings.allSet()) {
 				return false;
 			}
 		}
@@ -92,71 +223,21 @@ public class AppSettingsManager {
 	}
 	
 	/**
-	 * Read the properties from disk 
-	 * @return a Properties object or null if it could not be loaded
-	 */
-	static public ArrayList<AppSetting> readSettingsFromFile() {
-
-		// Make sure the Properties file exists
-		if (!AppSettingsManager.settingsFileExists()) {
-			return null;
-		}
-
-		// Instantiate Settings
-		ArrayList<AppSetting> appSettings = new ArrayList<AppSetting>();
-
-		// Read and parse the XML settings file
-		Document doc = readXMLFile();
-		
-		// Get the root node
-		Element rootNode = doc.getDocumentElement();
-		
-		// Now process all children
-		NodeList openBISURLNodes = rootNode.getChildNodes();
-		for (int i = 0; i < openBISURLNodes.getLength(); i ++) {
-			Node openBISURL = openBISURLNodes.item(i);
-			
-			// Create a new AppSetting object
-			AppSetting setting = new AppSetting(openBISURL.getNodeName());
-			
-			// Get and add the attributes
-			NamedNodeMap attrs = openBISURL.getAttributes();
-			
-			for (int j = 0; j < attrs.getLength(); j++) {
-				
-				// Get attribute name and value
-				String name = attrs.item(j).getNodeName();
-				String value = attrs.item(j).getNodeValue();
-				
-				// Store it
-				setting.setSetting(name, value);
-			}
-
-			// Now add the AppSetting object
-			appSettings.add(setting);
-		}
-		
-		// Return the settings
-		return appSettings;
-		
-	}
-	
-	/**
 	 * Returns the setting for current openBIS server
 	 * @param openBISURL: openBIS server URL
-	 * @return AppSetting object
+	 * @return AppSettings object
 	 */
-	public static AppSetting getSettingsForServer(String openBISURL) {
+	public AppSettings getSettingsForServer(String openBISURL) {
 	
 		// Get the settings
-		ArrayList<AppSetting> appSettings = readSettingsFromFile();
-		for (AppSetting appSetting : appSettings) {
-			if (appSetting.getOpenBISURL().equals(openBISURL)) {
-				return appSetting;
+		for (AppSettings appSettings : listAppSettings) {
+			if (appSettings.getOpenBISURL().equals(openBISURL)) {
+				return appSettings;
 			}
 		}
 		return null;
 	}
+	
 	
 	/**
 	 * Write the properties to disk 
@@ -165,7 +246,7 @@ public class AppSettingsManager {
 	 * This function might require write access to a restricted system
 	 * folder. It should be used only in code run with admin privileges.
 	 */
-	static public boolean writeSettingsToFile(ArrayList<AppSetting> appSettings) {
+	private boolean writeSettingsToFile() {
 
 		DocumentBuilder builder;
 		Document document = null;
@@ -182,17 +263,14 @@ public class AppSettingsManager {
 					Integer.toString(VersionInfo.propertiesVersion));
 
 			// Get all properties for all servers and store them in an XML document
-			for (AppSetting appSetting : appSettings) {
-				
-				// Get current server URL
-				String openBISURL = appSetting.getOpenBISURL();
+			for (AppSettings appSettings : listAppSettings) {
 				
 				// Get its properties
 			    Map<String, String> currentProperties = 
-			    		appSetting.getAllSettings();
+			    		appSettings.getAllSettings();
 
 				// Create the experiment
-			    Element element = document.createElement(openBISURL); 
+			    Element element = document.createElement("server"); 
 
 				// Append all properties as attributes
 				for (Map.Entry<String, String> curr : currentProperties.entrySet() ) {
@@ -252,7 +330,7 @@ public class AppSettingsManager {
 	 * Return last error message.
 	 * @return last error message.
 	 */
-	public static String getLastErrorMessage() {
+	public String getLastErrorMessage() {
 		return errorMessage;
 	}
 
@@ -264,16 +342,33 @@ public class AppSettingsManager {
 	 * 
 	 * @return an ArrayList<String> with all options for a given property name
 	 */		
-	public static ArrayList<String> possibleValuesForSetting(String property) {
-		return AppSetting.possibleValuesForSetting(property);
+	public ArrayList<String> possibleValuesForSetting(String name) {
+		return AppSettings.possibleValuesForSetting(name);
 	}
 
 	/**
 	 * Return default option for a given property 
 	 * @return an String with the default value for a given property name
 	 */		
-	public static String defaultValueForSetting(String name) {
-		return AppSetting.defaultValueForSetting(name);
+	public String defaultValueForSetting(String name) {
+		return AppSettings.defaultValueForSetting(name);
+	}
+
+	/**
+	 * Create the application data directory
+	 * @return 	true if the application data directory could be created
+	 * successfully, false otherwise.
+	 * 
+	 * This function might require write access to a restricted system
+	 * folder. It should be used only in code run with admin privileges.
+	 */
+	private boolean createApplicationSettingsDir() {
+		
+		// Get the application directory
+		File scuFolder = getSettingsPropertiesDir();
+		
+		// Create it if not there
+	    return scuFolder.exists() || scuFolder.mkdirs();
 	}
 
 	/**
@@ -283,7 +378,7 @@ public class AppSettingsManager {
 	 * @throws 	UnsupportedOperationException if the operating system is not one 
 	 * 			of Mac OS X or Windows 7.
 	 */
-	static private File getSettingsPropertiesDir() 
+	private File getSettingsPropertiesDir() 
 			throws UnsupportedOperationException {
 
 		// Initialize the applicationDir variable
@@ -311,64 +406,16 @@ public class AppSettingsManager {
 	 * Returns the properties file name with full path
 	 * @return 	name with full path of the properties files
 	 */
-	static private File getSettingsFileName() {
-		return new File( getSettingsPropertiesDir() + 
-				File.separator + "settings.cfg" );	
+	private File getSettingsFileName() {
+		return new File(getSettingsPropertiesDir() + 
+				File.separator + "settings.xml");	
 	}
 
-	/**
-	 * Create the application data directory
-	 * @return 	true if the application data directory could be created
-	 * successfully, false otherwise.
-	 * 
-	 * This function might require write access to a restricted system
-	 * folder. It should be used only in code run with admin privileges.
-	 */
-	static private boolean createApplicationSettingsDir() {
-		
-		// Get the application directory
-		File scuFolder = getSettingsPropertiesDir();
-		
-		// Create it if not there
-        return scuFolder.exists() || scuFolder.mkdirs();
-    }
-
-	/**
-	 * Read and parse the settings XML file and returns the Document
-	 * @return parsed Document
-	 */
-	private static Document readXMLFile() {
-
-		// Does the file exist?
-		if (! getSettingsFileName().exists()) {
-			return null;
-		}
-
-		// Read and parse the XML settings file
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
-		Document doc = null;
-		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			doc = dBuilder.parse(getSettingsFileName());
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException p) {
-			p.printStackTrace();
-		} catch (IOException i) {
-			i.printStackTrace();
-		}
-		doc.getDocumentElement().normalize();
-		
-		// Return the document
-		return doc;
-	}
-	
 	/**
 	 * Get the version of the settings XML file. It parses the file first.
 	 * @return the settings file number or -1 if the file does not exist.
 	 */
-	private static int getSettingsFileVersion() {
+	private int getSettingsFileVersion() {
 		Document doc = readXMLFile();
 		if (doc == null) {
 			return -1;
@@ -381,15 +428,156 @@ public class AppSettingsManager {
 			return -1;
 		}
 		return version;
-	}	
+	}
 
 	/**
 	 * Get the version of the settings XML file
 	 * @param doc Parsed XML document
 	 */
-	private static int getSettingsFileVersion(Document doc) {
+	private int getSettingsFileVersion(Document doc) {
 		Element root = doc.getDocumentElement();
 		return Integer.parseInt(root.getAttribute("version"));	
+	}
+
+	/**
+	 * Initialize application settings with default values.
+	 * @return ArrayList of AppSettings containing one element.
+	 */
+	private void initializeSettings() {
+		listAppSettings = new ArrayList<AppSettings>();
+		listAppSettings.add(new AppSettings());
+		currentSettingsIndex = 0;
+		fileVersion = -1;
+		isFileRead = false;
+		isFileCurrent = false;
+	}
+
+	/**
+	 * Read the settings from disk. 
+	 * @return true if the settings could be read successfully, false otherwise.
+	 */
+	private boolean readSettingsFromFile() {
+	
+		// Make sure the Properties file exists
+		if (!settingsFileExists()) {
+			fileExists = false;
+			isFileRead = false;
+			isFileCurrent = false;
+			fileVersion = -1;
+			errorMessage = "Settings file does not exist.";
+			return false;
+		}
+	
+		// Instantiate new Settings
+		ArrayList<AppSettings> loadedAppSettings = new ArrayList<AppSettings>();
+	
+		// Read and parse the XML settings file
+		Document doc = readXMLFile();
+		if (doc == null) {
+			// Error message already set in readXMLFile()
+			return false;
+		}
+		
+		// Get the root node
+		Element rootNode = doc.getDocumentElement();
+		
+		// Store the file version
+		try {
+			fileVersion = Integer.parseInt(rootNode.getAttribute("version")); 
+		} catch (NumberFormatException n) {
+			fileVersion = -1;
+		}
+
+		// Check that the file version is current
+		if (fileVersion != VersionInfo.propertiesVersion) {
+			errorMessage = "The settings file is obsolete.";
+			return false;
+		}
+
+		// Now process all children
+		NodeList openBISURLNodes = rootNode.getChildNodes();
+		for (int i = 0; i < openBISURLNodes.getLength(); i ++) {
+			Node openBISURL = openBISURLNodes.item(i);
+			
+			// Create a new AppSettings object
+			AppSettings setting = new AppSettings();
+			
+			// Get and add the attributes
+			NamedNodeMap attrs = openBISURL.getAttributes();
+			
+			for (int j = 0; j < attrs.getLength(); j++) {
+				
+				// Get attribute name and value
+				String name = attrs.item(j).getNodeName();
+				String value = attrs.item(j).getNodeValue();
+				
+				// Store it
+				setting.setSettingValue(name, value);
+			}
+	
+			// Now add the AppSettings object
+			loadedAppSettings.add(setting);
+		}
+		
+		// Now store the loaded settings
+		listAppSettings = loadedAppSettings;
+		currentSettingsIndex = 0;
+		isFileRead = true;
+		isFileCurrent = true;
+
+		// Reset error message
+		errorMessage = "";
+
+		// Return success
+		return true;
+	}
+
+	/**
+	 * Read and parse the settings XML file and returns the Document
+	 * @return parsed Document
+	 */
+	private Document readXMLFile() {
+
+		// Does the file exist?
+		if (! getSettingsFileName().exists()) {
+			errorMessage = "Settings file does not exist.";
+			return null;
+		}
+
+		// Read and parse the XML settings file
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+		Document doc = null;
+		try {
+			dBuilder = dbFactory.newDocumentBuilder();
+			doc = dBuilder.parse(getSettingsFileName());
+		} catch (ParserConfigurationException e) {
+			errorMessage = "Error parsing the settings file.";
+			return null;
+		} catch (SAXException p) {
+			errorMessage = "Error parsing the settings file.";
+			return null;
+		} catch (IOException i) {
+			errorMessage = "Error reading the settings file.";
+			return null;
+		}
+		doc.getDocumentElement().normalize();
+		
+		// Return the document
+		return doc;
+	}
+	
+	
+
+	// Public interface
+	
+	/**
+	 * Check whether the properties file already exists
+	 * @return 	true if the properties file already exists, false
+	 * otherwise.
+	 */	
+	private boolean settingsFileExists() {
+		return getSettingsFileName().exists();
 	}
 }
 
