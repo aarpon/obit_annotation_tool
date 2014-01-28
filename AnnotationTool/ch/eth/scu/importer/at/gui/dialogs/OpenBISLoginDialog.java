@@ -1,12 +1,16 @@
 package ch.eth.scu.importer.at.gui.dialogs;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
+import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -27,6 +31,9 @@ public class OpenBISLoginDialog extends JDialog {
 	 */
 	public OpenBISLoginDialog() {
 		
+		// Use a variable to keep track of where we are in the layout
+		int gridY = 0;
+		
 		// Make the dialog modal and not resizable
 		setModal(true);
 		setResizable(false);
@@ -35,20 +42,52 @@ public class OpenBISLoginDialog extends JDialog {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);
 		
+		// Add a menu
+		JLabel serverMenu = new JLabel("Pick server");
+		serverMenu.setOpaque(true);
+		serverMenu.setBackground(Color.white);
+		serverMenu.setHorizontalAlignment(SwingConstants.LEFT);
+		serverMenu.setBorder(new EmptyBorder(3, 3, 0, 0));
+		serverMenu.addMouseListener((new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				System.out.println("Clicked!");	
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) { }
+
+			@Override
+			public void mouseExited(MouseEvent arg0) { }
+
+			@Override
+			public void mousePressed(MouseEvent arg0) { }
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) { }
+        }));
+		GridBagConstraints serverMenuCnstr = new GridBagConstraints();
+		serverMenuCnstr.gridx = 0;
+		serverMenuCnstr.gridy = gridY++;
+		serverMenuCnstr.insets = new Insets(0, 0, 0, 0);
+		serverMenuCnstr.fill = GridBagConstraints.HORIZONTAL;
+		add(serverMenu, serverMenuCnstr);
+
 		// Add the SCU OpenBIS logo at the top
 		JLabel labelLogo = new JLabel(new ImageIcon(
 				this.getClass().getResource("logo.png")));
 		GridBagConstraints logoConstraints = new GridBagConstraints();
 		logoConstraints.anchor = GridBagConstraints.NORTHWEST;
 		logoConstraints.gridx = 0;
-		logoConstraints.gridy = 0;
+		logoConstraints.gridy = gridY++;
 		add(labelLogo, logoConstraints);
 		
 		// Add a label for the user name
 		JLabel labelUsername = new JLabel("User name");
 		GridBagConstraints usernameCnstr = new GridBagConstraints();
 		usernameCnstr.gridx = 0;
-		usernameCnstr.gridy = 1;
+		usernameCnstr.gridy = gridY++;
 		usernameCnstr.insets = new Insets(10, 0, 0, 0);	
 		add(labelUsername, usernameCnstr);
 
@@ -58,7 +97,7 @@ public class OpenBISLoginDialog extends JDialog {
 		GridBagConstraints txtUsernameCnstr = new GridBagConstraints();
 		txtUsernameCnstr.fill = GridBagConstraints.HORIZONTAL;
 		txtUsernameCnstr.gridx = 0;
-		txtUsernameCnstr.gridy = 2;
+		txtUsernameCnstr.gridy = gridY++;
 		txtUsernameCnstr.ipady = 10;
 		txtUsernameCnstr.insets = new Insets(5, 30, 0, 30);	
 		add(txtUsername, txtUsernameCnstr);
@@ -67,7 +106,7 @@ public class OpenBISLoginDialog extends JDialog {
 		JLabel labelPassword = new JLabel("Password");
 		GridBagConstraints passwordCnstr = new GridBagConstraints();
 		passwordCnstr.gridx = 0;
-		passwordCnstr.gridy = 3;
+		passwordCnstr.gridy = gridY++;
 		passwordCnstr.insets = new Insets(10, 0, 0, 0);	
 		add(labelPassword, passwordCnstr);
 		
@@ -77,7 +116,7 @@ public class OpenBISLoginDialog extends JDialog {
 		GridBagConstraints pwdPasswordCnstr = new GridBagConstraints();
 		pwdPasswordCnstr.fill = GridBagConstraints.HORIZONTAL;
 		pwdPasswordCnstr.gridx = 0;
-		pwdPasswordCnstr.gridy = 4;
+		pwdPasswordCnstr.gridy = gridY++;
 		pwdPasswordCnstr.ipady = 10;
 		pwdPasswordCnstr.insets = new Insets(5, 30, 0, 30);	
 		add(pwdPassword, pwdPasswordCnstr);
@@ -87,7 +126,7 @@ public class OpenBISLoginDialog extends JDialog {
 		GridBagConstraints loginButtonCnstr = new GridBagConstraints();
 		loginButtonCnstr.fill = GridBagConstraints.HORIZONTAL;
 		loginButtonCnstr.gridx = 0;
-		loginButtonCnstr.gridy = 5;
+		loginButtonCnstr.gridy = gridY++;
 		loginButtonCnstr.ipady = 15;
 		loginButtonCnstr.insets = new Insets(10, 3, 3, 3);
 		loginButton.addActionListener(new ActionListener() {
