@@ -237,6 +237,7 @@ public class OpenBISViewer extends Observable
         OpenBISLoginDialog loginDialog = new OpenBISLoginDialog();
 		userName = loginDialog.getUsername();
 		userPassword = loginDialog.getPassword();
+		openBISURL = loginDialog.getOpenBISServer();
 		return (! userName.isEmpty());
 	}
 	

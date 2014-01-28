@@ -3,6 +3,8 @@ package ch.eth.scu.importer.at.gui.dialogs;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
+
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -13,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 /**
  * openBIS login dialog
@@ -25,11 +28,19 @@ public class OpenBISLoginDialog extends JDialog {
 
 	private JTextField txtUsername;
 	private JPasswordField pwdPassword;
+	
+	private String openBISServerURL;
+	private ArrayList<String> servers;
 
 	/**
 	 * Constructor
 	 */
 	public OpenBISLoginDialog() {
+		
+		// Get the list of configured servers and set the default one
+		AppSettingsManager manager = new AppSettingsManager();
+		servers = manager.getAllServers();
+		openBISServerURL = servers.get(0);
 		
 		// Use a variable to keep track of where we are in the layout
 		int gridY = 0;
@@ -42,38 +53,49 @@ public class OpenBISLoginDialog extends JDialog {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);
 		
-		// Add a menu
-		JLabel serverMenu = new JLabel("Pick server");
-		serverMenu.setOpaque(true);
-		serverMenu.setBackground(Color.white);
-		serverMenu.setHorizontalAlignment(SwingConstants.LEFT);
-		serverMenu.setBorder(new EmptyBorder(3, 3, 0, 0));
-		serverMenu.addMouseListener((new MouseListener() {
+		if (servers.size() > 1) {
+			
+			// Add a menu
+			JLabel serverMenu = new JLabel("...");
+			serverMenu.setOpaque(true);
+			serverMenu.setBackground(Color.white);
+			serverMenu.setHorizontalAlignment(SwingConstants.LEFT);
+			serverMenu.setBorder(new EmptyBorder(3, 3, 0, 0));
+			serverMenu.addMouseListener((new MouseListener() {
 
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("Clicked!");	
-			}
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					// Modal dialog
+					OpenBISPickServerDialog dialog =
+							new OpenBISPickServerDialog(servers,
+									openBISServerURL);
+					openBISServerURL = dialog.getOpenBISServer();
+				}
 
-			@Override
-			public void mouseEntered(MouseEvent arg0) { }
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+				}
 
-			@Override
-			public void mouseExited(MouseEvent arg0) { }
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+				}
 
-			@Override
-			public void mousePressed(MouseEvent arg0) { }
+				@Override
+				public void mousePressed(MouseEvent arg0) {
+				}
 
-			@Override
-			public void mouseReleased(MouseEvent arg0) { }
-        }));
-		GridBagConstraints serverMenuCnstr = new GridBagConstraints();
-		serverMenuCnstr.gridx = 0;
-		serverMenuCnstr.gridy = gridY++;
-		serverMenuCnstr.insets = new Insets(0, 0, 0, 0);
-		serverMenuCnstr.fill = GridBagConstraints.HORIZONTAL;
-		add(serverMenu, serverMenuCnstr);
-
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+				}
+			}));
+			GridBagConstraints serverMenuCnstr = new GridBagConstraints();
+			serverMenuCnstr.gridx = 0;
+			serverMenuCnstr.gridy = gridY++;
+			serverMenuCnstr.insets = new Insets(0, 0, 0, 0);
+			serverMenuCnstr.fill = GridBagConstraints.HORIZONTAL;
+			add(serverMenu, serverMenuCnstr);
+		}
+		
 		// Add the SCU OpenBIS logo at the top
 		JLabel labelLogo = new JLabel(new ImageIcon(
 				this.getClass().getResource("logo.png")));
@@ -184,4 +206,12 @@ public class OpenBISLoginDialog extends JDialog {
 		return (new String(pwdPassword.getPassword()));
 	}
 	
+	/**
+	 * Get the entered password
+	 * @return password entered in the dialog 
+	 */
+	public String getOpenBISServer() {
+		return openBISServerURL;
+	}
+
 }
