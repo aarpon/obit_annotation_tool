@@ -6,9 +6,12 @@ import java.util.Map;
 
 /**
  * Class to store Annotation Tool settings for one specific openBIS server
+ * 
+ * This class is only visible within its package.
+ * 
  * @author Aaron Ponti
  */
-public class AppSettings {
+class AppSettings {
 
 	// String-string map of setting name - values
 	protected Map<String, String> settings = new HashMap<String, String>();
@@ -155,5 +158,30 @@ public class AppSettings {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Returns true if a certain setting can only occur once in a collection of settings
+	 * @param name Name of the setting
+	 * @return true if the setting must be unique, false otherwise
+	 * 
+	 * @see AppSettingsManager 
+	 */
+	static public boolean mustBeUnique(String name) {
+		
+		if (name.equals("OpenBISURL")) {
+			return true;
+		} else if (name.equals("AcceptSelfSignedCertificates")) {
+			return false;
+		} else if (name.equals("AcquisitionStation")) {
+			return false;
+		} else if (name.equals("UserDataDir")) {
+			return true;			
+		} else if (name.equals("DatamoverIncomingDir")) {
+			return true;
+		} else {
+			throw (new IllegalArgumentException());
+		}
+		
 	}
 }

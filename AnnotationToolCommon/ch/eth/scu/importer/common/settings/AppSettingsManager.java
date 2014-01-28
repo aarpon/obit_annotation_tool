@@ -163,17 +163,6 @@ public class AppSettingsManager {
     }
 	
 	/**
-	 * Resets settings.
-	 * 
-	 * @return true if the settings were loaded correctly, false otherwise.
-	 */
-	public void reset() {
-	
-		initialize();
-
-	}
-
-	/**
 	 * Return all configured openBIS servers
 	 * @return
 	 */
@@ -230,6 +219,30 @@ public class AppSettingsManager {
 	 */
 	public void setSettingValue(String name, String value) {
 		listAppSettings.get(currentSettingsIndex).setSettingValue(name, value);
+	}
+
+	/**
+	 * Checks whether a setting with the specified name must be unique
+	 * @param name name of the setting
+	 * @return true if the setting must be unique, false otherwise.
+	 */
+	public boolean settingMustBeUnique(String name) {
+		return AppSettings.mustBeUnique(name);
+	}
+
+	/**
+	 * Checks whether a combination setting name - value already exists
+	 * @param name name of the setting
+	 * @param value value of the setting
+	 * @return true if the setting combination already exists, false othewise
+	 */
+	public boolean doesSettingExist(String name, String value) {
+		for (AppSettings setting: listAppSettings) {
+			if (setting.getSettingValue(name).equalsIgnoreCase(value)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

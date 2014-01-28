@@ -127,7 +127,8 @@ public class AnnotationToolAdminDialog extends JDialog {
                 String url = JOptionPane.showInputDialog(
                         "Edit openBIS URL:",
                         manager.getServer());
-                if (url == null || url.equals("")) {
+                if (url == null || url.equals("") ||
+                		url.equalsIgnoreCase(manager.getServer())) {
                     return;
                 }
                 // TODO Validate URL better
@@ -141,6 +142,15 @@ public class AnnotationToolAdminDialog extends JDialog {
                 	return;
                 }
                 
+                // Check that the URL is not already present
+                if (manager.doesSettingExist("OpenBISURL", url)) {
+					JOptionPane.showMessageDialog(null,
+						    "Sorry, this server already exists!",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+
                 // Update URL
                 manager.setServer(url);
 
@@ -163,7 +173,7 @@ public class AnnotationToolAdminDialog extends JDialog {
         addOpenBISURLButton = new JButton(Character.toString('\u002B'));
         addOpenBISURLButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Ask the user to specify a new openBIS URL
+            	// Ask the user to specify a new openBIS URL
                 String url = JOptionPane.showInputDialog(
                         "Please enter full openBIS URL:");
                 if (url == null || url.equals("")) {
@@ -180,6 +190,15 @@ public class AnnotationToolAdminDialog extends JDialog {
                 	return;
                 }
                 
+                // Check that the URL is not already present
+                if (manager.doesSettingExist("OpenBISURL", url)) {
+					JOptionPane.showMessageDialog(null,
+						    "Sorry, this server already exists!",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+
                 // Add a new server to the list of settings
                 manager.add(url);
                 
@@ -321,8 +340,23 @@ public class AnnotationToolAdminDialog extends JDialog {
 		acceptSelfSignedCertsList.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
         		if (e.getActionCommand().equals("comboBoxChanged")) {
-        			manager.setSettingValue("AcceptSelfSignedCertificates",
-        					(String) acceptSelfSignedCertsList.getSelectedItem());
+        			String value = (String) acceptSelfSignedCertsList.getSelectedItem();
+        			if (manager.getSettingValue("AcceptSelfSignedCertificates").
+        					equals(value)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("AcceptSelfSignedCertificates")) {
+        				if (manager.doesSettingExist(
+        						"AcceptSelfSignedCertificates", value)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"You cannot duplicate this setting value!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
+        			// We can store it
+        			manager.setSettingValue("AcceptSelfSignedCertificates", value);
         		}
             }
         });
@@ -375,8 +409,24 @@ public class AnnotationToolAdminDialog extends JDialog {
 		acqStationsList.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
         		if (e.getActionCommand().equals("comboBoxChanged")) {
-        			manager.setSettingValue("AcquisitionStation", 
-        					(String) acqStationsList.getSelectedItem());
+        			String value = (String) acqStationsList.getSelectedItem();
+        			if (manager.getSettingValue("AcquisitionStation").
+        					equals(value)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("AcquisitionStation")) {
+        				if (manager.doesSettingExist(
+        						"AcquisitionStation", value)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"The acquisition station must univocal" +
+                							" among servers!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
+        			// We can store it
+        			manager.setSettingValue("AcquisitionStation", value);
         		}
             }
         });
@@ -418,10 +468,31 @@ public class AnnotationToolAdminDialog extends JDialog {
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
 					}
+            		if (! (new File(selUserDataDir)).exists() ) {
+            			JOptionPane.showMessageDialog(null, 
+    							"The selected directory does not exist!",
+    							"Error", JOptionPane.ERROR_MESSAGE);
+    					return;
+            		}
+            		if (manager.getSettingValue("UserDataDir").
+        					equals(selUserDataDir)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("UserDataDir")) {
+        				if (manager.doesSettingExist(
+        						"UserDataDir", selUserDataDir)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"The user directory must univocal" +
+        							" among servers!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
             		userdirButton.setText(selUserDataDir);
             		pack();
+            		manager.setSettingValue("UserDataDir", selUserDataDir);
             	}
-            	manager.setSettingValue("UserDataDir", selUserDataDir);
             }
         });		
 		constraints.gridx = 0;
@@ -449,7 +520,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		dirButton = new JButton(manager.getSettingValue("DatamoverIncomingDir"));
 		dirButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	String dir = pickDir("Set the datamover incoming directory");
+            	String dir = pickDir("Set the Datamover incoming directory");
             	String selIncomingDir = "";
             	if (!dir.equals("")) {
             		try {
@@ -462,10 +533,31 @@ public class AnnotationToolAdminDialog extends JDialog {
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
 					}
-            		dirButton.setText(selIncomingDir);
+            		if (! (new File(selIncomingDir)).exists() ) {
+            			JOptionPane.showMessageDialog(null, 
+    							"The selected directory does not exist!",
+    							"Error", JOptionPane.ERROR_MESSAGE);
+    					return;
+            		}
+            		if (manager.getSettingValue("DatamoverIncomingDir").
+        					equals(selIncomingDir)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("DatamoverIncomingDir")) {
+        				if (manager.doesSettingExist(
+        						"DatamoverIncomingDir", selIncomingDir)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"The Datamover incoming directory must " +
+        							"univocal among servers!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
+        			dirButton.setText(selIncomingDir);
             		pack();
+            		manager.setSettingValue("DatamoverIncomingDir", selIncomingDir);
             	}
-            	manager.setSettingValue("DatamoverIncomingDir", selIncomingDir);
             }
         });		
 		constraints.gridx = 0;
