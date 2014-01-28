@@ -26,7 +26,7 @@ import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
-import ch.eth.scu.importer.common.settings.AppSettingsManager;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
 /**
@@ -144,11 +144,12 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		setVisible(true);
 
 		// TEMP
-		AppSettingsManager manager = new AppSettingsManager();
-		ArrayList<String> settings = manager.getSettingsNames();
+		UserSettingsManager userManager = new UserSettingsManager();
+		userManager.load();
+		ArrayList<String> settings = userManager.getSettingsNames();
 		String out = "Current settings (DEBUG ONLY! REMOVE!): ";
 		for (String name : settings) {
-			out = out + name + ": " + manager.getSettingValue(name) + "; ";
+			out = out + name + ": " + userManager.getSettingValue(name) + "; ";
 		}
 		outputPane.log(out);		
 	}

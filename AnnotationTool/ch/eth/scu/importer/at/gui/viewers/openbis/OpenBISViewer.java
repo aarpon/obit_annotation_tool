@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -50,6 +49,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.eth.scu.importer.common.settings.AppSettingsManager;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.utils.QueryOS;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
@@ -106,8 +106,16 @@ public class OpenBISViewer extends Observable
 		panel = new JPanel();
 		
 		// Get the openBIS URL from the appProperties
-		AppSettingsManager manager = new AppSettingsManager();
-		
+		UserSettingsManager manager = new UserSettingsManager();
+		if (! manager.load()) {
+			JOptionPane.showMessageDialog(null,
+					"Could not read application settings!\n" +
+			"Please contact your administrator. The application\n" +
+			"will now exit!",
+			"Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
+
 		// Set the URL
 		this.openBISURL = manager.getSettingValue("OpenBISURL");
 		
@@ -262,6 +270,13 @@ public class OpenBISViewer extends Observable
 		if (isLoggedIn) {
 			return true;
 		}
+		
+		// Now save the user settings
+		AppSettingsManager manager = new AppSettingsManager();
+		UserSettingsManager userManager = new UserSettingsManager(
+				manager.getSettingsForServer(openBISURL));
+		userManager.save();
+		manager = null;
 
 		// Inform
 		outputPane.log("Logging in to openBIS...");
@@ -270,9 +285,8 @@ public class OpenBISViewer extends Observable
 		try {
 			
 			// Should we accept self-signed certificates?
-			AppSettingsManager manager = new AppSettingsManager();
 			String acceptSelfSignedCerts = 
-					manager.getSettingValue("AcceptSelfSignedCertificates");
+					userManager.getSettingValue("AcceptSelfSignedCertificates");
 
 			// Set the force-accept-ssl-certificate option if requested
 			// by the administrator

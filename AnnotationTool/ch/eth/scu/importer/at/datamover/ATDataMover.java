@@ -4,7 +4,7 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import ch.eth.scu.importer.common.settings.AppSettingsManager;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 
 import java.security.SecureRandom;
 import java.math.BigInteger;
@@ -33,8 +33,8 @@ public class ATDataMover {
 		random = new SecureRandom();
 
 		// Get the folder from the properties
-		AppSettingsManager manager = new AppSettingsManager();
-		if (! manager.isFileRead() || ! manager.isFileCurrent()) {
+		UserSettingsManager manager = new UserSettingsManager();
+		if (! manager.load()) {
 			JOptionPane.showMessageDialog(null,
 					"Could not read application settings!\n" +
 			"Please contact your administrator. The application\n" +

@@ -10,13 +10,14 @@ import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import ch.eth.scu.importer.at.datamover.ATDataMover;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
-import ch.eth.scu.importer.common.settings.AppSettingsManager;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 
 public class EditorContainer extends JPanel implements ActionListener {
 
@@ -105,7 +106,15 @@ public class EditorContainer extends JPanel implements ActionListener {
 			}
 
 			// Get the application properties
-			AppSettingsManager manager = new AppSettingsManager();
+			UserSettingsManager manager = new UserSettingsManager();
+			if (! manager.load()) {
+				JOptionPane.showMessageDialog(null,
+						"Could not read application settings!\n" +
+				"Please contact your administrator. The application\n" +
+				"will now exit!",
+				"Error", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
 			String outputDirectory = 
 					manager.getSettingValue("UserDataDir");
 

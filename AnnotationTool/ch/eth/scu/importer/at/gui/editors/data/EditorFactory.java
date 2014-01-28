@@ -1,9 +1,11 @@
 package ch.eth.scu.importer.at.gui.editors.data;
 
+import javax.swing.JOptionPane;
+
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.BDFACSDIVAFCSEditor;
-import ch.eth.scu.importer.common.settings.AppSettingsManager;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.importer.microscopy.gui.editors.data.MicroscopyEditor;
 
 /**
@@ -23,7 +25,15 @@ public class EditorFactory {
 			OpenBISViewer openBISViewer) {
 
 		// Get the application properties
-		AppSettingsManager manager = new AppSettingsManager();
+		UserSettingsManager manager = new UserSettingsManager();
+		if (! manager.load()) {
+			JOptionPane.showMessageDialog(null,
+					"Could not read application settings!\n" +
+			"Please contact your administrator. The application\n" +
+			"will now exit!",
+			"Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 
 		// Declare an AbstractEditor
 		AbstractEditor metadataEditor = null;
