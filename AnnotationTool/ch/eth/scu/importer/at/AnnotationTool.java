@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.at.gui.AnnotationToolWindow;
 import ch.eth.scu.importer.common.settings.AppSettingsManager;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 
 /**
  * AnnotationTool is an application to drive the import of data from the 
@@ -61,7 +62,21 @@ public class AnnotationTool {
 				    "First-time setup",
 				    JOptionPane.WARNING_MESSAGE);
 			System.exit(0);
-		}		
+		}
+		
+		// Create user setting file
+		UserSettingsManager userManager = new UserSettingsManager(
+				manager.getSettingsForServer(manager.getServer()));
+		if (!userManager.save()) {
+			JOptionPane.showMessageDialog(null,
+				    "The user settings file could not be created.\n" +
+			"Please ask an administrator to check file system permissions.\n\n"
+			+ "The application will close now.",
+				    "First-time setup",
+				    JOptionPane.WARNING_MESSAGE);
+			System.exit(0);
+		}
+
 		
 		// Open the main window
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
