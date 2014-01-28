@@ -143,6 +143,14 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Make window visible
 		setVisible(true);
 
+		// TEMP
+		AppSettingsManager manager = new AppSettingsManager();
+		ArrayList<String> settings = manager.getSettingsNames();
+		String out = "Current settings (DEBUG ONLY! REMOVE!): ";
+		for (String name : settings) {
+			out = out + name + ": " + manager.getSettingValue(name) + "; ";
+		}
+		outputPane.log(out);		
 	}
 
     /**

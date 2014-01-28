@@ -53,10 +53,10 @@ public class AnnotationTool {
 			System.exit(0);
 		}		
 
-		if (!manager.allSet()) {
+		if (!manager.isFileValid()) {
 			JOptionPane.showMessageDialog(null,
-				    "The application has not ben configured yet.\n" +
-			"Please ask an administrator to do it for you.\n\n"
+				    "The application settings are not valid.\n" +
+			"Please ask an administrator to reconfigure the application.\n\n"
 			+ "The application will close now.",
 				    "First-time setup",
 				    JOptionPane.WARNING_MESSAGE);

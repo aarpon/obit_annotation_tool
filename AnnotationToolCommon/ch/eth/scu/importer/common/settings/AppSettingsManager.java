@@ -39,6 +39,7 @@ public class AppSettingsManager {
 	protected String errorMessage = "";
 	private boolean isFileRead = false;
 	private boolean isFileCurrent = false;
+	private boolean isFileValid = false;
 	private boolean fileExists = false;
 	private int fileVersion = -1;
 
@@ -51,7 +52,7 @@ public class AppSettingsManager {
 		
 		// Try to load, otherwise initialize
 		if (!load()) {
-			initializeSettings();
+			initialize();
 		}
 
 	}
@@ -63,6 +64,14 @@ public class AppSettingsManager {
 	 */
 	public boolean fileExists() {
 		return fileExists;
+	}
+
+	/**
+	 * Return true if the settings file is valid
+	 * @return true if the settings file is valid
+	 */
+	public boolean isFileValid() {
+		return isFileValid;
 	}
 
 	/**
@@ -152,18 +161,6 @@ public class AppSettingsManager {
 		currentSettingsIndex = index - 1;
 
     }
-
-	/**
-	 * Try reading settings from file. If loading fails, current settings are 
-	 * left untouched.
-	 * 
-	 * @return true if the settings were loaded correctly, false otherwise.
-	 */
-	public boolean load() {
-	
-		return readSettingsFromFile();
-
-	}
 	
 	/**
 	 * Resets settings.
@@ -172,19 +169,7 @@ public class AppSettingsManager {
 	 */
 	public void reset() {
 	
-		initializeSettings();
-
-	}
-
-	/**
-	 * Try writing settings to file. If writing fails, use getLastErrorMessage()
-	 * to get the details.
-	 * 
-	 * @return true if the settings were saved correctly, false otherwise.
-	 */
-	public boolean save() {
-	
-		return writeSettingsToFile();
+		initialize();
 
 	}
 
@@ -306,13 +291,113 @@ public class AppSettingsManager {
 	
 	
 	/**
-	 * Write the properties to disk 
-	 * @return true if the properties were saved successfully, false otherwise
+	 * Try reading settings from file. If loading fails, current settings are 
+	 * left untouched.
+	 * 
+	 * @return true if the settings were loaded correctly, false otherwise.
+	 */
+	public boolean load() {
+	
+		// Make sure the Properties file exists
+		fileExists = settingsFileExists();
+		if (!fileExists) {
+			isFileRead = false;
+			isFileCurrent = false;
+			isFileValid = false;
+			fileVersion = -1;
+			errorMessage = "Settings file does not exist.";
+			return false;
+		}
+	
+	
+		// Instantiate new Settings
+		ArrayList<AppSettings> loadedAppSettings = new ArrayList<AppSettings>();
+	
+		// Read and parse the XML settings file
+		Document doc = readXMLFile();
+		if (doc == null) {
+			// Error message already set in readXMLFile()
+			return false;
+		}
+		
+		// Get the root node
+		Element rootNode = doc.getDocumentElement();
+		
+		// Store the file version
+		try {
+			fileVersion = Integer.parseInt(rootNode.getAttribute("version")); 
+		} catch (NumberFormatException n) {
+			fileVersion = -1;
+		}
+	
+		// Now process all children
+		NodeList openBISURLNodes = rootNode.getChildNodes();
+		for (int i = 0; i < openBISURLNodes.getLength(); i ++) {
+			Node openBISURL = openBISURLNodes.item(i);
+			
+			// Create a new AppSettings object
+			AppSettings setting = new AppSettings();
+			
+			// Get and add the attributes
+			NamedNodeMap attrs = openBISURL.getAttributes();
+			
+			for (int j = 0; j < attrs.getLength(); j++) {
+				
+				// Get attribute name and value
+				String name = attrs.item(j).getNodeName();
+				String value = attrs.item(j).getNodeValue();
+				
+				// Store it
+				setting.setSettingValue(name, value);
+			}
+	
+			// Now add the AppSettings object
+			loadedAppSettings.add(setting);
+		}
+		
+		// Now store the loaded settings
+		listAppSettings = loadedAppSettings;
+		currentSettingsIndex = 0;
+		isFileRead = true;
+	
+		// Check that the file version is current
+		if (fileVersion != VersionInfo.propertiesVersion) {
+			errorMessage = "The settings file is obsolete.";
+			isFileCurrent = false;
+			return false;
+		}
+		
+		// Set file to be current
+		isFileCurrent = true;
+		
+		// Run a validation
+		if (! allSet()) {
+			errorMessage = "File did not pass validation.";
+			isFileValid = false;
+			return false;
+		}
+
+		// Set the file to be valid
+		isFileValid = true;
+
+		// Reset error message
+		errorMessage = "";
+	
+		// Return success
+		return true;
+	}
+
+
+	/**
+	 * Try writing settings to file. If writing fails, use getLastErrorMessage()
+	 * to get the details.
 	 * 
 	 * This function might require write access to a restricted system
 	 * folder. It should be used only in code run with admin privileges.
+	 *  
+	 * @return true if the properties were saved successfully, false otherwise
 	 */
-	private boolean writeSettingsToFile() {
+	public boolean save() {
 
 		DocumentBuilder builder;
 		Document document = null;
@@ -421,6 +506,16 @@ public class AppSettingsManager {
 	}
 
 	/**
+	 * Check whether the properties file already exists
+	 * @return 	true if the properties file already exists, false
+	 * otherwise.
+	 */	
+	static public boolean settingsFileExists() {
+		return getSettingsFileName().exists();
+	}
+
+
+	/**
 	 * Create the application data directory
 	 * @return 	true if the application data directory could be created
 	 * successfully, false otherwise.
@@ -465,7 +560,7 @@ public class AppSettingsManager {
 		// Append the sub-path common to all platform
 
         return new File(applicationDataDir +
-                File.separator + "oBIT" + File.separator + "AnnotationTool");
+                File.separator + "obit" + File.separator + "AnnotationTool");
 	}
 	
 	/**
@@ -481,94 +576,10 @@ public class AppSettingsManager {
 	 * Initialize application settings with default values.
 	 * @return ArrayList of AppSettings containing one element.
 	 */
-	private void initializeSettings() {
+	private void initialize() {
 		listAppSettings = new ArrayList<AppSettings>();
 		listAppSettings.add(new AppSettings());
 		currentSettingsIndex = 0;
-	}
-
-	/**
-	 * Read the settings from disk. 
-	 * @return true if the settings could be read successfully, false otherwise.
-	 */
-	private boolean readSettingsFromFile() {
-	
-		// Make sure the Properties file exists
-		fileExists = settingsFileExists();
-		if (!fileExists) {
-			isFileRead = false;
-			isFileCurrent = false;
-			fileVersion = -1;
-			errorMessage = "Settings file does not exist.";
-			return false;
-		}
-	
-
-		// Instantiate new Settings
-		ArrayList<AppSettings> loadedAppSettings = new ArrayList<AppSettings>();
-	
-		// Read and parse the XML settings file
-		Document doc = readXMLFile();
-		if (doc == null) {
-			// Error message already set in readXMLFile()
-			return false;
-		}
-		
-		// Get the root node
-		Element rootNode = doc.getDocumentElement();
-		
-		// Store the file version
-		try {
-			fileVersion = Integer.parseInt(rootNode.getAttribute("version")); 
-		} catch (NumberFormatException n) {
-			fileVersion = -1;
-		}
-
-		// Now process all children
-		NodeList openBISURLNodes = rootNode.getChildNodes();
-		for (int i = 0; i < openBISURLNodes.getLength(); i ++) {
-			Node openBISURL = openBISURLNodes.item(i);
-			
-			// Create a new AppSettings object
-			AppSettings setting = new AppSettings();
-			
-			// Get and add the attributes
-			NamedNodeMap attrs = openBISURL.getAttributes();
-			
-			for (int j = 0; j < attrs.getLength(); j++) {
-				
-				// Get attribute name and value
-				String name = attrs.item(j).getNodeName();
-				String value = attrs.item(j).getNodeValue();
-				
-				// Store it
-				setting.setSettingValue(name, value);
-			}
-	
-			// Now add the AppSettings object
-			loadedAppSettings.add(setting);
-		}
-		
-		// Now store the loaded settings
-		listAppSettings = loadedAppSettings;
-		currentSettingsIndex = 0;
-		isFileRead = true;
-
-		// Check that the file version is current
-		if (fileVersion != VersionInfo.propertiesVersion) {
-			errorMessage = "The settings file is obsolete.";
-			isFileCurrent = false;
-			return false;
-		}
-		
-		// Set file to be current
-		isFileCurrent = true;
-		
-		// Reset error message
-		errorMessage = "";
-
-		// Return success
-		return true;
 	}
 
 	/**
@@ -604,15 +615,6 @@ public class AppSettingsManager {
 		
 		// Return the document
 		return doc;
-	}
-	
-	/**
-	 * Check whether the properties file already exists
-	 * @return 	true if the properties file already exists, false
-	 * otherwise.
-	 */	
-	static public boolean settingsFileExists() {
-		return getSettingsFileName().exists();
 	}
 }
 
