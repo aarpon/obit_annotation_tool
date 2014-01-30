@@ -519,6 +519,15 @@ public class AppSettingsManager {
 	}
 
 	/**
+	 * Returns the description for the specified acquisition station
+	 * @param name Name of the acquisition station
+	 * @return description of acquisition station
+	 */
+	public String getAcqStationDescription(String name) {
+		return AppSettings.getAcqStationDescription(name);
+	}
+	
+	/**
 	 * Check whether the properties file already exists
 	 * @return 	true if the properties file already exists, false
 	 * otherwise.

@@ -35,10 +35,9 @@ public class ViewerFactory {
 		
 		// Return the viewer that fits the "AcquisitionStation"
 		String acqStation = manager.getSettingValue("AcquisitionStation");	
-		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
-				acqStation.equals("BD FACSAria III cell sorter")) {
+		if (acqStation.equals("BD Biosciences Cell Analyzers and Sorters")) {
 			metadataViewer = new BDFACSDIVAFCSViewer();
-		} else if (acqStation.equals("Generic light microscope")) {
+		} else if (acqStation.equals("Generic light microscopes")) {
 			metadataViewer = new MicroscopyViewer();
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");

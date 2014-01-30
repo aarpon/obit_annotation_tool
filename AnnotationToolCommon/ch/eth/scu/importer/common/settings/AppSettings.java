@@ -101,9 +101,8 @@ class AppSettings {
 			options.add("no");
 			options.add("yes");
 		} else if (name.equals("AcquisitionStation")) {
-			options.add("BD LSRFortessa cell analyzer");
-			options.add("BD FACSAria III cell sorter");
-			options.add("Generic light microscope");
+			options.add("BD Biosciences Cell Analyzers and Sorters");
+			options.add("Generic light microscopes");
 		} else if (name.equals("UserDataDir")) {
 			options.add("");			
 		} else if (name.equals("DatamoverIncomingDir")) {
@@ -114,7 +113,24 @@ class AppSettings {
 		
 		return options;
 	}
-	
+
+	/**
+	 * Returns the description for the specified acquisition station
+	 * @param name Name of the acquisition station
+	 * @return description of acquisition station
+	 */
+	static public String getAcqStationDescription(String name) {
+		
+		if (name.equals("BD Biosciences Cell Analyzers and Sorters")) {
+			return "BD LSRFortessa and FACSAria III "
+					+ "(FCS 3.0/3.1 exports from BD FACSDiva™ Software 6/7)";
+		} else if (name.equals("Generic light microscopes")) {
+			return "Generic light microscopes (LOCI bio-formats compatible)";
+		} else {
+			throw (new IllegalArgumentException("Unknown acquisition station."));
+		}
+	}
+
 	/**
 	 * Return default option for a given setting 
 	 * @return name String with the default value for a given setting name

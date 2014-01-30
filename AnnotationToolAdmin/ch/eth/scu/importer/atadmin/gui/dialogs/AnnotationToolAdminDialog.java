@@ -26,13 +26,16 @@ public class AnnotationToolAdminDialog extends JDialog {
 	/* Private instance variables */
 	private static final long serialVersionUID = 1L;
 
+	protected String arrow; // String decorator
+	protected String info; // String decorator
+
 	protected JLabel urlLabel;
+	protected JLabel acqStationDescription;
 	protected JButton editOpenBISURLButton;
 	protected JButton addOpenBISURLButton;
     protected JButton remOpenBISURLButton;
     protected JButton lowerOpenBISURLButton;
     protected JButton higherOpenBISURLButton;   	
-	protected JTextField openBISURLInput;
 	protected JButton dirButton;
 	protected JButton userdirButton;
 	protected JButton saveButton;
@@ -48,6 +51,11 @@ public class AnnotationToolAdminDialog extends JDialog {
 	 */
 	public AnnotationToolAdminDialog() {
 
+		// Some text decorators
+		arrow = Character.toString('\u25C0') +
+				Character.toString('\u25B6') + " ";
+		info = Character.toString('\u24BE') + " ";
+		
 		// Set the dialog title
 		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" +
 		VersionInfo.version + " " + VersionInfo.status);
@@ -69,7 +77,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		// Add a label for the selection of the openBIS URL
-		urlLabel = new JLabel("Set the openBIS URL");
+		urlLabel = new JLabel(arrow + "Set the openBIS URL");
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridwidth = 20;
@@ -296,8 +304,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 	
 		// Add a label for the options of accepting self-signed
 		// certificates
-		JLabel certLabel = new JLabel("Accept self-signed SSL certificates "
-				+ "when logging in to openBIS");
+		JLabel certLabel = new JLabel(arrow + "Accept self-signed SSL "
+				+ "certificates when logging in to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
 		constraints.gridwidth = 20;
@@ -369,7 +377,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(acceptSelfSignedCertsList, constraints);
 
 		// Add a label for the selection of the acquisition machine
-		JLabel acqLabel = new JLabel("Select the acquisition station or type");
+		JLabel acqLabel = new JLabel(arrow + 
+				"Select the acquisition station or type");
 		constraints.gridx = 0;
 		constraints.gridy = 4;
 		constraints.gridwidth = 20;
@@ -400,6 +409,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 					manager.defaultValueForSetting("AcquisitionStation") +
 					".");
 			index = 0;
+			// Restore default
+			manager.setSettingValue("AcquisitionStation", 
+					manager.defaultValueForSetting("AcquisitionStation"));
 		}
 		acqStationsList = new JComboBox<String>();
         for (String currAcqStation : acqStations) {
@@ -427,6 +439,11 @@ public class AnnotationToolAdminDialog extends JDialog {
         			}
         			// We can store it
         			manager.setSettingValue("AcquisitionStation", value);
+        			
+        			// Update the description as well
+        			acqStationDescription.setText(info + 
+        					manager.getAcqStationDescription(
+        							manager.getSettingValue("AcquisitionStation")));
         		}
             }
         });
@@ -439,10 +456,22 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(acqStationsList, constraints);
 
-		// Add a label for the user directory
-		JLabel userdirLabel = new JLabel("Set user data directory");
+		acqStationDescription = new JLabel(info +
+				manager.getAcqStationDescription(
+						manager.getSettingValue("AcquisitionStation")));
 		constraints.gridx = 0;
 		constraints.gridy = 6;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(acqStationDescription, constraints);
+		
+		// Add a label for the user directory
+		JLabel userdirLabel = new JLabel(arrow + "Set user data directory");
+		constraints.gridx = 0;
+		constraints.gridy = 7;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -496,7 +525,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });		
 		constraints.gridx = 0;
-		constraints.gridy = 7;
+		constraints.gridy = 8;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -505,9 +534,10 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(userdirButton, constraints);
 
 		// Add a label for the directory
-		JLabel dirLabel = new JLabel("Set Datamover incoming directory");
+		JLabel dirLabel = new JLabel(arrow + 
+				"Set Datamover incoming directory");
 		constraints.gridx = 0;
-		constraints.gridy = 8;
+		constraints.gridy = 9;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -561,7 +591,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });		
 		constraints.gridx = 0;
-		constraints.gridy = 9;
+		constraints.gridy = 10;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -571,10 +601,10 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Add a label for the info text
 		JLabel infoLabel = new JLabel(
-				"<html>It is <b>highly recommended</b> to set " +
+				"<html>" + info + "It is <u>highly recommended</u> to set " +
 		"both folders on the same file system.</html>");
 		constraints.gridx = 0;
-		constraints.gridy = 10;
+		constraints.gridy = 11;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -585,7 +615,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Some spacer
 		JLabel spacerLabel = new JLabel("");
 		constraints.gridx = 0;
-		constraints.gridy = 11;
+		constraints.gridy = 12;
 		constraints.gridwidth = 4;
 		constraints.gridheight = 1;		
 		constraints.weightx = 0.5;
@@ -631,7 +661,7 @@ public class AnnotationToolAdminDialog extends JDialog {
           }
         });
 		constraints.gridx = 16;
-		constraints.gridy = 11;
+		constraints.gridy = 12;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;		
 		constraints.weightx = 0.1;
@@ -649,7 +679,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		constraints.gridx = 18;
-		constraints.gridy = 11;
+		constraints.gridy = 12;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;			
 		constraints.weightx = 0.1;
@@ -664,7 +694,7 @@ public class AnnotationToolAdminDialog extends JDialog {
     	toggleDynamicWidgets();
     	
 		// Display the dialog
-		setMinimumSize(new Dimension(600, 220));
+		setMinimumSize(new Dimension(700, 220));
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -785,10 +815,12 @@ public class AnnotationToolAdminDialog extends JDialog {
         lowerOpenBISURLButton.setEnabled(state);
         
     	if (openBISURLList.getSelectedIndex() != 0) {
-    		urlLabel.setText("Set the openBIS URL (current default: " +
+    		urlLabel.setText(arrow + 
+    				"Set the openBIS URL (current default: " +
     	(String) openBISURLList.getItemAt(0) + ")");
     	} else {
-    		urlLabel.setText("Set the openBIS URL (this is current default)");
+    		urlLabel.setText(arrow + 
+    				"Set the openBIS URL (this is current default)");
     	}
     }
 }
