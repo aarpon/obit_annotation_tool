@@ -2,9 +2,10 @@ package ch.eth.scu.importer.processors.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
+import javax.swing.JOptionPane;
+
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 
 /**
  * Provides utility methods to handle path-related information for the
@@ -37,9 +38,17 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	public PathAwareDescriptor(File fullPath) {
 
 		// Store base and full path
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		UserSettingsManager manager = new UserSettingsManager();
+		if (! manager.load()) {
+			JOptionPane.showMessageDialog(null,
+					"Could not read application settings!\n" +
+			"Please contact your administrator. The application\n" +
+			"will now exit!",
+			"Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 		this.basePath = new File(
-				appProperties.getProperty("UserDataDir"));
+				manager.getSettingValue("UserDataDir"));
 		this.fullPath = fullPath;
 		
 		// Compute and store the relative path

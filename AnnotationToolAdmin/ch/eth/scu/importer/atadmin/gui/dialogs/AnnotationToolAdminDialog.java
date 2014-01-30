@@ -2,8 +2,7 @@ package ch.eth.scu.importer.atadmin.gui.dialogs;
 
 import javax.swing.*;
 
-import ch.eth.scu.importer.common.properties.AppProperties;
-import ch.eth.scu.importer.common.properties.DefaultProperties;
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
 import java.io.File;
@@ -17,7 +16,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Properties;
 
 /**
  * AnnotationTool administrator Dialog
@@ -28,20 +26,23 @@ public class AnnotationToolAdminDialog extends JDialog {
 	/* Private instance variables */
 	private static final long serialVersionUID = 1L;
 
-	protected String selAcqStation;
-	protected String selAcceptSelfSignedCerts;
-	protected String selIncomingDir;
-	protected String selUserDataDir;
-	protected String selOpenBISURL;
-
+	protected JLabel urlLabel;
+	protected JButton editOpenBISURLButton;
+	protected JButton addOpenBISURLButton;
+    protected JButton remOpenBISURLButton;
+    protected JButton lowerOpenBISURLButton;
+    protected JButton higherOpenBISURLButton;   	
 	protected JTextField openBISURLInput;
 	protected JButton dirButton;
 	protected JButton userdirButton;
 	protected JButton saveButton;
 	protected JButton closeButton;
-	protected JComboBox<Object> acqStationsList;
-	protected JComboBox<Object> acceptSelfSignedCertsList;
-	
+	protected JComboBox<String> acqStationsList;
+    protected JComboBox<String> openBISURLList;	
+	protected JComboBox<String> acceptSelfSignedCertsList;
+
+	AppSettingsManager manager;
+
 	/**
 	 * Constructor
 	 */
@@ -52,22 +53,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		VersionInfo.version + " " + VersionInfo.status);
 
 		// Read the properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
-		boolean isUpToDate = 
-				AppProperties.isPropertiesFileVersionCurrent(appProperties);
-		if (appProperties == null || !isUpToDate) {
-			appProperties = AppProperties.initializePropertiesFile();
-			if (appProperties == null) {
-				JOptionPane.showMessageDialog(null,
-						AppProperties.getLastErrorMessage() + "\n\n" +
-						"Please contact your administrator. \n" +
-						"The application will now close.",
-						"Error",
-						JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
-			}
-		}
-
+		manager = new AppSettingsManager();
+		
 		// Make the dialog modal and not resizable
 		setModal(true);
 		setResizable(false);
@@ -82,28 +69,230 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		// Add a label for the selection of the openBIS URL
-		JLabel urlLabel = new JLabel("Set the openBIS URL");
+		urlLabel = new JLabel("Set the openBIS URL");
 		constraints.gridx = 0;
 		constraints.gridy = 0;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(urlLabel, constraints);
 
-		// Add a formatted text info that validates URLs
-		String openBISURL = appProperties.getProperty("OpenBISURL");
-	    openBISURLInput = new JTextField(openBISURL);
-	    openBISURLInput.setHorizontalAlignment(JTextField.CENTER);
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.gridwidth = 8;
-		constraints.gridheight = 1;
-		constraints.weightx = 1.0;
-		constraints.weighty = 1.0;
-		constraints.insets = new Insets(5, 5, 5, 5);
-		add(openBISURLInput, constraints);
+        // Add a drop-down menu for the selection of the URL
+        ArrayList<String> openBISURLOptions = manager.getAllServers();
+        String openBISURL = manager.getServer();
+        int index = -1;
+        for (int i = 0; i < openBISURLOptions.size(); i++) {
+            if (openBISURLOptions.get(i).equals(openBISURL)) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            String msg = "Unknown openBIS URL! Defaulting to " +
+                    manager.defaultValueForSetting("OpenBISURL") +
+                    ".";
+            JOptionPane.showMessageDialog(null, msg, "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            index = 0;
+        }
+        openBISURLList = new JComboBox<String>();
+        for (String currOpenBISURL : openBISURLOptions) {
+            openBISURLList.addItem(currOpenBISURL);
+        }
+        openBISURLList.setSelectedIndex(index);
+        openBISURLList.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getActionCommand().equals("comboBoxChanged")) {
+                	int index = openBISURLList.getSelectedIndex();
+                	changeCurrentSettingIndex(index);
+                }
+            }
+        });
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridwidth = 15;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.9;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        add(openBISURLList, constraints);
+
+        // Create the "Edit openBIS URL" button ("...")
+        editOpenBISURLButton = new JButton("...");
+        editOpenBISURLButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Ask the user to specify a new openBIS URL
+                String url = JOptionPane.showInputDialog(
+                        "Edit openBIS URL:",
+                        manager.getServer());
+                if (url == null || url.equals("") ||
+                		url.equalsIgnoreCase(manager.getServer())) {
+                    return;
+                }
+                // TODO Validate URL better
+                try {
+                	new URL(url);
+                } catch (MalformedURLException u) {
+					JOptionPane.showMessageDialog(null,
+						    "Malformed URL! Please try again.",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+                
+                // Check that the URL is not already present
+                if (manager.doesSettingExist("OpenBISURL", url)) {
+					JOptionPane.showMessageDialog(null,
+						    "Sorry, this server already exists!",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+
+                // Update URL
+                manager.setServer(url);
+
+                // Update UI
+                refillServerList();
+                updateUI();
+                
+            }
+        });
+        constraints.gridx = 15;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.05;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        add(editOpenBISURLButton, constraints);
+
+        // Create the "Add openBIS URL" button ("+")
+        addOpenBISURLButton = new JButton(Character.toString('\u002B'));
+        addOpenBISURLButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	// Ask the user to specify a new openBIS URL
+                String url = JOptionPane.showInputDialog(
+                        "Please enter full openBIS URL:");
+                if (url == null || url.equals("")) {
+                    return;
+                }
+                // TODO Validate URL better
+                try {
+                	new URL(url);
+                } catch (MalformedURLException u) {
+					JOptionPane.showMessageDialog(null,
+						    "Malformed URL! Please try again.",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+                
+                // Check that the URL is not already present
+                if (manager.doesSettingExist("OpenBISURL", url)) {
+					JOptionPane.showMessageDialog(null,
+						    "Sorry, this server already exists!",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+
+                // Add a new server to the list of settings
+                manager.add(url);
+                
+                // Update UI
+                refillServerList();
+                updateUI();
+
+            }
+        });
+        constraints.gridx = 16;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.05;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        add(addOpenBISURLButton, constraints);
+
+        // Add the "Remove openBIS URL" button ("-")
+        remOpenBISURLButton = new JButton(Character.toString('\u2212'));
+        remOpenBISURLButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	int index = openBISURLList.getSelectedIndex();
+            	try {
+            		manager.remove(index);
+            	} catch (ArrayIndexOutOfBoundsException a) {
+            		return;
+            	}
+
+            	// Update UI
+            	refillServerList();
+            	updateUI();
+
+            }
+        });
+        constraints.gridx = 17;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.05;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        add(remOpenBISURLButton, constraints);
+
+        // Add the "^" button
+        higherOpenBISURLButton = new JButton(Character.toString('\u25B2'));
+        higherOpenBISURLButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	int index = openBISURLList.getSelectedIndex();
+            	try {
+            		manager.moveUp(index);
+            	} catch (ArrayIndexOutOfBoundsException a) {
+            		return;
+            	}
+
+            	// Update UI
+            	refillServerList();
+            	updateUI();
+            }
+        });
+        constraints.gridx = 18;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.05;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        add(higherOpenBISURLButton, constraints);
+
+        // Add the "v" button
+        lowerOpenBISURLButton = new JButton(Character.toString('\u25BC'));
+        lowerOpenBISURLButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	int index = openBISURLList.getSelectedIndex();
+            	try {
+            		manager.moveDown(index);
+            	} catch (ArrayIndexOutOfBoundsException a) {
+            		return;
+            	}
+
+            	// Update UI
+            	refillServerList();
+            	updateUI();
+            }
+        });
+        constraints.gridx = 19;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;     
+        constraints.weightx = 0.05;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 5);
+        add(lowerOpenBISURLButton, constraints);
+
 	
 		// Add a label for the options of accepting self-signed
 		// certificates
@@ -111,7 +300,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 				+ "when logging in to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -120,12 +309,12 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Add a drop-down menu for the options of accepting self-signed
 		// certificates
-		String acceptSelfSignedCerts =
-				appProperties.getProperty("AcceptSelfSignedCertificates");
+		String acceptSelfSignedCerts = manager.getSettingValue(
+				"AcceptSelfSignedCertificates");
 		ArrayList<String> acceptSelfSignedCertsOptions = 
-				DefaultProperties.possibleValuesForProperty(
+				manager.possibleValuesForSetting(
 						"AcceptSelfSignedCertificates");
-		int index = -1;
+		index = -1;
 		for (int i = 0; i < acceptSelfSignedCertsOptions.size(); i++) {
 			if (acceptSelfSignedCertsOptions.get(i).equals(
 					acceptSelfSignedCerts)) {
@@ -136,26 +325,44 @@ public class AnnotationToolAdminDialog extends JDialog {
 		if (index == -1) {
 			String msg = "Unknown option for accepting self-signed " + 
 					"certificates! Defaulting to \"" +
-					DefaultProperties.defaultValueForProperty(
+					manager.defaultValueForSetting(
 							"AcceptSelfSignedCertificates") +
 					"\".";
 			JOptionPane.showMessageDialog(null, msg, "Error",
 				    JOptionPane.ERROR_MESSAGE);
 			index = 0;
 		}
-		acceptSelfSignedCertsList = new JComboBox<Object>(acceptSelfSignedCertsOptions.toArray());
+		acceptSelfSignedCertsList = new JComboBox<String>();
+        for (String currAcceptCertsOption : acceptSelfSignedCertsOptions) {
+        	acceptSelfSignedCertsList.addItem(currAcceptCertsOption);
+        }
 		acceptSelfSignedCertsList.setSelectedIndex(index);
-		selAcceptSelfSignedCerts = acceptSelfSignedCertsOptions.get(index);
 		acceptSelfSignedCertsList.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
         		if (e.getActionCommand().equals("comboBoxChanged")) {
-        			selAcceptSelfSignedCerts = (String) acceptSelfSignedCertsList.getSelectedItem();
+        			String value = (String) acceptSelfSignedCertsList.getSelectedItem();
+        			if (manager.getSettingValue("AcceptSelfSignedCertificates").
+        					equals(value)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("AcceptSelfSignedCertificates")) {
+        				if (manager.doesSettingExist(
+        						"AcceptSelfSignedCertificates", value)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"You cannot duplicate this setting value!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
+        			// We can store it
+        			manager.setSettingValue("AcceptSelfSignedCertificates", value);
         		}
             }
         });
 		constraints.gridx = 0;
 		constraints.gridy = 3;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -165,7 +372,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel acqLabel = new JLabel("Select the acquisition station or type");
 		constraints.gridx = 0;
 		constraints.gridy = 4;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -173,9 +380,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 		add(acqLabel, constraints);
 
 		// Add a drop-down menu for the selection of the acquisition machine
-		String acqStation = appProperties.getProperty("AcquisitionStation");
+		String acqStation = manager.getSettingValue("AcquisitionStation");
 		ArrayList<String> acqStations = 
-				DefaultProperties.possibleValuesForProperty("AcquisitionStation");
+				manager.possibleValuesForSetting("AcquisitionStation");
 		index = -1;
 		for (int i = 0; i < acqStations.size(); i++) {
 			if (acqStations.get(i).equals(acqStation)) {
@@ -185,28 +392,47 @@ public class AnnotationToolAdminDialog extends JDialog {
 		}
 		if (index == -1) {
 			String msg = "Unknown acquisition station! Defaulting to " +
-					DefaultProperties.defaultValueForProperty("AcquisitionStation") +
+					manager.defaultValueForSetting("AcquisitionStation") +
 					".";
 			JOptionPane.showMessageDialog(null, msg, "Error",
 				    JOptionPane.ERROR_MESSAGE);			
 			System.err.println("Unknown acquisition station! Defaulting to " +
-					DefaultProperties.defaultValueForProperty("AcquisitionStation") +
+					manager.defaultValueForSetting("AcquisitionStation") +
 					".");
 			index = 0;
 		}
-		acqStationsList = new JComboBox<Object>(acqStations.toArray());
+		acqStationsList = new JComboBox<String>();
+        for (String currAcqStation : acqStations) {
+        	acqStationsList.addItem(currAcqStation);
+        }
 		acqStationsList.setSelectedIndex(index);
-		selAcqStation = acqStations.get(index);
 		acqStationsList.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
         		if (e.getActionCommand().equals("comboBoxChanged")) {
-        			selAcqStation = (String) acqStationsList.getSelectedItem();
+        			String value = (String) acqStationsList.getSelectedItem();
+        			if (manager.getSettingValue("AcquisitionStation").
+        					equals(value)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("AcquisitionStation")) {
+        				if (manager.doesSettingExist(
+        						"AcquisitionStation", value)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"The acquisition station must univocal" +
+                							" among servers!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
+        			// We can store it
+        			manager.setSettingValue("AcquisitionStation", value);
         		}
             }
         });
 		constraints.gridx = 0;
 		constraints.gridy = 5;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -217,7 +443,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel userdirLabel = new JLabel("Set user data directory");
 		constraints.gridx = 0;
 		constraints.gridy = 6;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -226,11 +452,11 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Add a pushButton to choose the user directory
 		// Create a text field for the user name
-		selUserDataDir = appProperties.getProperty("UserDataDir");
-		userdirButton = new JButton(selUserDataDir);
+		userdirButton = new JButton(manager.getSettingValue("UserDataDir"));
 		userdirButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	String dir = pickDir("Set the user data directory");
+            	String selUserDataDir = "";
             	if (!dir.equals("")) {
             		try {
 						selUserDataDir = (new File(dir)).getCanonicalPath();
@@ -242,14 +468,36 @@ public class AnnotationToolAdminDialog extends JDialog {
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
 					}
+            		if (! (new File(selUserDataDir)).exists() ) {
+            			JOptionPane.showMessageDialog(null, 
+    							"The selected directory does not exist!",
+    							"Error", JOptionPane.ERROR_MESSAGE);
+    					return;
+            		}
+            		if (manager.getSettingValue("UserDataDir").
+        					equals(selUserDataDir)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("UserDataDir")) {
+        				if (manager.doesSettingExist(
+        						"UserDataDir", selUserDataDir)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"The user directory must univocal" +
+        							" among servers!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
             		userdirButton.setText(selUserDataDir);
             		pack();
+            		manager.setSettingValue("UserDataDir", selUserDataDir);
             	}
             }
         });		
 		constraints.gridx = 0;
 		constraints.gridy = 7;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -260,7 +508,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel dirLabel = new JLabel("Set Datamover incoming directory");
 		constraints.gridx = 0;
 		constraints.gridy = 8;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -269,11 +517,11 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Add a pushButton to choose the directory
 		// Create a text field for the user name
-		selIncomingDir = appProperties.getProperty("DatamoverIncomingDir");
-		dirButton = new JButton(selIncomingDir);
+		dirButton = new JButton(manager.getSettingValue("DatamoverIncomingDir"));
 		dirButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	String dir = pickDir("Set the datamover incoming directory");
+            	String dir = pickDir("Set the Datamover incoming directory");
+            	String selIncomingDir = "";
             	if (!dir.equals("")) {
             		try {
 						selIncomingDir = (new File(dir)).getCanonicalPath();
@@ -285,14 +533,36 @@ public class AnnotationToolAdminDialog extends JDialog {
 							    "Error",
 							    JOptionPane.ERROR_MESSAGE);
 					}
-            		dirButton.setText(selIncomingDir);
+            		if (! (new File(selIncomingDir)).exists() ) {
+            			JOptionPane.showMessageDialog(null, 
+    							"The selected directory does not exist!",
+    							"Error", JOptionPane.ERROR_MESSAGE);
+    					return;
+            		}
+            		if (manager.getSettingValue("DatamoverIncomingDir").
+        					equals(selIncomingDir)) {
+        				// No change, just return
+        				return;
+        			}
+        			if (manager.settingMustBeUnique("DatamoverIncomingDir")) {
+        				if (manager.doesSettingExist(
+        						"DatamoverIncomingDir", selIncomingDir)) {
+        					JOptionPane.showMessageDialog(null, 
+        							"The Datamover incoming directory must " +
+        							"univocal among servers!",
+        							"Error", JOptionPane.ERROR_MESSAGE);
+        					return;
+        				}
+        			}
+        			dirButton.setText(selIncomingDir);
             		pack();
+            		manager.setSettingValue("DatamoverIncomingDir", selIncomingDir);
             	}
             }
         });		
 		constraints.gridx = 0;
 		constraints.gridy = 9;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
@@ -328,30 +598,23 @@ public class AnnotationToolAdminDialog extends JDialog {
 		saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-            	// The acquisition station, the openBIS URL and the
-            	// option for accepting self-signed certificates are always set;
-            	// we make sure that the user also picked an user data directory
-            	if (selUserDataDir.equals("")) {
+            	// Are all the Settings set?
+            	if (!manager.allSet()) {
             		JOptionPane.showMessageDialog(null,
-            				"Please set the user data directory!", "Error",
-            				JOptionPane.ERROR_MESSAGE);
+            				"Incomplete configuration!",
+            				"Error", JOptionPane.ERROR_MESSAGE);
 
-            		return;
+            		return;            		
             	}
 
-            	// ... and also the Datamover incoming directory
-            	if (selIncomingDir.equals("")) {
+            	// Save
+            	if (!manager.save()) {
             		JOptionPane.showMessageDialog(null,
-            				"Please set the incoming directory!", "Error",
-            				JOptionPane.ERROR_MESSAGE);
+            				"Could not save settings: " +
+            						manager.getLastErrorMessage(),
+            				"Error", JOptionPane.ERROR_MESSAGE);
 
-            		return;
-            	}
-
-            	// Save the selection to the properties file. We leave eventual error messages 
-            	// to be displayed by savePorperties() or the functions called by it.
-            	if (!saveProperties()) {
-            		return;
+            		return;   
             	} else {
 
             		saveButton.setText("<html><b>Saved!</b></html>");
@@ -367,11 +630,11 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
           }
         });
-		constraints.gridx = 4;
+		constraints.gridx = 16;
 		constraints.gridy = 11;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;		
-		constraints.weightx = 0.25;
+		constraints.weightx = 0.1;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(saveButton, constraints);
@@ -385,11 +648,11 @@ public class AnnotationToolAdminDialog extends JDialog {
             	System.exit(0);
             }
         });
-		constraints.gridx = 6;
+		constraints.gridx = 18;
 		constraints.gridy = 11;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;			
-		constraints.weightx = 0.25;
+		constraints.weightx = 0.1;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(closeButton, constraints);
@@ -397,6 +660,9 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Make the login button react to the enter key
 		getRootPane().setDefaultButton(saveButton);
 
+    	// Enable/disable buttons
+    	toggleDynamicWidgets();
+    	
 		// Display the dialog
 		setMinimumSize(new Dimension(600, 220));
 		pack();
@@ -423,55 +689,106 @@ public class AnnotationToolAdminDialog extends JDialog {
 		}
 	}
 
-	/**
-	 * Saves current properties to file
-	 * @return true if saving was successful, false otherwise
-	 */
-	private boolean saveProperties() {
-		
-		// Get the openBIS URL
-		selOpenBISURL = openBISURLInput.getText();
-		
-		// Is the URL a valid URL?
-		try {
-			new URL(selOpenBISURL);
-		} catch (MalformedURLException e) {
-			JOptionPane.showMessageDialog(null,
-					"Malformed openBIS server URL", "Error",
-    				JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
+    /**
+     * Changes the currently active AppSettings
+     * @param index of the AppSettings in the listAppSettings array.
+     */
+    private void changeCurrentSettingIndex(int index) {
+    	
+    	if (index == -1) {
+    		// This happens when the server list is cleared 
+    		return;
+    	}
+    			
+    	// Check that we really need to change
+    	if (index == manager.getCurrentIndex()) {
+    		// Nothing to do
+    		return;
+    	}
 
-		// Check that everything is set
-		if (selOpenBISURL.equals("") || selAcqStation.equals("") ||
-				selAcceptSelfSignedCerts.equals("") ||
-				selUserDataDir.equals("") || 
-				selIncomingDir.equals("")) {
-			JOptionPane.showMessageDialog(null,
-    				"Please set all fields!", "Error",
-    				JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-		
-		// Check that the two paths do not point to the same folder
-		if (selUserDataDir.equalsIgnoreCase(selIncomingDir)) {
+    	// Try changing the index 
+    	try {
+    		manager.setCurrent(index);
+    	} catch (ArrayIndexOutOfBoundsException e) {
     		JOptionPane.showMessageDialog(null,
-    				"User and working directory must point to different locations!",
+    				"There was a mistake setting the index of current " +
+    		"server.\n\nThis is a bug, please inform your administrator!",
     				"Error", JOptionPane.ERROR_MESSAGE);
-    		return false;
-		}
-		
-		// Save the properties to file
-		boolean success = AppProperties.writePropertiesToFile(
-				selOpenBISURL, selAcceptSelfSignedCerts, selAcqStation, 
-				selUserDataDir, selIncomingDir);
-		if (! success) {
-    		JOptionPane.showMessageDialog(null,
-    				AppProperties.getLastErrorMessage(),
-    				"Error", JOptionPane.ERROR_MESSAGE);
-		}
-		
-		return success;
-	}
+    		return;        
+    	}
 
+		// Now update the UI with the new settings
+    	updateUI();
+
+    }
+    
+    /**
+     * Refills the list of opeenBIS servers when their number has changed after
+     * a user action.
+     */
+    private void refillServerList() {
+    	
+    	// Disable action listeners while we refill the list
+    	ActionListener[] actionListeners = openBISURLList.getActionListeners();
+    	for (ActionListener a : actionListeners) {
+    		openBISURLList.removeActionListener(a);
+    	}
+    	ArrayList<String> openBISURLOptions = manager.getAllServers();
+        openBISURLList.removeAllItems();
+        for (String currOpenBISURL : openBISURLOptions) {
+            openBISURLList.addItem(currOpenBISURL);
+        }
+        openBISURLList.setSelectedItem(manager.getServer());
+        // Add the action listeners back
+    	for (ActionListener a : actionListeners) {
+    		openBISURLList.addActionListener(a);
+    	}
+    }
+
+    /**
+     * Updates all fields with the values from current AppSettings
+     */
+    private void updateUI() {
+    	openBISURLList.setSelectedItem(manager.getServer());
+    	acqStationsList.setSelectedItem(manager.getSettingValue("AcquisitionStation"));
+    	acceptSelfSignedCertsList.setSelectedItem(manager.getSettingValue("AcceptSelfSignedCertificates"));
+    	userdirButton.setText(manager.getSettingValue("UserDataDir"));
+    	dirButton.setText(manager.getSettingValue("DatamoverIncomingDir"));
+    	
+    	// Enable/disable buttons
+    	toggleDynamicWidgets();
+
+    }
+
+    /**
+     * Enable/disable buttons depending on current selections
+     */
+    private void toggleDynamicWidgets() {
+    	boolean state = true;
+    	if (manager.getAllServers().size() < 2) {
+    		state = false;
+    	}
+        remOpenBISURLButton.setEnabled(state);
+        lowerOpenBISURLButton.setEnabled(state);
+        higherOpenBISURLButton.setEnabled(state);
+
+        state = true;
+        if (manager.getCurrentIndex() == 0) {
+        	state = false;
+        }
+        higherOpenBISURLButton.setEnabled(state);
+
+        state = true;
+        if (manager.getCurrentIndex() == (manager.getAllServers().size() - 1)) {
+        	state = false;
+        }
+        lowerOpenBISURLButton.setEnabled(state);
+        
+    	if (openBISURLList.getSelectedIndex() != 0) {
+    		urlLabel.setText("Set the openBIS URL (current default: " +
+    	(String) openBISURLList.getItemAt(0) + ")");
+    	} else {
+    		urlLabel.setText("Set the openBIS URL (this is current default)");
+    	}
+    }
 }

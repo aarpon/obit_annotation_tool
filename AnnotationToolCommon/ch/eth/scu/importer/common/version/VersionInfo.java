@@ -7,5 +7,8 @@ public class VersionInfo {
 	
 	// Version status: "alpha", "beta", or "" for a stable release
 	public static final String status = "alpha 2";
+	
+	// Properties (XML) file version
+	public static final int propertiesVersion = 4;
 
 }

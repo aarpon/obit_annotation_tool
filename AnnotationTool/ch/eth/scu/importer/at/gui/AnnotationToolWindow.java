@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -25,6 +26,7 @@ import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
 /**
@@ -59,7 +61,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Icon
 		appIcon = new ImageIcon(
 				this.getClass().getResource("icons/icon.png"));
-
+		
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
 		
@@ -140,7 +142,16 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Make window visible
 		setVisible(true);
-		
+
+		// TEMP
+		UserSettingsManager userManager = new UserSettingsManager();
+		userManager.load();
+		ArrayList<String> settings = userManager.getSettingsNames();
+		String out = "Current settings (DEBUG ONLY! REMOVE!): ";
+		for (String name : settings) {
+			out = out + name + ": " + userManager.getSettingValue(name) + "; ";
+		}
+		outputPane.log(out);		
 	}
 
     /**

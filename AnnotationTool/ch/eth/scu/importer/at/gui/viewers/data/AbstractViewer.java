@@ -14,7 +14,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -41,7 +40,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.utils.QueryOS;
@@ -336,9 +335,17 @@ abstract public class AbstractViewer extends Observable
 		
 		// Get the datamover incoming folder from the application properties
 		// to which we append the user name to personalize the working space
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		UserSettingsManager manager = new UserSettingsManager();
+		if (! manager.load()) {
+			JOptionPane.showMessageDialog(null,
+					"Could not read application settings!\n" +
+			"Please contact your administrator. The application\n" +
+			"will now exit!",
+			"Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 		File userDataFolder = new File(
-				appProperties.getProperty("UserDataDir") +
+				manager.getSettingValue("UserDataDir") +
 				File.separator + userName);
 		
 		// Does the folder exist? If not, we create it. Please mind,
@@ -662,10 +669,17 @@ abstract public class AbstractViewer extends Observable
             public void actionPerformed(ActionEvent e)
             {
             	// Build the full path of the invalid dataset
-            	Properties appProperties =
-            			AppProperties.readPropertiesFromFile();
+            	UserSettingsManager manager = new UserSettingsManager();
+        		if (! manager.load()) {
+        			JOptionPane.showMessageDialog(null,
+        					"Could not read application settings!\n" +
+        			"Please contact your administrator. The application\n" +
+        			"will now exit!",
+        			"Error", JOptionPane.ERROR_MESSAGE);
+        			System.exit(1);
+        		}
         		File userDataFolder = new File(
-        				appProperties.getProperty("UserDataDir"));
+        				manager.getSettingValue("UserDataDir"));
 
             	// Full path to the invalid dataset
 				File fullPath = new File(userDataFolder +
@@ -736,10 +750,17 @@ abstract public class AbstractViewer extends Observable
             	}
             	
             	// Build the full path of the file/folder to move
-            	Properties appProperties =
-            			AppProperties.readPropertiesFromFile();
+            	UserSettingsManager manager = new UserSettingsManager();
+        		if (! manager.load()) {
+        			JOptionPane.showMessageDialog(null,
+        					"Could not read application settings!\n" +
+        			"Please contact your administrator. The application\n" +
+        			"will now exit!",
+        			"Error", JOptionPane.ERROR_MESSAGE);
+        			System.exit(1);
+        		}
         		File userDataFolder = new File(
-        				appProperties.getProperty("UserDataDir"));
+        				manager.getSettingValue("UserDataDir"));
             	File fullPath = new File(userDataFolder +
         				File.separator + invalidDataset);
             	
@@ -766,10 +787,17 @@ abstract public class AbstractViewer extends Observable
             public void actionPerformed(ActionEvent e)
             {
             	// Build the full path of the file/folder to delete
-            	Properties appProperties =
-            			AppProperties.readPropertiesFromFile();
+            	UserSettingsManager manager = new UserSettingsManager();
+        		if (! manager.load()) {
+        			JOptionPane.showMessageDialog(null,
+        					"Could not read application settings!\n" +
+        			"Please contact your administrator. The application\n" +
+        			"will now exit!",
+        			"Error", JOptionPane.ERROR_MESSAGE);
+        			System.exit(1);
+        		}
         		File userDataFolder = new File(
-        				appProperties.getProperty("UserDataDir"));
+        				manager.getSettingValue("UserDataDir"));
             	File fullPath = new File(userDataFolder +
         				File.separator + invalidDataset);
             	

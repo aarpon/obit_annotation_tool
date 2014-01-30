@@ -1,11 +1,11 @@
 package ch.eth.scu.importer.at.gui.editors.data;
 
-import java.util.Properties;
+import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.BDFACSDIVAFCSEditor;
-import ch.eth.scu.importer.common.properties.AppProperties;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.importer.microscopy.gui.editors.data.MicroscopyEditor;
 
 /**
@@ -25,13 +25,21 @@ public class EditorFactory {
 			OpenBISViewer openBISViewer) {
 
 		// Get the application properties
-		Properties appProperties = AppProperties.readPropertiesFromFile();
+		UserSettingsManager manager = new UserSettingsManager();
+		if (! manager.load()) {
+			JOptionPane.showMessageDialog(null,
+					"Could not read application settings!\n" +
+			"Please contact your administrator. The application\n" +
+			"will now exit!",
+			"Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 
 		// Declare an AbstractEditor
 		AbstractEditor metadataEditor = null;
 
 		// Create the concrete editor
-		String acqStation = appProperties.getProperty("AcquisitionStation");	
+		String acqStation = manager.getSettingValue("AcquisitionStation");	
 		if (acqStation.equals("BD LSRFortessa cell analyzer") ||
 				acqStation.equals("BD FACSAria III cell sorter")) {
 			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
