@@ -1,6 +1,8 @@
 package ch.eth.scu.importer.at.gui.dialogs;
 
 import javax.swing.*;
+
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -139,11 +141,11 @@ public class OpenBISPickServerDialog extends JDialog {
 		});
 		
 		// Display the dialog
+		setMinimumSize(new Dimension(350, 120));
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		setVisible(true);
-		
 	}
 	
 	/**

@@ -143,15 +143,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Make window visible
 		setVisible(true);
 
-		// TEMP
-		UserSettingsManager userManager = new UserSettingsManager();
-		userManager.load();
-		ArrayList<String> settings = userManager.getSettingsNames();
-		String out = "Current settings (DEBUG ONLY! REMOVE!): ";
-		for (String name : settings) {
-			out = out + name + ": " + userManager.getSettingValue(name) + "; ";
-		}
-		outputPane.log(out);		
 	}
 
     /**
