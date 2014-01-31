@@ -164,7 +164,7 @@ public class AppSettingsManager {
 	
 	/**
 	 * Return all configured openBIS servers
-	 * @return
+	 * @return list of server URLs
 	 */
 	public ArrayList<String> getAllServers() {
 	
@@ -206,16 +206,17 @@ public class AppSettingsManager {
 
 	/**
 	 * Return the value of the setting for current server.
-	 * @param attribute: Attribute name
+	 * @param name Attribute name
 	 * @return the value of the attribute for current setting.
 	 */
 	public String getSettingValue(String name) {
 		return listAppSettings.get(currentSettingsIndex).getSettingValue(name);
 	}
-
+	
 	/**
-	 * Set the URL of current openBIS server
-	 * @param openBISURL URL for current openBIS server
+	 * Set the value of a specific setting
+	 * @param name Name of the setting
+	 * @param value Value of the setting
 	 */
 	public void setSettingValue(String name, String value) {
 		listAppSettings.get(currentSettingsIndex).setSettingValue(name, value);
@@ -234,7 +235,7 @@ public class AppSettingsManager {
 	 * Checks whether a combination setting name - value already exists
 	 * @param name name of the setting
 	 * @param value value of the setting
-	 * @return true if the setting combination already exists, false othewise
+	 * @return true if the setting combination already exists, false otherwise
 	 */
 	public boolean doesSettingExist(String name, String value) {
 		for (AppSettings setting: listAppSettings) {
@@ -288,7 +289,7 @@ public class AppSettingsManager {
 	
 	/**
 	 * Returns the setting for current openBIS server
-	 * @param openBISURL: openBIS server URL
+	 * @param openBISURL openBIS server URL
 	 * @return AppSettings object
 	 */
 	public AppSettings getSettingsForServer(String openBISURL) {

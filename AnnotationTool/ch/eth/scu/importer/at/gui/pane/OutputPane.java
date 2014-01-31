@@ -104,7 +104,7 @@ public class OutputPane extends JTextPane {
 	 * Display the passed warning string
 	 * @param text String to be displayed
 	 * 
-	 * @todo	 Add formatting
+	 * //TODO	 Add formatting
 	 */
 	public void warn(String text) {
 		try {
@@ -119,7 +119,7 @@ public class OutputPane extends JTextPane {
 	 * Display the passed error string
 	 * @param text String to be displayed
 	 *
-	 * @todo	 Add formatting
+	 * //TODO	 Add formatting
 	 */
 	public void err(String text) {
 		try {

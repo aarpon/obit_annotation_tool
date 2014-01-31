@@ -44,7 +44,7 @@ public class UserSettingsManager {
 	 * 
 	 * When using this constructor, settings must be explicitly loaded.
 	 * 
-	 * @see load()
+	 * @see UserSettingsManager#load()
 	 * 
 	 */
 	public UserSettingsManager() {
@@ -73,8 +73,7 @@ public class UserSettingsManager {
 	/**
 	 * Return the value of the setting for current server.
 	 * 
-	 * @param attribute
-	 *            : Attribute name
+	 * @param name setting name
 	 * @return the value of the attribute for current setting.
 	 */
 	public String getSettingValue(String name) {
