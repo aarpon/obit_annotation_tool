@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="AnnotationToolAdmin"/>
 	<classpathentry kind="src" path="AnnotationToolCommon"/>
 	<classpathentry kind="src" path="AnnotationToolBDFACSDIVAFCS"/>
-	<classpathentry kind="src" path="AnnotationToolNikonND2"/>
+	<classpathentry kind="src" path="AnnotationToolMicroscopy"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dropbox/datastore_server.jar"/>
@@ -22,11 +22,7 @@
 	<classpathentry kind="lib" path="lib/dss_client/ij.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/jline.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/jython.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/loci_tools.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/log4j.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/poi-3.7-20101029.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-3.7-20101029.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-schemas-3.7-20101029.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-schemas.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi.jar"/>
@@ -34,7 +30,6 @@
 	<classpathentry kind="lib" path="lib/dss_client/stream-supporting-httpinvoker.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/myglayout/miglayout-4.0-swing.jar"/>
-	<classpathentry kind="lib" path="lib/myglayout/miglayout-4.0.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/loci_tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -25,6 +26,8 @@ import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
+import ch.eth.scu.importer.common.settings.UserSettingsManager;
+import ch.eth.scu.importer.common.version.VersionInfo;
 
 /**
  * Main window of the AnnotationTool application.
@@ -38,12 +41,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	private AbstractViewer metadataViewer;
 	private JToolBar toolBar;
 	private Icon appIcon; 
-	
-	// Program version
-	private static final String version = "0.4.0";
-	
-	// Version status: "alpha", "beta", or "" for a stable release
-	private static final String status = "alpha 1";
 
 	/**
 	 * Constructor
@@ -52,7 +49,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Call the frame's constructor
 		super("openBIS Importer Toolset :: Annotation Tool v" +
-		version + " " + status);
+		VersionInfo.version + " " + VersionInfo.status);
 
 		// Use the system default look-and-feel
 		try {
@@ -64,7 +61,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Icon
 		appIcon = new ImageIcon(
 				this.getClass().getResource("icons/icon.png"));
-
+		
 		// Add a BorderLayout
 		setLayout(new BorderLayout());
 		
@@ -145,7 +142,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Make window visible
 		setVisible(true);
-		
+
 	}
 
     /**
