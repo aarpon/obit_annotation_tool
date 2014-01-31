@@ -28,7 +28,7 @@ ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.model.icons
 ch.eth.scu.importer.bdfacsdivafcs.processors
 ch.eth.scu.importer.bdfacsdivafcs.processors.model
 ch.eth.scu.importer.bdfacsdivafcs.readers
-ch.eth.scu.importer.common.properties
+ch.eth.scu.importer.common.settings
 ch.eth.scu.importer.common.version
 ch.eth.scu.importer.microscopy
 ch.eth.scu.importer.microscopy.gui.editors.data
