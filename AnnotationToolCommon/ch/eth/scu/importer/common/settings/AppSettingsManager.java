@@ -564,23 +564,10 @@ public class AppSettingsManager {
 	static private File getSettingsPropertiesDir() 
 			throws UnsupportedOperationException {
 
-		// Initialize the applicationDir variable
-		File applicationDataDir;
-		
-		// Build the path as a function of the operating system
-		if (QueryOS.isMac()) {
-			applicationDataDir = new File(
-					"/Users/Shared/Library/Application Support/");			
-		} else if (QueryOS.isWindows()) {
-			applicationDataDir = new File(
-					"C:/Users/All Users/");
-		} else {
-			throw new UnsupportedOperationException(
-					"Operating system not supported.");
-		}
+		// Get the common application data folder
+		File applicationDataDir = QueryOS.getOSSpecificAppDataFolder();
 		
 		// Append the sub-path common to all platform
-
         return new File(applicationDataDir +
                 File.separator + "obit" + File.separator + "AnnotationTool");
 	}

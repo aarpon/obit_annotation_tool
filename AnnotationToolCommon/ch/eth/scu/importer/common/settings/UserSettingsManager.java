@@ -1,12 +1,10 @@
 package ch.eth.scu.importer.common.settings;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -284,26 +282,12 @@ public class UserSettingsManager {
 	static private File getSettingsPropertiesDir()
 			throws UnsupportedOperationException {
 
-		// Initialize the applicationDir variable
-		File applicationDataDir;
-
-		// Build the path as a function of the operating system
-		if (QueryOS.isMac()) {
-			applicationDataDir = new File("/Users/"
-					+ System.getProperty("user.name")
-					+ "/Library/Application Support/");
-		} else if (QueryOS.isWindows()) {
-			applicationDataDir = new File("C:/Users/"
-					+ System.getProperty("user.name"));
-		} else {
-			throw new UnsupportedOperationException(
-					"Operating system not supported.");
-		}
-
+		// Get the common application data folder
+		File userDataDir = QueryOS.getOSSpecificUserDataFolder();
+		
 		// Append the sub-path common to all platform
-
-		return new File(applicationDataDir + File.separator + "obit"
-				+ File.separator + "AnnotationTool");
+        return new File(userDataDir +
+                File.separator + "obit" + File.separator + "AnnotationTool");
 	}
 
 	/**
