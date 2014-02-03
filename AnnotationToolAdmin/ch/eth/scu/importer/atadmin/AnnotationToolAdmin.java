@@ -17,6 +17,7 @@ public class AnnotationToolAdmin {
 		// Open the main window
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
+			@Override
 			public void run() {
 
 				new AnnotationToolAdminDialog();

@@ -111,7 +111,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         }
         openBISURLList.setSelectedIndex(index);
         openBISURLList.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
                 if (e.getActionCommand().equals("comboBoxChanged")) {
                 	int index = openBISURLList.getSelectedIndex();
                 	changeCurrentSettingIndex(index);
@@ -130,7 +131,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         // Create the "Edit openBIS URL" button ("...")
         editOpenBISURLButton = new JButton("...");
         editOpenBISURLButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
                 // Ask the user to specify a new openBIS URL
                 String url = JOptionPane.showInputDialog(
                         "Edit openBIS URL:",
@@ -180,7 +182,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         // Create the "Add openBIS URL" button ("+")
         addOpenBISURLButton = new JButton(Character.toString('\u002B'));
         addOpenBISURLButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	// Ask the user to specify a new openBIS URL
                 String url = JOptionPane.showInputDialog(
                         "Please enter full openBIS URL:");
@@ -228,7 +231,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         // Add the "Remove openBIS URL" button ("-")
         remOpenBISURLButton = new JButton(Character.toString('\u2212'));
         remOpenBISURLButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	int index = openBISURLList.getSelectedIndex();
             	try {
             		manager.remove(index);
@@ -254,7 +258,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         // Add the "^" button
         higherOpenBISURLButton = new JButton(Character.toString('\u25B2'));
         higherOpenBISURLButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	int index = openBISURLList.getSelectedIndex();
             	try {
             		manager.moveUp(index);
@@ -279,7 +284,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         // Add the "v" button
         lowerOpenBISURLButton = new JButton(Character.toString('\u25BC'));
         lowerOpenBISURLButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	int index = openBISURLList.getSelectedIndex();
             	try {
             		manager.moveDown(index);
@@ -346,7 +352,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         }
 		acceptSelfSignedCertsList.setSelectedIndex(index);
 		acceptSelfSignedCertsList.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
         		if (e.getActionCommand().equals("comboBoxChanged")) {
         			String value = (String) acceptSelfSignedCertsList.getSelectedItem();
         			if (manager.getSettingValue("AcceptSelfSignedCertificates").
@@ -419,7 +426,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         }
 		acqStationsList.setSelectedIndex(index);
 		acqStationsList.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
         		if (e.getActionCommand().equals("comboBoxChanged")) {
         			String value = (String) acqStationsList.getSelectedItem();
         			if (manager.getSettingValue("AcquisitionStation").
@@ -483,7 +491,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Create a text field for the user name
 		userdirButton = new JButton(manager.getSettingValue("UserDataDir"));
 		userdirButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	String dir = pickDir("Set the user data directory");
             	String selUserDataDir = "";
             	if (!dir.equals("")) {
@@ -549,7 +558,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Create a text field for the user name
 		dirButton = new JButton(manager.getSettingValue("DatamoverIncomingDir"));
 		dirButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	String dir = pickDir("Set the Datamover incoming directory");
             	String selIncomingDir = "";
             	if (!dir.equals("")) {
@@ -626,7 +636,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Create a Save button
 		saveButton = new JButton("Save");
 		saveButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
 
             	// Are all the Settings set?
             	if (!manager.allSet()) {
@@ -649,7 +660,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 
             		saveButton.setText("<html><b>Saved!</b></html>");
             		ActionListener ls = new ActionListener() {
-          		      public void actionPerformed(ActionEvent evt) {
+          		      @Override
+					public void actionPerformed(ActionEvent evt) {
                      		saveButton.setText("Save");
              		      }
               		  };
@@ -672,7 +684,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Create a close button
 		closeButton = new JButton("Close");
 		closeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            @Override
+			public void actionPerformed(ActionEvent e) {
             	setVisible(false);
             	dispose();
             	System.exit(0);
@@ -697,7 +710,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		setMinimumSize(new Dimension(700, 220));
 		pack();
 		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
 
 	}
@@ -817,7 +830,7 @@ public class AnnotationToolAdminDialog extends JDialog {
     	if (openBISURLList.getSelectedIndex() != 0) {
     		urlLabel.setText(arrow + 
     				"Set the openBIS URL (current default: " +
-    	(String) openBISURLList.getItemAt(0) + ")");
+    	openBISURLList.getItemAt(0) + ")");
     	} else {
     		urlLabel.setText(arrow + 
     				"Set the openBIS URL (this is current default)");
