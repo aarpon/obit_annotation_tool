@@ -253,8 +253,9 @@ public class OpenBISViewer extends Observable
 	 * Login to openBIS. Credentials provided by the user through a dialog.
 	 * @return true if login was successful (or if already logged in), 
 	 * false otherwise.
+	 * @throws InterruptedException 
 	 */
-	public boolean login() {
+	public boolean login() throws InterruptedException {
 
 		// Check that user name and password were set
 		if (userName.equals("") || userPassword.equals("")) {
@@ -281,31 +282,61 @@ public class OpenBISViewer extends Observable
 		// Inform
 		outputPane.log("Logging in to openBIS...");
 		
+		// Create a thread for logging in to openBIS and returning an
+		// IOpenbisServiceFacade
+		Thread serviceFacadeCreator = new Thread() {
+		
+			public void run() {
+				
+				// Create an IOpenbisServiceFacade to query openBIS for
+				// projects, experiments and samples.
+				// If the factory returns a valid object, it means that
+				// the credentials provided were accepted and the user
+				// was successfully logged in.
+	            facade = OpenbisServiceFacadeFactory.tryCreate(
+						userName, userPassword, openBISURL, timeout);
+
+			}
+		};
+
+		// Create a thread for logging in to openBIS and returning an
+		// IQueryApiFacade	
+		Thread queryFacadeCreator = new Thread() {
+			
+			public void run() {
+
+				// Create also an IQueryApiFacade to access the reporting
+				// plugins on the server.
+				queryFacade = FacadeFactory.create(openBISURL,
+						userName, userPassword);
+
+			}
+		};
+
+		// Should we accept self-signed certificates?
+		String acceptSelfSignedCerts = 
+				userManager.getSettingValue("AcceptSelfSignedCertificates");
+
+		// Set the force-accept-ssl-certificate option if requested
+		// by the administrator
+		if (acceptSelfSignedCerts.equals("yes")) {
+			System.setProperty("force-accept-ssl-certificate", "true");
+		}
+
 		// Try logging in with current credentials
 		try {
 			
-			// Should we accept self-signed certificates?
-			String acceptSelfSignedCerts = 
-					userManager.getSettingValue("AcceptSelfSignedCertificates");
+			// Create an IOpenbisServiceFacade in one thread to query
+			// openBIS for projects, experiments and samples.
+			serviceFacadeCreator.start();
 
-			// Set the force-accept-ssl-certificate option if requested
-			// by the administrator
-			if (acceptSelfSignedCerts.equals("yes")) {
-				System.setProperty("force-accept-ssl-certificate", "true");
-			}
+			// Create also an IQueryApiFacade in another thread to access
+			// the reporting plug-ins on the server.
+			queryFacadeCreator.start();
 			
-			// Create an IOpenbisServiceFacade to query openBIS for
-			// projects, experiments and samples.
-			// If the factory returns a valid object, it means that
-			// the credentials provided were accepted and the user
-			// was successfully logged in.
-            facade = OpenbisServiceFacadeFactory.tryCreate(
-					userName, userPassword, openBISURL, timeout);
-
-			// Create also an IQueryApiFacade to access the reporting
-			// plugins on the server.
-			queryFacade = FacadeFactory.create(openBISURL,
-					userName, userPassword);
+			// Wait for both threads to finish
+			serviceFacadeCreator.join();
+			queryFacadeCreator.join();
 
 		} catch (UserFailureException e) {
 			JOptionPane.showMessageDialog(this.panel,
@@ -791,4 +822,5 @@ public class OpenBISViewer extends Observable
 		// Not found, we return failure
 		return false;
 	}
+	
 }

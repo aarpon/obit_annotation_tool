@@ -130,7 +130,15 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// If the user just closes the dialog, we close the application.
 		boolean status = false;
 		while (!status) {
-			status = openBISViewer.login();
+			try {
+				status = openBISViewer.login();
+			} catch (InterruptedException e) {
+				JOptionPane.showMessageDialog(null,
+					    "Interrupted execution of login threads!",
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
 		}
 
 		// Now we can scan the openBIS instance
