@@ -52,9 +52,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 	public AnnotationToolAdminDialog() {
 
 		// Some text decorators
-		arrow = Character.toString('\u25C0') +
-				Character.toString('\u25B6') + " ";
-		info = Character.toString('\u24BE') + " ";
+		arrow = Character.toString('\u25CF') + " ";
+		info = Character.toString('\u25E6') + " ";
 		
 		// Set the dialog title
 		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" +
