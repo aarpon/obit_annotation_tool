@@ -61,7 +61,12 @@ public class QueryOS {
 					+ System.getProperty("user.name")
 					+ "/Library/Application Support/");		
 		} else if (QueryOS.isWindows()) {
-			userDir = new File(System.getenv("LOCALAPPDATA"));
+			String OS = System.getProperty("os.name").toUpperCase();
+	        if (OS.contains("XP")) {
+	        	userDir = new File(System.getenv("APPDATA"));
+	        } else {
+	        	userDir = new File(System.getenv("LOCALAPPDATA"));
+	        }
 		} else {
 			throw new UnsupportedOperationException(
 					"Operating system not supported.");
