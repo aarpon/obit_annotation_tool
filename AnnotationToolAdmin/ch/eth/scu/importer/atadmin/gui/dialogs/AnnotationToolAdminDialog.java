@@ -27,7 +27,6 @@ public class AnnotationToolAdminDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	protected String arrow; // String decorator
-	protected String info; // String decorator
 
 	protected JLabel urlLabel;
 	protected JLabel acqStationDescription;
@@ -51,9 +50,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 	 */
 	public AnnotationToolAdminDialog() {
 
-		// Some text decorators
+		// Define a text decorator
 		arrow = Character.toString('\u25CF') + " ";
-		info = Character.toString('\u25E6') + " ";
 		
 		// Set the dialog title
 		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" +
@@ -448,7 +446,7 @@ public class AnnotationToolAdminDialog extends JDialog {
         			manager.setSettingValue("AcquisitionStation", value);
         			
         			// Update the description as well
-        			acqStationDescription.setText(info + 
+        			acqStationDescription.setText(
         					manager.getAcqStationDescription(
         							manager.getSettingValue("AcquisitionStation")));
         		}
@@ -463,7 +461,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(acqStationsList, constraints);
 
-		acqStationDescription = new JLabel(info +
+		acqStationDescription = new JLabel(
 				manager.getAcqStationDescription(
 						manager.getSettingValue("AcquisitionStation")));
 		constraints.gridx = 0;
@@ -610,7 +608,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Add a label for the info text
 		JLabel infoLabel = new JLabel(
-				"<html>" + info + "It is <u>highly recommended</u> to set " +
+				"<html>It is <u>highly recommended</u> to set " +
 		"both folders on the same file system.</html>");
 		constraints.gridx = 0;
 		constraints.gridy = 11;
