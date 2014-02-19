@@ -58,7 +58,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
-		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(5, 0, 5, 0);
 		add(title, constraints);
 
 		// Add the editor
@@ -67,6 +67,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 0, 5, 0);
 		add(metadataEditor.getPanel(), constraints);
 		
 		// Add an upload button
@@ -75,6 +76,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.gridy = 2;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
+		constraints.insets = new Insets(5, 0, 5, 0);
 		registerButton.addActionListener(this);
 		add(registerButton, constraints);
 		

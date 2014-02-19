@@ -222,7 +222,7 @@ public class MicroscopyEditor extends AbstractEditor {
 		String expName = metadata.experimentNode.toString();
 		
 		// Create a label for the experiment
-		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.insets = new Insets(0, 10, 0, 10);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
@@ -237,7 +237,7 @@ public class MicroscopyEditor extends AbstractEditor {
 		 */
 		
 		// Create a label for the experiment description
-		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.insets = new Insets(0, 10, 0, 10);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
@@ -285,7 +285,7 @@ public class MicroscopyEditor extends AbstractEditor {
 		 */
 
 		// Create a label for the openBIS projects
-		constraints.insets = new Insets(10, 10, 10, 10);
+		constraints.insets = new Insets(5, 5, 5, 5);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
@@ -345,7 +345,7 @@ public class MicroscopyEditor extends AbstractEditor {
 		});
 	
 		// Add the project combo box
-		constraints.insets = new Insets(0, 20, 0, 20);
+		constraints.insets = new Insets(0, 10, 0, 10);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;

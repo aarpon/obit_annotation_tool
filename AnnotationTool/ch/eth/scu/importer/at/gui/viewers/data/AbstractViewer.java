@@ -147,7 +147,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
-		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(5, 0, 5, 5);
 		panel.add(title, constraints);
 		
 		// Create the Tree
@@ -171,7 +171,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.45;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 5, 0, 5);
+		constraints.insets = new Insets(5, 0, 0, 5);
 		panel.add(treeView, constraints);
 
 		// Add a rescan button
@@ -191,7 +191,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(5, 0, 5, 5);
 		panel.add(rescanButton, constraints);
 		
 		// Add a simple label
@@ -205,7 +205,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(5, 0, 5, 5);
 		panel.add(metadataView, constraints);
 		
 		// Add the table
@@ -225,6 +225,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.20;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 0, 5, 5);
 		panel.add(metadataViewPane, constraints);
 
 		// Add a simple label
@@ -238,6 +239,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 0, 5, 5);
 		panel.add(invalidDatasets, constraints);
 		
 		// Add the table

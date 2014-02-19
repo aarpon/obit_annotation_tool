@@ -1,13 +1,13 @@
 package ch.eth.scu.importer.at.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -26,7 +26,6 @@ import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
-import ch.eth.scu.importer.common.settings.UserSettingsManager;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
 /**
@@ -62,15 +61,30 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		appIcon = new ImageIcon(
 				this.getClass().getResource("icons/icon.png"));
 		
-		// Add a BorderLayout
-		setLayout(new BorderLayout());
-		
+		// Create a GridBagLayout
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		setLayout(gridBagLayout);		
+
+		// Common constraints
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		constraints.fill = GridBagConstraints.BOTH;
+
 		// Create a toolbar
 		toolBar = new JToolBar("Tools");
 		toolBar.setFloatable(false);
 		// TODO: Add tools...
-		add(toolBar, BorderLayout.NORTH);
 
+		// Set constraints and add widget
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridwidth = 3;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(toolBar, constraints);
+		
 		// Add the metadata viewer
 		try {
 			metadataViewer = ViewerFactory.createViewer();
@@ -78,32 +92,65 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 			System.err.println("There was a problem instantiating "
 					+ "the tools for current acquisition station.");
 			System.exit(1);
-		} 
-		add(metadataViewer.getPanel(), BorderLayout.WEST);
+		}
 
-		// Create the HTML viewing pane. We set a maximum size to
-		// try to work around a strange behavior in Windows XP where
-		// the output panel keeps growing in (vertical) size even 
-		// though there is a JScrollPane that should prevent that... 
+		// Set constraints and add widget
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		add(metadataViewer.getPanel(), constraints);
+
+		// Create the HTML viewing pane.
         OutputPane outputPane = new OutputPane();
-        outputPane.setMaximumSize(new Dimension(1500, 100));
+        outputPane.setMaximumSize(new Dimension(1500, 200));
         JScrollPane outputWindow = new JScrollPane(outputPane);
-		add(outputWindow, BorderLayout.SOUTH);
-
+        //outputWindow.setMaximumSize(new Dimension(1500, 200));
+        
+		// Set constraints and add widget
+        constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.gridwidth = 3;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(0, 5, 5, 5);
+		add(outputWindow, constraints);
+		
 		// Set the output pane to the viewer
 		metadataViewer.setOutputPane(outputPane);
 		
 		// Add the openBIS viewer
 		openBISViewer = new OpenBISViewer(outputPane);
-		add(openBISViewer.getPanel(), BorderLayout.EAST);
+		
+		// Set constraints and add widget
+		constraints.gridx = 2;
+		constraints.gridy = 1;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(0, 5, 5, 5);
+		add(openBISViewer.getPanel(), constraints);
 		
 		// Add the editor: it is important to create this object as
 		// the last one, since it requires non-null references to the 
 		// metadata, the openBIS viewers, and the output pane!
         EditorContainer editorContainer = new EditorContainer(
                 metadataViewer, openBISViewer, outputPane);
-		add(editorContainer, BorderLayout.CENTER);
 
+		// Set constraints and add widget
+		constraints.gridx = 1;
+		constraints.gridy = 1;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(0, 5, 5, 0);
+		add(editorContainer, constraints);
+		
 		// Add observers to the viewers
 		metadataViewer.addObserver(editorContainer.getEditor());
 		openBISViewer.addObserver(editorContainer.getEditor());
@@ -118,9 +165,8 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 	    });
 
 		// Set up the frame and center on screen
-		setMinimumSize(new Dimension(1200, 700));
-		setPreferredSize(new Dimension(1200, 700));
-		setMaximumSize(new Dimension(1500, 1500));
+		setMinimumSize(new Dimension(1200, 900));
+		setPreferredSize(new Dimension(1200, 900));
 		pack();
 		setLocationRelativeTo(null);
 

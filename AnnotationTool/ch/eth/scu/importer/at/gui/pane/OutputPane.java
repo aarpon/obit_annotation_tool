@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.at.gui.pane;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -80,6 +81,9 @@ public class OutputPane extends JTextPane {
 		// Set some margin
 		setMargin(new Insets(3, 3, 3, 3));
 		
+		// Set the minimum size
+		setMinimumSize(new Dimension(1500, 200));
+
 		// Set the pane to non-editable
 		setEditable(false);
 		
