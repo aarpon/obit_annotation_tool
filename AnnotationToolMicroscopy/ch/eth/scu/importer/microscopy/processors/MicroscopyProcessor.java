@@ -2,6 +2,8 @@ package ch.eth.scu.importer.microscopy.processors;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,6 +23,31 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 	/* Folder to scan (recursively) */
 	private File userFolder;
+
+	/* List of supported file formats */
+	// TODO Get this from bio-formats
+	private ArrayList<String> supportedFormats = 
+			new ArrayList<String>(Arrays.asList(
+					".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff", ".afm",
+					".aim", ".al3d", ".am", ".amiramesh", ".apl", ".arf",
+					".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2", ".crw",
+					".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2", ".dm3",
+					".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf", ".fff",
+					".ffr", ".fits", ".flex", ".fli", ".frm", ".gel", ".gif",
+					".grey", ".hdr", ".hed", ".his", ".htd", ".html", ".hx",
+					".ics", ".ids", ".img", ".ims", ".inr", ".ipl", ".ipm",
+					".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d", ".labels",
+					".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb", ".mea",
+					".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw", ".mtb",
+					".mvd2", ".naf", ".nd", ".nd2", ".ndpi", ".nef", ".nhdr",
+					".nrrd", ".obsep", ".oib", ".oif", ".ome", ".par", ".pcx",
+					".pds", ".pgm", ".pic", ".pict", ".png", ".pnl", ".pr3",
+					".ps", ".psd", ".r3d", ".raw", ".res", ".scn", ".sdt",
+					".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk", ".stp",
+					".svs", ".sxm", ".tfr", ".tga", ".tif", ".tiff", ".tnb",
+					".top", ".txt", ".v", ".vms", ".vsi", ".vws", ".wat",
+					".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys", ".zfp",
+					".zfr", ".zvi"));
 
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
@@ -100,9 +127,16 @@ public class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	private void recursiveDir(File dir) throws IOException {
 
-
 		// Get the directory listing
 		String [] files = dir.list();
+
+		// Empty subfolders are not accepted
+		if (files.length == 0 && !dir.equals(this.userFolder)) {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(
+					dir, "Empty folder");
+			return;
+		}		
 
 		// Go over the files and folders
 		for (String f : files) {
@@ -155,8 +189,16 @@ public class MicroscopyProcessor extends AbstractProcessor {
 				return;				
 			}
 
+			// A microscopy file cannot be at the user folder root!
+			if (file.getParent().equals(this.userFolder.toString())) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "File must be in subfolder.");
+				continue;
+			}
+			
 			// Do we have an unknown file? If we do, we move on to the next.
-			if (! ext.equalsIgnoreCase(".nd2")) {
+			if (! supportedFormats.contains(ext)) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
 						file, "Invalid file type.");
