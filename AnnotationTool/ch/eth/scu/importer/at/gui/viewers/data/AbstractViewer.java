@@ -12,6 +12,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
@@ -24,9 +26,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -558,8 +565,16 @@ abstract public class AbstractViewer extends Observable
 			String value = attributes.get(key);
 			model.addRow(new Object[] {key, value});
 		}
-		// Sort the table by the first column
-		metadataViewTable.getRowSorter().toggleSortOrder(0);
+
+		// Sort the table ascending by the first column
+		TableRowSorter<? extends TableModel> rowSorter = 
+				(TableRowSorter<? extends TableModel>)
+				metadataViewTable.getRowSorter();
+		List<SortKey> keys = new ArrayList<SortKey>();
+		SortKey sortKey = new SortKey(0, SortOrder.ASCENDING);
+		keys.add(sortKey);
+		rowSorter.setSortKeys(keys);
+		rowSorter.sort();
 	}
 
 	/**
