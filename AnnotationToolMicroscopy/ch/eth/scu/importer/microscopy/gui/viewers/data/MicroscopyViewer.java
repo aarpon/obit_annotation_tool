@@ -20,7 +20,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor;
 import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.Experiment;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.ND2File;
+import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.MicroscopyFile;
 
 /**
  * Simple graphical viewer for the MicroscopyProcessor.
@@ -48,14 +48,14 @@ public class MicroscopyViewer extends AbstractViewer {
 					// Get the node object
 		        		Object nodeInfo = node.getUserObject();
 
-		        		// If the double-clicked on an ND2 file, scan it
+		        		// If the double-clicked on an microscopy file, scan it
 		        		// and update the metadata view
 		        		String className = nodeInfo.getClass().getSimpleName();
-		        		if (className.equals("ND2File") && 
+		        		if (className.equals("MicroscopyFile") && 
 		        				(e.getClickCount() == 2)) {
 		        			clearMetadataTable();
 		        			addAttributesToMetadataTable(
-		        					((MicroscopyProcessor.ND2File) 
+		        					((MicroscopyProcessor.MicroscopyFile) 
 		        							nodeInfo).scanFileAndGetAttributes());
 		        		}
 		         }
@@ -98,10 +98,10 @@ public class MicroscopyViewer extends AbstractViewer {
 		String className = nodeInfo.getClass().getSimpleName();
 		if (className.equals("Experiment")) {
 			clearMetadataTable();
-		} else if (className.equals("ND2File")) {
+		} else if (className.equals("MicroscopyFile")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((MicroscopyProcessor.ND2File) 
+					((MicroscopyProcessor.MicroscopyFile) 
 							nodeInfo).getAttributes());
 		} else {
 			clearMetadataTable();
@@ -186,7 +186,7 @@ public class MicroscopyViewer extends AbstractViewer {
 			MicroscopyProcessor.UserFolder folderDescriptor) {
 
 		ExperimentNode experimentNode;
-		MicroscopyFileNode nd2FileNode;
+		MicroscopyFileNode microscopyFileNode;
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
@@ -198,14 +198,15 @@ public class MicroscopyViewer extends AbstractViewer {
 			rootNode.add(experimentNode);
 
 			// Add its images
-			for (String nd2Key: e.nd2Files.keySet()) {
+			for (String microscopyKey: e.microscopyFiles.keySet()) {
 
-				// Get the ND2 file descriptor
-				ND2File nd2File = e.nd2Files.get(nd2Key);
+				// Get the miroscopy file descriptor
+				MicroscopyFile microscopyFile = 
+						e.microscopyFiles.get(microscopyKey);
 				
-				// Add the ND2File
-				nd2FileNode = new MicroscopyFileNode(nd2File);
-				experimentNode.add(nd2FileNode);
+				// Add the MicroscopyFile
+				microscopyFileNode = new MicroscopyFileNode(microscopyFile);
+				experimentNode.add(microscopyFileNode);
 			}
 		}
 	}

@@ -16,7 +16,7 @@ import ch.eth.scu.importer.processors.model.RootDescriptor;
 import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
- * MicroscopyProcessor parses Nikon ND2 files (using the bio-formats library).
+ * MicroscopyProcessor parses microscopy files (using the bio-formats library).
  * @author Aaron Ponti
  */
 public class MicroscopyProcessor extends AbstractProcessor {
@@ -111,19 +111,19 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 	@Override
 	public String info() {
-		return "Nikon NIS-Elements ND2";
+		return "Bioformats-compatible microscopy file format";
 	}
 
 	@Override
 	public String getType() {
 		// Return type
-		return "NIKONND2";
+		return "MICROSCOPY";
 	}
 
 	/**
-	 * Scan the folder recursively and process all ND2 files found
+	 * Scan the folder recursively and process all microscopy files found
 	 * @param dir Full path to the directory to scan
-	 * @throws IOException Thrown if an ND2 file could not be processed
+	 * @throws IOException Thrown if a file could not be processed
 	 */
 	private void recursiveDir(File dir) throws IOException {
 
@@ -217,13 +217,13 @@ public class MicroscopyProcessor extends AbstractProcessor {
 			}
 
 			// Store
-			ND2File nd2FileDesc;
-			String nd2FileName = fileName;
-			String nd2FileKey = experimentName + "_" + nd2FileName;
-			nd2FileDesc = new ND2File(file);	
+			MicroscopyFile microscopyFileDesc;
+			String microscopyFileName = fileName;
+			String microscopyFileKey = experimentName + "_" + microscopyFileName;
+			microscopyFileDesc = new MicroscopyFile(file);	
 
 			// Store it in the Experiment descriptor
-			expDesc.nd2Files.put(nd2FileKey, nd2FileDesc);
+			expDesc.microscopyFiles.put(microscopyFileKey, microscopyFileDesc);
 			
 		}
 
@@ -264,9 +264,9 @@ public class MicroscopyProcessor extends AbstractProcessor {
 		// Experiment description
 		public String description = "";
 			
-		// Store the ND2 files associated with this Experiment
-		public Map<String, ND2File> nd2Files = 
-				new LinkedHashMap<String, ND2File>();
+		// Store the microscopy files associated with this Experiment
+		public Map<String, MicroscopyFile> microscopyFiles = 
+				new LinkedHashMap<String, MicroscopyFile>();
 		
 		/**
 		 * Constructor
@@ -320,27 +320,27 @@ public class MicroscopyProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Descriptor representing a Nikon ND2 file.
+	 * Descriptor representing a microscopy file.
 	 * @author Aaron Ponti
 	 */
-	public class ND2File extends DatasetDescriptor {
+	public class MicroscopyFile extends DatasetDescriptor {
 
 		private boolean fileScanned = false;
 
 		/**
 		 * Constructor.
-		 * @param nd2FileName ND2 file name with full path
+		 * @param microscopyFileName Microscopy file name with full path
 		 */
-		public ND2File(File nd2FileName) throws IOException {
+		public MicroscopyFile(File microscopyFileName) throws IOException {
 
 			// Call base constructor
-			super(nd2FileName);
+			super(microscopyFileName);
 
 			// Store the file name
-			this.setName(nd2FileName.getName());
+			this.setName(microscopyFileName.getName());
 
 			// Append the attibute file size.
-			long s = nd2FileName.length();
+			long s = microscopyFileName.length();
 			float sMB = s / (1024 * 1024);
 			String unit = "MiB";
 			if (sMB > 750) {
@@ -359,8 +359,8 @@ public class MicroscopyProcessor extends AbstractProcessor {
 		}
 
 		/**
-		 * Return a String representation of the extracted ND2 file.
-		 * @return String representation of the ND2 filw.
+		 * Return a String representation of the extracted microscopy file.
+		 * @return String representation of the microscopy file.
 		 */
 		@Override
 		public String toString() {
@@ -373,7 +373,7 @@ public class MicroscopyProcessor extends AbstractProcessor {
 		 */
 		@Override		
 		public String getType() {
-			return "ND2File";
+			return "MicroscopyFile";
 		}
 
 		/**

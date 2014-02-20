@@ -7,7 +7,7 @@ import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.Experiment;
 
 /**
  * Collects all relevant metadata to allow the registration of an
- * experiment from a Nikon microscope (ND2 file format).
+ * experiment from a generic light microscope (bioformats-compatible file format).
  * @author Aaron Ponti
  *
  */

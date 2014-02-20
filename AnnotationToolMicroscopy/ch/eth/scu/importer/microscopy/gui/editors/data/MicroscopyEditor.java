@@ -29,7 +29,7 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.microscopy.gui.editors.data.model.MicroscopyMetadata;
 import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.Experiment;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.ND2File;
+import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.MicroscopyFile;
 
 /**
  * Metadata editor panel.
@@ -115,31 +115,31 @@ public class MicroscopyEditor extends AbstractEditor {
 					currentMetadata.getExperiment().description); 
 			expDescr.addUserAttributes(expUserAttributes);
 
-			// Now get the ND2File children of the Experiment
+			// Now get the MicroscopyFile children of the Experiment
 			for (int i = 0; i < expNode.getChildCount(); i++) {
 	
 				// Get the i-th child node
-				AbstractNode nd2FileNode =
+				AbstractNode microscopyFileNode =
 						(AbstractNode) expNode.getChildAt(i);
 	
-				// Get the ND2File Descriptor
-				ND2File nd2FileDescriptor =
-						(ND2File) nd2FileNode.getUserObject();
+				// Get the MicroscopyFile Descriptor
+				MicroscopyFile microscopyFileDescriptor =
+						(MicroscopyFile) microscopyFileNode.getUserObject();
 	
 				// Make sure we have a Tray or a Specimen
-				assert(nd2FileNode.getType().equals("ND2File"));
+				assert(microscopyFileNode.getType().equals("MicroscopyFile"));
 
 				// Set the openBIS space and experiment identifiers
-				Map<String, String> ND2FileOpenBISAttributes = 
+				Map<String, String> microscopyFileOpenBISAttributes = 
 						new Hashtable<String, String>();
-				ND2FileOpenBISAttributes.put(
+				microscopyFileOpenBISAttributes.put(
 						"openBISSpaceIdentifier", 
 						currentMetadata.getOpenBISSpaceIdentifier());
-				ND2FileOpenBISAttributes.put(
+				microscopyFileOpenBISAttributes.put(
 						"openBISExperimentIdentifier", 
 						currentMetadata.getOpenBISExerimentIdentifier());
-				nd2FileDescriptor.addOpenBISAttributes(
-						ND2FileOpenBISAttributes);
+				microscopyFileDescriptor.addOpenBISAttributes(
+						microscopyFileOpenBISAttributes);
 
 			}
 		}

@@ -126,7 +126,7 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	 */
 	@Override
 	public String getType() {
-		return "nd2";
+		return "microscopy";
 	}
 
 
@@ -135,7 +135,7 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	 * @return descriptive String for the Reader.
 	 */
 	public String info() {
-		return "Nikon ND2 file format.";
+		return "Bioformats-compatible microscopy file format.";
 	}
 
 }
