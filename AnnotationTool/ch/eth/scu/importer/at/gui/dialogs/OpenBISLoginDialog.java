@@ -1,13 +1,8 @@
 package ch.eth.scu.importer.at.gui.dialogs;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
-import ch.eth.scu.importer.common.settings.AppSettingsManager;
-
 import java.awt.Color;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +11,18 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import ch.eth.scu.importer.common.settings.AppSettingsManager;
 
 /**
  * openBIS login dialog

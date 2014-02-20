@@ -354,7 +354,7 @@ public class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 
 		// Create a label for the folder
-		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(0, 5, 5, 5);
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;

@@ -10,7 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,6 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSampleListNode;
-import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSampleNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
@@ -58,7 +56,6 @@ import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SampleFetchOption;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.FacadeFactory;
 import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.IQueryApiFacade;
@@ -180,7 +177,7 @@ public class OpenBISViewer extends Observable
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		constraints.insets = new Insets(0, 5, 5, 0);
+		constraints.insets = new Insets(5, 5, 5, 0);
 		panel.add(treeView, constraints);
 
 		// Add a rescan button

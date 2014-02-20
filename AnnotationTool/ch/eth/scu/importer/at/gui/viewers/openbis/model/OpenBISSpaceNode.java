@@ -1,6 +1,5 @@
 package ch.eth.scu.importer.at.gui.viewers.openbis.model;
 
-import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 
 /**

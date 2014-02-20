@@ -1,13 +1,12 @@
 package ch.eth.scu.importer.at.datamover;
 
 import java.io.File;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 import javax.swing.JOptionPane;
 
 import ch.eth.scu.importer.common.settings.UserSettingsManager;
-
-import java.security.SecureRandom;
-import java.math.BigInteger;
 
 /**
  * Moves the user folder to the Datamover incoming folder.

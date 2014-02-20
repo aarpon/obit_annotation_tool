@@ -26,7 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
@@ -154,7 +153,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
-		constraints.insets = new Insets(5, 0, 5, 5);
+		constraints.insets = new Insets(0, 0, 5, 5);
 		panel.add(title, constraints);
 		
 		// Create the Tree

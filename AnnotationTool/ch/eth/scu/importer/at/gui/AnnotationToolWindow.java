@@ -101,13 +101,13 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
+		constraints.insets = new Insets(0, 5, 0, 5);
 		add(metadataViewer.getPanel(), constraints);
 
 		// Create the HTML viewing pane.
         OutputPane outputPane = new OutputPane();
         outputPane.setMaximumSize(new Dimension(1500, 200));
         JScrollPane outputWindow = new JScrollPane(outputPane);
-        //outputWindow.setMaximumSize(new Dimension(1500, 200));
         
 		// Set constraints and add widget
         constraints.gridx = 0;
@@ -132,7 +132,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		constraints.insets = new Insets(0, 5, 5, 5);
+		constraints.insets = new Insets(0, 0, 0, 5);
 		add(openBISViewer.getPanel(), constraints);
 		
 		// Add the editor: it is important to create this object as
@@ -148,7 +148,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		constraints.insets = new Insets(0, 5, 5, 0);
+		constraints.insets = new Insets(0, 0, 0, 5);
 		add(editorContainer, constraints);
 		
 		// Add observers to the viewers

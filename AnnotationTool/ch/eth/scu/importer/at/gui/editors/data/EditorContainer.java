@@ -58,7 +58,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
-		constraints.insets = new Insets(5, 0, 5, 0);
+		constraints.insets = new Insets(0, 0, 5, 0);
 		add(title, constraints);
 
 		// Add the editor

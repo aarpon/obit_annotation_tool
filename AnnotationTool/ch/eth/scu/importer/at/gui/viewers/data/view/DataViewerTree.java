@@ -4,8 +4,6 @@ import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeCellRenderer;
-
 /**
  * Custom JTree that uses a customized renderer
  * @author Aaron Ponti
