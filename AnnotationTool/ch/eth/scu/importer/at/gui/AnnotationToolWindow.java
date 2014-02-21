@@ -11,11 +11,9 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
@@ -38,7 +36,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
     private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
-	private JToolBar toolBar;
 	private Icon appIcon; 
 
 	/**
@@ -70,21 +67,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		constraints.fill = GridBagConstraints.BOTH;
 
-		// Create a toolbar
-		toolBar = new JToolBar("Tools");
-		toolBar.setFloatable(false);
-		// TODO: Add tools...
-
-		// Set constraints and add widget
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.gridwidth = 3;
-		constraints.gridheight = 1;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.insets = new Insets(5, 5, 5, 5);
-		add(toolBar, constraints);
-		
 		// Add the metadata viewer
 		try {
 			metadataViewer = ViewerFactory.createViewer();
@@ -96,12 +78,12 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Set constraints and add widget
 		constraints.gridx = 0;
-		constraints.gridy = 1;
+		constraints.gridy = 0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		constraints.insets = new Insets(0, 5, 0, 5);
+		constraints.insets = new Insets(5, 5, 0, 5);
 		add(metadataViewer.getPanel(), constraints);
 
 		// Create the HTML viewing pane.
@@ -111,7 +93,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
         
 		// Set constraints and add widget
         constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = 1;
 		constraints.gridwidth = 3;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
@@ -127,12 +109,12 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		
 		// Set constraints and add widget
 		constraints.gridx = 2;
-		constraints.gridy = 1;
+		constraints.gridy = 0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		constraints.insets = new Insets(0, 0, 0, 5);
+		constraints.insets = new Insets(5, 0, 0, 5);
 		add(openBISViewer.getPanel(), constraints);
 		
 		// Add the editor: it is important to create this object as
@@ -143,12 +125,12 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Set constraints and add widget
 		constraints.gridx = 1;
-		constraints.gridy = 1;
+		constraints.gridy = 0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-		constraints.insets = new Insets(0, 0, 0, 5);
+		constraints.insets = new Insets(5, 0, 0, 5);
 		add(editorContainer, constraints);
 		
 		// Add observers to the viewers
@@ -211,41 +193,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		} else {
 			// Nothing
 		}
-	}
-
-	/**
-	 * Add buttons to the toolbar
-	 * 
-	 * TODO: Currently this is not in use!
-	 */
-	private void addButtons() {
-
-		// Quit
-        toolBar.add(createButton("icons/quit.png", "Quit",
-        		"Quit", "Quit the application"));
-
-     }
-	
-	/**
-	 * Create an action button to be added to the toolbar
-	 * @param imgLocation		relative path to the image
-	 * @param actionCommand		command to be used 
-	 * @param toolTipText		tooltip String for the button 
-	 * @return a JButton ready to be added to the toolbar
-	 */
-	private JButton createButton(String imgLocation,
-			String text, String actionCommand, String toolTipText) {
-
-		// Create, initialize and return the button.
-		JButton button = new JButton(text);
-		button.setMargin(new Insets(3, 3, 3, 3));
-		button.setBorderPainted(false);
-		button.setActionCommand(actionCommand);
-		button.setToolTipText(toolTipText);
-		button.addActionListener(this);
-		button.setIcon(new ImageIcon(
-					this.getClass().getResource(imgLocation)));
-		return button;
 	}
 
 	/**
