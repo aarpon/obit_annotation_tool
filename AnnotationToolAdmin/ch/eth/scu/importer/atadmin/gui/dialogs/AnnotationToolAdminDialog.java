@@ -433,11 +433,14 @@ public class AnnotationToolAdminDialog extends JDialog {
         				return;
         			}
         			if (manager.settingMustBeUnique("AcquisitionStation")) {
+        				// This is here for completeness. Currently, the
+        				// acquisition station MUST not need to be univocal
+        				// among servers!
         				if (manager.doesSettingExist(
         						"AcquisitionStation", value)) {
         					JOptionPane.showMessageDialog(null, 
-        							"The acquisition station must univocal" +
-                							" among servers!",
+        							"This acquisition station has already " +
+                							"been assigned to another server!",
         							"Error", JOptionPane.ERROR_MESSAGE);
         					return;
         				}
@@ -518,8 +521,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         				if (manager.doesSettingExist(
         						"UserDataDir", selUserDataDir)) {
         					JOptionPane.showMessageDialog(null, 
-        							"The user directory must univocal" +
-        							" among servers!",
+        							"This user directory has already been " +
+        							"assigned to another server!",
         							"Error", JOptionPane.ERROR_MESSAGE);
         					return;
         				}
@@ -585,8 +588,8 @@ public class AnnotationToolAdminDialog extends JDialog {
         				if (manager.doesSettingExist(
         						"DatamoverIncomingDir", selIncomingDir)) {
         					JOptionPane.showMessageDialog(null, 
-        							"The Datamover incoming directory must " +
-        							"univocal among servers!",
+        							"This Datamover incoming directory has " +
+        							"already been assigned to another server!",
         							"Error", JOptionPane.ERROR_MESSAGE);
         					return;
         				}
