@@ -129,9 +129,9 @@ public class MicroscopyViewer extends AbstractViewer {
 	public boolean parse(File folder) {
 
 		// Process the file or folder
-		MicroscopyProcessor nikonprocessor;
+		MicroscopyProcessor microscopyProcessor;
 		try {
-			nikonprocessor = new MicroscopyProcessor(
+			microscopyProcessor = new MicroscopyProcessor(
 					folder.getCanonicalPath());
 		} catch (IOException e) {
 			outputPane.err("Could not parse the folder " + folder + "!");
@@ -139,17 +139,17 @@ public class MicroscopyViewer extends AbstractViewer {
 		}
 
 		// We parse. If parsing fails, we just return (the dataset is invalid).
-		if (!nikonprocessor.parse()) {
+		if (!microscopyProcessor.parse()) {
 			outputPane.err("Could not parse the folder " + folder + "!");
-			nikonprocessor = null;
+			microscopyProcessor = null;
 			return false;
 		}
 
 		// Make sure we have a valid dataset
-		if (!nikonprocessor.validator.isValid) {
+		if (!microscopyProcessor.validator.isValid) {
 			DefaultTableModel model = 
 					(DefaultTableModel) invalidDatasetsTable.getModel();
-			for (File file : nikonprocessor.validator.invalidFilesOrFolders.keySet()) {
+			for (File file : microscopyProcessor.validator.invalidFilesOrFolders.keySet()) {
 				String filePath;
 				try {
 					filePath = file.getCanonicalPath();
@@ -163,17 +163,17 @@ public class MicroscopyViewer extends AbstractViewer {
 					filePath = "Unknown";
 				}
 				model.addRow(new Object[] {filePath,
-						nikonprocessor.validator.invalidFilesOrFolders.get(file)});
+						microscopyProcessor.validator.invalidFilesOrFolders.get(file)});
 			}
 			return false;
 		}
 
 		// We will append the experiment nodes directly to the root node
-		createNodes((RootNode)rootNode, nikonprocessor.folderDescriptor);
+		createNodes((RootNode)rootNode, microscopyProcessor.folderDescriptor);
 		
 		// Inform the user
 		outputPane.log("Successfully processed folder \"" + 
-				nikonprocessor.getFolder().getName() + "\"");
+				microscopyProcessor.getFolder().getName() + "\"");
 		return true;
 	}
 

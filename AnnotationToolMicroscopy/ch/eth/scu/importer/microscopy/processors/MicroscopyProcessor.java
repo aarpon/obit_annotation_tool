@@ -399,8 +399,9 @@ public class MicroscopyProcessor extends AbstractProcessor {
 			}
 			
 			// First scan
-            MicroscopyReader nikonReader = new MicroscopyReader(this.fullPath);
-			attributes.putAll(nikonReader.getAttributes());
+            MicroscopyReader microscopyReader =
+            		new MicroscopyReader(this.fullPath);
+			attributes.putAll(microscopyReader.getAttributes());
 			
 			// Set the fileScanned attributes to true
 			fileScanned = true;
