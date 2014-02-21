@@ -86,8 +86,6 @@ public class BDFACSDIVAFCSViewer extends AbstractViewer {
 		// We will append the experiment nodes directly to the root node
 		createNodes((RootNode)rootNode, divafcsprocessor.folderDescriptor);
 		
-		// Inform the user
-		outputPane.log("Successfully processed user data folder.");
 		return true;
 	}
 

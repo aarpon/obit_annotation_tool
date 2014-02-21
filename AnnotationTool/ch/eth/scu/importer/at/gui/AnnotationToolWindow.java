@@ -26,6 +26,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.version.VersionInfo;
 
+
 /**
  * Main window of the AnnotationTool application.
  * @author Aaron Ponti
@@ -156,6 +157,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		// Here we will insist on getting valid openBIS credentials, since a
 		// valid login is essential for the functioning of the application.
 		// If the user just closes the dialog, we close the application.
+		outputPane.log("Asking for user credentials.");
 		boolean status = false;
 		while (!status) {
 			try {
@@ -169,12 +171,47 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 			}
 		}
 
-		// Now we can scan the openBIS instance
-		openBISViewer.scan();
+		// Create a thread for building the tree of the openBIS entities
+		Thread dataScanner = new Thread() {
+		
+			public void run() {
+				
+				// Scan the openBIS instance
+				openBISViewer.scan();
+			}
+		};
 
-		// Scan the datamover incoming folder for datasets
-		metadataViewer.setUserName(openBISViewer.getUserName());
-		metadataViewer.scan();
+		// Create a thread for scanning the user data folder	
+		Thread openBISScanner = new Thread() {
+			
+			public void run() {
+
+				// Scan the user data folder for datasets
+				metadataViewer.setUserName(openBISViewer.getUserName());
+				metadataViewer.scan();
+			}
+		};
+		
+		try {
+
+			// Run the scanning threads
+			dataScanner.start();
+			openBISScanner.start();
+
+			// Wait for both threads to finish
+			dataScanner.join();
+			openBISScanner.join();
+
+		} catch (InterruptedException e) {
+			
+			JOptionPane.showMessageDialog(null,
+					"Scanning threads interrupted!\n\n" +
+							"The application will now quit.",	
+					"Scanning error",
+					JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+
+		}
 
 		// Make window visible
 		setVisible(true);

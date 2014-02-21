@@ -364,10 +364,20 @@ public class OpenBISViewer extends Observable
 					JOptionPane.ERROR_MESSAGE);
 			facade = null;
 			System.exit(1);
+		} catch (InterruptedException e) {
+			JOptionPane.showMessageDialog(this.panel,
+					"Connection thread interrupted!\n\n" +
+							"The application will now quit.",	
+					"Connection error",
+					JOptionPane.ERROR_MESSAGE);
+			facade = null;
+			System.exit(1);
 		}
 
 		// Set isLoggedIn to true
 		isLoggedIn = true;
+		
+		outputPane.log("Successfully logged in to openBIS.");
 		
 		return true;
 	}
@@ -435,6 +445,9 @@ public class OpenBISViewer extends Observable
 
 		OpenBISSpaceNode space;
 		OpenBISProjectNode project;
+
+		// Inform
+		outputPane.log("Retrieving openBIS structure...");
 
 		// Clear the tree
 		clearTree();
@@ -544,6 +557,9 @@ public class OpenBISViewer extends Observable
 			// We do not need to return, this case is treated below
 
 		}
+		
+		// Inform
+		outputPane.log("Retrieving openBIS structure completed.");
 	}
 
 	/**
@@ -718,10 +734,10 @@ public class OpenBISViewer extends Observable
  
             public void actionPerformed(ActionEvent e)
             {
-            		if (createNewProject(node)) {
-            			// Rescan
-            			scan();
-            		}
+            	if (createNewProject(node)) {
+            		// Rescan
+            		scan();
+            	}
 
 			}
         });

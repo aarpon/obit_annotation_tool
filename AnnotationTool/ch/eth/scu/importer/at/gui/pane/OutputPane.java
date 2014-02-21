@@ -88,7 +88,7 @@ public class OutputPane extends JTextPane {
 		setEditable(false);
 		
 		// Add the first text
-		log("Ready.");
+		log("Welcome.");
 	}
 
 	/**

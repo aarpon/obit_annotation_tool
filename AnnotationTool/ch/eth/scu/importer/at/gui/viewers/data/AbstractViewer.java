@@ -393,6 +393,9 @@ abstract public class AbstractViewer extends Observable
 		notifyObservers(new ObserverActionParameters(
 				ObserverActionParameters.Action.SCAN_COMPLETE,
 				null));
+		
+		// Inform
+		outputPane.log("Scanning user data folder completed.");
 	}
 
     /**
