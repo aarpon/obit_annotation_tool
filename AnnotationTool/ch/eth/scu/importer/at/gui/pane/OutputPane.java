@@ -6,6 +6,7 @@ import java.awt.Insets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -19,10 +20,11 @@ import javax.swing.text.StyledDocument;
  * @author Aaron Ponti
  *
  */
-public class OutputPane extends JTextPane {
+public class OutputPane extends JScrollPane {
 
 	private static final long serialVersionUID = 1L;
-
+	private static JTextPane outputPane = new JTextPane();
+	
 	/**
 	 * Message type
 	 */
@@ -63,9 +65,12 @@ public class OutputPane extends JTextPane {
 	 */
 	public OutputPane() {
 		
+		// Call the base constructor
+		super(outputPane);
+		
 		// Set the document
 		this.doc = new DefaultStyledDocument();
-		setDocument(this.doc);
+		outputPane.setDocument(this.doc);
 		
 		// Add three styles
 		base = StyleContext.getDefaultStyleContext().
@@ -79,13 +84,13 @@ public class OutputPane extends JTextPane {
 		StyleConstants.setForeground(err, Color.red);
 		
 		// Set some margin
-		setMargin(new Insets(3, 3, 3, 3));
+		outputPane.setMargin(new Insets(3, 3, 3, 3));
 		
 		// Set the minimum size
-		setMinimumSize(new Dimension(1500, 200));
+		outputPane.setMinimumSize(new Dimension(1500, 200));
 
 		// Set the pane to non-editable
-		setEditable(false);
+		outputPane.setEditable(false);
 		
 		// Add the first text
 		log("Welcome.");
@@ -99,6 +104,7 @@ public class OutputPane extends JTextPane {
 		try {
 			doc.insertString(doc.getLength(), 
 					buildFullString(text, Type.LOG), log);
+			scroll();
 		} catch (BadLocationException e) {
 			System.err.println("Could not print to output pane!");
 		}
@@ -114,6 +120,7 @@ public class OutputPane extends JTextPane {
 		try {
 			doc.insertString(doc.getLength(), 
 					buildFullString(text, Type.WARN), warn);
+			scroll();
 		} catch (BadLocationException e) {
 			System.err.println("Could not print to output pane!");
 		}
@@ -129,6 +136,7 @@ public class OutputPane extends JTextPane {
 		try {
 			doc.insertString(doc.getLength(), 
 					buildFullString(text, Type.ERR), err);
+			scroll();
 		} catch (BadLocationException e) {
 			System.err.println("Could not print to output pane!");
 		}
@@ -148,5 +156,10 @@ public class OutputPane extends JTextPane {
 		}
 		return (new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")).format(
 				new Date()) + ": " + typeStr + text + "\n";
+	}
+	
+	// Scroll to the end of the JTextPane
+	private void scroll() {
+		// TODO: Implement!
 	}
 }

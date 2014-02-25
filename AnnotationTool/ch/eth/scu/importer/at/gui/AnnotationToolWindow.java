@@ -89,9 +89,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 		// Create the HTML viewing pane.
         OutputPane outputPane = new OutputPane();
-        outputPane.setMaximumSize(new Dimension(1500, 200));
-        JScrollPane outputWindow = new JScrollPane(outputPane);
-        
+
 		// Set constraints and add widget
         constraints.gridx = 0;
 		constraints.gridy = 1;
@@ -100,7 +98,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(0, 5, 5, 5);
-		add(outputWindow, constraints);
+		add(outputPane, constraints);
 		
 		// Set the output pane to the viewer
 		metadataViewer.setOutputPane(outputPane);

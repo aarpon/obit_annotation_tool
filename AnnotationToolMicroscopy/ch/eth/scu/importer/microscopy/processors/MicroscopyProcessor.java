@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import ch.eth.scu.importer.microscopy.readers.MicroscopyReader;
 import ch.eth.scu.importer.processors.AbstractProcessor;
+import ch.eth.scu.importer.processors.model.AbstractDescriptor;
 import ch.eth.scu.importer.processors.model.DatasetDescriptor;
 import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
 import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
@@ -17,6 +19,7 @@ import ch.eth.scu.importer.processors.validator.GenericValidator;
 
 /**
  * MicroscopyProcessor parses microscopy files (using the bio-formats library).
+ * 
  * @author Aaron Ponti
  */
 public class MicroscopyProcessor extends AbstractProcessor {
@@ -26,46 +29,46 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 	/* List of supported file formats */
 	// TODO Get this from bio-formats
-	private ArrayList<String> supportedFormats = 
-			new ArrayList<String>(Arrays.asList(
-					".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff", ".afm",
-					".aim", ".al3d", ".am", ".amiramesh", ".apl", ".arf",
-					".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2", ".crw",
-					".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2", ".dm3",
-					".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf", ".fff",
-					".ffr", ".fits", ".flex", ".fli", ".frm", ".gel", ".gif",
-					".grey", ".hdr", ".hed", ".his", ".htd", ".html", ".hx",
-					".ics", ".ids", ".img", ".ims", ".inr", ".ipl", ".ipm",
-					".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d", ".labels",
-					".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb", ".mea",
-					".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw", ".mtb",
-					".mvd2", ".naf", ".nd", ".nd2", ".ndpi", ".nef", ".nhdr",
-					".nrrd", ".obsep", ".oib", ".oif", ".ome", ".par", ".pcx",
-					".pds", ".pgm", ".pic", ".pict", ".png", ".pnl", ".pr3",
-					".ps", ".psd", ".r3d", ".raw", ".res", ".scn", ".sdt",
-					".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk", ".stp",
-					".svs", ".sxm", ".tfr", ".tga", ".tif", ".tiff", ".tnb",
-					".top", ".txt", ".v", ".vms", ".vsi", ".vws", ".wat",
-					".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys", ".zfp",
-					".zfr", ".zvi"));
+	private ArrayList<String> supportedFormats = new ArrayList<String>(
+			Arrays.asList(".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
+					".afm", ".aim", ".al3d", ".am", ".amiramesh", ".apl",
+					".arf", ".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2",
+					".crw", ".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2",
+					".dm3", ".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf",
+					".fff", ".ffr", ".fits", ".flex", ".fli", ".frm", ".gel",
+					".gif", ".grey", ".hdr", ".hed", ".his", ".htd", ".html",
+					".hx", ".ics", ".ids", ".img", ".ims", ".inr", ".ipl",
+					".ipm", ".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d",
+					".labels", ".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb",
+					".mea", ".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw",
+					".mtb", ".mvd2", ".naf", ".nd", ".nd2", ".ndpi", ".nef",
+					".nhdr", ".nrrd", ".obsep", ".oib", ".oif", ".ome", ".par",
+					".pcx", ".pds", ".pgm", ".pic", ".pict", ".png", ".pnl",
+					".pr3", ".ps", ".psd", ".r3d", ".raw", ".res", ".scn",
+					".sdt", ".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk",
+					".stp", ".svs", ".sxm", ".tfr", ".tga", ".tif", ".tiff",
+					".tnb", ".top", ".txt", ".v", ".vms", ".vsi", ".vws",
+					".wat", ".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys",
+					".zfp", ".zfr", ".zvi"));
 
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
 
-    /**
+	/**
 	 * Constructor
 	 */
 	/**
 	 * Constructor
-	 * @param fullFolderName Full path of the folder containing the
-	 *        exported experiment.
+	 * 
+	 * @param fullFolderName
+	 *            Full path of the folder containing the exported experiment.
 	 */
 	public MicroscopyProcessor(String fullFolderName) {
 
 		// Instantiate the validator
 		validator = new GenericValidator();
 
-		// fullFolderName MUST be a folder! If it is not, there is 
+		// fullFolderName MUST be a folder! If it is not, there is
 		// a major problem with the software setup!
 		File folder = new File(fullFolderName);
 		if (!folder.isDirectory()) {
@@ -78,18 +81,19 @@ public class MicroscopyProcessor extends AbstractProcessor {
 		this.userFolder = folder;
 
 		// Create a descriptor for the user folder
-		folderDescriptor = new UserFolder(folder); 		
+		folderDescriptor = new UserFolder(folder);
 
 	}
-	
+
 	/**
 	 * Return the full path of the processed folder processed.
+	 * 
 	 * @return path of the processed folder.
 	 */
 	public File getFolder() {
 		return this.userFolder;
 	}
-	
+
 	@Override
 	public boolean parse() {
 
@@ -99,11 +103,11 @@ public class MicroscopyProcessor extends AbstractProcessor {
 		try {
 			recursiveDir(this.userFolder);
 		} catch (IOException e) {
-			this.errorMessage = "Could not parse the folder."; 
+			this.errorMessage = "Could not parse the folder.";
 			System.err.println(errorMessage);
 			return false;
 		}
-		
+
 		// Success
 		this.errorMessage = "";
 		return true;
@@ -122,33 +126,35 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 	/**
 	 * Scan the folder recursively and process all microscopy files found
-	 * @param dir Full path to the directory to scan
-	 * @throws IOException Thrown if a file could not be processed
+	 * 
+	 * @param dir
+	 *            Full path to the directory to scan
+	 * @throws IOException
+	 *             Thrown if a file could not be processed
 	 */
 	private void recursiveDir(File dir) throws IOException {
 
 		// Get the directory listing
-		String [] files = dir.list();
+		String[] files = dir.list();
 
 		// Empty subfolders are not accepted
 		if (files.length == 0 && !dir.equals(this.userFolder)) {
 			validator.isValid = false;
-			validator.invalidFilesOrFolders.put(
-					dir, "Empty folder");
+			validator.invalidFilesOrFolders.put(dir, "Empty folder");
 			return;
-		}		
+		}
 
 		// Go over the files and folders
 		for (String f : files) {
-			
+
 			File file = new File(dir + File.separator + f);
-	
+
 			// Is it a directory? Recurse into it
 			if (file.isDirectory()) {
-	
+
 				// Recurse into the subfolder
 				recursiveDir(file);
-	
+
 				// Move on to the next file
 				continue;
 			}
@@ -165,16 +171,16 @@ public class MicroscopyProcessor extends AbstractProcessor {
 				continue;
 			}
 			String ext = fileName.substring(indx);
-			
-			// Check whether we find a data_structure.ois file. This 
+
+			// Check whether we find a data_structure.ois file. This
 			// means that the whole folder has apparently been annotated
 			// already, but for some unknown reason it has not been
-			// moved into Datamover's incoming folder. 
+			// moved into Datamover's incoming folder.
 			// We break here.
 			if (fileName.toLowerCase().equals("data_structure.ois")) {
 				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						file, "Failed registration to openBIS!");
+				validator.invalidFilesOrFolders.put(file,
+						"Failed registration to openBIS!");
 				return;
 			}
 
@@ -184,24 +190,23 @@ public class MicroscopyProcessor extends AbstractProcessor {
 			// one has been annotated, somewhere.
 			if (fileName.contains("_properties.oix")) {
 				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						file, "Experiment already annotated");
-				return;				
+				validator.invalidFilesOrFolders.put(file,
+						"Experiment already annotated");
+				return;
 			}
 
 			// A microscopy file cannot be at the user folder root!
 			if (file.getParent().equals(this.userFolder.toString())) {
 				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						file, "File must be in subfolder.");
+				validator.invalidFilesOrFolders.put(file,
+						"File must be in subfolder.");
 				continue;
 			}
-			
+
 			// Do we have an unknown file? If we do, we move on to the next.
-			if (! supportedFormats.contains(ext)) {
+			if (!supportedFormats.contains(ext)) {
 				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						file, "Invalid file type.");
+				validator.invalidFilesOrFolders.put(file, "Invalid file type.");
 			}
 
 			// Create a new ExperimentDescriptor or reuse an existing one
@@ -219,35 +224,36 @@ public class MicroscopyProcessor extends AbstractProcessor {
 			// Store
 			MicroscopyFile microscopyFileDesc;
 			String microscopyFileName = fileName;
-			String microscopyFileKey = experimentName + "_" + microscopyFileName;
-			microscopyFileDesc = new MicroscopyFile(file);	
+			String microscopyFileKey = experimentName + "_"
+					+ microscopyFileName;
+			microscopyFileDesc = new MicroscopyFile(file);
 
 			// Store it in the Experiment descriptor
 			expDesc.microscopyFiles.put(microscopyFileKey, microscopyFileDesc);
-			
+
 		}
 
 	}
 
 	/**
-	 * Descriptor that represents a folder containing a dataset. 
+	 * Descriptor that represents a folder containing a dataset.
+	 * 
 	 * @author Aaron Ponti
 	 */
 	public class Folder extends PathAwareDescriptor {
-		
-		public Map<String, Experiment> experiments = 
-				new LinkedHashMap<String, Experiment>();
-		
+
+		public Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
+
 		public Folder(File fullFolder) {
-			
+
 			// Invoke parent constructor
 			super(fullFolder);
-			
+
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
 
 		}
-		
+
 		@Override
 		public String getType() {
 			return "Folder";
@@ -257,26 +263,29 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 	/**
 	 * Descriptor representing an experiment obtained from the FCS file.
+	 * 
 	 * @author Aaron Ponti
 	 */
 	public class Experiment extends ExperimentDescriptor {
 
 		// Experiment description
 		public String description = "";
-			
+
 		// Store the microscopy files associated with this Experiment
-		public Map<String, MicroscopyFile> microscopyFiles = 
+		public Map<String, MicroscopyFile> microscopyFiles =
 				new LinkedHashMap<String, MicroscopyFile>();
-		
+
 		/**
 		 * Constructor
-		 * @param name Name of the experiment.
+		 * 
+		 * @param name
+		 *            Name of the experiment.
 		 */
 		public Experiment(File name) {
-			
+
 			// Call base constructor
 			super(name);
-			
+
 			// Store the experiment name
 			this.setName(name.getName());
 
@@ -284,9 +293,10 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 		/**
 		 * Return a simplified class name to use in XML.
+		 * 
 		 * @return simplified class name.
 		 */
-		@Override		
+		@Override
 		public String getType() {
 			return "Experiment";
 		}
@@ -294,24 +304,24 @@ public class MicroscopyProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Descriptor that represents a the user top folder. 
+	 * Descriptor that represents a the user top folder.
+	 * 
 	 * @author Aaron Ponti
 	 */
 	public class UserFolder extends RootDescriptor {
-		
-		public Map<String, Experiment> experiments = 
-				new LinkedHashMap<String, Experiment>();
-		
+
+		public Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
+
 		public UserFolder(File fullFolder) {
-			
+
 			// Invoke parent constructor
 			super(fullFolder);
-			
+
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
 
 		}
-		
+
 		@Override
 		public String getType() {
 			return "Folder";
@@ -321,15 +331,20 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 	/**
 	 * Descriptor representing a microscopy file.
+	 * 
 	 * @author Aaron Ponti
 	 */
 	public class MicroscopyFile extends DatasetDescriptor {
 
 		private boolean fileScanned = false;
 
+		public Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
+
 		/**
 		 * Constructor.
-		 * @param microscopyFileName Microscopy file name with full path
+		 * 
+		 * @param microscopyFileName
+		 *            Microscopy file name with full path
 		 */
 		public MicroscopyFile(File microscopyFileName) throws IOException {
 
@@ -347,12 +362,11 @@ public class MicroscopyProcessor extends AbstractProcessor {
 				sMB = sMB / 1024;
 				unit = "GiB";
 			}
-			attributes.put("fileSize",
-					String.format("%.2f", sMB) + " " + unit);
+			attributes.put("fileSize", String.format("%.2f", sMB) + " " + unit);
 
-			// Append the attribute relative file name. Since this  
-			// will be used by the openBIS dropboxes running on a Unix  
-			// machine, we make sure to use forward slashes for path 
+			// Append the attribute relative file name. Since this
+			// will be used by the openBIS dropboxes running on a Unix
+			// machine, we make sure to use forward slashes for path
 			// separators when we set it as an attribute.
 			attributes.put("relativeFileName",
 					this.relativePath.replace("\\", "/"));
@@ -360,6 +374,7 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 		/**
 		 * Return a String representation of the extracted microscopy file.
+		 * 
 		 * @return String representation of the microscopy file.
 		 */
 		@Override
@@ -369,9 +384,10 @@ public class MicroscopyProcessor extends AbstractProcessor {
 
 		/**
 		 * Return a simplified class name to use in XML.
+		 * 
 		 * @return simplified class name.
 		 */
-		@Override		
+		@Override
 		public String getType() {
 			return "MicroscopyFile";
 		}
@@ -386,29 +402,113 @@ public class MicroscopyProcessor extends AbstractProcessor {
 			// Return the attributes
 			return attributes;
 		}
-		
+
 		/**
 		 * Scans the file and stores the metadata into the attributes
 		 * String-String map
 		 */
-		public Map<String, String> scanFileAndGetAttributes() {
-			
+		public void scanForSeries() {
+
 			// If the file was already scanned we return the attributes
 			if (fileScanned) {
-				return attributes;
+				return;
 			}
-			
-			// First scan
-            MicroscopyReader microscopyReader =
-            		new MicroscopyReader(this.fullPath);
-			attributes.putAll(microscopyReader.getAttributes());
-			
-			// Set the fileScanned attributes to true
-			fileScanned = true;
-			
+
+			// Scan the file for series
+			MicroscopyReader microscopyReader = new MicroscopyReader(
+					this.fullPath);
+			fileScanned = microscopyReader.parse();
+
+			// Now update the data model
+			if (fileScanned == true) {
+
+				// Get the attributes for the series
+				Map<String, HashMap<String, String>> seriesAttr = microscopyReader
+						.getAttributes();
+
+				// Process all series
+				for (int i = 0; i < seriesAttr.size(); i++) {
+
+					// Series key
+					String keySeries = "series_" + i;
+
+					// Create a new MicroscopyFileSeries descriptor
+					MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(
+							i, seriesAttr.get(keySeries));
+
+					// Append it to the MicroscopyFile descriptor
+					series.put(keySeries, fileSeries);
+				}
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * Descriptor representing a microscopy file series.
+	 * 
+	 * @author Aaron Ponti
+	 */
+	public class MicroscopyFileSeries extends AbstractDescriptor {
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param microscopyFileName
+		 *            Microscopy file name with full path
+		 * @param attr
+		 *            String-string map of attributes for the series
+		 */
+		public MicroscopyFileSeries(int index, Map<String, String> attr) {
+
+			// Call base constructor
+			super();
+
+			// Store the attributes
+			attributes = attr;
+
+			// Store the file name
+			if (attr.containsKey("name")) {
+				this.setName(attr.get("name"));
+			} else {
+
+			}
+			this.setName("series_" + index);
+		}
+
+		/**
+		 * Return a String representation of the extracted microscopy file.
+		 * 
+		 * @return String representation of the microscopy file.
+		 */
+		@Override
+		public String toString() {
+			return getName();
+		}
+
+		/**
+		 * Return a simplified class name to use in XML.
+		 * 
+		 * @return simplified class name.
+		 */
+		@Override
+		public String getType() {
+			return "MicroscopyFileSeries";
+		}
+
+		/**
+		 * Scans the file and stores the metadata into the attributes
+		 * String-String map
+		 */
+		@Override
+		public Map<String, String> getAttributes() {
+
 			// Return the attributes
 			return attributes;
 		}
+
 	}
-	
+
 }

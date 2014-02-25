@@ -1,13 +1,15 @@
 package ch.eth.scu.importer.at.gui.viewers.openbis.model;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import ch.eth.scu.importer.at.interfaces.ILazyNode;
 
 /**
  * Customized Node to be used in a JTree that renders the content of the
  * openBIS server.
  * @author Aaron Ponti 
  */
-public abstract class AbstractOpenBISNode extends DefaultMutableTreeNode {
+public abstract class AbstractOpenBISNode extends DefaultMutableTreeNode
+	implements ILazyNode {
 
 	private static final long serialVersionUID = 1L;
 	

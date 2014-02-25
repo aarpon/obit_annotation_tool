@@ -16,7 +16,7 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	/**
 	 * Metadata attributes
 	 */
-	protected Map<String, String> attr;
+	protected Map<String,HashMap<String,String>> attr;
 
 	/**
 	 * @param filename
@@ -27,8 +27,8 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 		super(filename);
 
 		// Initialize String-String attributes map
-		attr = new HashMap<String, String>();
-
+		attr = new HashMap<String, HashMap<String, String>>();
+		
 	}
 
 	/**
@@ -36,9 +36,9 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	 * 
 	 * These will be uploaded to openBIS as associated information.
 	 */
-	public Map<String, String> getAttributes() {
+	public Map<String,HashMap<String,String>> getAttributes() {
 		
-		// If we already scanned the file we just return the attributes
+		// If we have already scanned the file we just return the attributes
 		if (attr.size() > 0) {
 			return attr;
 		}
@@ -57,49 +57,57 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	@Override
 	public boolean parse() {
 
+		// If we have already scanned the file we just return true
+		if (attr.size() > 0) {
+			return true;
+		}
+
 		try {
 
 			// Number of series
 			int numSeries = reader.getSeriesCount();
 
-			// Get and store all subimages
+			// Get and store all series
 			for (int i = 0; i < numSeries; i++) {
 
+				// Set the series
 				reader.setSeries(i);
 
-				// Image name
-				attr.put("numSeries", Integer.toString(numSeries));
+				// Create a hashmap for the attributes of current series
+				HashMap<String, String> seriesAttr = new HashMap<String, String>();
+				
+				// Series number
+				seriesAttr.put("numSeries", Integer.toString(i));
 
-				String key_series = "series" + i + "_"; 
-
 				// Image name
-				attr.put(key_series + "name", omexmlMeta.getImageName(i));
+				seriesAttr.put("name", omexmlMeta.getImageName(i));
 
 				// Image size X
-				attr.put(key_series + "sizeX",
-						Integer.toString(reader.getSizeX()));
+				seriesAttr.put("sizeX", Integer.toString(reader.getSizeX()));
 
 				// Image size Y
-				attr.put(key_series + "sizeY",
-						Integer.toString(reader.getSizeY()));
+				seriesAttr.put("sizeY", Integer.toString(reader.getSizeY()));
 
 				// Image size Z
-				attr.put(key_series + "sizeZ",
-						Integer.toString(reader.getSizeZ()));
+				seriesAttr.put("sizeZ", Integer.toString(reader.getSizeZ()));
 
 				// Image size C
-				attr.put(key_series + "sizeC",
-						Integer.toString(reader.getSizeC()));
+				seriesAttr.put("sizeC", Integer.toString(reader.getSizeC()));
 
 				// Image size T
-				attr.put(key_series + "sizeT", 
-						Integer.toString(reader.getSizeT()));
+				seriesAttr.put("sizeT", Integer.toString(reader.getSizeT()));
 
 				// Pixel type
-				attr.put(key_series + "pixelType",
+				seriesAttr.put("pixelType",
 						loci.formats.FormatTools.getPixelTypeString(
 								reader.getPixelType()));
 
+				// Key prefix
+				String seriesKey = "series_" + i; 
+
+				// Now add the metadata for current series
+				attr.put(seriesKey, seriesAttr);
+				
 				}
 
 			} catch (Exception e) {
