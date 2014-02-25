@@ -91,6 +91,10 @@ public class OpenBISViewer extends Observable
 	
 	AggregationServiceDescription createProjectService = null;
 
+	String loginErrorMessage = "";
+	String loginErrorTitle = "";
+	boolean loginErrorRecoverable = true;
+
 	/**
 	 * Constructor
 	 */
@@ -285,15 +289,22 @@ public class OpenBISViewer extends Observable
 		Thread serviceFacadeCreator = new Thread() {
 		
 			public void run() {
-				
+
 				// Create an IOpenbisServiceFacade to query openBIS for
 				// projects, experiments and samples.
 				// If the factory returns a valid object, it means that
 				// the credentials provided were accepted and the user
 				// was successfully logged in.
-	            facade = OpenbisServiceFacadeFactory.tryCreate(
-						userName, userPassword, openBISURL, timeout);
-
+				try {
+					facade = OpenbisServiceFacadeFactory.tryCreate(userName,
+							userPassword, openBISURL, timeout);
+				} catch (UserFailureException e) {
+					facade = null; reactToUserFailureException();
+				} catch (RemoteConnectFailureException e) {
+					facade = null; reactToRemoteConnectFailureException();
+				} catch (RemoteAccessException e) {
+					facade = null; reactToRemoteAccessException();
+				}
 			}
 		};
 
@@ -305,8 +316,16 @@ public class OpenBISViewer extends Observable
 
 				// Create also an IQueryApiFacade to access the reporting
 				// plugins on the server.
-				queryFacade = FacadeFactory.create(openBISURL,
+				try {
+					queryFacade = FacadeFactory.create(openBISURL,
 						userName, userPassword);
+				} catch (UserFailureException e) {
+					queryFacade = null; reactToUserFailureException();
+				} catch (RemoteConnectFailureException e) {
+					queryFacade = null; reactToRemoteConnectFailureException();
+				} catch (RemoteAccessException e) {
+					queryFacade = null; reactToRemoteAccessException();
+				}
 
 			}
 		};
@@ -336,50 +355,52 @@ public class OpenBISViewer extends Observable
 			serviceFacadeCreator.join();
 			queryFacadeCreator.join();
 
-		} catch (UserFailureException e) {
-			JOptionPane.showMessageDialog(this.panel,
-					"Login failed. Please try again.",
-					"Authentication error",
-					JOptionPane.ERROR_MESSAGE);
-			userName = "";
-			userPassword = "";
-			facade = null;
-			return false;
-		} catch (RemoteConnectFailureException e) {
-			JOptionPane.showMessageDialog(this.panel,
-					"Could not connect to openBIS.\n" +
-							"Please try again later.\n\n" +
-							"The application will now quit.",	
-					"Connection error",
-					JOptionPane.ERROR_MESSAGE);
-			facade = null;
-			System.exit(1);
-		} catch (RemoteAccessException e) {
-			JOptionPane.showMessageDialog(this.panel,
-					"Could not connect to openBIS: " + 
-							"the server appears to be down.\n" +
-							"Please try again later.\n\n" +
-							"The application will now quit.",	
-					"Connection error",
-					JOptionPane.ERROR_MESSAGE);
-			facade = null;
-			System.exit(1);
 		} catch (InterruptedException e) {
-			JOptionPane.showMessageDialog(this.panel,
-					"Connection thread interrupted!\n\n" +
-							"The application will now quit.",	
-					"Connection error",
-					JOptionPane.ERROR_MESSAGE);
-			facade = null;
-			System.exit(1);
+
+			// Thread interrupted
+			facade = null; queryFacade = null; reactToInterruptedException();
+			
 		}
 
 		// Set isLoggedIn to true
-		isLoggedIn = true;
+		if (facade != null && queryFacade != null) {
+			
+			// Successful login
+			isLoggedIn = true;
+			
+			// Inform
+			outputPane.log("Successfully logged in to openBIS.");
+			
+			// Return success
+			return true;
+			
+		} else {
+			
+			// Failed login. Inform
+			JOptionPane.showMessageDialog(null, loginErrorMessage,
+					loginErrorTitle, JOptionPane.ERROR_MESSAGE);
+			if (loginErrorRecoverable) {
+				
+				// We can retry. Make sure to reset user name and password
+				userName = "";
+				userPassword = "";
+				
+				// Inform				
+				outputPane.err("Failed logged in to openBIS!");
+				
+				// Return false
+				return false;
+			
+			} else {
+				
+				// The error is not recoverable. Exit here.
+				System.exit(1);
+				
+			}
+
+		}
 		
-		outputPane.log("Successfully logged in to openBIS.");
-		
-		return true;
+		return false;
 	}
 	
 	/**
@@ -836,5 +857,48 @@ public class OpenBISViewer extends Observable
 		// Not found, we return failure
 		return false;
 	}
+
+	/**
+	 * React to a RemoteConnectFailure exception
+	 */
+	private void reactToRemoteConnectFailureException() {
+		loginErrorMessage = "Could not connect to openBIS.\n"
+				+ "Please try again later.\n\n"
+				+ "The application will now quit.";
+		loginErrorTitle = "Connection error";
+		loginErrorRecoverable = false;
+	}
+
+	/**
+	 * React to a UserFailureException exception
+	 */
+	private void reactToUserFailureException() {
+		loginErrorMessage = "Login failed. Please try again.";
+		loginErrorTitle = "Authentication error";
+		loginErrorRecoverable = true;
+	}
+
+	/**
+	 * React to a RemoteAccessException exception
+	 */
+	private void reactToRemoteAccessException() {
+		loginErrorMessage = "Could not connect to openBIS: "
+				+ "the server appears to be down.\n"
+				+ "Please try again later.\n\n"
+				+ "The application will now quit.";
+		loginErrorTitle = "Connection error";
+		loginErrorRecoverable = false;
+	}
+	
+	/**
+	 * React to a InterruptedException exception
+	 */
+	private void reactToInterruptedException() {
+		loginErrorMessage = "Connection thread interrupted!\n\n" +
+				"The application will now quit.";
+		loginErrorTitle = "Thread interrupted";
+		loginErrorRecoverable = false;
+	}	
+	
 	
 }
