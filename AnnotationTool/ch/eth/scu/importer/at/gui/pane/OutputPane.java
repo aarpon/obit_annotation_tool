@@ -9,6 +9,7 @@ import java.util.Date;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -68,6 +69,10 @@ public class OutputPane extends JScrollPane {
 		// Call the base constructor
 		super(outputPane);
 		
+		// Make sure the JScrollPane always shows the latest lines added
+		DefaultCaret caret = (DefaultCaret)outputPane.getCaret();  
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		
 		// Set the document
 		this.doc = new DefaultStyledDocument();
 		outputPane.setDocument(this.doc);
@@ -104,7 +109,6 @@ public class OutputPane extends JScrollPane {
 		try {
 			doc.insertString(doc.getLength(), 
 					buildFullString(text, Type.LOG), log);
-			scroll();
 		} catch (BadLocationException e) {
 			System.err.println("Could not print to output pane!");
 		}
@@ -120,7 +124,6 @@ public class OutputPane extends JScrollPane {
 		try {
 			doc.insertString(doc.getLength(), 
 					buildFullString(text, Type.WARN), warn);
-			scroll();
 		} catch (BadLocationException e) {
 			System.err.println("Could not print to output pane!");
 		}
@@ -136,7 +139,6 @@ public class OutputPane extends JScrollPane {
 		try {
 			doc.insertString(doc.getLength(), 
 					buildFullString(text, Type.ERR), err);
-			scroll();
 		} catch (BadLocationException e) {
 			System.err.println("Could not print to output pane!");
 		}
@@ -157,9 +159,5 @@ public class OutputPane extends JScrollPane {
 		return (new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")).format(
 				new Date()) + ": " + typeStr + text + "\n";
 	}
-	
-	// Scroll to the end of the JTextPane
-	private void scroll() {
-		// TODO: Implement!
-	}
+
 }

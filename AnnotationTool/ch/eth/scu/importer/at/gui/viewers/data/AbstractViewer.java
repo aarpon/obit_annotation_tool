@@ -88,6 +88,8 @@ abstract public class AbstractViewer extends Observable
 	protected JScrollPane invalidDatasetsPane;
 	protected OutputPane outputPane;
 	
+	protected boolean scanInProgress = false;
+	
 	/**
 	 * Read-only table model
 	 * @author Aaron Ponti
@@ -324,6 +326,16 @@ abstract public class AbstractViewer extends Observable
 	 */
 	public void scan() {
 
+		// Make sure not to start another scan until the one currently
+		// in progress has concluded
+		if (scanInProgress) {
+			outputPane.log("Scanning already in progress.");
+			return;
+		}
+
+		// Set scanInProgress to true
+		scanInProgress = true;
+		
 		// Clear the tree
 		clearTree();
 
@@ -366,7 +378,7 @@ abstract public class AbstractViewer extends Observable
 		
 		// We parse the user folder: the actual processing is done
 		// by the processor.
-		Boolean status = parse(userDataFolder);
+		boolean status = parse(userDataFolder);
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
@@ -396,6 +408,9 @@ abstract public class AbstractViewer extends Observable
 		
 		// Inform
 		outputPane.log("Scanning user data folder completed.");
+		
+		// Now reset the scanInProgress flag
+		scanInProgress = false;
 	}
 
     /**
