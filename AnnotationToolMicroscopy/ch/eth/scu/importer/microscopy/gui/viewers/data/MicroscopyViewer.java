@@ -250,9 +250,6 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
 				return;
 			}
 			
-			// Inform
-			outputPane.log("Scanning metadata from " + node.toString() + "...");
-			
 			// Get the descriptor
 			MicroscopyFile microscopyFile = (MicroscopyFile) obj;
 			
@@ -270,7 +267,8 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
 			node.setLoaded();
 			
 			// Inform
-			outputPane.log("Scanning metadata completed.");
+			outputPane.log("Scanning metadata from " + node.toString() +
+					" completed.");
 							
 		} else {
 			
