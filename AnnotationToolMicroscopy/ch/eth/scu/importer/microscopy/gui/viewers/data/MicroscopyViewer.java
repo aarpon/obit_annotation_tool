@@ -245,7 +245,7 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
 		if (className.equals("MicroscopyFile")) {
 			
 			MicroscopyFileNode node = (MicroscopyFileNode) abstractNode; 
-			if (node.isLoaded() == true) {
+			if (node.isLoaded()) {
 				outputPane.log("This node is already expanded.");
 				return;
 			}

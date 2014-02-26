@@ -420,7 +420,7 @@ public class MicroscopyProcessor extends AbstractProcessor {
 			fileScanned = microscopyReader.parse();
 
 			// Now update the data model
-			if (fileScanned == true) {
+			if (fileScanned) {
 
 				// Get the attributes for the series
 				Map<String, HashMap<String, String>> seriesAttr = microscopyReader

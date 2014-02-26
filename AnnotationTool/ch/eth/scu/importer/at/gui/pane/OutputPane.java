@@ -117,8 +117,6 @@ public class OutputPane extends JScrollPane {
 	/**
 	 * Display the passed warning string
 	 * @param text String to be displayed
-	 * 
-	 * //TODO	 Add formatting
 	 */
 	public void warn(String text) {
 		try {
@@ -132,8 +130,6 @@ public class OutputPane extends JScrollPane {
 	/**
 	 * Display the passed error string
 	 * @param text String to be displayed
-	 *
-	 * //TODO	 Add formatting
 	 */
 	public void err(String text) {
 		try {
