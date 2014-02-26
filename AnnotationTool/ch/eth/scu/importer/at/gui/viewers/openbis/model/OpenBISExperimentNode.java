@@ -43,6 +43,8 @@ public class OpenBISExperimentNode extends AbstractOpenBISNode {
 			return properties.get("LSR_FORTESSA_EXPERIMENT_NAME");
 		} else if (properties.containsKey("FACS_ARIA_EXPERIMENT_NAME")) {
 			return properties.get("FACS_ARIA_EXPERIMENT_NAME");
+		} else if (properties.containsKey("MICROSCOPY_EXPERIMENT_NAME")) {
+				return properties.get("MICROSCOPY_EXPERIMENT_NAME");			
 		} else {
 			return e.getCode();
 		}
