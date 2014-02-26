@@ -95,8 +95,7 @@ public class OpenBISViewer extends Observable
 	String loginErrorTitle = "";
 	boolean loginErrorRecoverable = true;
 
-	protected boolean scanInProgress = false;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -469,16 +468,6 @@ public class OpenBISViewer extends Observable
 		OpenBISSpaceNode space;
 		OpenBISProjectNode project;
 
-		// Make sure not to start another scan until the one currently
-		// in progress has concluded
-		if (scanInProgress) {
-			outputPane.log("Scanning already in progress.");
-			return;
-		}
-		
-		// Set scanInProgress to true
-		scanInProgress = true;
-		
 		// Inform
 		outputPane.log("Retrieving openBIS structure...");
 
@@ -495,7 +484,6 @@ public class OpenBISViewer extends Observable
 		// We just need an active facade for scanning; the queryFacade
 		// should actually be on as well, but we do not need it here. 
 		if (facade == null || !isLoggedIn) {
-			scanInProgress = false;
 			return;
 		}
 		
@@ -512,7 +500,6 @@ public class OpenBISViewer extends Observable
 			facade = null;
 			isLoggedIn = false;
 			clearTree();
-			scanInProgress = false;
 			return;
 		}
 
@@ -595,9 +582,7 @@ public class OpenBISViewer extends Observable
 		
 		// Inform
 		outputPane.log("Retrieving openBIS structure completed.");
-		
-		// Now reset the scanInProgress flag
-		scanInProgress = false;
+	
 	}
 
 	/**
