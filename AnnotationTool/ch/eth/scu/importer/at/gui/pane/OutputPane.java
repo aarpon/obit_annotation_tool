@@ -3,9 +3,18 @@ package ch.eth.scu.importer.at.gui.pane;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -15,6 +24,8 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+
+import ch.eth.scu.utils.QueryOS;
 
 /**
  * Output pane to display any output from the application
@@ -97,6 +108,26 @@ public class OutputPane extends JScrollPane {
 		// Set the pane to non-editable
 		outputPane.setEditable(false);
 		
+		// Add a context menu
+		outputPane.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (QueryOS.isWindows()) {
+					return;
+				}
+				setListenerOnTextPane(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (QueryOS.isMac()) {
+					return;
+				}
+				setListenerOnTextPane(e);
+			}
+		});
+		
 		// Add the first text
 		log("Welcome.");
 	}
@@ -156,4 +187,65 @@ public class OutputPane extends JScrollPane {
 				new Date()) + ": " + typeStr + text + "\n";
 	}
 
+	/**
+	 * Sets a mouse event listener on the text pane
+	 * @param e Mouse event
+	 */
+    private void setListenerOnTextPane(MouseEvent e) {
+
+    	if (e.isPopupTrigger() &&
+                e.getComponent() instanceof JTextPane) {
+
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+    		
+    		// Create the popup menu.
+    	    JPopupMenu popup = new JPopupMenu();
+
+    	    // Add "Copy" menu entry
+    	    JMenuItem copyMenuItem = new JMenuItem("Copy");
+    	    copyMenuItem.addActionListener(new ActionListener() {
+     
+                public void actionPerformed(ActionEvent e)
+                {
+                	copy();
+    			}
+            });
+    	    popup.add(copyMenuItem);
+
+    	    // Add "Clear" menu entry
+    	    JMenuItem clearMenuItem = new JMenuItem("Clear");
+    	    clearMenuItem.addActionListener(new ActionListener() {
+     
+                public void actionPerformed(ActionEvent e)
+                {
+                	clear();
+    			}
+            });
+    	    popup.add(clearMenuItem);
+
+    	    // Display the menu
+            popup.show(e.getComponent(), x, y);
+        }
+    }
+
+	/**
+	 * Copy text from outputPane to system clipboard
+	 */
+    private void copy()
+    {
+    	String selection = outputPane.getText();
+    	StringSelection data = new StringSelection(selection);
+    	Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    	clipboard.setContents(data, data);
+    }
+    
+	/**
+	 * Clear the text in outputPane
+	 */
+    private void clear()
+    {
+    	outputPane.setText("");
+    }
 }
