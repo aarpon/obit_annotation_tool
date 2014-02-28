@@ -96,9 +96,12 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
         		lastSelectedExperiment = folderNode;
         		
             // Notify the editor to update its view
-            setChanged();
-            notifyObservers(new ObserverActionParameters(
-                ObserverActionParameters.Action.EXPERIMENT_CHANGED, folderNode));
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.EXPERIMENT_CHANGED,
+						folderNode));
+			}
         }
 	}
 

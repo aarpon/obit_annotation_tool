@@ -175,10 +175,12 @@ public class BDFACSDIVAFCSViewer extends AbstractViewer {
         		lastSelectedExperiment = expNode;
         		
             // Notify the editor to update its view
-            setChanged();
-            notifyObservers(new ObserverActionParameters(
-                ObserverActionParameters.Action.EXPERIMENT_CHANGED,
-                expNode));
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.EXPERIMENT_CHANGED,
+						expNode));
+			}
         }
 	}
 

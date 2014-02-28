@@ -475,11 +475,12 @@ public class OpenBISViewer extends Observable
 		clearTree();
 
 		// Notify observers that the scanning is about to start 
-		setChanged();
-		notifyObservers(new ObserverActionParameters(
-				ObserverActionParameters.Action.ABOUT_TO_RESCAN,
-				null));
-
+		synchronized (this) {
+			setChanged();
+			notifyObservers(new ObserverActionParameters(
+					ObserverActionParameters.Action.ABOUT_TO_RESCAN, null));
+		}
+		
 		// Do we have a connection with openBIS?
 		// We just need an active facade for scanning; the queryFacade
 		// should actually be on as well, but we do not need it here. 
@@ -563,10 +564,11 @@ public class OpenBISViewer extends Observable
 			isReady = true;
 		
 			// Notify observers that the scanning is done 
-			setChanged();
-			notifyObservers(new ObserverActionParameters(
-				ObserverActionParameters.Action.SCAN_COMPLETE,
-				null));
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.SCAN_COMPLETE, null));
+			}
 		} else {
 			JOptionPane.showMessageDialog(this.panel,
 					"Sorry, there are no (accessible) projects.\n\n" + 

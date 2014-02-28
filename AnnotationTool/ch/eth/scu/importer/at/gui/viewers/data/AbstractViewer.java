@@ -328,11 +328,12 @@ abstract public class AbstractViewer extends Observable
 		clearTree();
 
 		// Notify observers that the scanning is about to start 
-		setChanged();
-		notifyObservers(new ObserverActionParameters(
-				ObserverActionParameters.Action.ABOUT_TO_RESCAN,
-				null));
-
+		synchronized (this) {
+			setChanged();
+			notifyObservers(new ObserverActionParameters(
+					ObserverActionParameters.Action.ABOUT_TO_RESCAN, null));
+		}
+		
 		// Inform
 		outputPane.log("Scanning user data folder...");
 
@@ -388,11 +389,12 @@ abstract public class AbstractViewer extends Observable
 					"Please fix the invalid datasets to continue!");
 		}
 	
-		// Notify observers that the scanning is done 
-		setChanged();
-		notifyObservers(new ObserverActionParameters(
-				ObserverActionParameters.Action.SCAN_COMPLETE,
-				null));
+		// Notify observers that the scanning is done
+		synchronized (this) {
+			setChanged();
+			notifyObservers(new ObserverActionParameters(
+					ObserverActionParameters.Action.SCAN_COMPLETE, null));
+		}
 		
 		// Inform
 		outputPane.log("Scanning user data folder completed.");
