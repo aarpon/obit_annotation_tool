@@ -2,7 +2,7 @@ package ch.eth.scu.importer.at.gui.viewers.data.model;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import ch.eth.scu.importer.processors.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.data.model.AbstractDescriptor;
 
 /**
  * Customized Node to be used in a JTree that renders the hierarchical

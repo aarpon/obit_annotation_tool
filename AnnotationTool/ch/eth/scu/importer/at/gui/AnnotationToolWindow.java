@@ -13,7 +13,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
@@ -25,6 +24,7 @@ import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.ViewerFactory;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.common.version.VersionInfo;
+import ch.eth.scu.importer.processors.openbis.OpenBISProcessor;
 
 
 /**
@@ -35,6 +35,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
+	private OpenBISProcessor openBISProcessor; 
     private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
 	private Icon appIcon; 
@@ -48,6 +49,34 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		super("openBIS Importer Toolset :: Annotation Tool v" +
 		VersionInfo.version + " " + VersionInfo.status);
 
+		// We instantiate the OutputPane so we can start logging to it
+        OutputPane outputPane = new OutputPane();
+
+        // Instantiate an OpenBISProcessor
+		openBISProcessor = new OpenBISProcessor();
+		
+		// And now we ask the user to login.
+		// Here we will insist on getting valid openBIS credentials, since a
+		// valid login is essential for the functioning of the application.
+		// The OpenBISProcessor takes care of closing the application if the
+		// user just closes the dialog.
+		outputPane.log("Logging in to openBIS...");
+		boolean status = false;
+		while (!status) {
+			try {
+				status = openBISProcessor.login();
+				if (! status) {
+					outputPane.err("Failed logged in to openBIS!");
+				}
+			} catch (InterruptedException e) {
+				JOptionPane.showMessageDialog(null,
+						"Interrupted execution of login threads!", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+		}
+		outputPane.log("Successfully logged in to openBIS.");
+		
 		// Use the system default look-and-feel
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -87,10 +116,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		constraints.insets = new Insets(5, 5, 0, 5);
 		add(metadataViewer.getPanel(), constraints);
 
-		// Create the HTML viewing pane.
-        OutputPane outputPane = new OutputPane();
-
-		// Set constraints and add widget
+		// Set constraints and add the OutputPane widget (instantiated earlier)
         constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.gridwidth = 3;
@@ -104,7 +130,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		metadataViewer.setOutputPane(outputPane);
 		
 		// Add the openBIS viewer
-		openBISViewer = new OpenBISViewer(outputPane);
+		openBISViewer = new OpenBISViewer(openBISProcessor, outputPane);
 		
 		// Set constraints and add widget
 		constraints.gridx = 2;
@@ -151,23 +177,23 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		pack();
 		setLocationRelativeTo(null);
 
-		// Ask the user to login.
-		// Here we will insist on getting valid openBIS credentials, since a
-		// valid login is essential for the functioning of the application.
-		// If the user just closes the dialog, we close the application.
-		outputPane.log("Asking for user credentials.");
-		boolean status = false;
-		while (!status) {
-			try {
-				status = openBISViewer.login();
-			} catch (InterruptedException e) {
-				JOptionPane.showMessageDialog(null,
-					    "Interrupted execution of login threads!",
-					    "Error",
-					    JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
-			}
-		}
+//		// Ask the user to login.
+//		// Here we will insist on getting valid openBIS credentials, since a
+//		// valid login is essential for the functioning of the application.
+//		// If the user just closes the dialog, we close the application.
+//		outputPane.log("Asking for user credentials.");
+//		boolean status = false;
+//		while (!status) {
+//			try {
+//				status = openBISViewer.login();
+//			} catch (InterruptedException e) {
+//				JOptionPane.showMessageDialog(null,
+//					    "Interrupted execution of login threads!",
+//					    "Error",
+//					    JOptionPane.ERROR_MESSAGE);
+//				System.exit(1);
+//			}
+//		}
 
 		// Create a thread for building the tree of the openBIS entities
 		Thread dataScanner = new Thread() {
@@ -241,7 +267,7 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
         		JOptionPane.QUESTION_MESSAGE, appIcon) == 
         		JOptionPane.YES_OPTION) {
         	try {
-        		openBISViewer.logout();
+        		openBISProcessor.logout();
         		System.exit(0);
         	} catch (RemoteAccessException e) {
        

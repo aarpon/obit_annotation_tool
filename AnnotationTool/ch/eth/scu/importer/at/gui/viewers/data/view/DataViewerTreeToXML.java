@@ -23,8 +23,8 @@ import org.w3c.dom.Element;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
-import ch.eth.scu.importer.processors.model.AbstractDescriptor;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.data.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.data.model.ExperimentDescriptor;
 
 
 /**

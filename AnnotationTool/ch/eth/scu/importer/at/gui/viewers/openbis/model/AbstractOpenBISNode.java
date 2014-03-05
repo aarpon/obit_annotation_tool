@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.at.gui.viewers.openbis.model;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+
 import ch.eth.scu.importer.at.interfaces.ILazyNode;
 
 /**

@@ -1,6 +1,6 @@
-package ch.eth.scu.importer.bdfacsdivafcs.processors.model;
+package ch.eth.scu.importer.bdfacsdivafcs.processors.data.model;
 
-import ch.eth.scu.importer.processors.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.data.model.AbstractDescriptor;
 
 
 public abstract class SampleDescriptor extends AbstractDescriptor{

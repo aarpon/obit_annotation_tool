@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.microscopy.processors;
+package ch.eth.scu.importer.microscopy.processors.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,12 +10,12 @@ import java.util.Map;
 
 import ch.eth.scu.importer.microscopy.readers.MicroscopyReader;
 import ch.eth.scu.importer.processors.AbstractProcessor;
-import ch.eth.scu.importer.processors.model.AbstractDescriptor;
-import ch.eth.scu.importer.processors.model.DatasetDescriptor;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
-import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
-import ch.eth.scu.importer.processors.model.RootDescriptor;
-import ch.eth.scu.importer.processors.validator.GenericValidator;
+import ch.eth.scu.importer.processors.data.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.data.model.DatasetDescriptor;
+import ch.eth.scu.importer.processors.data.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.data.model.PathAwareDescriptor;
+import ch.eth.scu.importer.processors.data.model.RootDescriptor;
+import ch.eth.scu.importer.processors.data.validator.GenericValidator;
 
 /**
  * MicroscopyProcessor parses microscopy files (using the bio-formats library).

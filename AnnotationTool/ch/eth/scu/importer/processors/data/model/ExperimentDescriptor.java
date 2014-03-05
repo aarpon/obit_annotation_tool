@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.processors.model;
+package ch.eth.scu.importer.processors.data.model;
 
 import java.io.File;
 import java.util.regex.Pattern;

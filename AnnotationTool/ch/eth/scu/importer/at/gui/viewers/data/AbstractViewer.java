@@ -47,8 +47,8 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTree;
 import ch.eth.scu.importer.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.eth.scu.importer.common.settings.UserSettingsManager;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
-import ch.eth.scu.importer.processors.model.RootDescriptor;
+import ch.eth.scu.importer.processors.data.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.data.model.RootDescriptor;
 import ch.eth.scu.utils.QueryOS;
 
 /**

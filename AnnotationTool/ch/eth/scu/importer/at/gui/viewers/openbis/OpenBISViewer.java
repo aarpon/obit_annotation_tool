@@ -10,9 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 
 import javax.swing.JButton;
@@ -33,10 +31,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.springframework.remoting.RemoteAccessException;
-import org.springframework.remoting.RemoteConnectFailureException;
-
-import ch.eth.scu.importer.at.gui.dialogs.OpenBISLoginDialog;
 import ch.eth.scu.importer.at.gui.pane.OutputPane;
 import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.AbstractOpenBISNode;
@@ -46,20 +40,13 @@ import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSampleListNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.view.OpenBISViewerTree;
-import ch.eth.scu.importer.common.settings.AppSettingsManager;
 import ch.eth.scu.importer.common.settings.UserSettingsManager;
+import ch.eth.scu.importer.processors.openbis.OpenBISProcessor;
 import ch.eth.scu.utils.QueryOS;
-import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
-import ch.systemsx.cisd.common.exceptions.UserFailureException;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
-import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.FacadeFactory;
-import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.IQueryApiFacade;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.AggregationServiceDescription;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 /**
@@ -72,24 +59,17 @@ public class OpenBISViewer extends Observable
 
 	protected JPanel panel;
 	
-	private String openBISURL = "";
-	private String userName = "";
-	private String userPassword = "";
-	private int timeout = 60000;
-    private IOpenbisServiceFacade facade;
-	private IQueryApiFacade queryFacade;
+	private OpenBISProcessor openBISProcessor;
 
     private OpenBISUserNode userNode;
 	private OpenBISViewerTree tree;
     private String defaultRootNodeString = "Please login to openBIS...";
 
-	private boolean isLoggedIn = false;
+	//private boolean isLoggedIn = false;
 
     private boolean isReady = false;
 	
 	protected OutputPane outputPane;
-	
-	AggregationServiceDescription createProjectService = null;
 
 	String loginErrorMessage = "";
 	String loginErrorTitle = "";
@@ -99,7 +79,10 @@ public class OpenBISViewer extends Observable
 	/**
 	 * Constructor
 	 */
-	public OpenBISViewer(OutputPane outputPane) {
+	public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane) {
+
+		// Store the OpenBISProcessor reference
+		this.openBISProcessor = openBISProcessor;
 
 		// Store the OutputPane reference
 		this.outputPane = outputPane;
@@ -118,9 +101,6 @@ public class OpenBISViewer extends Observable
 			System.exit(1);
 		}
 
-		// Set the URL
-		this.openBISURL = manager.getSettingValue("OpenBISURL");
-		
 		// Set a grid bag layout
 		panel.setLayout(new GridBagLayout());
 
@@ -210,14 +190,22 @@ public class OpenBISViewer extends Observable
 	}
 	
 	/**
+	 * Return the OpenBISProcessor.
+	 * @return the OpenBISProcessor.
+	 */
+	public OpenBISProcessor getOpenBISProcessor() {
+		return openBISProcessor;
+	}
+
+	/**
 	 * Returns the user name if successfully logged in, empty string otherwise 
 	 * @return user name or empty String if log on was not successful 
 	 */
 	public String getUserName() {
-		if (!isLoggedIn) {
+		if (!openBISProcessor.isLoggedIn()) {
 			return "";
 		}
-		return userName;
+		return openBISProcessor.getUserName();
 	}
 	
 	/**
@@ -237,188 +225,6 @@ public class OpenBISViewer extends Observable
 		// TODO Implement!
 	}
 
-	/**
-	 * Asks the user to enter credentials.
-	 * @return true if the credentials were entered correctly, false otherwise.
-	 */
-	private boolean askForCredentials() {
-
-		// Modal dialog: stops here until the dialog is disposed
-		// (when a username and password have been provided)
-        OpenBISLoginDialog loginDialog = new OpenBISLoginDialog();
-		userName = loginDialog.getUsername();
-		userPassword = loginDialog.getPassword();
-		openBISURL = loginDialog.getOpenBISServer();
-		return (! userName.isEmpty());
-	}
-	
-	/**
-	 * Login to openBIS. Credentials provided by the user through a dialog.
-	 * @return true if login was successful (or if already logged in), 
-	 * false otherwise.
-	 * @throws InterruptedException 
-	 */
-	public boolean login() throws InterruptedException {
-
-		// Check that user name and password were set
-		if (userName.equals("") || userPassword.equals("")) {
-			boolean status = false;
-			while (!status) {
-				// This is redundant, since the dialog cannot be closed
-				// without specifying a user name and password.
-				status = askForCredentials();
-			}
-		}
-		
-		// Are we already logged in?
-		if (isLoggedIn) {
-			return true;
-		}
-		
-		// Now save the user settings
-		AppSettingsManager manager = new AppSettingsManager();
-		UserSettingsManager userManager = new UserSettingsManager(
-				manager.getSettingsForServer(openBISURL));
-		userManager.save();
-		manager = null;
-
-		// Inform
-		outputPane.log("Logging in to openBIS...");
-		
-		// Create a thread for logging in to openBIS and returning an
-		// IOpenbisServiceFacade
-		Thread serviceFacadeCreator = new Thread() {
-		
-			public void run() {
-
-				// Create an IOpenbisServiceFacade to query openBIS for
-				// projects, experiments and samples.
-				// If the factory returns a valid object, it means that
-				// the credentials provided were accepted and the user
-				// was successfully logged in.
-				try {
-					facade = OpenbisServiceFacadeFactory.tryCreate(userName,
-							userPassword, openBISURL, timeout);
-				} catch (UserFailureException e) {
-					facade = null; reactToUserFailureException();
-				} catch (RemoteConnectFailureException e) {
-					facade = null; reactToRemoteConnectFailureException();
-				} catch (RemoteAccessException e) {
-					facade = null; reactToRemoteAccessException();
-				}
-			}
-		};
-
-		// Create a thread for logging in to openBIS and returning an
-		// IQueryApiFacade	
-		Thread queryFacadeCreator = new Thread() {
-			
-			public void run() {
-
-				// Create also an IQueryApiFacade to access the reporting
-				// plugins on the server.
-				try {
-					queryFacade = FacadeFactory.create(openBISURL,
-						userName, userPassword);
-				} catch (UserFailureException e) {
-					queryFacade = null; reactToUserFailureException();
-				} catch (RemoteConnectFailureException e) {
-					queryFacade = null; reactToRemoteConnectFailureException();
-				} catch (RemoteAccessException e) {
-					queryFacade = null; reactToRemoteAccessException();
-				}
-
-			}
-		};
-
-		// Should we accept self-signed certificates?
-		String acceptSelfSignedCerts = 
-				userManager.getSettingValue("AcceptSelfSignedCertificates");
-
-		// Set the force-accept-ssl-certificate option if requested
-		// by the administrator
-		if (acceptSelfSignedCerts.equals("yes")) {
-			System.setProperty("force-accept-ssl-certificate", "true");
-		}
-
-		// Try logging in with current credentials
-		try {
-			
-			// Create an IOpenbisServiceFacade in one thread to query
-			// openBIS for projects, experiments and samples.
-			serviceFacadeCreator.start();
-
-			// Create also an IQueryApiFacade in another thread to access
-			// the reporting plug-ins on the server.
-			queryFacadeCreator.start();
-			
-			// Wait for both threads to finish
-			serviceFacadeCreator.join();
-			queryFacadeCreator.join();
-
-		} catch (InterruptedException e) {
-
-			// Thread interrupted
-			facade = null; queryFacade = null; reactToInterruptedException();
-			
-		}
-
-		// Set isLoggedIn to true
-		if (facade != null && queryFacade != null) {
-			
-			// Successful login
-			isLoggedIn = true;
-			
-			// Inform
-			outputPane.log("Successfully logged in to openBIS.");
-			
-			// Return success
-			return true;
-			
-		} else {
-			
-			// Failed login. Inform
-			JOptionPane.showMessageDialog(null, loginErrorMessage,
-					loginErrorTitle, JOptionPane.ERROR_MESSAGE);
-			if (loginErrorRecoverable) {
-				
-				// We can retry. Make sure to reset user name and password
-				userName = "";
-				userPassword = "";
-				
-				// Inform				
-				outputPane.err("Failed logged in to openBIS!");
-				
-				// Return false
-				return false;
-			
-			} else {
-				
-				// The error is not recoverable. Exit here.
-				System.exit(1);
-				
-			}
-
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Log out from openBIS
-	 * @return true if logging out was successful, false otherwise.
-	 */
-	public boolean logout() throws RemoteAccessException {
-		if (facade != null && isLoggedIn && queryFacade != null) {
-			facade.logout();
-			queryFacade.logout();
-			clearTree();
-			isLoggedIn = false;
-			return true;
-		}
-		return false;
-	}
-	
 	/**
 	 * Return the Tree's data model.
 	 */
@@ -484,32 +290,28 @@ public class OpenBISViewer extends Observable
 		// Do we have a connection with openBIS?
 		// We just need an active facade for scanning; the queryFacade
 		// should actually be on as well, but we do not need it here. 
-		if (facade == null || !isLoggedIn) {
+		if (! openBISProcessor.isLoggedIn()) {
 			return;
 		}
 		
 		// Check that the session is still open (we just check the
 		// facade, the queryFacade is not necessary
-		try {
-			facade.checkSession();
-		} catch ( InvalidSessionException e ) {
+		if (!openBISProcessor.checkSession()) {
 			JOptionPane.showMessageDialog(this.panel,
 					"The openBIS session is no longer valid!\n" + 
 			"Please try logging in again.",	
 					"Session error",
 					JOptionPane.ERROR_MESSAGE);
-			facade = null;
-			isLoggedIn = false;
 			clearTree();
 			return;
 		}
 
 		// Set the root of the tree
-		userNode = new OpenBISUserNode(userName);
+		userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
 		// Get spaces
-		List<SpaceWithProjectsAndRoleAssignments> spaces =
-				facade.getSpacesWithProjects();
+		List<SpaceWithProjectsAndRoleAssignments> spaces = 
+				openBISProcessor.getSpaces();
 		if (spaces.isEmpty()) {
 			JOptionPane.showMessageDialog(this.panel,
 					"Sorry, there are no (accessible) spaces.\n\n" + 
@@ -656,8 +458,8 @@ public class OpenBISViewer extends Observable
 			Project p = (Project) obj;
 			List<String> expId = new ArrayList<String>();
 			expId.add(p.getIdentifier());
-			List<Experiment> experiments =
-					facade.listExperimentsForProjects(expId);
+			List<Experiment> experiments = 
+					openBISProcessor.getExperimentsForProjects(expId);
 			for (Experiment e : experiments) {
 				// Add the experiments
 				OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
@@ -691,7 +493,7 @@ public class OpenBISViewer extends Observable
 			// the openBIS Viewer from the customizable openBIS 
 			// Processor.
 			List<Sample> samples = 
-					facade.listSamplesForExperiments(experimentId);
+					openBISProcessor.getSamplesForExperiments(experimentId);
 			int nSamples = samples.size();
 			String title = ""; 
 			if (nSamples == 0) {
@@ -789,22 +591,18 @@ public class OpenBISViewer extends Observable
 	private boolean createNewProject(final OpenBISSpaceNode node) {
 		
 		// Retrieve and store the createProject service
-		if (createProjectService == null) {
-			if (!retrieveAndStoreServices()) {
+		if (!openBISProcessor.retrieveAndStoreServices()) {
 				
-				// TODO Throw an exception to distinguish the case where
-				// the project could not be created.
-				return false;
-			}
+			// TODO Throw an exception to distinguish the case where
+			// the project could not be created.
+			return false;
+
 		}
 
 		// Get the space object from the openBIS node
 		SpaceWithProjectsAndRoleAssignments space =
 				(SpaceWithProjectsAndRoleAssignments) 
 				node.getUserObject();
-
-		// Get the space code
-		String spaceCode = space.getCode();
 
 		// Ask the user to specify a project name
 		String projectCode = JOptionPane.showInputDialog(
@@ -814,18 +612,9 @@ public class OpenBISViewer extends Observable
 			return false;
 		}
 
-		// Set the parameters
-		Map<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("spaceCode", spaceCode.toUpperCase());
-		parameters.put("projectCode", projectCode.toUpperCase());
-		
 		// Call the ingestion server and collect the output
-		// TODO:
-		// - check that the session is still on
-		// - check that the user has the right to create a project
-		QueryTableModel tableModel = 
-				queryFacade.createReportFromAggregationService(
-						createProjectService, parameters);
+		QueryTableModel tableModel = openBISProcessor.createProject(
+				space.getCode(), projectCode);
 
 		// Display the output
 		String success= "";
@@ -842,76 +631,5 @@ public class OpenBISViewer extends Observable
 		outputPane.err(message);
 		return false;
 	}
-
-	/**
-	 * Retrieve and store the create_project ingestion service from the
-	 * server.
-	 * @return true if the service could be retrieved successfully,
-	 * false otherwise.
-	 */
-	public boolean retrieveAndStoreServices() {
-
-		// Retrieve the create_project ingestion service from the server
-		List<AggregationServiceDescription> aggregationServices = 
-				queryFacade.listAggregationServices();
-
-		// Go over all returned services and store a reference to the
-		// create_project ingestion plug-in.
-		for (AggregationServiceDescription service : aggregationServices)
-        {
-			if (service.getServiceKey().equals("create_project")) {
-				createProjectService = service;
-				
-				// Found, we can return success
-				return true;
-			}
-        }
-		
-		// Not found, we return failure
-		return false;
-	}
-
-	/**
-	 * React to a RemoteConnectFailure exception
-	 */
-	private void reactToRemoteConnectFailureException() {
-		loginErrorMessage = "Could not connect to openBIS.\n"
-				+ "Please try again later.\n\n"
-				+ "The application will now quit.";
-		loginErrorTitle = "Connection error";
-		loginErrorRecoverable = false;
-	}
-
-	/**
-	 * React to a UserFailureException exception
-	 */
-	private void reactToUserFailureException() {
-		loginErrorMessage = "Login failed. Please try again.";
-		loginErrorTitle = "Authentication error";
-		loginErrorRecoverable = true;
-	}
-
-	/**
-	 * React to a RemoteAccessException exception
-	 */
-	private void reactToRemoteAccessException() {
-		loginErrorMessage = "Could not connect to openBIS: "
-				+ "the server appears to be down.\n"
-				+ "Please try again later.\n\n"
-				+ "The application will now quit.";
-		loginErrorTitle = "Connection error";
-		loginErrorRecoverable = false;
-	}
-	
-	/**
-	 * React to a InterruptedException exception
-	 */
-	private void reactToInterruptedException() {
-		loginErrorMessage = "Connection thread interrupted!\n\n" +
-				"The application will now quit.";
-		loginErrorTitle = "Thread interrupted";
-		loginErrorRecoverable = false;
-	}	
-	
 	
 }

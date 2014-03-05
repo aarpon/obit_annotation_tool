@@ -2,7 +2,7 @@ package ch.eth.scu.importer.at.gui.viewers.openbis.model;
 
 /**
  * This Node is to be used temporarily and discarded as soon as the
- * refactoring of the OpenBISViewer class into Viewer and separate
+ * refactoring of the OpenBISProcessor class into Viewer and separate
  * (customizable) Processor is completed.
  * 
  * @author Aaron Ponti

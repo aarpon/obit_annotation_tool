@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.model;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.model.SampleDescriptor;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.model.SampleDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different

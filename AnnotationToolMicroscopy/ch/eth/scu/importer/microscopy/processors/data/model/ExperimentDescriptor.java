@@ -1,6 +1,7 @@
-package ch.eth.scu.importer.microscopy.processors.model;
+package ch.eth.scu.importer.microscopy.processors.data.model;
 
-import ch.eth.scu.importer.processors.model.PathAwareDescriptor;
+import ch.eth.scu.importer.processors.data.model.PathAwareDescriptor;
+
 import java.io.File;
 
 public class ExperimentDescriptor extends PathAwareDescriptor{
