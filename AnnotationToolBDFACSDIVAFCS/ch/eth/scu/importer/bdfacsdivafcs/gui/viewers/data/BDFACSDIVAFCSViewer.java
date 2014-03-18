@@ -10,12 +10,12 @@ import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.model.SpecimenNode;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.model.TrayNode;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.model.TubeNode;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.viewers.data.model.WellNode;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Experiment;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Specimen;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Tray;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Tube;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Well;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Specimen;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tube;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Well;
 import ch.eth.scu.importer.bdfacsdivafcs.readers.FCSReader;
 
 import java.awt.event.*;

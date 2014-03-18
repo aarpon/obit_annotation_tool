@@ -1,7 +1,7 @@
 package ch.eth.scu.importer.microscopy.gui.viewers.data.model;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.data.model.ExperimentDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different

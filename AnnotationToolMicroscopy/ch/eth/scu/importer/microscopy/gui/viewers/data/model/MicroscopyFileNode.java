@@ -2,7 +2,7 @@ package ch.eth.scu.importer.microscopy.gui.viewers.data.model;
 
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.interfaces.ILazyNode;
-import ch.eth.scu.importer.processors.model.DatasetDescriptor;
+import ch.eth.scu.importer.processors.data.model.DatasetDescriptor;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different

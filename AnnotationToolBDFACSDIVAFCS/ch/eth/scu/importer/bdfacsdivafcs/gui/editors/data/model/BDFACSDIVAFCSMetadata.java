@@ -7,8 +7,8 @@ import java.util.Map;
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Experiment;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Tray;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
 
 /**
  * Collects all relevant metadata to allow the registration of an

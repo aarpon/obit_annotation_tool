@@ -65,32 +65,74 @@ public class ATDataMover {
 
 		// Create a subfolder in targetDir with the uniqueID as name
 		File subFolder = new File(targetDir + File.separator + uniqueID);
-		if (!createDir(subFolder)) {
-			JOptionPane.showMessageDialog(null,
-					"Failed creating " + subFolder + "!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-
+		boolean retry = true;
+		while (retry) {
+			if (!createDir(subFolder)) {
+				Object[] options = {"Retry", "Exit"};
+				int n = JOptionPane.showOptionDialog(null,
+					"Failed creating " + subFolder + "!\n",
+					"Error", JOptionPane.YES_NO_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+				if (n == 0) {
+					continue;
+				} else {
+					System.exit(1);
+				}
+			} else {
+				retry = false;
+			}
 		}
-		
+
 		// Full target path
 		File fullTarget = new File(subFolder + File.separator + 
 				sourceDir.getName());
 		
 		// Move
-		sourceDir.renameTo(fullTarget);
+		retry = true;
+		while (retry) {
 		
-		// Check that moving worked
-		if (! fullTarget.exists()) {
-			JOptionPane.showMessageDialog(null,
-					"Failed copying " + sourceDir + " to " + 
-			fullTarget + "!\n" +
-			"Please contact your administrator. The application " +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
+			// Try to move over
+			boolean success = sourceDir.renameTo(fullTarget);
+			
+			if (success) {
+				retry = false;
+			} else {
+				
+				// Check that moving worked
+				if (! fullTarget.exists() ) {
+					
+					// Make sure the source folder is still there
+					if (sourceDir.exists()) {
+						Object[] options = {"Retry", "Exit"};
+						int n = JOptionPane.showOptionDialog(null,
+							"Failed transferring " + 
+						sourceDir.getAbsolutePath() + " to\n" + 
+									subFolder.getAbsolutePath() + "!\n\n" + 
+						"Please make sure that the folder is not open in\n" +
+						"the file manager or that any of the contained\n" +
+						"files are not open in some application.",
+						"Error", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE, null, options,
+						options[0]);
+						if (n == 0) {
+							continue;
+						} else {
+							System.exit(1);
+						}
+					} else {
+						// Something very BAD happened here. Neither source
+						// nor target folders exist!
+						JOptionPane.showMessageDialog(null,
+								"Failed copying " + sourceDir + " to " + 
+						fullTarget + "!\n" +
+						"Please contact your administrator. The application " +
+						"will now exit!",
+						"Fatal error!", JOptionPane.ERROR_MESSAGE);
+						System.exit(1);
+					}
+				}
+				
+			}
 		}
 		
 		// Re-create user folder

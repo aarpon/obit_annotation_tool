@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.processors.validator;
+package ch.eth.scu.importer.processors.data.validator;
 
 import java.io.File;
 import java.util.HashMap;

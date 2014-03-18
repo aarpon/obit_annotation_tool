@@ -19,10 +19,10 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.model.MicroscopyFileSeriesNode;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.Experiment;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.MicroscopyFile;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.MicroscopyFileSeries;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.Experiment;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.MicroscopyFileSeries;
 
 /**
  * Simple graphical viewer for the MicroscopyProcessor.

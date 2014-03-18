@@ -28,8 +28,8 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.microscopy.gui.editors.data.model.MicroscopyMetadata;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.Experiment;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.MicroscopyFile;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.Experiment;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 
 /**
  * Metadata editor panel.

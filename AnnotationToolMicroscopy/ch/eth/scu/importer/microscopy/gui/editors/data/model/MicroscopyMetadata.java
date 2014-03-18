@@ -3,7 +3,7 @@ package ch.eth.scu.importer.microscopy.gui.editors.data.model;
 import ch.eth.scu.importer.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.eth.scu.importer.microscopy.processors.MicroscopyProcessor.Experiment;
+import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.Experiment;
 
 /**
  * Collects all relevant metadata to allow the registration of an

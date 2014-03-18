@@ -2,7 +2,7 @@ package ch.eth.scu.importer.processors;
 
 import java.io.File;
 
-import ch.eth.scu.importer.processors.validator.GenericValidator;
+import ch.eth.scu.importer.processors.data.validator.GenericValidator;
 
 /**
  * Abstract base class for file processors. Actual implementations must

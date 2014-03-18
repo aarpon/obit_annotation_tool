@@ -29,11 +29,11 @@ import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.at.gui.viewers.openbis.OpenBISViewer;
 import ch.eth.scu.importer.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetadata;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Experiment;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.BDFACSDIVAFCSProcessor.Tray;
-import ch.eth.scu.importer.bdfacsdivafcs.processors.model.SampleDescriptor;
-import ch.eth.scu.importer.processors.model.AbstractDescriptor;
-import ch.eth.scu.importer.processors.model.DatasetDescriptor;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.model.SampleDescriptor;
+import ch.eth.scu.importer.processors.data.model.AbstractDescriptor;
+import ch.eth.scu.importer.processors.data.model.DatasetDescriptor;
 
 /**
  * Metadata editor panel.

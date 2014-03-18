@@ -1,4 +1,4 @@
-package ch.eth.scu.importer.bdfacsdivafcs.processors;
+package ch.eth.scu.importer.bdfacsdivafcs.processors.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,13 +10,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.eth.scu.importer.bdfacsdivafcs.processors.model.SampleDescriptor;
+import ch.eth.scu.importer.bdfacsdivafcs.processors.data.model.SampleDescriptor;
 import ch.eth.scu.importer.bdfacsdivafcs.readers.FCSReader;
 import ch.eth.scu.importer.processors.AbstractProcessor;
-import ch.eth.scu.importer.processors.model.DatasetDescriptor;
-import ch.eth.scu.importer.processors.model.ExperimentDescriptor;
-import ch.eth.scu.importer.processors.model.RootDescriptor;
-import ch.eth.scu.importer.processors.validator.GenericValidator;
+import ch.eth.scu.importer.processors.data.model.DatasetDescriptor;
+import ch.eth.scu.importer.processors.data.model.ExperimentDescriptor;
+import ch.eth.scu.importer.processors.data.model.RootDescriptor;
+import ch.eth.scu.importer.processors.data.validator.GenericValidator;
 
 /**
  * BDFACSDIVAXMLProcessor parses folder structures created by the 
