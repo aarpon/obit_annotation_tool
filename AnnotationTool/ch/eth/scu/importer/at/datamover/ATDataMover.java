@@ -119,7 +119,9 @@ public class ATDataMover {
 						} else {
 							System.exit(1);
 						}
+
 					} else {
+						
 						// Something very BAD happened here. Neither source
 						// nor target folders exist!
 						JOptionPane.showMessageDialog(null,
@@ -129,6 +131,7 @@ public class ATDataMover {
 						"will now exit!",
 						"Fatal error!", JOptionPane.ERROR_MESSAGE);
 						System.exit(1);
+
 					}
 				}
 				
