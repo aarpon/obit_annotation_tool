@@ -177,50 +177,12 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		pack();
 		setLocationRelativeTo(null);
 
-		// Create a thread for building the tree of the openBIS entities
-		Thread dataScanner = new Thread() {
-		
-			public void run() {
-				
-				// Scan the openBIS instance
-				openBISViewer.scan();
-			}
-		};
+		// Scan the openBIS instance
+		openBISViewer.scan();
 
-		// Create a thread for scanning the user data folder	
-		Thread openBISScanner = new Thread() {
-			
-			public void run() {
-
-				// Scan the user data folder for datasets
-				metadataViewer.setUserName(openBISViewer.getUserName());
-				metadataViewer.scan();
-			}
-		};
-		
-		try {
-
-			// Warning. The constructor starts two threads. This is safe
-			// because this class if FINAL.
-
-			// Run the scanning threads
-			dataScanner.start();
-			openBISScanner.start();
-
-			// Wait for both threads to finish
-			dataScanner.join();
-			openBISScanner.join();
-
-		} catch (InterruptedException e) {
-			
-			JOptionPane.showMessageDialog(null,
-					"Scanning threads interrupted!\n\n" +
-							"The application will now quit.",	
-					"Scanning error",
-					JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-
-		}
+    	// Scan the user data folder for datasets
+		metadataViewer.setUserName(openBISViewer.getUserName());
+		metadataViewer.scan();
 
 		// Make window visible
 		setVisible(true);
