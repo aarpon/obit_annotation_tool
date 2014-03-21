@@ -32,7 +32,7 @@ import ch.eth.scu.utils.QueryOS;
  * @author Aaron Ponti
  *
  */
-public class OutputPane extends JScrollPane {
+public final class OutputPane extends JScrollPane {
 
 	private static final long serialVersionUID = 1L;
 	private static JTextPane outputPane = new JTextPane();
