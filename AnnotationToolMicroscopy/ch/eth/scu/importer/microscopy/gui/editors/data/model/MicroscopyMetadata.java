@@ -11,7 +11,7 @@ import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.Experi
  * @author Aaron Ponti
  *
  */
-public class MicroscopyMetadata extends AbstractMetadataMapper {
+public final class MicroscopyMetadata extends AbstractMetadataMapper {
 
 	public ExperimentNode experimentNode;
 	public OpenBISProjectNode openBISProjectNode;

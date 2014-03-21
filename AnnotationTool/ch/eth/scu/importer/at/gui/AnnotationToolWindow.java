@@ -31,7 +31,7 @@ import ch.eth.scu.importer.processors.openbis.OpenBISProcessor;
  * Main window of the AnnotationTool application.
  * @author Aaron Ponti
  */
-public class AnnotationToolWindow extends JFrame implements ActionListener {
+public final class AnnotationToolWindow extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -177,24 +177,6 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		pack();
 		setLocationRelativeTo(null);
 
-//		// Ask the user to login.
-//		// Here we will insist on getting valid openBIS credentials, since a
-//		// valid login is essential for the functioning of the application.
-//		// If the user just closes the dialog, we close the application.
-//		outputPane.log("Asking for user credentials.");
-//		boolean status = false;
-//		while (!status) {
-//			try {
-//				status = openBISViewer.login();
-//			} catch (InterruptedException e) {
-//				JOptionPane.showMessageDialog(null,
-//					    "Interrupted execution of login threads!",
-//					    "Error",
-//					    JOptionPane.ERROR_MESSAGE);
-//				System.exit(1);
-//			}
-//		}
-
 		// Create a thread for building the tree of the openBIS entities
 		Thread dataScanner = new Thread() {
 		
@@ -217,6 +199,9 @@ public class AnnotationToolWindow extends JFrame implements ActionListener {
 		};
 		
 		try {
+
+			// Warning. The constructor starts two threads. This is safe
+			// because this class if FINAL.
 
 			// Run the scanning threads
 			dataScanner.start();

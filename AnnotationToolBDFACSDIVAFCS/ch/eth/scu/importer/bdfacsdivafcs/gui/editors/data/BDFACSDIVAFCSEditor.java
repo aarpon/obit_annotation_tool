@@ -39,7 +39,7 @@ import ch.eth.scu.importer.processors.data.model.DatasetDescriptor;
  * Metadata editor panel.
  * @author Aaron Ponti
  */
-public class BDFACSDIVAFCSEditor extends AbstractEditor {
+public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 
 	// List of experiments from the Data Model
 	protected List<ExperimentNode> experiments = 
@@ -98,8 +98,7 @@ public class BDFACSDIVAFCSEditor extends AbstractEditor {
 		for (BDFACSDIVAFCSMetadata metadata : metadataMappersList) {
 			
 			// Get the experiment node
-			ExperimentNode expNode = 
-					(ExperimentNode) metadata.expNode;
+			ExperimentNode expNode = metadata.expNode;
 			assert(expNode.getType().equals("Experiment"));
 			
 			// We first start by updating the Experiment descriptor itself
@@ -281,7 +280,6 @@ public class BDFACSDIVAFCSEditor extends AbstractEditor {
 
 	/**
 	 * Map the data and openBIS models
-	 * @throws Exception 
 	 */
 	protected boolean initMetadata() {
 		
@@ -565,8 +563,7 @@ public class BDFACSDIVAFCSEditor extends AbstractEditor {
 		for (OpenBISProjectNode s : openBISProjects) {
 
 			// Add the project identifier
-			comboProjectList.addItem(
-					((OpenBISProjectNode)s).getIdentifier());
+			comboProjectList.addItem(s.getIdentifier());
 
 		}
 		
@@ -635,7 +632,6 @@ public class BDFACSDIVAFCSEditor extends AbstractEditor {
 
 	/**
 	 * Collects and stores data folders for mapping
-	 * @return list of openBIS nodes
 	 */
 	private void storeExperiments() {
 

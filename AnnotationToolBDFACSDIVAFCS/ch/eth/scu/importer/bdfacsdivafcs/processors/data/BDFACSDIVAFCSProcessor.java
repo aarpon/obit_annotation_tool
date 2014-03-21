@@ -31,7 +31,7 @@ import ch.eth.scu.importer.processors.data.validator.GenericValidator;
  * 
  * @author Aaron Ponti
  */
-public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
+public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
@@ -532,7 +532,7 @@ public class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			Experiment expDesc;
 			String experimentName = getExperimentName(processor);
 			String experimentPath = getExperimentPath(processor, file);
-			if (experimentPath == "") {
+			if (experimentPath.equals("")) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(file,
 						"Folder name does not match experiment name.");

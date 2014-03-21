@@ -30,7 +30,7 @@ import java.io.IOException;
  * Simple graphical viewer for the BDFACSDIVAFCSProcessor
  * @author Aaron Ponti
  */
-public class BDFACSDIVAFCSViewer extends AbstractViewer {
+public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 
 	/**
 	 * Constructor

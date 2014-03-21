@@ -36,23 +36,22 @@ import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.Micros
  * @author Aaron Ponti
  *
  */
-public class MicroscopyEditor extends AbstractEditor {
+public final class MicroscopyEditor extends AbstractEditor {
 
 	// List of experiments from the Data Model
-	protected List<ExperimentNode> experiments = 
+	private List<ExperimentNode> experiments = 
 			new ArrayList<ExperimentNode>();
 	
 	// List of metadata mappers
-	protected List<MicroscopyMetadata> metadataMappersList =
+	private List<MicroscopyMetadata> metadataMappersList =
 			new ArrayList<MicroscopyMetadata>();
 
 	// Indicate which of the List<MicroscopyMetadata> is the active one
-	protected int currentExperimentIndex = -1;
+	private int currentExperimentIndex = -1;
 
-	protected JLabel labelExpName;
-	protected JComboBox<String> comboGeometryList;
-	protected JComboBox<String> comboProjectList;
-	protected JTextArea expDescription;
+	private JLabel labelExpName;
+	private JComboBox<String> comboProjectList;
+	private JTextArea expDescription;
 	
 	/**
 	 * Constructor
@@ -73,6 +72,7 @@ public class MicroscopyEditor extends AbstractEditor {
 	 * ActionPerformed method from the ActionListener interface
 	 * @param e The ActionEvent object
 	 */
+	@Override
 	public void actionPerformed(ActionEvent e) {
 	}
 
@@ -149,8 +149,8 @@ public class MicroscopyEditor extends AbstractEditor {
 
 	/**
 	 * Map the data and openBIS models
-	 * @throws Exception 
 	 */
+	@Override
 	protected boolean initMetadata() {
 		
 		// Make sure both viewers have completed their models
@@ -165,7 +165,6 @@ public class MicroscopyEditor extends AbstractEditor {
 		// Check that there is at least one entry in each of the 
 		// arrays
 		if (experiments.size() == 0 || openBISProjects.size() == 0) {
-			// TODO: Inform the user
 			return false;
 		}
 		
@@ -178,8 +177,8 @@ public class MicroscopyEditor extends AbstractEditor {
 		}
 		
 		// Set the index of the experiment (if needed)
-		if (	currentExperimentIndex < 0 ||
-				currentExperimentIndex > (experiments.size() - 1)) {
+		if (currentExperimentIndex < 0
+				|| currentExperimentIndex > (experiments.size() - 1)) {
 			currentExperimentIndex = 0;
 		}
 		
@@ -191,6 +190,7 @@ public class MicroscopyEditor extends AbstractEditor {
 	 * Renders all widgets on the panel
 	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
+	@Override
 	protected void createUIElements(ObserverActionParameters params) throws Exception {
 
 		// Get selected metadata element
@@ -304,8 +304,7 @@ public class MicroscopyEditor extends AbstractEditor {
 		for (OpenBISProjectNode s : openBISProjects) {
 
 			// Add the openBIS Project node
-			comboProjectList.addItem(
-					((OpenBISProjectNode)s).getIdentifier());
+			comboProjectList.addItem(s.getIdentifier());
 
 		}
 		
@@ -325,12 +324,12 @@ public class MicroscopyEditor extends AbstractEditor {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
 					// Get selected project identifier
-					String projectID =
-							(String)
-							((JComboBox<String>)
-									e.getSource()).getSelectedItem();
+					String projectID;
+                    projectID = (String)
+                    ((JComboBox<String>)
+                            e.getSource()).getSelectedItem();
 
-					// Get the ProjectNode that matches the identifier
+                    // Get the ProjectNode that matches the identifier
 					for (OpenBISProjectNode projNode : openBISProjects) {
 						if (projNode.getIdentifier().equals(projectID)) {
 							metadataMappersList.get(
@@ -373,6 +372,7 @@ public class MicroscopyEditor extends AbstractEditor {
 	/**
 	 * Update all widgets on the panel
 	 */
+	@Override
 	protected void updateUIElements(ObserverActionParameters params) {
 		
 		// Update the currentExperimentIndex property
@@ -402,7 +402,6 @@ public class MicroscopyEditor extends AbstractEditor {
 
 	/**
 	 * Collects and stores data folders for mapping
-	 * @return list of openBIS nodes
 	 */
 	private void storeExperiments() {
 

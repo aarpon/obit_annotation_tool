@@ -16,7 +16,7 @@ import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.
  * @author Aaron Ponti
  *
  */
-public class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
+public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 
 	public ExperimentNode expNode;
 	public OpenBISProjectNode openBISProjectNode;

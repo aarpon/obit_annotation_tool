@@ -22,7 +22,7 @@ import ch.eth.scu.importer.processors.data.validator.GenericValidator;
  * 
  * @author Aaron Ponti
  */
-public class MicroscopyProcessor extends AbstractProcessor {
+public final class MicroscopyProcessor extends AbstractProcessor {
 
 	/* Folder to scan (recursively) */
 	private File userFolder;
@@ -456,10 +456,8 @@ public class MicroscopyProcessor extends AbstractProcessor {
 		/**
 		 * Constructor.
 		 * 
-		 * @param microscopyFileName
-		 *            Microscopy file name with full path
-		 * @param attr
-		 *            String-string map of attributes for the series
+		 * @param index Index of the series in file.
+		 * @param attr  String-string map of attributes for the series
 		 */
 		public MicroscopyFileSeries(int index, Map<String, String> attr) {
 

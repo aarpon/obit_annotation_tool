@@ -115,7 +115,7 @@ public class DataViewerTreeToXML {
 			String filename = outputDirectory + File.separator + key;
 
 			try {
-				Document document = (Document) documents.get(key);
+				Document document = documents.get(key);
 				Transformer t = 
 						TransformerFactory.newInstance().newTransformer();
 				OutputStream outputStream = new FileOutputStream(filename);

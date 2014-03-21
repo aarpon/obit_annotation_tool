@@ -37,8 +37,6 @@ abstract public class BaseBioFormatsReader extends AbstractReader {
 	protected ServiceFactory factory;
 	protected OMEXMLService service;
 	protected IMetadata omexmlMeta;
-	
-	protected String errorMessage = "";
 
 	/**
 	 * Constructor
@@ -55,8 +53,6 @@ abstract public class BaseBioFormatsReader extends AbstractReader {
 
 	/**
 	 * Initialize the reader and sets up the OMEXML metadata store
-	 * @throws DependencyException 
-	 * @throws ServiceException 
 	 */
 	protected boolean init() {
 

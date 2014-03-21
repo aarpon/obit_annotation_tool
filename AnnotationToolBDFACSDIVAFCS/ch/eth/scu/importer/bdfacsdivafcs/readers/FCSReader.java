@@ -19,7 +19,7 @@ import ch.eth.scu.importer.readers.AbstractReader;
  * 
  * @author Aaron Ponti
  */
-public class FCSReader extends AbstractReader {
+public final class FCSReader extends AbstractReader {
 
 	/* Private instance variables */
 	private File filename;

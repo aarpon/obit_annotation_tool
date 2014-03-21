@@ -16,7 +16,6 @@ import ch.eth.scu.importer.at.gui.viewers.ObserverActionParameters;
 import ch.eth.scu.importer.at.gui.viewers.data.AbstractViewer;
 import ch.eth.scu.importer.at.gui.viewers.data.model.AbstractNode;
 import ch.eth.scu.importer.at.gui.viewers.data.model.ExperimentNode;
-import ch.eth.scu.importer.at.gui.viewers.data.model.RootNode;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.eth.scu.importer.microscopy.gui.viewers.data.model.MicroscopyFileSeriesNode;
 import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor;
@@ -28,7 +27,7 @@ import ch.eth.scu.importer.microscopy.processors.data.MicroscopyProcessor.Micros
  * Simple graphical viewer for the MicroscopyProcessor.
  * @author Aaron Ponti
  */
-public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandListener {
+public final class MicroscopyViewer extends AbstractViewer implements TreeWillExpandListener {
 
 	/**
 	 * Constructor
@@ -36,7 +35,7 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
 	public MicroscopyViewer() {
 		
 		// Listen for when a node is about to be opened (for lazy loading)
-		tree.addTreeWillExpandListener((TreeWillExpandListener) this);
+		tree.addTreeWillExpandListener(this);
 
 	}
 
@@ -153,7 +152,7 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
 		}
 
 		// We will append the experiment nodes directly to the root node
-		createNodes((RootNode)rootNode, microscopyProcessor.folderDescriptor);
+		createNodes(rootNode, microscopyProcessor.folderDescriptor);
 		
 		// Inform the user
 		outputPane.log("Successfully processed folder \"" + 
@@ -234,7 +233,7 @@ public class MicroscopyViewer extends AbstractViewer implements TreeWillExpandLi
 	
 	/**
 	 * Load the childen of the specified node if needed
-	 * @param abstractNode
+	 * @param abstractNode Node to query for children.
 	 */
 	private void loadLazyChildren(AbstractNode abstractNode) {
 		

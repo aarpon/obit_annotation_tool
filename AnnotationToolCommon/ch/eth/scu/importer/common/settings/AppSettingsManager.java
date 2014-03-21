@@ -57,15 +57,6 @@ public class AppSettingsManager {
 
 	}
 	
-
-	/**
-	 * Return true if the settings file exists
-	 * @return true if the settings file exists
-	 */
-	public boolean fileExists() {
-		return fileExists;
-	}
-
 	/**
 	 * Return true if the settings file is valid
 	 * @return true if the settings file is valid
@@ -195,14 +186,6 @@ public class AppSettingsManager {
 		currentSettingsIndex = newCurrent;
 		return true;
 	}
-	
-	/**
-	 * Returns the properties file name with full path
-	 * @return 	name with full path of the properties files
-	 */
-	public ArrayList<String> getSettingsNames() {
-		return AppSettings.getSettingsNames();
-	}
 
 	/**
 	 * Return the value of the setting for current server.
@@ -260,17 +243,6 @@ public class AppSettingsManager {
 	 */
 	public void setServer(String openBISURL) {
 		listAppSettings.get(currentSettingsIndex).setOpenBISURL(openBISURL);
-	}
-
-	/**
-	 * Selects the server by URL
-	 * @param openBISURL Server URL.
-	 */
-	public void selectServer(String openBISURL) {
-		int indx = listAppSettings.indexOf(openBISURL);
-		if (indx != -1) {
-			currentSettingsIndex = indx;
-		}
 	}
 	
 	/**
@@ -339,7 +311,7 @@ public class AppSettingsManager {
 		
 		// Store the file version
 		try {
-			fileVersion = Integer.parseInt(rootNode.getAttribute("version")); 
+			fileVersion = Integer.parseInt(rootNode.getAttribute("version"));
 		} catch (NumberFormatException n) {
 			fileVersion = -1;
 		}
@@ -584,7 +556,6 @@ public class AppSettingsManager {
 
 	/**
 	 * Initialize application settings with default values.
-	 * @return ArrayList of AppSettings containing one element.
 	 */
 	private void initialize() {
 		listAppSettings = new ArrayList<AppSettings>();

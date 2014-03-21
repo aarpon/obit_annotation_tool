@@ -19,7 +19,7 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	protected Map<String,HashMap<String,String>> attr;
 
 	/**
-	 * @param filename
+	 * @param filename File name with full path.
 	 */
 	public MicroscopyReader(File filename) {
 		

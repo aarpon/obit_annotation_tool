@@ -88,43 +88,42 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	public void update(Observable obs, Object arg) {
 
 		// Get the ObserverAction
-        ObserverActionParameters observerActionParams = 
-        		(ObserverActionParameters) arg;
+		ObserverActionParameters observerActionParams = 
+				(ObserverActionParameters) arg;
 
-        // Perform the correct action
-        switch (observerActionParams.action) {
-        		case ABOUT_TO_RESCAN:
-        			try {
-        				resetMetadata(observerActionParams);
-                } catch (Exception e) {
-                     // TODO Auto-generated catch block
-                     e.printStackTrace();
-                }
-                break;
-            case SCAN_COMPLETE:
-                try {
-                    init(observerActionParams);
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-            case EXPERIMENT_CHANGED:
-                try {
-                	updateUIElements(observerActionParams);
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                break;
-        }
+		// Perform the correct action
+		switch (observerActionParams.action) {
+		case ABOUT_TO_RESCAN:
+			try {
+				resetMetadata(observerActionParams);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			break;
+		case SCAN_COMPLETE:
+			try {
+				init(observerActionParams);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			break;
+		case EXPERIMENT_CHANGED:
+			try {
+				updateUIElements(observerActionParams);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
 	/**
 	 * Collects and stores openBIS projects for mapping
-	 * @return list of openBIS nodes
 	 */
 	protected void storeOpenBISProjects() {
 		
@@ -198,7 +197,6 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 	 * the user will provide through UI elements in the editor).
 	 * 
 	 * @see AbstractMetadataMapper
-	 * @throws Exception 
 	 */
 	abstract protected boolean initMetadata();
 
@@ -210,7 +208,6 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 
 	/**
 	 * Updates all widgets on the panel
-	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
 	abstract protected void updateUIElements(ObserverActionParameters params);
 	

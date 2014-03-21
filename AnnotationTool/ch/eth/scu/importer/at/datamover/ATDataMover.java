@@ -106,8 +106,7 @@ public class ATDataMover {
 						Object[] options = {"Retry", "Exit"};
 						int n = JOptionPane.showOptionDialog(null,
 							"Failed transferring " + 
-						sourceDir.getAbsolutePath() + " to\n" + 
-									subFolder.getAbsolutePath() + "!\n\n" + 
+						sourceDir.getAbsolutePath() + "!\n\n" + 
 						"Please make sure that the folder is not open in\n" +
 						"the file manager or that any of the contained\n" +
 						"files are not open in some application.",

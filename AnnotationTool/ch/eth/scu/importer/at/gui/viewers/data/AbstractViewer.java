@@ -517,8 +517,12 @@ abstract public class AbstractViewer extends Observable
 			}
 		}
 
+		// Create a RootNode
 		rootNode = new RootNode(new RootDescriptor(new File("/")));
-		
+		if (rootNode == null) {
+			return;
+		}
+
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
 		tree.getSelectionModel().setSelectionMode(
