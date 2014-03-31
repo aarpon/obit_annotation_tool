@@ -424,7 +424,7 @@ public class OpenBISProcessor {
 				"The application will now quit.";
 		loginErrorTitle = "Thread interrupted";
 		loginErrorRecoverable = false;
-	}	
-	
+        Thread.currentThread().interrupt();
+	}
 	
 }

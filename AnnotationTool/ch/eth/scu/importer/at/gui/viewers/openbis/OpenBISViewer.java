@@ -254,10 +254,7 @@ public class OpenBISViewer extends Observable
 		
 		// Create the root node
 		userNode = new OpenBISUserNode(defaultRootNodeString);
-		if (userNode == null) {
-			return;
-		}
-		
+
 		tree.setModel(new DefaultTreeModel(userNode));
 		tree.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);

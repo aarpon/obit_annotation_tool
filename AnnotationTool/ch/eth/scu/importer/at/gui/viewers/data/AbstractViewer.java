@@ -77,7 +77,6 @@ abstract public class AbstractViewer extends Observable
 	protected JLabel title;
 	protected DefaultMutableTreeNode rootNode;
 	protected JScrollPane treeView;
-	protected JScrollPane htmlView;
 	protected JButton rescanButton;
 	protected JLabel metadataView;
 	protected JTable metadataViewTable;
@@ -519,9 +518,6 @@ abstract public class AbstractViewer extends Observable
 
 		// Create a RootNode
 		rootNode = new RootNode(new RootDescriptor(new File("/")));
-		if (rootNode == null) {
-			return;
-		}
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
@@ -798,9 +794,24 @@ abstract public class AbstractViewer extends Observable
             	// Move
             	outputPane.log("Moving \"" + fullPath + "\" to \"" +
             			fullTarget + "\"");
-            	fullPath.renameTo(fullTarget);
-            	outputPane.warn("Please rescan the data folder when you have " +
-            			"fixed all invalid datasets!");            	
+                boolean isFile = fullPath.isFile();
+                if (! fullPath.renameTo(fullTarget)) {
+                    if (isFile) {
+                        JOptionPane.showMessageDialog(null,
+                                "Could not move \"" + fullPath + "\"!\n\n" +
+                                        "Please make sure that the file is not " +
+                                        "open in some application.");
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                            "Could not move \"" + fullPath + "\"!\n\n" +
+                            "Please make sure that the folder is not open in " +
+                            "the file manager or that any of the contained\n" +
+                            "files are not open in some application.");
+                    }
+                } else {
+                    outputPane.warn("Please rescan the data folder when you have " +
+                            "fixed all invalid datasets!");
+                }
 
             }
         });
@@ -838,9 +849,24 @@ abstract public class AbstractViewer extends Observable
                 	
                 	// Delete
                 	outputPane.log("Deleting \"" + fullPath + "\"");
-                	ATDataMover.deleteRecursively(fullPath);
-                	outputPane.warn("Please rescan the data folder when you have " +
-                			"fixed all invalid datasets!");            	
+                    boolean isFile = fullPath.isFile();
+                	if (!ATDataMover.deleteRecursively(fullPath)) {
+                        if (isFile) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Could not move \"" + fullPath + "\"!\n\n" +
+                                            "Please make sure that the file is not " +
+                                            "open in some application.");
+                        } else {
+                            JOptionPane.showMessageDialog(null,
+                                    "Could not move \"" + fullPath + "\"!\n\n" +
+                                            "Please make sure that the folder is not open in " +
+                                            "the file manager or that any of the contained\n" +
+                                            "files are not open in some application.");
+                        }
+                    } else {
+                        outputPane.warn("Please rescan the data folder when you have " +
+                                "fixed all invalid datasets!");
+                    }
                 
                 }
             }

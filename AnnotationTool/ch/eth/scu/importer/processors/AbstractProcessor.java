@@ -79,8 +79,7 @@ abstract public class AbstractProcessor {
 		if (name.equals(".DS_Store") ||
 				name.equals("._.DS_Store") ||
 				name.equals("Thumbs.db")) {
-			file.delete();
-			return true;
+            return file.delete();
 		} else {
 			return false;
 		}
