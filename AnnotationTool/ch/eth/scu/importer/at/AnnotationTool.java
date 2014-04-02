@@ -85,7 +85,10 @@ public class AnnotationTool {
 
 				// Create the Window and scan user's data folder and
 				// openBIS structure.
-				(new AnnotationToolWindow()).scan();
+				AnnotationToolWindow w = new AnnotationToolWindow();
+				w.setEnabled(false);
+				w.scan();
+				w.setEnabled(true);
 			}
 		
 		});
