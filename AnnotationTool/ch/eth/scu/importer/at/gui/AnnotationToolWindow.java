@@ -177,16 +177,23 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		pack();
 		setLocationRelativeTo(null);
 
+		// Make window visible
+		setVisible(true);
+
+	}
+
+	/**
+	 * Scans the data folder and the openBIS structure and updates the UI.
+	 */
+	public void scan() {
+
 		// Scan the openBIS instance
 		openBISViewer.scan();
 
     	// Scan the user data folder for datasets
 		metadataViewer.setUserName(openBISViewer.getUserName());
 		metadataViewer.scan();
-
-		// Make window visible
-		setVisible(true);
-
+		
 	}
 
     /**

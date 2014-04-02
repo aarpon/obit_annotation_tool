@@ -83,7 +83,9 @@ public class AnnotationTool {
 			
 			public void run() {
 
-				new AnnotationToolWindow();
+				// Create the Window and scan user's data folder and
+				// openBIS structure.
+				(new AnnotationToolWindow()).scan();
 			}
 		
 		});
