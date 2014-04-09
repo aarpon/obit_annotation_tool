@@ -335,7 +335,12 @@ public class OpenBISProcessor {
 		// create_project ingestion plug-in.
 		for (AggregationServiceDescription service : aggregationServices)
         {
-			if (service.getServiceKey().equals("create_project")) {
+			// The 'micr_create_project' and 'flow_create_project' plug-ins
+			// are identical and we can use either one; but we have to check
+			// for both since we do not know which core technologies are
+			// enabled.
+			if (service.getServiceKey().equals("flow_create_project") ||
+					service.getServiceKey().equals("micr_create_project")) {
 				createProjectService = service;
 				
 				// Found, we can return success
