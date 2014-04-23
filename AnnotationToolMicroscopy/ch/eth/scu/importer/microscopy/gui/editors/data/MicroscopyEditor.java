@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
@@ -324,25 +325,52 @@ public final class MicroscopyEditor extends AbstractEditor {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
 					// Get selected project identifier
+					@SuppressWarnings("unchecked")
 					String projectID;
                     projectID = (String)
                     ((JComboBox<String>)
                             e.getSource()).getSelectedItem();
 
-                    // Get the ProjectNode that matches the identifier
+					// Get the selected project node
+					OpenBISProjectNode selProjNode = null;
 					for (OpenBISProjectNode projNode : openBISProjects) {
 						if (projNode.getIdentifier().equals(projectID)) {
-							metadataMappersList.get(
-									currentExperimentIndex).openBISProjectNode =
-											projNode;
+							selProjNode = projNode;
 							break;
 						}
 					}
 
+					// Ask the user if he wants to set this project only 
+					// to this experiment or to all
+					Object[] options = {"To this only", "To all"};
+					int n = JOptionPane.showOptionDialog(null,
+					    "Set this project to this experiment only or to all?",
+					    "Question",
+					    JOptionPane.YES_NO_OPTION,
+					    JOptionPane.QUESTION_MESSAGE,
+					    null,
+					    options,
+					    options[0]);
+					
+					// Apply user's choice
+					if (n == 1) {
+						
+						// Apply to all
+						for (int i = 0; i < metadataMappersList.size(); i++) {
+							metadataMappersList.get(i).openBISProjectNode = selProjNode;
+						}
+						
+					} else {
+						
+						// Apply to current experiment only
+						metadataMappersList.get(
+								currentExperimentIndex).openBISProjectNode =
+								selProjNode;
+					}
 				}
 			}
 		});
-	
+
 		// Add the project combo box
 		constraints.insets = new Insets(0, 10, 0, 10);
 		constraints.weightx = 1;
@@ -362,10 +390,9 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
 		
-		// In case this was called when then window was already visible (i.e.
-		// if the login failed the first time and this panel was drawn without
-		// children)
-		panel.revalidate();
+		// Now redraw
+		panel.validate();
+		panel.repaint();
 
 	}
 
