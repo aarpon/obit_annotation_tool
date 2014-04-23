@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -38,7 +37,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 	private OpenBISProcessor openBISProcessor; 
     private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
-	private Icon appIcon; 
+	private ImageIcon appIcon; 
 
 	/**
 	 * Constructor
@@ -88,6 +87,9 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		appIcon = new ImageIcon(
 				this.getClass().getResource("icons/icon.png"));
 		
+		// Set it to the window
+		setIconImage(appIcon.getImage());
+
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);		
