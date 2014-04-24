@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.bdfacsdivafcs.gui.editors.data;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -407,6 +408,8 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.gridy = gridy++;
 		expDescription = new JTextArea(metadata.getExperiment().description);
 		expDescription.setLineWrap(true);
+		Font f = expDescription.getFont();
+		expDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override

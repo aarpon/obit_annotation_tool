@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.microscopy.gui.editors.data;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -256,6 +257,8 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.gridy = 2;
 		expDescription = new JTextArea(
 				metadata.getExperiment().description);
+		Font f = expDescription.getFont();
+		expDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
 		expDescription.setLineWrap(true);
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
 
