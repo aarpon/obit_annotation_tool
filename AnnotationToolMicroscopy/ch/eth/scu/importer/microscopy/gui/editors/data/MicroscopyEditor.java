@@ -324,11 +324,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 		// When a project is selected, update the corresponding 
 		// experiment in the data model 
 		comboProjectList.addActionListener(new ActionListener() {
+			@SuppressWarnings("unchecked")
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
 					// Get selected project identifier
-					@SuppressWarnings("unchecked")
 					String projectID;
                     projectID = (String)
                     ((JComboBox<String>)
