@@ -1,6 +1,7 @@
 package ch.eth.scu.importer.at;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 
 import ch.eth.scu.importer.at.gui.AnnotationToolWindow;
 import ch.eth.scu.importer.common.settings.AppSettingsManager;
@@ -86,13 +87,34 @@ public class AnnotationTool {
 				// Create the Window and scan user's data folder and
 				// openBIS structure.
 				AnnotationToolWindow w = new AnnotationToolWindow();
-				w.setEnabled(false);
-				w.scan();
-				w.setEnabled(true);
-			}
-		
-		});
+
+				class BackgroundScanner extends SwingWorker<Void, Void> {
+					
+					AnnotationToolWindow w;
+					
+					public BackgroundScanner(AnnotationToolWindow w) {
+						this.w = w;
+					}
+					
+					@Override
+				    public Void doInBackground() {
+						// Scan data and openBIS
+				    	w.scan();
+				    	return null;
+				    }
+
+				    @Override
+				    public void done() {
+				    	// Nothing to do.
+				    }
+
+				}
 	
+				// Execute scan() in the background 
+				(new BackgroundScanner(w)).execute();
+			}
+		});
+
 	}
 	
 }

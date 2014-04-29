@@ -70,7 +70,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 		constraints.insets = new Insets(5, 0, 5, 0);
 		add(metadataEditor.getPanel(), constraints);
 		
-		// Add an upload button
+		// Add a "Send to openBIS" button
 		registerButton = new JButton("Send to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
@@ -156,5 +156,5 @@ public class EditorContainer extends JPanel implements ActionListener {
 	public AbstractEditor getEditor() {
 		return metadataEditor;
 	}
-	
+
 }

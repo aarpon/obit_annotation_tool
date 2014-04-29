@@ -77,7 +77,7 @@ abstract public class AbstractViewer extends Observable
 	protected JLabel title;
 	protected DefaultMutableTreeNode rootNode;
 	protected JScrollPane treeView;
-	protected JButton rescanButton;
+	protected JButton scanButton;
 	protected JLabel metadataView;
 	protected JTable metadataViewTable;
 	protected JScrollPane metadataViewPane;	
@@ -180,8 +180,8 @@ abstract public class AbstractViewer extends Observable
 		panel.add(treeView, constraints);
 
 		// Add a rescan button
-		rescanButton = new JButton("Scan");
-		rescanButton.addActionListener(new ActionListener() {
+		scanButton = new JButton("Scan");
+		scanButton.addActionListener(new ActionListener() {
  
             public void actionPerformed(ActionEvent e)
             {
@@ -197,7 +197,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.insets = new Insets(5, 0, 5, 5);
-		panel.add(rescanButton, constraints);
+		panel.add(scanButton, constraints);
 		
 		// Add a simple label
 		metadataView = new JLabel("Metadata viewer");

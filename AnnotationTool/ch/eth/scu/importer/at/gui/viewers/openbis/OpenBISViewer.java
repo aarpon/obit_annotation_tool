@@ -58,12 +58,13 @@ public class OpenBISViewer extends Observable
 	implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
 	protected JPanel panel;
+	protected JButton scanButton;
 	
 	private OpenBISProcessor openBISProcessor;
 
     private OpenBISUserNode userNode;
 	private OpenBISViewerTree tree;
-    private String defaultRootNodeString = "Please login to openBIS...";
+    private String defaultRootNodeString = "/";
 
 	//private boolean isLoggedIn = false;
 
@@ -166,8 +167,8 @@ public class OpenBISViewer extends Observable
 		panel.add(treeView, constraints);
 
 		// Add a rescan button
-        JButton rescanButton = new JButton("Scan");
-		rescanButton.addActionListener(new ActionListener() {
+        scanButton = new JButton("Scan");
+		scanButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 scan();
@@ -182,7 +183,7 @@ public class OpenBISViewer extends Observable
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.insets = new Insets(0, 5, 5, 0);
-		panel.add(rescanButton, constraints);
+		panel.add(scanButton, constraints);
 		
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
