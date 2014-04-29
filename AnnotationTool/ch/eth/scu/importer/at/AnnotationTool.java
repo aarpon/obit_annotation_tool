@@ -86,12 +86,13 @@ public class AnnotationTool {
 
 				// Create the Window and scan user's data folder and
 				// openBIS structure.
-				AnnotationToolWindow w = new AnnotationToolWindow();
+				final AnnotationToolWindow w = new AnnotationToolWindow();
 
 				class BackgroundScanner extends SwingWorker<Void, Void> {
 					
-					AnnotationToolWindow w;
+					final AnnotationToolWindow w;
 					
+					// Constructor
 					public BackgroundScanner(AnnotationToolWindow w) {
 						this.w = w;
 					}
