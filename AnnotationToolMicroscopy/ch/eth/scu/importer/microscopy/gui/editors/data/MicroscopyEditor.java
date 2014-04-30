@@ -419,6 +419,14 @@ public final class MicroscopyEditor extends AbstractEditor {
 		expDescription.setText(
 				metadata.getExperiment().description);
 
+		// Remove listeners on the comboProjectList element to prevent firing
+		// while we set the value.
+		ActionListener[] listeners = 
+				comboProjectList.getListeners(ActionListener.class);
+		for (ActionListener l : listeners) {
+			comboProjectList.removeActionListener(l);
+		}
+		
 		// Select the correct one
 		for (int i = 0; i < openBISProjects.size(); i++) {
 			if (openBISProjects.get(i).getIdentifier().equals(
@@ -426,6 +434,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 				comboProjectList.setSelectedIndex(i);
 				break;
 			}
+		}
+		
+		// Restore listeners
+		for (ActionListener l : listeners) {
+			comboProjectList.addActionListener(l);
 		}
 
 	}

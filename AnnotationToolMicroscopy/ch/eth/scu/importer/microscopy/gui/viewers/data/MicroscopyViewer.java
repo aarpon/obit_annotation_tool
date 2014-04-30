@@ -61,11 +61,11 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 		// The valuedChanged() method is called twice when the a node is
 		// chosen in the tree. Workaround: do not process the same node 
 		// twice in a row  
-		if (node.toString().equals(lastSelectedNode)) {
+		if (node == lastSelectedNode) {
 			return;
 		}
-		lastSelectedNode = node.toString();
-		
+		lastSelectedNode = node;
+
 		// Get the node object
 		Object nodeInfo = node.getUserObject();
 

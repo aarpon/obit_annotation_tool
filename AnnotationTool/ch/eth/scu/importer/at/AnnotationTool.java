@@ -79,7 +79,7 @@ public class AnnotationTool {
 		}
 
 		
-		// Open the main window
+		// Open the main window and run the scan in the background
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
 			public void run() {

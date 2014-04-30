@@ -96,7 +96,7 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
 
-		// Get selected node		
+		// Get selected node
 		AbstractNode node = (AbstractNode) tree.getLastSelectedPathComponent();
 		if (node == null) {
 			return;
@@ -105,10 +105,10 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 		// The valuedChanged() method is called twice when the a node is
 		// chosen in the tree. Workaround: do not process the same node 
 		// twice in a row  
-		if (node.toString().equals(lastSelectedNode)) {
+		if (node == lastSelectedNode) {
 			return;
 		}
-		lastSelectedNode = node.toString();
+		lastSelectedNode = node;
 		
 		// Get the node object
 		Object nodeInfo = node.getUserObject();

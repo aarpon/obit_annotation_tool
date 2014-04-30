@@ -60,8 +60,8 @@ abstract public class AbstractViewer extends Observable
 
 	// The valueChanged() method is fired twice when selection is changed  
 	// in a JTree, so we keep track of the last processed node to avoid 
-	// parsing the same FCS file twice every time the node is changed.
-	protected String lastSelectedNode;
+	// doing the work twice every time the node is changed.
+	protected AbstractNode lastSelectedNode;
 	
 	// When selecting an entry in the tree, the editor might be refreshed
 	// in response. This should happen only if a new folder is selected -
@@ -853,12 +853,12 @@ abstract public class AbstractViewer extends Observable
                 	if (!ATDataMover.deleteRecursively(fullPath)) {
                         if (isFile) {
                             JOptionPane.showMessageDialog(null,
-                                    "Could not move \"" + fullPath + "\"!\n\n" +
+                                    "Could not delete \"" + fullPath + "\"!\n\n" +
                                             "Please make sure that the file is not " +
                                             "open in some application.");
                         } else {
                             JOptionPane.showMessageDialog(null,
-                                    "Could not move \"" + fullPath + "\"!\n\n" +
+                                    "Could not delete \"" + fullPath + "\"!\n\n" +
                                             "Please make sure that the folder is not open in " +
                                             "the file manager or that any of the contained\n" +
                                             "files are not open in some application.");
