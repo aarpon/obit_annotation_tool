@@ -1,0 +1,1 @@
+Upload the created JAR to the lib subfolder of the "MicroscopyDropbox". Restart the DSS.
