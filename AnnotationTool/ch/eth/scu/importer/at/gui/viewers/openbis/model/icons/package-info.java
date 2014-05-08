@@ -1,1 +1,0 @@
-package ch.eth.scu.importer.at.gui.viewers.openbis.model.icons;

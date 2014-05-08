@@ -1,6 +1,6 @@
 package tests;
 
-import ch.eth.scu.importer.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor;
+import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor;
 
 public class TestBDDIVAFCSProcessor {
 

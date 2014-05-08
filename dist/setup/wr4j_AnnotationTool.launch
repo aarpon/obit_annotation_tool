@@ -18,7 +18,7 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.eth.scu.importer.at.AnnotationTool"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.ethz.scu.obit.at.AnnotationTool"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="scu_annotation_tool"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms512m -Xmx2048m -XX:MaxPermSize=512m"/>
 <stringAttribute key="process.priority" value=""/>
