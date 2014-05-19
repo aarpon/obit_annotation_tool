@@ -4,20 +4,43 @@
 package ch.ethz.scu.obit.microscopy.readers;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import loci.common.services.DependencyException;
+import loci.common.services.ServiceException;
+import loci.common.services.ServiceFactory;
+import loci.formats.ChannelSeparator;
+import loci.formats.FormatException;
+import loci.formats.meta.IMetadata;
+import loci.formats.services.OMEXMLService;
+import loci.plugins.util.ImageProcessorReader;
+import loci.plugins.util.LociPrefs;
 import ome.xml.model.primitives.Color;
 import ome.xml.model.primitives.PositiveFloat;
 import ome.xml.model.primitives.PositiveInteger;
+import ch.ethz.scu.obit.readers.AbstractReader;
 
 /**
+ * A generic bio-formats based file processor that should manage to parse
+ * metadata information from any microscopy file format supported by
+ * LOCI's bio-formats library.
+ * 
  * @author Aaron Ponti
  *
  */
-public class MicroscopyReader extends BaseBioFormatsReader {
+public class MicroscopyReader extends AbstractReader {
+
+	/* Protected instance variables */
+	protected File filename;
+	protected ImageProcessorReader reader;
+
+	protected ServiceFactory factory;
+	protected OMEXMLService service;
+	protected IMetadata omexmlMeta;
 
 	/**
 	 * Metadata attributes
@@ -28,15 +51,69 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	 * @param filename File name with full path.
 	 */
 	public MicroscopyReader(File filename) {
-		
-		// Call base constructor
-		super(filename);
 
 		// Initialize String-String attributes map
 		attr = new HashMap<String, HashMap<String, String>>();
+		
+		// Store the filename
+		this.filename = filename;
+		
+		// Initialize
+		init();
 
 	}
 
+	/**
+	 * Initialize the reader and sets up the OMEXML metadata store
+	 */
+	protected boolean init() {
+
+		// Create the reader
+		reader = new ImageProcessorReader(
+				new ChannelSeparator(
+						LociPrefs.makeImageReader()));
+
+		// Set OME-XML metadata
+		factory = null;
+		service = null;
+		omexmlMeta = null;
+
+		try {
+			factory = new ServiceFactory();
+			service = factory.getInstance(OMEXMLService.class);
+		} catch (DependencyException e) {
+			this.errorMessage =
+					"Could not initialize bio-formats library. " +
+			"Error was: " + e.getMessage();
+			return false;
+		}
+		try {
+			omexmlMeta = service.createOMEXMLMetadata();
+		} catch (ServiceException e) {
+			this.errorMessage =
+				    "Could not initialize bio-formats library. " +
+			"Error was: " + e.getMessage();
+			return false;
+		}
+		reader.setMetadataStore(omexmlMeta);
+
+		// Try to open the image file
+		try {
+		      reader.setId(filename.getCanonicalPath());
+		} catch (FormatException e) {
+			this.errorMessage =
+					"Could not open file. Error was: " + e.getMessage();
+			return false;
+		} catch (IOException e) {
+			this.errorMessage =
+					"Could not open file. Error was: " + e.getMessage();
+			return false;
+		}
+
+		this.errorMessage = "";
+		return true;
+	}
+	
 	/**
 	 * String-string map of data attribute key:value pair.
 	 * 
@@ -219,7 +296,14 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	    // Voxel size Y
 	    pVoxelY = omexmlMeta.getPixelsPhysicalSizeY(seriesNum);
 	    if (pVoxelY == null) {
-	        voxelY = Double.NaN;
+	    	if (pVoxelX == null) {
+	    		voxelY = Double.NaN;
+	    	} else {
+	    		// Some formats store just one size for X and Y,
+	    		// if they are equal.
+	    		voxelY = voxelX;
+	    	}
+	    	
 	    } else {
 	        voxelY = pVoxelY.getValue();
 	    }
@@ -230,11 +314,6 @@ public class MicroscopyReader extends BaseBioFormatsReader {
 	        voxelZ = Double.NaN;
 	    } else {
 	        voxelZ = pVoxelZ.getValue();
-	    }
-
-	    // Workaround for 2-D ND2 files 
-	    if (voxelY == 0 && voxelX > 0) {
-	    	voxelY = voxelX;
 	    }
 
 	    // Pack the voxels into an array
