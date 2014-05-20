@@ -186,7 +186,7 @@ public class MicroscopyReader extends AbstractReader {
 								reader.getPixelType()));
 
 				// Acquisition date
-				seriesAttr.put("acqDate", 
+				seriesAttr.put("acquisitionDate", 
 						omexmlMeta.getImageAcquisitionDate(i).getValue());
 				
 				// Voxel sizes
@@ -420,14 +420,14 @@ public class MicroscopyReader extends AbstractReader {
 		Set<String> keys = metadata.keySet();
 		if (keys.contains("X position")) {
 			Object m = metadata.get("X position");
-			x = (double) m;
+			x = ((Number)m).doubleValue(); // Java 6 compatibility
 		} else {
 			x = Double.NaN;
 		}
 
 		if (keys.contains("Y position")) {
 			Object m = metadata.get("Y position");
-			y = (double) m;
+			y = ((Number)m).doubleValue(); // Java 6 compatibility
 		} else {
 			y = Double.NaN;
 		}
