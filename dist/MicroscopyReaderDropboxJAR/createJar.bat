@@ -11,7 +11,7 @@ SET OUT=%CURRENT_DIR%\build
 SET JDK_BIN="C:\Program Files\Java\jdk1.6.0_45\bin"
 
 ECHO * * * Compiling code
-%JDK_BIN%\javac -cp ..\..\lib\dss_client\loci_tools.jar ..\..\AnnotationTool\ch\ethz\scu\obit\readers\AbstractReader.java ..\..\AnnotationToolMicroscopy\ch\ethz\scu\obit\microscopy\readers\MicroscopyReader.java
+%JDK_BIN%\javac -cp ..\..\lib\dss_client\loci_tools.jar:..\..\lib\dss_client\ij.jar ..\..\AnnotationTool\ch\ethz\scu\obit\readers\AbstractReader.java ..\..\AnnotationToolMicroscopy\ch\ethz\scu\obit\microscopy\readers\MicroscopyReader.java
 
 ECHO * * * Moving compiled classes
 MOVE /Y ..\..\AnnotationTool\ch\ethz\scu\obit\readers\AbstractReader.class %IN%\readers\
