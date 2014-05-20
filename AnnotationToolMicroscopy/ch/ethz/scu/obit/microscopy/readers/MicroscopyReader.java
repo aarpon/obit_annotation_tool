@@ -15,6 +15,7 @@ import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
+import loci.formats.FormatTools;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
@@ -22,6 +23,7 @@ import loci.plugins.util.LociPrefs;
 import ome.xml.model.primitives.Color;
 import ome.xml.model.primitives.PositiveFloat;
 import ome.xml.model.primitives.PositiveInteger;
+import ome.xml.model.primitives.Timestamp;
 import ch.ethz.scu.obit.readers.AbstractReader;
 
 /**
@@ -133,6 +135,14 @@ public class MicroscopyReader extends AbstractReader {
 	}
 
 	/**
+	 * Return the version of the bio-formats library used.
+	 * @return String with the bio-formats library version.
+	 */
+	public String bioformatsVersion() {
+		return loci.formats.FormatTools.VERSION;
+	}
+
+	/**
 	 * Scan the file for metadata information and stores it as a 
 	 * String-String map of key-value attributes.
 	 * @return true if parsing was successful, false otherwise.
@@ -180,15 +190,21 @@ public class MicroscopyReader extends AbstractReader {
 				// Image size T
 				seriesAttr.put("sizeT", Integer.toString(reader.getSizeT()));
 
-				// Pixel type
-				seriesAttr.put("pixelType",
-						loci.formats.FormatTools.getPixelTypeString(
-								reader.getPixelType()));
+				// Data type
+				seriesAttr.put("datatype", getDataType());
 
-				// Acquisition date
-				seriesAttr.put("acquisitionDate", 
-						omexmlMeta.getImageAcquisitionDate(i).getValue());
+				// Is Signed
+				seriesAttr.put("isSigned",
+						Boolean.toString(loci.formats.FormatTools.isSigned(
+								reader.getPixelType())));
+
+				// Is Little Endian
+				seriesAttr.put("isLittleEndian", 
+						Boolean.toString(reader.isLittleEndian()));
 				
+				// Acquisition date
+				seriesAttr.put("acquisitionDate", getAcquisitionDate(i));
+
 				// Voxel sizes
 				double[] voxels = getVoxelSizes(i);
 				seriesAttr.put("voxelX", Double.toString(voxels[0]));
@@ -229,7 +245,23 @@ public class MicroscopyReader extends AbstractReader {
 							colors[c][2] + ", " +
 							colors[c][3]);
 				}
+
+				// NAs
+				double[] NAs = getNAs();
+				if (NAs.length == 0) {
+					seriesAttr.put("NA", Double.toString(Double.NaN)); 
+				} else if (NAs.length == 1) {
+					seriesAttr.put("NA", Double.toString(NAs[0]));
+				} else {
+					String strNAs = "";
+					for (int c = 0; c < NAs.length - 1; c++) {
+						strNAs += Double.toString(NAs[c]) + ", ";
+					}
+					strNAs += Double.toString(NAs[NAs.length - 1]);
+					seriesAttr.put("NA", strNAs);
+				}
 				
+
 				// Key prefix
 				String seriesKey = "series_" + i; 
 
@@ -272,6 +304,25 @@ public class MicroscopyReader extends AbstractReader {
 	 */
 	public String info() {
 		return "Bioformats-compatible microscopy file format.";
+	}
+
+	/**
+	 * Return the acquisition date for the specified series
+	 * @param seriesNum index of series to query
+	 * @return string acquisition date
+	 * Values that could not be retrieved will be replaced by Double.NaN.
+	 */
+	public String getAcquisitionDate(int seriesNum) {
+		
+		Timestamp timestamp = omexmlMeta.getImageAcquisitionDate(seriesNum);
+		String acqDate;
+		if (timestamp == null) {
+			acqDate = "";
+		} else {
+			acqDate = timestamp.getValue();
+		}
+		
+		return acqDate;
 	}
 
 	/**
@@ -343,6 +394,32 @@ public class MicroscopyReader extends AbstractReader {
 	}
 	
 	/**
+	 * Return the data type
+	 * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
+	 */
+	public String getDataType() {
+        
+		// Get and store the dataset type
+		String datatype = "";
+		switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
+			case 1:
+				datatype = "uint8";
+				break;
+			case 2:
+				datatype = "uint16";
+				break;
+			case 4:
+				datatype = "float";
+				break;
+			default:
+				datatype = "unsupported";
+				break;
+		}
+		
+		return datatype;
+	}
+
+	/**
 	 * Return the channel excitation wavelengths
 	 * @param seriesNum index of the series to query
 	 * @return array of excitation wavelengths. 
@@ -396,6 +473,40 @@ public class MicroscopyReader extends AbstractReader {
 		return emWavelengths;
 	}
 
+	/**
+	 * Return the objective numerical aperture(s)
+	 * @return array of numerical apertures.
+	 * Values that could not be retrieved will be replaced by Double.NaN.
+	 */
+	public double[] getNAs() {
+        
+		// Number of instruments
+		int nInstr = omexmlMeta.getInstrumentCount();
+		
+		// Count objectives for this series (expected: 1)
+		int nTotObj = 0;
+		for (int i = 0; i < nInstr; i++) {
+			for (int j = 0; j < omexmlMeta.getObjectiveCount(i); j++) {
+				nTotObj++;
+			}
+		}
+		
+		// Allocate space to store the numerical apertures
+		double[] numericalApertures = new double[nTotObj];
+
+		// Get all NAs (expected: 1)
+		int c = 0;
+		for (int i = 0; i < nInstr; i++) {
+			for (int j = 0; j < omexmlMeta.getObjectiveCount(i); j++) {
+				Double NA = omexmlMeta.getObjectiveLensNA(i, j);
+				if (NA == null) {
+					NA = Double.NaN;
+				}
+				numericalApertures[c++] = NA;
+			}
+		}
+		return numericalApertures;
+	}
 
 	/**
 	 * Return the channel stage position for current series.
