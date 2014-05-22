@@ -583,11 +583,11 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		// When a project is selected, update the corresponding 
 		// experiment in the data model 
 		comboProjectList.addActionListener(new ActionListener() {
+			@SuppressWarnings("unchecked")
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("comboBoxChanged")) {
 
 					// Get selected project identifier
-					@SuppressWarnings("unchecked")
 					String projectID =
 							(String)
 							((JComboBox<String>)
@@ -602,23 +602,32 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 						}
 					}
 					
-					// Ask the user if he wants to set this project only 
-					// to this experiment or to all
-					Object[] options = {"To this only", "To all"};
-					int n = JOptionPane.showOptionDialog(null,
-					    "Set this project to this experiment only or to all?",
-					    "Question",
-					    JOptionPane.YES_NO_OPTION,
-					    JOptionPane.QUESTION_MESSAGE,
-					    null,
-					    options,
-					    options[0]);
+					// How many experiments do we have?
+					int nExperiments = metadataMappersList.size();
+
+					// Default to set the project for current experiment only.
+					int n = 0;
+					if (nExperiments > 1) {
+						
+					
+						// Ask the user if he wants to set this project only 
+						// to this experiment or to all
+						Object[] options = {"To this only", "To all"};
+						n = JOptionPane.showOptionDialog(null,
+								"Set this project to this experiment only or to all?",
+								"Question",
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE,
+								null,
+								options,
+								options[0]);
+					}
 					
 					// Apply user's choice
 					if (n == 1) {
 						
 						// Apply to all
-						for (int i = 0; i < metadataMappersList.size(); i++) {
+						for (int i = 0; i < nExperiments; i++) {
 							metadataMappersList.get(i).openBISProjectNode = selProjNode;
 						}
 						

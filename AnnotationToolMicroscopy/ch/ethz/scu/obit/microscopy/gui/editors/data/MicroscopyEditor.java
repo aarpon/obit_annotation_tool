@@ -196,6 +196,9 @@ public final class MicroscopyEditor extends AbstractEditor {
 	protected void createUIElements(ObserverActionParameters params) throws Exception {
 
 		// Get selected metadata element
+		if (metadataMappersList.size() < (currentExperimentIndex + 1)) {
+			return;
+		}		
 		MicroscopyMetadata metadata = metadataMappersList.get(
 				currentExperimentIndex);
 
@@ -343,23 +346,31 @@ public final class MicroscopyEditor extends AbstractEditor {
 						}
 					}
 
-					// Ask the user if he wants to set this project only 
-					// to this experiment or to all
-					Object[] options = {"To this only", "To all"};
-					int n = JOptionPane.showOptionDialog(null,
-					    "Set this project to this experiment only or to all?",
-					    "Question",
-					    JOptionPane.YES_NO_OPTION,
-					    JOptionPane.QUESTION_MESSAGE,
-					    null,
-					    options,
-					    options[0]);
-					
+					// How many experiments do we have?
+					int nExperiments = metadataMappersList.size();
+
+					// Default to set the project for current experiment only.
+					int n = 0;
+					if (nExperiments > 1) {
+
+						// Ask the user if he wants to set this project only 
+						// to this experiment or to all
+						Object[] options = {"To this only", "To all"};
+						n = JOptionPane.showOptionDialog(null,
+								"Set this project to this experiment only or to all?",
+								"Question",
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE,
+								null,
+								options,
+								options[0]);
+					}
+
 					// Apply user's choice
 					if (n == 1) {
 						
 						// Apply to all
-						for (int i = 0; i < metadataMappersList.size(); i++) {
+						for (int i = 0; i < nExperiments; i++) {
 							metadataMappersList.get(i).openBISProjectNode = selProjNode;
 						}
 						
