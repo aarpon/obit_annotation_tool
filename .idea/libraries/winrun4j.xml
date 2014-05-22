@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="winrun4j">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/winrun4j/WinRun4J.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dist/winrun4j/junit-4.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dist/winrun4j/WinRun4JTest.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
