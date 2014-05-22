@@ -280,6 +280,18 @@ public class MicroscopyReader extends AbstractReader {
 
 	}
 
+    /**
+     * Return the number of series in the file.
+     * @return Int Number of series in the file.
+     */
+    public int getNumberOfSeries() {
+        try {
+            return reader.getSeriesCount();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
 	/**
 	 * Return the file name of associated to the MicroscopyReader.
 	 * @return String containing the file name associated to the MicroscopyReader. 
@@ -513,7 +525,6 @@ public class MicroscopyReader extends AbstractReader {
 	 * 
 	 * The series must have set in advance with reader.setSeries(num).
 	 * 
-	 * @param seriesNum index of the series to query
 	 * @return array of [X Y] stage position.
 	 * Values that could not be retrieved will be replaced by Double.NaN.
 	 */
