@@ -5,6 +5,7 @@ package ch.ethz.scu.obit.microscopy.readers;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -214,7 +215,9 @@ public class MicroscopyReader extends AbstractReader {
 				// Channel names
 				String[] channelNames = getChannelNames(i);
 				for (int c = 0; c < reader.getSizeC(); c++) {
-					seriesAttr.put("channelName" + c, channelNames[c]);
+					seriesAttr.put("channelName" + c,
+                            Normalizer.normalize(channelNames[c],
+                                    Normalizer.Form.NFD));
 				}
 
 				// Emission wavelengths
@@ -379,11 +382,8 @@ public class MicroscopyReader extends AbstractReader {
 	        voxelZ = pVoxelZ.getValue();
 	    }
 
-	    // Pack the voxels into an array
-	    double voxels[] = {voxelX, voxelY, voxelZ};
-	    
-	    // Return
-	    return voxels;
+        // Return
+	    return new double[]{voxelX, voxelY, voxelZ};
 	    
 	}
 	
@@ -412,7 +412,7 @@ public class MicroscopyReader extends AbstractReader {
 	public String getDataType() {
         
 		// Get and store the dataset type
-		String datatype = "";
+		String datatype;
 		switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
 			case 1:
 				datatype = "uint8";
