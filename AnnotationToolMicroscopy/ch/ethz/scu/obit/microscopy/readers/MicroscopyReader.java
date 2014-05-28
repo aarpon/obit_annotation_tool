@@ -16,7 +16,6 @@ import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
-import loci.formats.FormatTools;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
@@ -115,6 +114,41 @@ public class MicroscopyReader extends AbstractReader {
 
 		this.errorMessage = "";
 		return true;
+	}
+	
+	/**
+	 * Close file. 
+	 * The client is responsible to call close to release the file handle!
+	 * @return true if the file could be closed, false otherwise.
+	 */
+	public boolean close() {
+		
+		// If the file is closed already, we return true
+		if (reader == null) {
+			return true;
+		}
+		
+		// Try closing it
+		try {
+			reader.close();
+		} catch (IOException e) {
+			
+			// Return failure
+			return false;
+		}
+		
+		// Return success
+		return true;
+	}
+	
+	/**
+	 * Implement finalize() to make sure that all file handles are released.
+	 * @return 
+	 */
+	public void finalize() {
+		
+		// Call close
+		close();
 	}
 	
 	/**

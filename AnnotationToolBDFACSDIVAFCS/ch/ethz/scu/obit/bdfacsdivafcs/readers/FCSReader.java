@@ -69,6 +69,21 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
+	 * Destructor.
+	 */
+	public void finalize() {
+	
+		// Make sure the file is closed
+		if (in != null) {
+			try {
+				in.close();
+			} catch (IOException e) {
+				System.err.println("Could not close FCS file on garbage collection!");
+			}
+		}
+	}
+
+	/**
 	 * Return information regarding the file format.
 	 * @return descriptive String for the Processor.
 	 */

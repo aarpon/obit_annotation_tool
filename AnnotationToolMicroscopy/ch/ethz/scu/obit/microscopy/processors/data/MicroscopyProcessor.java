@@ -418,6 +418,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			MicroscopyReader microscopyReader = new MicroscopyReader(
 					this.fullPath);
 			fileScanned = microscopyReader.parse();
+			microscopyReader.close();
 
 			// Now update the data model
 			if (fileScanned) {
