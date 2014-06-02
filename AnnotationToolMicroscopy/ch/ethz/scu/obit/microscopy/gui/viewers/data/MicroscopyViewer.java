@@ -3,6 +3,7 @@ package ch.ethz.scu.obit.microscopy.gui.viewers.data;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -29,6 +30,8 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Microscop
  */
 public final class MicroscopyViewer extends AbstractViewer implements TreeWillExpandListener {
 
+	MicroscopyProcessor microscopyProcessor;
+
 	/**
 	 * Constructor
 	 */
@@ -41,8 +44,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
+		// Nothing to do here.
 	}
 
 	/**
@@ -112,7 +114,6 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 	public boolean parse(File folder) {
 
 		// Process the file or folder
-		MicroscopyProcessor microscopyProcessor;
 		try {
 			microscopyProcessor = new MicroscopyProcessor(
 					folder.getCanonicalPath());
@@ -130,24 +131,21 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 		// Make sure we have a valid dataset
 		if (!microscopyProcessor.validator.isValid) {
-			DefaultTableModel model = 
-					(DefaultTableModel) invalidDatasetsTable.getModel();
-			for (File file : microscopyProcessor.validator.invalidFilesOrFolders.keySet()) {
-				String filePath;
-				try {
-					filePath = file.getCanonicalPath();
-					// Build a relative path
-					int indx = filePath.indexOf(userName);
-					if (indx != -1) {
-						filePath = filePath.substring(indx);
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					filePath = "Unknown";
-				}
-				model.addRow(new Object[] {filePath,
-						microscopyProcessor.validator.invalidFilesOrFolders.get(file)});
-			}
+
+			// Clear the invalid dataset table
+			clearInvalidDatasetsTable();
+
+			// Update the invalid dataset table 
+			updateInvalidDatasetTable(
+					microscopyProcessor.validator.invalidFilesOrFolders);
+			
+			// Clear the metadata table
+			clearMetadataTable();
+			
+			// Set the isReady flag to false
+			isReady = false;
+			
+			// Return failure
 			return false;
 		}
 
@@ -208,6 +206,32 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 	}
 
 	/**
+	 * Update the invalid dataset table.
+	 * @param invalidFilesOrFolders Map<File, String> of invalid folders from
+	 * the MicroscopyProcessor
+	 */
+	protected void updateInvalidDatasetTable(Map<File, String> invalidFilesOrFolders) {
+
+		// Get the table model
+		DefaultTableModel model = 
+				(DefaultTableModel) invalidDatasetsTable.getModel();
+		for (File file : invalidFilesOrFolders.keySet()) {
+			String filePath;
+			try {
+				filePath = file.getCanonicalPath();
+				// Build a relative path
+				int indx = filePath.indexOf(userName);
+				if (indx != -1) {
+					filePath = filePath.substring(indx);
+				}
+			} catch (IOException e) {
+				filePath = "Unknown";
+			}
+			model.addRow(new Object[] {filePath, invalidFilesOrFolders.get(file)});
+		}
+	}
+	
+	/**
 	 * Called when a node in the Tree is about to expand.
 	 * @param event A TreeExpansionEvent.
 	 * Required by TreeWillExpandListener interface.
@@ -256,8 +280,30 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			MicroscopyFile microscopyFile = (MicroscopyFile) obj;
 			
 			// Scan for series
-			microscopyFile.scanForSeries();
-			
+			if (!microscopyFile.scanForSeries()) {
+				
+				// If scanning failed, we update the invalid dataset table
+				// and return failure
+				
+				// Clear the invalid dataset table
+				clearInvalidDatasetsTable();
+				
+				// Update the invalid dataset table 
+				updateInvalidDatasetTable(
+						microscopyProcessor.validator.invalidFilesOrFolders);
+				
+				// Clear the metadata table
+				clearMetadataTable();
+				
+				// Set the isReady flag to false
+				isReady = false;
+
+				// Inform
+				outputPane.err("Scanning metadata from " + node.toString() +
+						" failed!");
+				return;
+			}
+
 			// Add all series to the tree
 			for (String key : microscopyFile.series.keySet()) {
 			

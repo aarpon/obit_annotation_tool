@@ -43,6 +43,8 @@ public class MicroscopyReader extends AbstractReader {
 	protected ServiceFactory factory;
 	protected OMEXMLService service;
 	protected IMetadata omexmlMeta;
+	
+	protected boolean isFileScanned = false;
 
 	/**
 	 * Metadata attributes
@@ -164,9 +166,13 @@ public class MicroscopyReader extends AbstractReader {
 		}
 
 		// Otherwise, we first scan and then return them
-		parse();
-		return attr;
+		if (! parse()) {
+			
+			// Reset attr
+			attr = new HashMap<String, HashMap<String, String>>();
+		}
 
+		return attr;
 	}
 
 	/**
@@ -190,6 +196,10 @@ public class MicroscopyReader extends AbstractReader {
 			return true;
 		}
 
+		// Initialize file scanned to false
+		isFileScanned = false;
+		
+		// Now process the file
 		try {
 
 			// Number of series
@@ -309,12 +319,28 @@ public class MicroscopyReader extends AbstractReader {
 
 			} catch (Exception e) {
 
+				// Make sure the isFileScanned flag is set to false
+				isFileScanned = false;
+				
+				// Return failure
 				return false;
 
 			}
 			
+		// Now we can set the isFileScanned flag to true
+		isFileScanned = true;
+		
+		// And return success
 		return true;
 
+	}
+
+	/**
+	 * Return true if the file was scanned already, false otherwise.
+	 * @return true if the file was scanned already, false otherwise.
+	 */
+	public boolean isScanned() {
+		return isFileScanned;
 	}
 
     /**

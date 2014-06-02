@@ -28,7 +28,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	private File userFolder;
 
 	/* List of supported file formats */
-	// TODO Get this from bio-formats
 	private ArrayList<String> supportedFormats = new ArrayList<String>(
 			Arrays.asList(".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
 					".afm", ".aim", ".al3d", ".am", ".amiramesh", ".apl",
@@ -407,41 +406,55 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		 * Scans the file and stores the metadata into the attributes
 		 * String-String map
 		 */
-		public void scanForSeries() {
+		public boolean scanForSeries() {
 
 			// If the file was already scanned we return the attributes
 			if (fileScanned) {
-				return;
+				return true;
 			}
 
 			// Scan the file for series
 			MicroscopyReader microscopyReader = new MicroscopyReader(
 					this.fullPath);
-			fileScanned = microscopyReader.parse();
+			boolean success = microscopyReader.parse();
 			microscopyReader.close();
+			if (! success) {
+				
+				// Add this file to the list of invalid datasets
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(this.fullPath,
+						"Metadata parsing failed.");
+				
+				// Return failure
+				fileScanned = false;
+				return false;
+				
+			} else {
+				fileScanned = true;
+			}
 
 			// Now update the data model
-			if (fileScanned) {
 
-				// Get the attributes for the series
-				Map<String, HashMap<String, String>> seriesAttr = microscopyReader
-						.getAttributes();
+			// Get the attributes for the series
+			Map<String, HashMap<String, String>> seriesAttr = microscopyReader
+					.getAttributes();
 
-				// Process all series
-				for (int i = 0; i < seriesAttr.size(); i++) {
+			// Process all series
+			for (int i = 0; i < seriesAttr.size(); i++) {
 
-					// Series key
-					String keySeries = "series_" + i;
+				// Series key
+				String keySeries = "series_" + i;
 
-					// Create a new MicroscopyFileSeries descriptor
-					MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(
-							i, seriesAttr.get(keySeries));
+				// Create a new MicroscopyFileSeries descriptor
+				MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(
+						i, seriesAttr.get(keySeries));
 
-					// Append it to the MicroscopyFile descriptor
-					series.put(keySeries, fileSeries);
-				}
-
+				// Append it to the MicroscopyFile descriptor
+				series.put(keySeries, fileSeries);
 			}
+			
+			// Retun success 
+			return true;
 
 		}
 
