@@ -468,6 +468,11 @@ public class MicroscopyReader extends AbstractReader {
 			if (channelName == null) {
 				channelName = "CHANNEL_" + i;
 			}
+			// Make sure to remove "\0" end of the name
+			// (as found for instance in LSM files)
+			if (channelName.endsWith("\0")) {
+				channelName = channelName.substring(0, channelName.length() - 1);
+			}
 			channelNames[i] = channelName;
 		}
 		
