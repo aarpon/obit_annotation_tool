@@ -71,7 +71,7 @@ public final class FCSReader extends AbstractReader {
 	/**
 	 * Destructor.
 	 */
-	public void finalize() {
+	public void finalize() throws Throwable {
 	
 		// Make sure the file is closed
 		if (in != null) {
@@ -81,6 +81,9 @@ public final class FCSReader extends AbstractReader {
 				System.err.println("Could not close FCS file on garbage collection!");
 			}
 		}
+
+        // Call the parent finalize()
+        super.finalize();
 	}
 
 	/**

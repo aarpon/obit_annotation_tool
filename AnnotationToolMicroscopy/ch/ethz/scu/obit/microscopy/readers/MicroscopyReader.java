@@ -145,12 +145,14 @@ public class MicroscopyReader extends AbstractReader {
 	
 	/**
 	 * Implement finalize() to make sure that all file handles are released.
-	 * @return 
 	 */
-	public void finalize() {
+	public void finalize() throws Throwable {
 		
 		// Call close
 		close();
+
+        // Call the parent finalize()
+        super.finalize();
 	}
 	
 	/**
