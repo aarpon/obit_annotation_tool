@@ -308,6 +308,9 @@ public class MicroscopyReader extends AbstractReader {
 					seriesAttr.put("NA", strNAs);
 				}
 				
+				// Is the series a thumbnail?
+				seriesAttr.put("isThumbnail",
+						String.valueOf(reader.isThumbnailSeries()));
 
 				// Key prefix
 				String seriesKey = "series_" + i; 
@@ -459,7 +462,11 @@ public class MicroscopyReader extends AbstractReader {
 		String[] channelNames = new String[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			channelNames[i] = omexmlMeta.getChannelName(seriesNum, i);
+			String channelName = omexmlMeta.getChannelName(seriesNum, i);
+			if (channelName == null) {
+				channelName = "CHANNEL_" + i;
+			}
+			channelNames[i] = channelName;
 		}
 		
 		return channelNames;
