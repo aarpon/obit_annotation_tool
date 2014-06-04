@@ -53,7 +53,8 @@ public class OpenBISPickServerDialog extends JDialog {
 		setResizable(false);
 	
 		// Add a label for the selection of the URL
-		JLabel label = new JLabel("Please choose the server you want to use:");
+		JLabel label = new JLabel(
+				"Please choose the openBIS server you want to use:");
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridwidth = 3;
