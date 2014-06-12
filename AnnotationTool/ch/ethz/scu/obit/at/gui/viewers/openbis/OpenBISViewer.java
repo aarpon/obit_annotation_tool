@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -20,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -398,8 +400,7 @@ public class OpenBISViewer extends Observable
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Currently we do not do anything when the user interacts 
-		// with the code 
+		// TODO Currently we do not do anything.
 	}
 	
 	/**
@@ -439,7 +440,7 @@ public class OpenBISViewer extends Observable
 	 * Load the childen of the specified node if needed.
 	 * @param node Node to query for children.
 	 */
-	private void loadLazyChildren(AbstractOpenBISNode node) {
+	private synchronized void loadLazyChildren(AbstractOpenBISNode node) {
 		
 		// If the node children were loaded already, we just return 
 		if (node.isLoaded()) {
@@ -459,17 +460,70 @@ public class OpenBISViewer extends Observable
 			Project p = (Project) obj;
 			List<String> expId = new ArrayList<String>();
 			expId.add(p.getIdentifier());
-			List<Experiment> experiments = 
-					openBISProcessor.getExperimentsForProjects(expId);
-			for (Experiment e : experiments) {
-				// Add the experiments
-				OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
-				node.add(experiment);
-			}
+			
+			// Then define and start the worker
+			class Worker extends SwingWorker<List<Experiment>, Void> {
 
-			// Inform
-			outputPane.log("Retrieved list of experiments for project " +
-			p.getIdentifier() + ".");
+				final private OpenBISProcessor o;
+				final private List<String> eId;
+				final private AbstractOpenBISNode n;
+				final private Project p;
+				
+				/**
+				 * Constructor.
+				 * @param o	OpenBISProcessor reference.
+				 * @param eId List of Experiment identifiers.
+				 * @param n Node to which to add the Experiment nodes.
+				 * @param p Project reference.
+				 */
+				public Worker(OpenBISProcessor o, List<String> eId,
+						AbstractOpenBISNode n, Project p) {
+					this.o = o;
+					this.eId = eId;
+					this.n = n;
+					this.p = p;
+				}
+
+				@Override
+				public List<Experiment> doInBackground() {
+
+					return (o.getExperimentsForProjects(eId));
+
+				}
+
+				@Override
+				public void done() {
+
+					// Initialize Sample list
+					List<Experiment> experiments = new ArrayList<Experiment>();
+
+					// Retrieve the result
+					try {
+						experiments = get();
+					} catch (InterruptedException | ExecutionException e) {
+						experiments = new ArrayList<Experiment>();
+					}
+
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					for (Experiment e : experiments) {
+						// Add the experiments
+						OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
+						model.insertNodeInto(experiment, n, n.getChildCount());
+					}
+
+					// Inform
+					outputPane.log("Retrieved list of experiments for project " +
+					p.getIdentifier() + ".");
+					
+					// Mark the node as loaded
+					n.setLoaded();
+
+				}
+
+			};
+
+	        // Run the worker!
+	        (new Worker(openBISProcessor, expId, node, p)).execute();
 
 		} else if (className.equals("Experiment")) {
 		
@@ -490,33 +544,84 @@ public class OpenBISViewer extends Observable
 			//}
 
 			// Temporarily, we just display the number of contained 
-			// samples in the Experiment, until we will have uncoupled
-			// the openBIS Viewer from the customizable openBIS 
-			// Processor.
-			List<Sample> samples = 
-					openBISProcessor.getSamplesForExperiments(experimentId);
-			int nSamples = samples.size();
-			String title = ""; 
-			if (nSamples == 0) {
-				title = "No samples";
-			} else if (nSamples == 1) {
-				title = "One sample";
-			} else {
-				title = nSamples + " samples";
-			}
-			node.add(new OpenBISSampleListNode(title));
-			
-			// Inform
-			outputPane.log("Retrieved number of samples for experiment " +
-			e.getIdentifier() + ".");
+			// samples in the Experiment. Later we could re-enable this
+			// if we decided to provided specialized versions of the 
+			// openBIS Viewer/Processor.
+
+			// Then define and start the worker
+			class Worker extends SwingWorker<List<Sample>, Void> {
+
+				final private OpenBISProcessor o;
+				final private List<String> eId;
+				final private AbstractOpenBISNode n;
+				final private Experiment e;
+				
+				/**
+				 * Constructor.
+				 * @param o	OpenBISProcessor reference.
+				 * @param eId List of Experiment identifiers.
+				 * @param n Node to which to add the Sample nodes.
+				 * @param e Experiment reference.
+				 */
+				public Worker(OpenBISProcessor o, List<String> eId,
+						AbstractOpenBISNode n, Experiment e) {
+					this.o = o;
+					this.eId = eId;
+					this.n = n;
+					this.e = e;
+				}
+
+				@Override
+				public List<Sample> doInBackground() {
+
+					return (o.getSamplesForExperiments(eId));
+
+				}
+
+				@Override
+				public void done() {
+
+					// Initialize Sample list
+					List<Sample> samples = new ArrayList<Sample>();
+
+					// Retrieve the result
+					try {
+						samples = get();
+					} catch (InterruptedException | ExecutionException e) {
+						samples = new ArrayList<Sample>();
+					}
+
+					int nSamples = samples.size();
+					String title = ""; 
+					if (nSamples == 0) {
+						title = "No samples";
+					} else if (nSamples == 1) {
+						title = "One sample";
+					} else {
+						title = nSamples + " samples";
+					}
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					model.insertNodeInto(new OpenBISSampleListNode(title),
+							n, n.getChildCount());
+					
+					// Inform
+					outputPane.log("Retrieved number of samples for experiment " +
+					e.getIdentifier() + ".");
+					
+					// Mark the node as loaded
+					n.setLoaded();
+				}
+
+			};
+
+	        // Run the worker!
+	        (new Worker(openBISProcessor, experimentId, node, e)).execute();
 			
 		} else {
 			
-			// We do nothing for other openBIS object types
+			// Mark the node as loaded (in any case)
+			node.setLoaded();
 		}
-
-		// Mark the node as loaded (in any case)
-		node.setLoaded();
 		
 	}
 

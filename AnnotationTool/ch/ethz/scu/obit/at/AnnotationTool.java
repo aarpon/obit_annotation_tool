@@ -1,7 +1,6 @@
 package ch.ethz.scu.obit.at;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 
 import ch.ethz.scu.obit.at.gui.AnnotationToolWindow;
 import ch.ethz.scu.obit.common.settings.AppSettingsManager;
@@ -88,31 +87,9 @@ public class AnnotationTool {
 				// openBIS structure.
 				final AnnotationToolWindow w = new AnnotationToolWindow();
 
-				class BackgroundScanner extends SwingWorker<Void, Void> {
-					
-					final AnnotationToolWindow w;
-					
-					// Constructor
-					public BackgroundScanner(AnnotationToolWindow w) {
-						this.w = w;
-					}
-					
-					@Override
-				    public Void doInBackground() {
-						// Scan data and openBIS
-				    	w.scan();
-				    	return null;
-				    }
+				// Scan data folder and openBIS
+				w.scan();
 
-				    @Override
-				    public void done() {
-				    	// Nothing to do.
-				    }
-
-				}
-	
-				// Execute scan() in the background 
-				(new BackgroundScanner(w)).execute();
 			}
 		});
 

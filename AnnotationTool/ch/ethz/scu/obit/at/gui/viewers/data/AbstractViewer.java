@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -29,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -364,40 +366,81 @@ abstract public class AbstractViewer extends Observable
 		// Prepare a new root node for the Tree
 		rootNode = new RootNode(new RootDescriptor(userDataFolder));
 		
-		// We parse the user folder: the actual processing is done
-		// by the processor.
-		boolean status = parse(userDataFolder);
+		// Then define and start the worker
+		class Worker extends SwingWorker<Boolean, Void> {
 
-		// Create a tree that allows one selection at a time.
-		tree.setModel(new DefaultTreeModel(rootNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
+			final private File userDataFolder;
+			final private AbstractViewer ref;
 
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-		
-		// Clear the metadata table
-		clearMetadataTable();
-		
-		// Set isReady to globalStatus
-		isReady = status;
-		
-		// Inform the user if isReady is false
-		if (!isReady) {
-			outputPane.err(
-					"Please fix the invalid datasets to continue!");
+			/**
+			 * Constructor
+			 * 
+			 * @param userDataFolder Folder to be parsed.
+			 # @param ref AbstractViewer reference.
+			 */
+			public Worker(File userDataFolder, AbstractViewer ref) {
+				this.userDataFolder = userDataFolder;
+				this.ref = ref;
+			}
+
+			@Override
+			public Boolean doInBackground() {
+
+				// We parse the user folder: the actual processing is done
+				// by the processor.
+				return (parse(userDataFolder));
+
+			}
+
+			@Override
+			public void done() {
+
+				boolean status = false;
+
+				// Retrieve the status
+				try {
+					status = get();
+				} catch (InterruptedException | ExecutionException e) {
+					status = false;
+				}
+
+				// Create a tree that allows one selection at a time.
+				tree.setModel(new DefaultTreeModel(rootNode));
+				tree.getSelectionModel().setSelectionMode(
+						TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+				// Listen for when the selection changes.
+				tree.addTreeSelectionListener(ref);
+
+				// Clear the metadata table
+				clearMetadataTable();
+
+				// Set isReady to globalStatus
+				isReady = status;
+
+				// Inform the user if isReady is false
+				if (!isReady) {
+					outputPane
+							.err("Please fix the invalid datasets to continue!");
+				}
+
+				// Notify observers that the scanning is done
+				synchronized (this) {
+					setChanged();
+					notifyObservers(new ObserverActionParameters(
+							ObserverActionParameters.Action.SCAN_COMPLETE, null));
+				}
+
+				// Inform
+				outputPane.log("Scanning user data folder completed.");
+
+			}
+
 		}
-	
-		// Notify observers that the scanning is done
-		synchronized (this) {
-			setChanged();
-			notifyObservers(new ObserverActionParameters(
-					ObserverActionParameters.Action.SCAN_COMPLETE, null));
-		}
-		
-		// Inform
-		outputPane.log("Scanning user data folder completed.");
-		
+		;
+ 
+        // Run the worker!
+        (new Worker(userDataFolder, this)).execute();
 	}
 
     /**

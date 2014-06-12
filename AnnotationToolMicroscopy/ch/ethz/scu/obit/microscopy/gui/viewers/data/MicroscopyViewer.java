@@ -4,12 +4,15 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 
@@ -259,7 +262,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 	 * Load the childen of the specified node if needed
 	 * @param abstractNode Node to query for children.
 	 */
-	private void loadLazyChildren(AbstractNode abstractNode) {
+	private synchronized void loadLazyChildren(AbstractNode abstractNode) {
 		
 		// Get the user object stored in the node
 		Object obj = abstractNode.getUserObject();
@@ -272,51 +275,103 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			
 			MicroscopyFileNode node = (MicroscopyFileNode) abstractNode; 
 			if (node.isLoaded()) {
-				outputPane.log("This node is already expanded.");
+				// This node is already expanded.
 				return;
 			}
+
+			// Inform
+			outputPane.log("Scanning metadata from " + node.toString());
 			
 			// Get the descriptor
 			MicroscopyFile microscopyFile = (MicroscopyFile) obj;
 			
-			// Scan for series
-			if (!microscopyFile.scanForSeries()) {
-				
-				// If scanning failed, we update the invalid dataset table
-				// and return failure
-				
-				// Clear the invalid dataset table
-				clearInvalidDatasetsTable();
-				
-				// Update the invalid dataset table 
-				updateInvalidDatasetTable(
-						microscopyProcessor.validator.invalidFilesOrFolders);
-				
-				// Clear the metadata table
-				clearMetadataTable();
-				
-				// Set the isReady flag to false
-				isReady = false;
+			// Scan the series in background
 
-				// Inform
-				outputPane.err("Scanning metadata from " + node.toString() +
-						" failed!");
-				return;
-			}
+			// Then define and start the worker
+			class Worker extends SwingWorker<Boolean, Void> {
 
-			// Add all series to the tree
-			for (String key : microscopyFile.series.keySet()) {
-			
-				MicroscopyFileSeries s = microscopyFile.series.get(key);
-				node.add(new MicroscopyFileSeriesNode(s));
+				final private MicroscopyFile m;
+				final private MicroscopyFileNode n;
+
+				/**
+				 * Constructor
+				 * 
+				 * @param m MicrosopyFile reference
+				 # @param n MicroscopyFileNode reference.
+				 */
+				public Worker(MicroscopyFile m, MicroscopyFileNode n) {
+					this.m = m;
+					this.n = n;
+				}
+
+				@Override
+				public Boolean doInBackground() {
+
+					// We parse the user folder: the actual processing is done
+					// by the processor.
+					return (m.scanForSeries());
+
+				}
+
+				@Override
+				public void done() {
+
+					boolean status = false;
+
+					// Retrieve the status
+					try {
+						status = get();
+					} catch (InterruptedException | ExecutionException e) {
+						status = false;
+					}
+
+					if (!status) {
+						// If scanning failed, we update the invalid dataset
+						// table and return failure
+
+						// Clear the invalid dataset table
+						clearInvalidDatasetsTable();
+
+						// Update the invalid dataset table
+						updateInvalidDatasetTable(
+								microscopyProcessor.validator.invalidFilesOrFolders);
+
+						// Clear the metadata table
+						clearMetadataTable();
+
+						// Set the isReady flag to false
+						isReady = false;
+
+						// Inform
+						outputPane.err("Scanning metadata from "
+								+ n.toString() + " failed!");
+						return;
+					}
+
+					// Get the tree model for extension
+					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+					
+					// Add all series to the tree
+					for (String key : m.series.keySet()) {
+
+						MicroscopyFileSeries s = m.series.get(key);
+						model.insertNodeInto(new MicroscopyFileSeriesNode(s),
+								n, n.getChildCount());
+					}
+
+					// Mark the node as loaded
+					n.setLoaded();
+
+					// Inform
+					outputPane.log("Scanning metadata from " + n.toString()
+							+ " completed.");
+				}
+
 			}
-			
-			// Mark the node as loaded
-			node.setLoaded();
-			
-			// Inform
-			outputPane.log("Scanning metadata from " + node.toString() +
-					" completed.");
+			;
+
+	        // Run the worker!
+	        (new Worker(microscopyFile, node)).execute();
 							
 		} else {
 			
