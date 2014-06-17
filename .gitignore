@@ -3,3 +3,4 @@
 /dist/AnnotationToolExe/*.exe
 /dist/AnnotationToolAdminExe/*.jar
 /dist/AnnotationToolAdminExe/*.exe
+/out/

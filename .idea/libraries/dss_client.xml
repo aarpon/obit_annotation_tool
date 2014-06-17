@@ -1,0 +1,41 @@
+<component name="libraryTable">
+  <library name="dss_client">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/aopalliance.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/cglib-nodep.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/cisd-args4j.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/cisd-base.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/commons-codec.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/commons-httpclient.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/commons-io.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/commons-lang.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/commons-logging.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/dom4j-1.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/dss_client.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/dss_upload_gui.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/geronimo-stax-api_1.0_spec-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/ij.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/image-viewer.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/jline.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/jython.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/loci_tools.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/log4j.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/poi-ooxml-schemas.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/poi-ooxml.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/poi.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/spring-aop.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/spring-beans.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/spring-context.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/spring-core.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/spring-web.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/spring.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/stax-api.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/stream-supporting-httpinvoker.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/swing-layout.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dss_client/xmlbeans-2.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dropbox/datastore_server.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

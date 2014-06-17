@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>scu_annotation_tool</name>
-	<comment></comment>
+	<name>obit_annotation_tool</name>
+	<comment>The Annotation Tool is part of the openBIS Importer Toolset.</comment>
 	<projects>
 	</projects>
 	<buildSpec>
