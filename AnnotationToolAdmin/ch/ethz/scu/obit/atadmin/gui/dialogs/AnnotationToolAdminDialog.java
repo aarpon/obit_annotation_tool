@@ -230,6 +230,16 @@ public class AnnotationToolAdminDialog extends JDialog {
         remOpenBISURLButton.addActionListener(new ActionListener() {
             @Override
 			public void actionPerformed(ActionEvent e) {
+            	
+            	// Ask the user for confirmation
+            	if (JOptionPane.showConfirmDialog(null,
+            			"Are you sure you want to delete this server?",
+            			"Question", JOptionPane.YES_NO_OPTION) !=
+            			JOptionPane.YES_OPTION) {
+            		return;
+            	}
+
+            	// Remove
             	int index = openBISURLList.getSelectedIndex();
             	try {
             		manager.remove(index);
