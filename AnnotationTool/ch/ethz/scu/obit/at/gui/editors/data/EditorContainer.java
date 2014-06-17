@@ -7,6 +7,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -15,21 +17,22 @@ import javax.swing.JPanel;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
+import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.common.settings.UserSettingsManager;
 
-public class EditorContainer extends JPanel implements ActionListener {
+public class EditorContainer extends JPanel implements ActionListener, Observer {
 
 	private static final long serialVersionUID = 1L;
 
 	private AbstractEditor metadataEditor;
-	private JButton registerButton;
+	private JButton sendToOpenBISButton;
 
 	protected AbstractViewer dataViewer;
 	protected OpenBISViewer openBISViewer;
 	protected OutputPane outputPane;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -71,14 +74,14 @@ public class EditorContainer extends JPanel implements ActionListener {
 		add(metadataEditor.getPanel(), constraints);
 		
 		// Add a "Send to openBIS" button
-		registerButton = new JButton("Send to openBIS");
+		sendToOpenBISButton = new JButton("Send to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		constraints.insets = new Insets(5, 0, 5, 0);
-		registerButton.addActionListener(this);
-		add(registerButton, constraints);
+		sendToOpenBISButton.addActionListener(this);
+		add(sendToOpenBISButton, constraints);
 		
 		// Set the preferred and minimum size
 		this.setMinimumSize(new Dimension(400, 700));
@@ -93,7 +96,7 @@ public class EditorContainer extends JPanel implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getSource() == registerButton) {
+		if (e.getSource() == sendToOpenBISButton) {
 			
 			// Make sure all models are ready
 			if (!dataViewer.isReady() || !openBISViewer.isReady()) {
@@ -155,6 +158,45 @@ public class EditorContainer extends JPanel implements ActionListener {
 	 */
 	public AbstractEditor getEditor() {
 		return metadataEditor;
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		
+		// Get the ObserverAction
+		ObserverActionParameters observerActionParams = 
+				(ObserverActionParameters) arg;
+
+		// Perform the correct action
+		switch (observerActionParams.action) {
+		case ABOUT_TO_RESCAN:
+			
+			// Disable the send to openBIS button
+			sendToOpenBISButton.setEnabled(false);
+
+			break;
+
+		case SCAN_COMPLETE:
+
+			// Nothing to do
+			break;
+
+		case EXPERIMENT_CHANGED:
+
+			// Nothing to do
+			break;
+			
+		case READY_TO_SEND:
+			
+			// Re-enable the send to openBIS button
+			sendToOpenBISButton.setEnabled(true);
+
+			break;
+			
+			
+		default:
+			break;
+		}
 	}
 
 }

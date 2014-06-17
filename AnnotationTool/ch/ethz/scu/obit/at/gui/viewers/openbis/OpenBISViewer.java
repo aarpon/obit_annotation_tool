@@ -309,6 +309,9 @@ public class OpenBISViewer extends Observable
 			return;
 		}
 
+		// Disable the "scan" button
+		scanButton.setEnabled(false);
+		
 		// Set the root of the tree
 		userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
@@ -387,6 +390,9 @@ public class OpenBISViewer extends Observable
 
 		}
 		
+		// Re-enable the "scan" button
+		scanButton.setEnabled(true);
+
 		// Inform
 		outputPane.log("Retrieving openBIS structure completed.");
 	

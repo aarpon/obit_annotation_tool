@@ -325,6 +325,9 @@ abstract public class AbstractViewer extends Observable
 	 */
 	public void scan() {
 
+		// Disable the "scan" button
+		scanButton.setEnabled(false);
+
 		// Clear the tree
 		clearTree();
 
@@ -430,6 +433,9 @@ abstract public class AbstractViewer extends Observable
 					notifyObservers(new ObserverActionParameters(
 							ObserverActionParameters.Action.SCAN_COMPLETE, null));
 				}
+
+				// Re-enable the "scan" button
+				scanButton.setEnabled(true);
 
 				// Inform
 				outputPane.log("Scanning user data folder completed.");

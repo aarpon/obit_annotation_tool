@@ -160,9 +160,12 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		constraints.insets = new Insets(5, 0, 0, 5);
 		add(editorContainer, constraints);
 		
-		// Add observers to the viewers
+		// Add observers to the viewers and the editor container.
 		metadataViewer.addObserver(editorContainer.getEditor());
+		metadataViewer.addObserver(editorContainer);
 		openBISViewer.addObserver(editorContainer.getEditor());
+		openBISViewer.addObserver(editorContainer);
+		editorContainer.getEditor().addObserver(editorContainer);
 		
 		// We do not want the window to close without some clean up
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

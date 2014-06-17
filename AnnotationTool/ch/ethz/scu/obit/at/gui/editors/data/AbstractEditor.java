@@ -21,7 +21,8 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
  * Abstract editor for processors
  * @author Aaron Ponti
  */
-abstract public class AbstractEditor implements ActionListener, Observer {
+abstract public class AbstractEditor extends Observable 
+implements ActionListener, Observer {
 
 	protected JPanel panel;
 	
@@ -117,6 +118,9 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 				e.printStackTrace();
 			}
 			break;
+		case READY_TO_SEND:
+			// Nothing to do
+			break;
 		default:
 			break;
 		}
@@ -186,6 +190,13 @@ abstract public class AbstractEditor implements ActionListener, Observer {
 			
 			// Create the widgets
 			createUIElements(params);
+
+			// Notify observers that the data is ready to be transferred 
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.READY_TO_SEND, null));
+			}
 
 		}
 		
