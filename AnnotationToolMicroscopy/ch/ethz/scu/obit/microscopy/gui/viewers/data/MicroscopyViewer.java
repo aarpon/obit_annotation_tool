@@ -279,6 +279,17 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 				return;
 			}
 
+			// Disable Scan button
+			scanButton.setEnabled(false);
+			
+            // Notify that the node is being expanded
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.ABOUT_TO_SCAN_INCREMENTALLY,
+						null));
+			}
+
 			// Inform
 			outputPane.log("Scanning metadata from " + node.toString());
 			
@@ -361,6 +372,17 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 					// Mark the node as loaded
 					n.setLoaded();
+
+					// Re-enable Scan button
+					scanButton.setEnabled(true);
+
+		            // Notify that the node has finished expanding
+					synchronized (this) {
+						setChanged();
+						notifyObservers(new ObserverActionParameters(
+								ObserverActionParameters.Action.INCREMENTAL_SCAN_COMPLETE,
+								null));
+					}
 
 					// Inform
 					outputPane.log("Scanning metadata from " + n.toString()

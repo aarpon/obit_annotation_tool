@@ -11,10 +11,19 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 public class ObserverActionParameters {
 
     public enum Action {
-        ABOUT_TO_RESCAN,       /** About to start a rescan (metadata must be reset) */
-        SCAN_COMPLETE,         /** Scan of the data folder or the openBIS space is complete */
-        EXPERIMENT_CHANGED,    /** The user selected an experiment (or one of its children) in the data viewer */
-        READY_TO_SEND          /** The data is ready to be sent to openBIS */   
+        ABOUT_TO_RESCAN,             /** About to start a rescan of data or
+                                         openBIS -> metadata must be reset */
+        SCAN_COMPLETE,               /** Scan of the data folder or the openBIS
+                                         space is complete */
+        EXPERIMENT_CHANGED,          /** The user selected a new experiment (or
+                                         one of its children) in the data 
+                                         viewer */
+        ABOUT_TO_SCAN_INCREMENTALLY, /** Some data node is being expanded 
+                                         (lazy loading) -> metadata does not
+                                         need to be reset */
+        INCREMENTAL_SCAN_COMPLETE,   /** Incremental scan is complete. */
+        READY_TO_SEND                /** The data is ready to be sent to
+                                         openBIS. */   
     }
 
 	public ObserverActionParameters.Action action;

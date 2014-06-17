@@ -185,7 +185,19 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 
 			// Nothing to do
 			break;
+
+		case ABOUT_TO_SCAN_INCREMENTALLY:
 			
+			// Disable the send to openBIS button
+			sendToOpenBISButton.setEnabled(false);
+			break;
+			
+		case INCREMENTAL_SCAN_COMPLETE:
+			
+			// Disable the send to openBIS button
+			sendToOpenBISButton.setEnabled(true);
+			break;
+
 		case READY_TO_SEND:
 			
 			// Re-enable the send to openBIS button
