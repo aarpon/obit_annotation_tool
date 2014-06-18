@@ -52,7 +52,7 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 		GridBagConstraints constraints = new GridBagConstraints();
 		
 		// Add a title JLabel
-		JLabel title = new JLabel("Metadata editor");
+		JLabel title = new JLabel("<html><b>Data editor</b></html>");
 
 		// Add the tree viewer to the layout
 		constraints.anchor = GridBagConstraints.NORTHWEST;

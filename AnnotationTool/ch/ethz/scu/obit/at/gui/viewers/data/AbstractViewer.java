@@ -38,7 +38,6 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeSelectionModel;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
@@ -147,7 +146,7 @@ abstract public class AbstractViewer extends Observable
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		// Add a title JLabel
-		title = new JLabel("Data viewer");
+		title = new JLabel("<html><b>Data viewer</b></html>");
 
 		// Add the tree viewer to the layout
 		constraints.gridx = 0;
@@ -162,8 +161,6 @@ abstract public class AbstractViewer extends Observable
 		
 		// Create a tree that allows one selection at a time.
 		tree = new DataViewerTree(rootNode);
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
@@ -202,7 +199,7 @@ abstract public class AbstractViewer extends Observable
 		panel.add(scanButton, constraints);
 		
 		// Add a simple label
-		metadataView = new JLabel("Metadata viewer");
+		metadataView = new JLabel("<html><b>Metadata viewer</b></html>");
 		metadataView.setVerticalAlignment(SwingConstants.TOP);
 
 		// Add to the layout
@@ -236,7 +233,7 @@ abstract public class AbstractViewer extends Observable
 		panel.add(metadataViewPane, constraints);
 
 		// Add a simple label
-		invalidDatasets = new JLabel("Invalid datasets");
+		invalidDatasets = new JLabel("<html><b>Invalid datasets</b></html>");
 		invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
 
 		// Add to the layout
@@ -409,8 +406,6 @@ abstract public class AbstractViewer extends Observable
 
 				// Create a tree that allows one selection at a time.
 				tree.setModel(new DefaultTreeModel(rootNode));
-				tree.getSelectionModel().setSelectionMode(
-						TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 				// Listen for when the selection changes.
 				tree.addTreeSelectionListener(ref);
@@ -570,8 +565,6 @@ abstract public class AbstractViewer extends Observable
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);

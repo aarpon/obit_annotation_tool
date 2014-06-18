@@ -210,15 +210,14 @@ public final class MicroscopyEditor extends AbstractEditor {
 		if (metadataMappersList.size() == 0) {
 			return;
 		}
-
-		/*
-		 *  Folder name
-		 */
-		
+	
 		// Constraints
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		constraints.fill = GridBagConstraints.HORIZONTAL;
+
+		// Use a variable y to keep track of the row mumber in the grid layout
+		int y = 0;
 
 		/*
 		 *  Experiment name
@@ -227,11 +226,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 		String expName = metadata.experimentNode.toString();
 		
 		// Create a label for the experiment
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 0, 0, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.gridy = y++;
 		labelExpName = new JLabel(expName);
 		labelExpName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/experiment.png")));		
@@ -242,11 +241,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 		 */
 		
 		// Create a label for the experiment description
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 0, 0, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 1;
+		constraints.gridy = y++;
 		JLabel labelExpDescription = new JLabel("Description");
 		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpDescription, constraints);
@@ -257,7 +256,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = y++;
 		expDescription = new JTextArea(
 				metadata.getExperiment().description);
 		Font f = expDescription.getFont();
@@ -296,7 +295,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 3;
+		constraints.gridy = y++;
 		JLabel labelProjects = new JLabel("Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
@@ -386,11 +385,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 		});
 
 		// Add the project combo box
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 0, 0, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = y++;
 		panel.add(comboProjectList, constraints);
 
 		/*
@@ -399,7 +398,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		
 		// Add a spacer
 		constraints.gridx = 0;
-		constraints.gridy = 5;
+		constraints.gridy = y++;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);

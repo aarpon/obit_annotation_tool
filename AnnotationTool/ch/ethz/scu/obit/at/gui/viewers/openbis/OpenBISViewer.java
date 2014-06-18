@@ -31,7 +31,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
@@ -68,7 +67,9 @@ public class OpenBISViewer extends Observable
 	private OpenBISViewerTree tree;
     private String defaultRootNodeString = "/";
 
-	//private boolean isLoggedIn = false;
+    // Keep track of the last visited TreePath to prevent multiple firing
+    // of treeWillExpand().
+	private TreePath lastVisitedPath = null;
 
     private boolean isReady = false;
 	
@@ -113,7 +114,7 @@ public class OpenBISViewer extends Observable
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		// Add a title JLabel
-        JLabel title = new JLabel("openBIS viewer");
+        JLabel title = new JLabel("<html><b>openBIS viewer</b></html>");
 
 		// Add the tree viewer to the layout
 		constraints.gridx = 0;
@@ -128,8 +129,6 @@ public class OpenBISViewer extends Observable
 		
 		// Create a tree that allows one selection at a time.
 		tree = new OpenBISViewerTree(userNode);
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
@@ -257,10 +256,7 @@ public class OpenBISViewer extends Observable
 		
 		// Create the root node
 		userNode = new OpenBISUserNode(defaultRootNodeString);
-
 		tree.setModel(new DefaultTreeModel(userNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		// Listen for when the selection changes.
 		tree.addTreeSelectionListener(this);
@@ -357,8 +353,6 @@ public class OpenBISViewer extends Observable
 
 		// Update the view
 		tree.setModel(new DefaultTreeModel(userNode));
-		tree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		// Listen for when the selection changes
 		tree.addTreeSelectionListener(this);
@@ -427,6 +421,11 @@ public class OpenBISViewer extends Observable
 	public void treeWillExpand(TreeExpansionEvent event)
 			throws ExpandVetoException {
         TreePath path = event.getPath();
+        if (path == lastVisitedPath) {
+        	return;
+        } else {
+        	lastVisitedPath = path;
+        }
         loadLazyChildren(
         		(AbstractOpenBISNode) path.getLastPathComponent());
 	}

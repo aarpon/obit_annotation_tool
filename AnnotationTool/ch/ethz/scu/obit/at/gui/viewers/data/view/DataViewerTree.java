@@ -3,6 +3,7 @@ package ch.ethz.scu.obit.at.gui.viewers.data.view;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 
 /**
  * Custom JTree that uses a customized renderer
@@ -16,6 +17,10 @@ public class DataViewerTree extends JTree {
 		
 		// Pass the node on to the base constructor
 		super(node);
+		
+		// Set selection mode to single selection
+		getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		
 		// Set the custom renderer
 	    setCellRenderer(new DataViewerTreeCellRenderer());
