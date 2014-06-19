@@ -523,8 +523,17 @@ public class AppSettingsManager {
 		// Get the application directory
 		File scuFolder = getSettingsPropertiesDir();
 		
-		// Create it if not there
-	    return scuFolder.exists() || scuFolder.mkdirs();
+		// Does the folder exist already?
+		if (scuFolder.exists()) {
+			return true;
+		}
+		
+		// Try creating it
+	    if (! scuFolder.mkdirs()) {
+	    	errorMessage = "Could not create settings directory.";
+	    	return false;
+	    }
+	    return true;
 	}
 
 	/**
