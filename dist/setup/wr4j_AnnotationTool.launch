@@ -9,7 +9,7 @@
 <stringAttribute key="log.level" value=""/>
 <booleanAttribute key="log.overwrite" value="true"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/scu_annotation_tool/AnnotationTool/ch/eth/scu/importer/at/AnnotationTool.java"/>
+<listEntry value="/obit_annotation_tool/AnnotationTool/ch/eth/scu/importer/at/AnnotationTool.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
@@ -19,7 +19,7 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.ethz.scu.obit.at.AnnotationTool"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="scu_annotation_tool"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="obit_annotation_tool"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms512m -Xmx2048m -XX:MaxPermSize=512m"/>
 <stringAttribute key="process.priority" value=""/>
 <stringAttribute key="single.instance" value=""/>
