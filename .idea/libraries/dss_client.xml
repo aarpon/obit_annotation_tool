@@ -18,7 +18,6 @@
       <root url="jar://$PROJECT_DIR$/lib/dss_client/image-viewer.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/jline.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/jython.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/dss_client/loci_tools.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/log4j.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/poi-ooxml-schemas.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/poi-ooxml.jar!/" />
@@ -31,9 +30,7 @@
       <root url="jar://$PROJECT_DIR$/lib/dss_client/spring.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/stax-api.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/stream-supporting-httpinvoker.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/dss_client/swing-layout.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/dss_client/xmlbeans-2.3.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/dropbox/datastore_server.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

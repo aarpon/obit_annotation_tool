@@ -661,7 +661,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             	// Save
             	if (!manager.save()) {
             		JOptionPane.showMessageDialog(null,
-            				"Could not save settings: " +
+            				"Error saving settings: " +
             						manager.getLastErrorMessage(),
             				"Error", JOptionPane.ERROR_MESSAGE);
 

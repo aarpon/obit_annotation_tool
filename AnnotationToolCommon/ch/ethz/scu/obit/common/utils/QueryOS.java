@@ -23,6 +23,15 @@ public class QueryOS {
     }
 
 	/**
+	 * Check if the application is running on Linux
+	 * @return true if on Linux, false otherwise
+	 */
+	static public boolean isLinux() {
+		String OS = System.getProperty("os.name").toUpperCase();
+        return OS.contains("LINUX");
+    }
+
+	/**
 	 * Get the application data folder specific for current OS
 	 * @return full path to the application data folder
 	 */
@@ -37,6 +46,8 @@ public class QueryOS {
 					"/Users/Shared/Library/Application Support/");			
 		} else if (QueryOS.isWindows()) {
 			applicationDataDir = new File(System.getenv("ALLUSERSPROFILE"));
+		} else if (QueryOS.isLinux()) {
+			applicationDataDir = new File("/usr/local/");
 		} else {
 			throw new UnsupportedOperationException(
 					"Operating system not supported.");
@@ -67,6 +78,10 @@ public class QueryOS {
 	        } else {
 	        	userDir = new File(System.getenv("LOCALAPPDATA"));
 	        }
+		} else if (QueryOS.isLinux()) {
+			userDir = new File("/home/"
+					+ System.getProperty("user.name")
+					+ "/.config/");	
 		} else {
 			throw new UnsupportedOperationException(
 					"Operating system not supported.");
