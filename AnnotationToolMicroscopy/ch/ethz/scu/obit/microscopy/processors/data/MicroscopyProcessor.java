@@ -336,6 +336,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	public class MicroscopyFile extends DatasetDescriptor {
 
 		private boolean fileScanned = false;
+		
+		public String description;
 
 		public Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
 

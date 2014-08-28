@@ -35,6 +35,8 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 	MicroscopyProcessor microscopyProcessor;
 
+	MicroscopyFileNode lastSelectedMicroscopyFile;
+
 	/**
 	 * Constructor
 	 */
@@ -71,6 +73,12 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 		}
 		lastSelectedNode = node;
 
+		// Flag: broadcast project change
+		boolean broadcastMicroscopyFileChange = false;
+		
+		// Keep track of the selected microscopy file node
+		MicroscopyFileNode fileNode = null;
+		
 		// Get the node object
 		Object nodeInfo = node.getUserObject();
 
@@ -83,30 +91,71 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			addAttributesToMetadataTable(
 					((MicroscopyProcessor.MicroscopyFile) 
 							nodeInfo).getAttributes());
+			
+			if (node != lastSelectedMicroscopyFile) { 
+			
+				// Store reference to the node
+				fileNode = (MicroscopyFileNode) node;
+				
+				// A project change must be broadcast
+				broadcastMicroscopyFileChange = true;
+			
+			}
+
+
 		} else if (className.equals("MicroscopyFileSeries")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
 					((MicroscopyProcessor.MicroscopyFileSeries) 
 							nodeInfo).getAttributes());
+			
+			// Which file is it?
+			fileNode = (MicroscopyFileNode)
+					getParentNodeByName(node, "MicroscopyFile");
+			
+			if (fileNode != lastSelectedMicroscopyFile) { 
+				
+				// A project change must be broadcast
+				broadcastMicroscopyFileChange = true;
+			
+			}
+			
 		} else {
 			clearMetadataTable();
 		}
 
-        // Get the folder name
-        AbstractNode folderNode = getParentNodeByName(node, "Experiment");
-        if (folderNode != null && folderNode != lastSelectedExperiment) {
+        // Get the Experiment name
+        AbstractNode expNode = getParentNodeByName(node, "Experiment");
+        if (expNode != null && expNode != lastSelectedExperiment) {
         		
-        		// Update the lastSelectedFolder property
-        		lastSelectedExperiment = folderNode;
+        	// Update the lastSelectedFolder property
+        	lastSelectedExperiment = expNode;
         		
             // Notify the editor to update its view
 			synchronized (this) {
 				setChanged();
 				notifyObservers(new ObserverActionParameters(
 						ObserverActionParameters.Action.EXPERIMENT_CHANGED,
-						folderNode));
+						expNode));
 			}
         }
+        
+        // Should the file editing elements be updated?
+        if (broadcastMicroscopyFileChange) {
+        	
+        	// Notify the change of file
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.FILE_CHANGED,
+						fileNode));
+			}
+
+			// Update the last selected microscopy file node reference
+			lastSelectedMicroscopyFile = fileNode;
+
+        }
+       
 	}
 
 	/**
