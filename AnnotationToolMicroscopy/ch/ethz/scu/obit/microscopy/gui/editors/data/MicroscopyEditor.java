@@ -152,6 +152,14 @@ public final class MicroscopyEditor extends AbstractEditor {
 						currentMetadata.getOpenBISExerimentIdentifier());
 				microscopyFileDescriptor.addOpenBISAttributes(
 						microscopyFileOpenBISAttributes);
+				
+				// Set the description
+				Map<String, String> fileUserAttributes = 
+						new Hashtable<String, String>();
+				fileUserAttributes.put("description", 
+						microscopyFileDescriptor.description); 
+				microscopyFileDescriptor.addUserAttributes(fileUserAttributes);
+
 
 			}
 		}
@@ -247,7 +255,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		panel.add(labelExpName, constraints);
 
 		/*
-		 * Description label
+		 * Experiment description label
 		 */
 		
 		// Create a label for the experiment description
@@ -261,7 +269,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		panel.add(labelExpDescription, constraints);
 
 		/*
-		 * Description text area
+		 * Experiment description text area
 		 */
 		constraints.weightx = 1;
 		constraints.weighty = 0;
@@ -296,6 +304,17 @@ public final class MicroscopyEditor extends AbstractEditor {
 		areaExpScrollPane.setPreferredSize(new Dimension(400, 50));
 		panel.add(areaExpScrollPane, constraints);
 
+		// Create a label for the explanation
+        constraints.insets = new Insets(5, 0, 10, 0);
+        constraints.weightx = 1;
+        constraints.weighty = 0;
+        constraints.gridx = 0;
+        constraints.gridy = y++;
+        JLabel labelExpl = new JLabel("If the experiment already exists, "
+        		+ "the description will be updated.");
+        labelExpl.setHorizontalAlignment(JLabel.CENTER);
+        panel.add(labelExpl, constraints);
+
 		// Create a label for the file
         constraints.insets = new Insets(10, 0, 0, 0);
         constraints.weightx = 1;
@@ -305,16 +324,9 @@ public final class MicroscopyEditor extends AbstractEditor {
         labelFileName = new JLabel("");
         labelFileName.setIcon(new ImageIcon(
                 this.getClass().getResource("icons/loci.png")));
-        if (currentlySelectedMicroscopyFileNode != null) {
-        	labelFileName.setText(currentlySelectedMicroscopyFileNode.toString());
-        	labelFileName.setVisible(true);
-        } else {
-        	labelFileName.setText("");
-        	labelFileName.setVisible(false);        	
-        }
         panel.add(labelFileName, constraints);
 
-        // Create a label for the experiment description
+        // Create a label for the file description
         constraints.insets = new Insets(0, 0, 0, 0);
         constraints.weightx = 1;
         constraints.weighty = 0;
@@ -322,11 +334,6 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.gridy = y++;
         labelFileDescription = new JLabel("Description");
         labelFileDescription.setHorizontalAlignment(JLabel.CENTER);
-        if (currentlySelectedMicroscopyFileNode != null) {
-        	labelFileDescription.setVisible(true);
-        } else {
-        	labelFileDescription.setVisible(false);        	
-        }
         panel.add(labelFileDescription, constraints);
 
         /*
@@ -362,12 +369,18 @@ public final class MicroscopyEditor extends AbstractEditor {
                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         areaFileScrollPane.setMinimumSize(new Dimension(400, 50));
         areaFileScrollPane.setPreferredSize(new Dimension(400, 50));
-        if (currentlySelectedMicroscopyFileNode != null) {
-        	areaFileScrollPane.setVisible(true);
-        } else {
-        	areaFileScrollPane.setVisible(false);        	
-        }        
         panel.add(areaFileScrollPane, constraints);
+
+        // Depending on whether a file is selected, show or hide
+        // the UI elements needed to edit it
+        if (currentlySelectedMicroscopyFileNode != null) {
+        	MicroscopyFile microscopyFile = (MicroscopyFile) 
+        			currentlySelectedMicroscopyFileNode.getUserObject();
+        	showFileEditUIElements(microscopyFile.toString(),
+        			microscopyFile.description);
+        } else {
+        	hideFileEditUIElements();
+        }
 
 		/*
 		 *  Label openBIS projects
@@ -508,15 +521,17 @@ public final class MicroscopyEditor extends AbstractEditor {
 			// Store currently selected node
 			currentlySelectedMicroscopyFileNode =
 					(MicroscopyFileNode) params.node;
-			
-			// Update the UI
-			labelFileName.setText(currentlySelectedMicroscopyFileNode.toString());
-			labelFileName.setVisible(true);
+
+			// Get the microscopy file 
 			MicroscopyFile microscopyFile =
 					(MicroscopyFile) currentlySelectedMicroscopyFileNode.getUserObject();
-			labelFileDescription.setVisible(true);
-			fileDescription.setText(microscopyFile.description);
-			areaFileScrollPane.setVisible(true);
+			
+			// Get current file name and  description
+			String fileName = currentlySelectedMicroscopyFileNode.toString();
+			String description = microscopyFile.description;
+			
+			// Set file name and description and show the UI edit elements
+			showFileEditUIElements(fileName, description);
 			
 			// Return
 			return;
@@ -526,12 +541,8 @@ public final class MicroscopyEditor extends AbstractEditor {
 		currentlySelectedMicroscopyFileNode = null;
 
 		// If the experiment changed, we hide the UI elements related to
-		// the Microscopy file
-		labelFileName.setName("");
-		labelFileName.setVisible(false);
-		labelFileDescription.setText("");
-		labelFileDescription.setVisible(false);
-		areaFileScrollPane.setVisible(false);			
+		// the Microscopy file.
+		hideFileEditUIElements();
 		
 		// Update the currentExperimentIndex property
 		currentExperimentIndex = experiments.indexOf(params.node);
@@ -619,8 +630,12 @@ public final class MicroscopyEditor extends AbstractEditor {
 	 */
 	protected void updateFileDescription() {
 
-		// TODO: Implement
-		int lomm = 23;
+		if (currentlySelectedMicroscopyFileNode == null) {
+			return;
+		}
+		MicroscopyFile microscopyFile = (MicroscopyFile) 
+				currentlySelectedMicroscopyFileNode.getUserObject();
+		microscopyFile.description = fileDescription.getText();
 	
 	}
 
@@ -635,6 +650,32 @@ public final class MicroscopyEditor extends AbstractEditor {
 			return;
 		}
 		metadataMappersList = new ArrayList<MicroscopyMetadata>();
+	}
+
+	/**
+	 * Hides all UI elements needed to edit File properties and sets
+	 * file name and description to empty strings.
+	 */
+	protected void hideFileEditUIElements() {
+		labelFileName.setText("");
+		fileDescription.setText("");
+		labelFileName.setVisible(false);
+		labelFileDescription.setVisible(false);
+		areaFileScrollPane.setVisible(false);		
+	}
+
+	/**
+	 * Shows all UI elements needed to edit File properties and sets the
+	 * file name and description
+	 * @param fileName Name of the selected file
+	 * @param description Description for the selected file.
+	 */
+	protected void showFileEditUIElements(String fileName, String description) {
+		labelFileName.setText(fileName);
+		fileDescription.setText(description);
+		labelFileName.setVisible(true);
+		labelFileDescription.setVisible(true);
+		areaFileScrollPane.setVisible(true);
 	}
 
 }
