@@ -35,8 +35,6 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 	MicroscopyProcessor microscopyProcessor;
 
-	MicroscopyFileNode lastSelectedMicroscopyFile;
-
 	/**
 	 * Constructor
 	 */
@@ -92,16 +90,11 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 					((MicroscopyProcessor.MicroscopyFile) 
 							nodeInfo).getAttributes());
 			
-			if (node != lastSelectedMicroscopyFile) { 
-			
-				// Store reference to the node
-				fileNode = (MicroscopyFileNode) node;
+			// Store reference to the node
+			fileNode = (MicroscopyFileNode) node;
 				
-				// A project change must be broadcast
-				broadcastMicroscopyFileChange = true;
-			
-			}
-
+			// A project change must be broadcast
+			broadcastMicroscopyFileChange = true;
 
 		} else if (className.equals("MicroscopyFileSeries")) {
 			clearMetadataTable();
@@ -113,12 +106,8 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			fileNode = (MicroscopyFileNode)
 					getParentNodeByName(node, "MicroscopyFile");
 			
-			if (fileNode != lastSelectedMicroscopyFile) { 
-				
-				// A project change must be broadcast
-				broadcastMicroscopyFileChange = true;
-			
-			}
+			// A project change must be broadcast
+			broadcastMicroscopyFileChange = true;
 			
 		} else {
 			clearMetadataTable();
@@ -126,10 +115,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
         // Get the Experiment name
         AbstractNode expNode = getParentNodeByName(node, "Experiment");
-        if (expNode != null && expNode != lastSelectedExperiment) {
-        		
-        	// Update the lastSelectedFolder property
-        	lastSelectedExperiment = expNode;
+        if (expNode != null) {
         		
             // Notify the editor to update its view
 			synchronized (this) {
@@ -150,9 +136,6 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 						ObserverActionParameters.Action.FILE_CHANGED,
 						fileNode));
 			}
-
-			// Update the last selected microscopy file node reference
-			lastSelectedMicroscopyFile = fileNode;
 
         }
        

@@ -567,8 +567,15 @@ public final class MicroscopyEditor extends AbstractEditor {
 		// the Microscopy file.
 		hideFileEditUIElements();
 		
-		// Update the currentExperimentIndex property
-		currentExperimentIndex = experiments.indexOf(params.node);
+		// If the experiment changed, update the currentExperimentIndex
+		// property and refresh the UI
+		int index = experiments.indexOf(params.node);
+		if (currentExperimentIndex == index) {
+				return;
+		}
+
+		// Update the current experiment
+		currentExperimentIndex = index;
 
 		// Get the active metadata object
 		MicroscopyMetadata metadata = metadataMappersList.get(
