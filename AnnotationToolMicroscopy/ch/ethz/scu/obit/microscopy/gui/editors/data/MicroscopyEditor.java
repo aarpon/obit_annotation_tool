@@ -224,6 +224,9 @@ public final class MicroscopyEditor extends AbstractEditor {
 		// child components already displayed.
 		clearUIElements();
 
+		// Make sure to clear references to selected experiments and projects
+		currentlySelectedMicroscopyFileNode = null;
+		
 		// Make sure both viewers have completed their models
 		if (metadataMappersList.size() == 0) {
 			return;
