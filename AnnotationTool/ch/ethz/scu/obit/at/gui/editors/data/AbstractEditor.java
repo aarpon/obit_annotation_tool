@@ -117,6 +117,14 @@ implements ActionListener, Observer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			break;			
+		case FILE_CHANGED:
+			try {
+				updateUIElements(observerActionParams);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			break;
 		case READY_TO_SEND:
 			// Nothing to do

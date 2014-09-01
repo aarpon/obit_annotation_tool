@@ -5,7 +5,10 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 /**
  * Lists the actions supported by the observer pattern.
  *
- * This is used by the viewers (data and openBIS) to notify the editors that something has to be done.
+ * This is used by the viewers (data and openBIS) to notify the editors that 
+ * something has to be done. The matching editors and viewers (per hardware 
+ * category might decide which of the following actions to implement).
+ * 
  * @author Aaron Ponti
  */
 public class ObserverActionParameters {
@@ -18,6 +21,8 @@ public class ObserverActionParameters {
         EXPERIMENT_CHANGED,          /** The user selected a new experiment (or
                                          one of its children) in the data 
                                          viewer */
+        FILE_CHANGED,                /** The user selected another file in the
+                                         data viewer */
         ABOUT_TO_SCAN_INCREMENTALLY, /** Some data node is being expanded 
                                          (lazy loading) -> metadata does not
                                          need to be reset */
