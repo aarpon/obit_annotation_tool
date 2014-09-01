@@ -3,7 +3,7 @@ package ch.ethz.scu.obit.common.version;
 public class VersionInfo {
 
 	// Program version
-	public static final String version = "0.6.0";
+	public static final String version = "0.5.1";
 	
 	// Version status: "alpha", "beta", or "" for a stable release
 	public static final String status = "alpha";
