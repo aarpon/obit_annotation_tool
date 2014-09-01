@@ -309,7 +309,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class UserFolder extends RootDescriptor {
 
-		public Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
+		public Map<String, Experiment> experiments =
+				new LinkedHashMap<String, Experiment>();
 
 		public UserFolder(File fullFolder) {
 

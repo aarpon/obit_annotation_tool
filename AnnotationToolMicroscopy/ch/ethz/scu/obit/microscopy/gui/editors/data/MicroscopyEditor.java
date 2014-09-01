@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -224,9 +225,28 @@ public final class MicroscopyEditor extends AbstractEditor {
 		// child components already displayed.
 		clearUIElements();
 
-		// Make sure to clear references to selected experiments and projects
-		currentlySelectedMicroscopyFileNode = null;
-		
+		// Make sure to clear references to selected file if it no longer
+		// exists; this is the case if the data folder was rescanned, but not
+		// if openBIS was rescanned.
+		if (currentlySelectedMicroscopyFileNode != null) {
+			MicroscopyFile microscopyFile = 
+					(MicroscopyFile) currentlySelectedMicroscopyFileNode
+					.getUserObject();
+			boolean found = false;
+			Iterator<Map.Entry<String, MicroscopyFile>> it = metadata
+					.getExperiment().microscopyFiles.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, MicroscopyFile> entry = it.next();
+				if (entry.getValue() == microscopyFile) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				currentlySelectedMicroscopyFileNode = null;
+			}
+		}
+
 		// Make sure both viewers have completed their models
 		if (metadataMappersList.size() == 0) {
 			return;
