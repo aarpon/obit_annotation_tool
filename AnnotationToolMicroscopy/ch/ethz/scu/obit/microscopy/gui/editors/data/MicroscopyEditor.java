@@ -333,7 +333,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.weighty = 0;
         constraints.gridx = 0;
         constraints.gridy = y++;
-        JLabel labelExpl = new JLabel("If the experiment already exists, "
+        JLabel labelExpl = new JLabel("If the experiment already exists "
         		+ "in openBIS, the description will be updated.");
         labelExpl.setHorizontalAlignment(JLabel.CENTER);
         panel.add(labelExpl, constraints);
