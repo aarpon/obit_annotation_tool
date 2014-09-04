@@ -27,6 +27,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	/* Folder to scan (recursively) */
 	private File userFolder;
 
+	/* Keep track of the folder level when recursing into subfolders */
+	private int folderLevel = 0;
+
 	/* List of supported file formats */
 	private ArrayList<String> supportedFormats = new ArrayList<String>(
 			Arrays.asList(".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
@@ -100,6 +103,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		// indeed a folder. So we can scan it recursively to find and
 		// reconstruct the structure of all contained experiments.
 		try {
+			folderLevel = 0;
 			recursiveDir(this.userFolder);
 		} catch (IOException e) {
 			this.errorMessage = "Could not parse the folder.";
@@ -132,6 +136,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 *             Thrown if a file could not be processed
 	 */
 	private void recursiveDir(File dir) throws IOException {
+
+		// Update the folder level
+		folderLevel++;
 
 		// Get the directory listing
 		String[] files = dir.list();
@@ -208,30 +215,55 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				validator.invalidFilesOrFolders.put(file, "Invalid file type.");
 			}
 
-			// Create a new ExperimentDescriptor or reuse an existing one
-			// The name of the experiment is the name of the folder that
-			// contains current file
-			Experiment expDesc;
-			String experimentName = dir.getName();
-			if (folderDescriptor.experiments.containsKey(experimentName)) {
-				expDesc = folderDescriptor.experiments.get(experimentName);
-			} else {
-				expDesc = new Experiment(dir);
-				folderDescriptor.experiments.put(experimentName, expDesc);
+			switch (folderLevel) {
+
+			case 2:
+
+				// A sub-folder of the user folder is an Experiment folder.
+
+				// Create a new ExperimentDescriptor or reuse an existing one
+				// The name of the experiment is the name of the folder that
+				// contains current file
+				Experiment expDesc;
+				String experimentName = dir.getName();
+				if (folderDescriptor.experiments.containsKey(experimentName)) {
+					expDesc = folderDescriptor.experiments.get(experimentName);
+				} else {
+					expDesc = new Experiment(dir);
+					folderDescriptor.experiments.put(experimentName, expDesc);
+				}
+
+				// Store
+				MicroscopyFile microscopyFileDesc;
+				String microscopyFileName = fileName;
+				String microscopyFileKey = experimentName + "_"
+						+ microscopyFileName;
+				microscopyFileDesc = new MicroscopyFile(file);
+
+				// Store it in the Experiment descriptor
+				expDesc.microscopyFiles.put(microscopyFileKey,
+						microscopyFileDesc);
+
+				break;
+
+			case 3:
+
+				// A sub-folder of the Experiment folder is an Experiment folder.
+				// TODO: Add a new descriptor for the composite dataset type 
+				break;
+
+			default:
+
+				// Do we have an unknown file? If we do, we move on to the next.
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file,
+						"Unexpectedly deep folder hierarchy.");
 			}
-
-			// Store
-			MicroscopyFile microscopyFileDesc;
-			String microscopyFileName = fileName;
-			String microscopyFileKey = experimentName + "_"
-					+ microscopyFileName;
-			microscopyFileDesc = new MicroscopyFile(file);
-
-			// Store it in the Experiment descriptor
-			expDesc.microscopyFiles.put(microscopyFileKey, microscopyFileDesc);
 
 		}
 
+		// We are about to leave the folder, we reduce the folder level
+		folderLevel--;
 	}
 
 	/**
@@ -337,7 +369,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	public class MicroscopyFile extends DatasetDescriptor {
 
 		private boolean fileScanned = false;
-		
+
 		public String description = "";
 
 		public Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
@@ -421,17 +453,17 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 					this.fullPath);
 			boolean success = microscopyReader.parse();
 			microscopyReader.close();
-			if (! success) {
-				
+			if (!success) {
+
 				// Add this file to the list of invalid datasets
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(this.fullPath,
 						"Metadata parsing failed.");
-				
+
 				// Return failure
 				fileScanned = false;
 				return false;
-				
+
 			} else {
 				fileScanned = true;
 			}
@@ -449,14 +481,14 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				String keySeries = "series_" + i;
 
 				// Create a new MicroscopyFileSeries descriptor
-				MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(
-						i, seriesAttr.get(keySeries));
+				MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(i,
+						seriesAttr.get(keySeries));
 
 				// Append it to the MicroscopyFile descriptor
 				series.put(keySeries, fileSeries);
 			}
-			
-			// Retun success 
+
+			// Retun success
 			return true;
 
 		}
@@ -473,8 +505,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		/**
 		 * Constructor.
 		 * 
-		 * @param index Index of the series in file.
-		 * @param attr  String-string map of attributes for the series
+		 * @param index
+		 *            Index of the series in file.
+		 * @param attr
+		 *            String-string map of attributes for the series
 		 */
 		public MicroscopyFileSeries(int index, Map<String, String> attr) {
 
