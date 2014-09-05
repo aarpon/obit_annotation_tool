@@ -20,10 +20,12 @@ import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
+import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyCompositeFileNode;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileSeriesNode;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
+import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFileSeries;
 
@@ -203,6 +205,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 		ExperimentNode experimentNode;
 		MicroscopyFileNode microscopyFileNode;
+		MicroscopyCompositeFileNode microscopyCompositeFileNode;
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
@@ -237,6 +240,19 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			
 			}
 			
+			// Add its composite files
+			for (String microscopyCompositeKey: e.microscopyCompositeFiles.keySet()) {
+
+				// Get the miroscopy file descriptor
+				MicroscopyCompositeFile microscopyCompositeFile = 
+						e.microscopyCompositeFiles.get(microscopyCompositeKey);
+				
+				// Add the MicroscopyCompositeFile
+				microscopyCompositeFileNode = new MicroscopyCompositeFileNode(microscopyCompositeFile);
+				experimentNode.add(microscopyCompositeFileNode);
+			
+			}
+
 		}
 	}
 
