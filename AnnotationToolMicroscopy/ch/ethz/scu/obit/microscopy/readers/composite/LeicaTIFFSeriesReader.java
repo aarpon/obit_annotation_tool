@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * @author Aaron Ponti
  *
  */
-public class LeicaTIFFSeriesReader extends CompositeMicroscopyReader {
+public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
 	protected File folder;
@@ -31,12 +31,26 @@ public class LeicaTIFFSeriesReader extends CompositeMicroscopyReader {
 		this.folder = folder;
 	}
 
-	@Override
-	public boolean canRead(File folder) {
+	/**
+	 * Return true if the reader can parse the passed folder
+	 * @param folder Folder to be parsed.
+	 * @return true if the folder can be parsed, false otherwise.
+	 */
+	static public boolean canRead(File folder) {
 		
 		// TODO: Implement!
 		return true; 
 	
+	}
+
+	/**
+	 * Return true if the composite microscopy dataset could be parsed
+	 * successfully.
+	 * @return true if the composite microscopy dataset could be parsed
+	 * successfully, false otherwise.
+	 */
+	public boolean isParsed() {
+		return isValid;
 	}
 
 	@Override
@@ -108,7 +122,9 @@ public class LeicaTIFFSeriesReader extends CompositeMicroscopyReader {
 			validFiles.add(file);
 		}
 
-		return true;
+		// Mark success
+		isValid = true;
+		return isValid;
 
 	}
 
@@ -128,6 +144,24 @@ public class LeicaTIFFSeriesReader extends CompositeMicroscopyReader {
 	@Override
 	public String getType() {
 		return "composite microscopy";
+	}
+
+	/**
+	 * Return the (representative) name of the composite microscopy dataset.
+	 * @return the name of the composite microscopy dataset.
+	 */		
+	@Override
+	public String getName() {
+		return basename;
+	}
+
+	/**
+	 * Return the folder that contains the composite microscopy dataset.
+	 * @return the dataset folder.
+	 */	
+	@Override
+	public File getFolder() {
+		return folder;
 	}
 
 }

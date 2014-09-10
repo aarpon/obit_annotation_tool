@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import ch.ethz.scu.obit.microscopy.readers.MicroscopyReader;
+import ch.ethz.scu.obit.microscopy.readers.composite.AbstractCompositeMicroscopyReader;
+import ch.ethz.scu.obit.microscopy.readers.composite.CompositeMicroscopyReaderFactory;
 import ch.ethz.scu.obit.processors.AbstractProcessor;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
@@ -137,6 +139,18 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	private void recursiveDir(File dir) throws IOException {
 
+		// We do not allow recursion above folderLevel 2; deeper levels must
+		// be taken care of by the CompositeMicroscopyReaders.
+		if (folderLevel == 2) {
+			return;
+		}
+
+		// Declare an AbstractCompositeMicroscopyReader 
+		AbstractCompositeMicroscopyReader reader = null;
+		
+		// Keep track whether we are processing a composite microscopy dataset
+		boolean isCompositeDataset = false;
+		
 		// Update the folder level
 		folderLevel++;
 
@@ -151,92 +165,147 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		}
 
 		// Go over the files and folders
+		String fileName = "";
 		for (String f : files) {
 
 			File file = new File(dir + File.separator + f);
 
-			// Is it a directory? Recurse into it
+			// Is it a directory?
 			if (file.isDirectory()) {
 
-				// Recurse into the subfolder
-				recursiveDir(file);
+				if (folderLevel < 2) {
+					
+					// Recurse into the subfolder
+					recursiveDir(file);
 
-				// Move on to the next file
+				// Move on to the next file/folder
 				continue;
-			}
-
-			// Delete some known garbage
-			if (deleteIfKnownUselessFile(file)) {
-				continue;
-			}
-
-			// Check the file type.
-			String fileName = file.getName();
-			int indx = fileName.lastIndexOf(".");
-			if (indx == -1) {
-				continue;
-			}
-			String ext = fileName.substring(indx);
-
-			// Check whether we find a data_structure.ois file. This
-			// means that the whole folder has apparently been annotated
-			// already, but for some unknown reason it has not been
-			// moved into Datamover's incoming folder.
-			// We break here.
-			if (fileName.toLowerCase().equals("data_structure.ois")) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(file,
-						"Failed registration to openBIS!");
-				return;
-			}
-
-			// Check whether an experiment is already annotated. Please
-			// mind that at this stage we do not know WHICH experiment
-			// was annotated. We just react to the fact that at least
-			// one has been annotated, somewhere.
-			if (fileName.contains("_properties.oix")) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(file,
-						"Experiment already annotated");
-				return;
-			}
-
-			// A microscopy file cannot be at the user folder root!
-			if (file.getParent().equals(this.userFolder.toString())) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(file,
-						"File must be in subfolder.");
-				continue;
-			}
-
-			// Do we have an unknown file? If we do, we move on to the next.
-			if (!supportedFormats.contains(ext)) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(file, "Invalid file type.");
-			}
-
-			// Declare some variables to be used in the switch block below 
-			Experiment expDesc;
-			String experimentName;
-
-			switch (folderLevel) {
-
-			case 2:
-
-				// A sub-folder of the user folder is an Experiment folder.
-
-				// The experiment name is the name of the containing folder
-				experimentName = dir.getName();
-				
-				// Create a new ExperimentDescriptor or reuse an existing one
-				// The name of the experiment is the name of the folder that
-				// contains current file
-				if (folderDescriptor.experiments.containsKey(experimentName)) {
-					expDesc = folderDescriptor.experiments.get(experimentName);
+					
 				} else {
-					expDesc = new Experiment(dir);
-					folderDescriptor.experiments.put(experimentName, expDesc);
+
+					// Get a reader to process the folder as a composite
+					// microscope type
+					reader = CompositeMicroscopyReaderFactory.createReader(file);
+					if (reader == null) {
+						validator.isValid = false;
+						validator.invalidFilesOrFolders.put(file,
+								"No reader for folder " + file);
+						continue;
+					}
+
+					// Now process the folder
+					try {
+						
+						// Parse the folder
+						reader.parse();
+						
+						// Label the folder as composite
+						isCompositeDataset = true;
+
+					} catch (Exception e) {
+						validator.isValid = false;
+						validator.invalidFilesOrFolders.put(file,
+								"Could not process folder " + file);
+						continue;
+					}
+
 				}
+
+			} else {
+
+				// Delete some known garbage
+				if (deleteIfKnownUselessFile(file)) {
+					continue;
+				}
+
+				// Check the file type.
+				fileName = file.getName();
+				int indx = fileName.lastIndexOf(".");
+				if (indx == -1) {
+					continue;
+				}
+				String ext = fileName.substring(indx);
+
+				// Check whether we find a data_structure.ois file. This
+				// means that the whole folder has apparently been annotated
+				// already, but for some unknown reason it has not been
+				// moved into Datamover's incoming folder.
+				// We break here.
+				if (fileName.toLowerCase().equals("data_structure.ois")) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"Failed registration to openBIS!");
+					return;
+				}
+
+				// Check whether an experiment is already annotated. Please
+				// mind that at this stage we do not know WHICH experiment
+				// was annotated. We just react to the fact that at least
+				// one has been annotated, somewhere.
+				if (fileName.contains("_properties.oix")) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"Experiment already annotated");
+					return;
+				}
+
+				// A microscopy file cannot be at the user folder root!
+				if (file.getParent().equals(this.userFolder.toString())) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"File must be in subfolder.");
+					continue;
+				}
+
+				// Do we have an unknown file? If we do, we move on to the next.
+				if (!supportedFormats.contains(ext)) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"Invalid file type.");
+					continue;
+				}
+			}
+			
+			// Create a new ExperimentDescriptor or reuse an existing one
+			// The name of the experiment is the name of the folder that
+			// contains current file
+			Experiment expDesc;
+			String experimentName = dir.getName();
+			if (folderDescriptor.experiments.containsKey(experimentName)) {
+				expDesc = folderDescriptor.experiments.get(experimentName);
+			} else {
+				expDesc = new Experiment(dir);
+				folderDescriptor.experiments.put(experimentName, expDesc);
+			}
+
+			// Now add the dataset to the tree
+			if (isCompositeDataset) {
+
+				// Store the composite microscopy dataset.
+				//
+				// The isParsed() call is not strictly necessary, since in 
+				// case something went wrong with the parsing, we would not 
+				//  reach this point (see the try .. catch block above).
+				if (reader.isParsed()) {
+
+					// Store
+					String microscopyCompositeFileName = reader.getName();
+					String microscopyCompositeFileKey = experimentName + "_"
+							+ microscopyCompositeFileName;
+
+					// Store it in the Experiment descriptor
+					if (! expDesc.microscopyCompositeFiles.containsKey(microscopyCompositeFileKey)) {
+						MicroscopyCompositeFile microscopyCompositeFileDesc;
+						microscopyCompositeFileDesc = new MicroscopyCompositeFile(reader);
+						expDesc.microscopyCompositeFiles.put(microscopyCompositeFileKey,
+								microscopyCompositeFileDesc);
+					}
+
+				}
+
+			} else {
+
+				// Normal dataset
 
 				// Store
 				MicroscopyFile microscopyFileDesc;
@@ -249,55 +318,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				expDesc.microscopyFiles.put(microscopyFileKey,
 						microscopyFileDesc);
 
-				break;
-
-			case 3:
-
-				// A sub-folder of the Experiment folder is an Experiment folder.
-
-				// The experiment name is the name of the parent folder of
-				// the containing folder
-				File parentDir = dir.getParentFile();
-				experimentName = parentDir.getName();
+			}
+			
+			// This should not happen!
+			if (folderLevel > 2) {
 				
-				// Create a new ExperimentDescriptor or reuse an existing one
-				// The name of the experiment is the name of the folder that
-				// contains current file
-				if (folderDescriptor.experiments.containsKey(experimentName)) {
-					expDesc = folderDescriptor.experiments.get(experimentName);
-				} else {
-					expDesc = new Experiment(parentDir);
-					folderDescriptor.experiments.put(experimentName, expDesc);
-				}
-
-				// Store
-				String microscopyCompositeFileName = dir.getName();
-				String microscopyCompositeFileKey = experimentName + "_"
-						+ microscopyCompositeFileName;
-
-				// Store it in the Experiment descriptor
-				if (! expDesc.microscopyCompositeFiles.containsKey(microscopyCompositeFileKey)) {
-					MicroscopyCompositeFile microscopyCompositeFileDesc;
-					microscopyCompositeFileDesc = new MicroscopyCompositeFile(dir);
-					expDesc.microscopyCompositeFiles.put(microscopyCompositeFileKey,
-							microscopyCompositeFileDesc);
-				}
-
-				// TODO: Depending on the type of the composite file, a 
-				//       dedicated processor must return proper descriptors
-				//       to append to the MicroscopyCompositeFile. Currently,
-				//       we add all contained files to the list of invalid
-				//       datasets. This will have to be removed when the
-				//       processors will be in place. The processor will
-				//       have to perform validation itself.
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(file,
-						"Unrecognized composite dataset component.");
-
-				break;
-
-			default:
-
 				// Do we have an unknown file? If we do, we move on to the next.
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(file,
@@ -557,29 +582,19 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		 * @param microscopyFileName
 		 *            Microscopy file name with full path
 		 */
-		public MicroscopyCompositeFile(File microscopyFileName) throws IOException {
+		public MicroscopyCompositeFile(AbstractCompositeMicroscopyReader reader) throws IOException {
 
 			// Call base constructor
-			super(microscopyFileName);
+			super(reader.getFolder());
 
 			// Store the file name
-			this.setName(microscopyFileName.getName());
+			this.setName(reader.getName());
 
-			// Append the attibute file size.
-			long s = microscopyFileName.length();
-			float sMB = s / (1024 * 1024);
-			String unit = "MiB";
-			if (sMB > 750) {
-				sMB = sMB / 1024;
-				unit = "GiB";
-			}
-			attributes.put("fileSize", String.format("%.2f", sMB) + " " + unit);
-
-			// Append the attribute relative file name. Since this
+			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix
 			// machine, we make sure to use forward slashes for path
 			// separators when we set it as an attribute.
-			attributes.put("relativeFileName",
+			attributes.put("relativeFolder",
 					this.relativePath.replace("\\", "/"));
 		}
 

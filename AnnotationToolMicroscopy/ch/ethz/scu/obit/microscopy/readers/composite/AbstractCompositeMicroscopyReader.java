@@ -17,7 +17,7 @@ import ch.ethz.scu.obit.readers.AbstractReader;
  * @author Aaron Ponti
  *
  */
-public abstract class CompositeMicroscopyReader extends AbstractReader {
+public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 
 	/**
 	 * Return true if the specialized can read and process the dataset
@@ -27,6 +27,26 @@ public abstract class CompositeMicroscopyReader extends AbstractReader {
 	 * @return true if the reader can read and process the dataset, false
 	 *         otherwise.
 	 */
-	abstract public boolean canRead(File folder);
+	static public boolean canRead(File folder) { return false; }
+	
+	/**
+	 * Return true if the composite microscopy dataset could be parsed
+	 * successfully.
+	 * @return true if the composite microscopy dataset could be parsed
+	 * successfully, false otherwise.
+	 */
+	public boolean isParsed() { return false; }
+	
+	/**
+	 * Return the (representative) name of the composite microscopy dataset.
+	 * @return the name of the composite microscopy dataset.
+	 */	
+	abstract public String getName();
+	
+	/**
+	 * Return the folder that contains the composite microscopy dataset.
+	 * @return the dataset folder.
+	 */
+	abstract public File getFolder();
 
 }
