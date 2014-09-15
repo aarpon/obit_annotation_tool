@@ -442,8 +442,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		private boolean fileScanned = false;
 
-		public String description = "";
-
 		public Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
 
 		/**
@@ -573,8 +571,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 */
 	public class MicroscopyCompositeFile extends DatasetDescriptor {
-
-		public String description = "";
 
 		/**
 		 * Constructor.
