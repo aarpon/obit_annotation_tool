@@ -32,7 +32,6 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadata;
-import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
@@ -152,11 +151,12 @@ public final class MicroscopyEditor extends AbstractEditor {
 						(AbstractNode) expNode.getChildAt(i);
 	
 				// Get the MicroscopyFile Descriptor
-				MicroscopyFile microscopyFileDescriptor =
-						(MicroscopyFile) microscopyFileNode.getUserObject();
+				DatasetDescriptor microscopyFileDescriptor =
+						(DatasetDescriptor) microscopyFileNode.getUserObject();
 	
 				// Make sure we have a Tray or a Specimen
-				assert(microscopyFileNode.getType().equals("MicroscopyFile"));
+				assert(microscopyFileNode.getType().equals("MicroscopyFile") ||
+						microscopyFileNode.getType().equals("MicroscopyCompositeFile"));
 
 				// Set the openBIS space and experiment identifiers
 				Map<String, String> microscopyFileOpenBISAttributes = 

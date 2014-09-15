@@ -143,7 +143,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	 */
 	@Override
 	public String getType() {
-		return "composite microscopy";
+		return "Leica TIFF Series";
 	}
 
 	/**

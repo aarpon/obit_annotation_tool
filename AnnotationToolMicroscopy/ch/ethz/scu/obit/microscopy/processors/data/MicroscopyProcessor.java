@@ -586,12 +586,16 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			// Store the file name
 			this.setName(reader.getName());
 
+			// Store the type of the composite reader
+			attributes.put("compositeFileType", reader.getType());
+
 			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix
 			// machine, we make sure to use forward slashes for path
 			// separators when we set it as an attribute.
 			attributes.put("relativeFolder",
 					this.relativePath.replace("\\", "/"));
+			
 		}
 
 		/**
