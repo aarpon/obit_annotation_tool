@@ -6,6 +6,9 @@ import java.io.File;
 
 public class DatasetDescriptor extends PathAwareDescriptor{
 
+	// Dataset description
+	public String description = "";
+	
 	/**
 	 * Constructor
 	 * @param fullPath Full path of the entity

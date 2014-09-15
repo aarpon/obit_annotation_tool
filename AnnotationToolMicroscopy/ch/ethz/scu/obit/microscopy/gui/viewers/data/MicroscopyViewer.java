@@ -77,7 +77,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 		boolean broadcastMicroscopyFileChange = false;
 		
 		// Keep track of the selected microscopy file node
-		MicroscopyFileNode fileNode = null;
+		AbstractNode fileNode = null;
 		
 		// Get the node object
 		Object nodeInfo = node.getUserObject();
@@ -93,7 +93,19 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 							nodeInfo).getAttributes());
 			
 			// Store reference to the node
-			fileNode = (MicroscopyFileNode) node;
+			fileNode = (AbstractNode) node;
+				
+			// A project change must be broadcast
+			broadcastMicroscopyFileChange = true;
+
+		} else if (className.equals("MicroscopyCompositeFile")) {
+			clearMetadataTable();
+			addAttributesToMetadataTable(
+					((MicroscopyProcessor.MicroscopyCompositeFile) 
+							nodeInfo).getAttributes());
+			
+			// Store reference to the node
+			fileNode = (AbstractNode) node;
 				
 			// A project change must be broadcast
 			broadcastMicroscopyFileChange = true;
@@ -105,7 +117,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 							nodeInfo).getAttributes());
 			
 			// Which file is it?
-			fileNode = (MicroscopyFileNode)
+			fileNode = (AbstractNode)
 					getParentNodeByName(node, "MicroscopyFile");
 			
 			// A project change must be broadcast

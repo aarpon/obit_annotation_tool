@@ -22,7 +22,7 @@ public class MicroscopyCompositeFileNode extends AbstractNode implements ILazyNo
 
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
-				getClass().getResource("icons/composite.png"));
+				getClass().getResource("icons/microscopycompositefile.png"));
 	}
 
 	public String getTooltip() {

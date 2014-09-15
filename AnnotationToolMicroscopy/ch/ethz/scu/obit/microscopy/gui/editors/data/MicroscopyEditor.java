@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -31,9 +32,10 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadata;
-import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
+import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
+import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 
 /**
  * Metadata editor panel.
@@ -54,7 +56,12 @@ public final class MicroscopyEditor extends AbstractEditor {
 	private int currentExperimentIndex = -1;
 
 	// Indicate which is the currently selected file
-	private MicroscopyFileNode currentlySelectedMicroscopyFileNode;
+	private AbstractNode currentlySelectedMicroscopyFileNode;
+	
+	// Icons
+	private Icon experimentIcon;
+	private Icon microscopyFileIcon;
+	private Icon microscopyCompositeFileIcon;
 	
 	private JLabel labelExpName;
 	private JLabel labelFileName;
@@ -78,6 +85,14 @@ public final class MicroscopyEditor extends AbstractEditor {
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		panel.setLayout(gridBagLayout);
+		
+		// Store references to the icons to use
+		experimentIcon = new ImageIcon(
+				this.getClass().getResource("icons/experiment.png"));
+		microscopyFileIcon = new ImageIcon(
+				this.getClass().getResource("icons/microscopyfile.png"));
+		microscopyCompositeFileIcon = new ImageIcon(
+				this.getClass().getResource("icons/microscopycompositefile.png"));
 
 	}
 
@@ -136,11 +151,12 @@ public final class MicroscopyEditor extends AbstractEditor {
 						(AbstractNode) expNode.getChildAt(i);
 	
 				// Get the MicroscopyFile Descriptor
-				MicroscopyFile microscopyFileDescriptor =
-						(MicroscopyFile) microscopyFileNode.getUserObject();
+				DatasetDescriptor microscopyFileDescriptor =
+						(DatasetDescriptor) microscopyFileNode.getUserObject();
 	
 				// Make sure we have a Tray or a Specimen
-				assert(microscopyFileNode.getType().equals("MicroscopyFile"));
+				assert(microscopyFileNode.getType().equals("MicroscopyFile") ||
+						microscopyFileNode.getType().equals("MicroscopyCompositeFile"));
 
 				// Set the openBIS space and experiment identifiers
 				Map<String, String> microscopyFileOpenBISAttributes = 
@@ -229,19 +245,54 @@ public final class MicroscopyEditor extends AbstractEditor {
 		// exists; this is the case if the data folder was rescanned, but not
 		// if openBIS was rescanned.
 		if (currentlySelectedMicroscopyFileNode != null) {
-			MicroscopyFile microscopyFile = 
-					(MicroscopyFile) currentlySelectedMicroscopyFileNode
-					.getUserObject();
+			
+			// Get the type of the node 
+			String className = 
+					currentlySelectedMicroscopyFileNode.getClass().getSimpleName();
+			
 			boolean found = false;
-			Iterator<Map.Entry<String, MicroscopyFile>> it = metadata
-					.getExperiment().microscopyFiles.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, MicroscopyFile> entry = it.next();
-				if (entry.getValue() == microscopyFile) {
-					found = true;
-					break;
+			
+			if (className.equals("MicroscopyFileNode")) {
+
+				MicroscopyFile microscopyFile = 
+						(MicroscopyFile) currentlySelectedMicroscopyFileNode
+						.getUserObject();
+
+				// Check the MicroscopyFile list first
+				Iterator<Map.Entry<String, MicroscopyFile>> it = metadata
+						.getExperiment().microscopyFiles.entrySet().iterator();
+				while (it.hasNext()) {
+					Map.Entry<String, MicroscopyFile> entry = it.next();
+					if (entry.getValue() == microscopyFile) {
+						found = true;
+						break;
+					}
 				}
+
+			} else if (className.equalsIgnoreCase("MicroscopyCompositeFileNode")) {
+				
+				MicroscopyCompositeFile microscopyCompositeFile = 
+						(MicroscopyCompositeFile) currentlySelectedMicroscopyFileNode
+						.getUserObject();
+
+				// Then, if needed, check the MicroscopyCompositeFile list
+				Iterator<Map.Entry<String, MicroscopyCompositeFile>> it = metadata
+						.getExperiment().microscopyCompositeFiles.entrySet().iterator();
+				while (it.hasNext()) {
+					Map.Entry<String, MicroscopyCompositeFile> entry = it.next();
+					if (entry.getValue() == microscopyCompositeFile) {
+						found = true;
+						break;
+					}
+				}				
+				
+			} else {
+				
+				found = false;
+
 			}
+			
+			// Check the MicroscopyFile's first
 			if (!found) {
 				currentlySelectedMicroscopyFileNode = null;
 			}
@@ -273,8 +324,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.gridx = 0;
 		constraints.gridy = y++;
 		labelExpName = new JLabel(expName);
-		labelExpName.setIcon(new ImageIcon(
-				this.getClass().getResource("icons/experiment.png")));		
+		labelExpName.setIcon(experimentIcon);		
 		panel.add(labelExpName, constraints);
 
 		/*
@@ -345,8 +395,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.gridx = 0;
         constraints.gridy = y++;
         labelFileName = new JLabel("");
-        labelFileName.setIcon(new ImageIcon(
-                this.getClass().getResource("icons/loci.png")));
+        labelFileName.setIcon(microscopyFileIcon);
         panel.add(labelFileName, constraints);
 
         // Create a label for the file description
@@ -397,10 +446,13 @@ public final class MicroscopyEditor extends AbstractEditor {
         // Depending on whether a file is selected, show or hide
         // the UI elements needed to edit it
         if (currentlySelectedMicroscopyFileNode != null) {
-        	MicroscopyFile microscopyFile = (MicroscopyFile) 
+        	DatasetDescriptor microscopyFile = (DatasetDescriptor) 
         			currentlySelectedMicroscopyFileNode.getUserObject();
-        	showFileEditUIElements(microscopyFile.toString(),
-        			microscopyFile.description);
+        	
+			// Update the UI elements
+			showFileEditUIElements(microscopyFile.toString(),
+        			microscopyFile.description, 
+        			currentlySelectedMicroscopyFileNode.getClass().getSimpleName());
         } else {
         	hideFileEditUIElements();
         }
@@ -540,24 +592,25 @@ public final class MicroscopyEditor extends AbstractEditor {
 		
 		// Should we should the file editing elements?
 		if (params.action == ObserverActionParameters.Action.FILE_CHANGED) {
-		
-			// Store currently selected node
-			currentlySelectedMicroscopyFileNode =
-					(MicroscopyFileNode) params.node;
 
-			// Get the microscopy file 
-			MicroscopyFile microscopyFile =
-					(MicroscopyFile) currentlySelectedMicroscopyFileNode.getUserObject();
+			// Store currently selected node
+			currentlySelectedMicroscopyFileNode = params.node;
 			
-			// Get current file name and  description
-			String fileName = currentlySelectedMicroscopyFileNode.toString();
-			String description = microscopyFile.description;
+			DatasetDescriptor d = (DatasetDescriptor)
+					currentlySelectedMicroscopyFileNode.getUserObject();
+			
+			// Get current file name and description
+			String fileName = currentlySelectedMicroscopyFileNode
+					.toString();
+			String description = d.description;
 			
 			// Set file name and description and show the UI edit elements
-			showFileEditUIElements(fileName, description);
-			
+			showFileEditUIElements(fileName, description, 
+					currentlySelectedMicroscopyFileNode.getClass().getSimpleName());
+
 			// Return
 			return;
+			
 		}
 		
 		// Forget the currently selected file
@@ -663,7 +716,9 @@ public final class MicroscopyEditor extends AbstractEditor {
 		if (currentlySelectedMicroscopyFileNode == null) {
 			return;
 		}
-		MicroscopyFile microscopyFile = (MicroscopyFile) 
+		// This can be either a MicroscopyFile or a MicroscopyCompositeFile, 
+		// which are both DatasetDescriptor's
+		DatasetDescriptor microscopyFile = (DatasetDescriptor) 
 				currentlySelectedMicroscopyFileNode.getUserObject();
 		microscopyFile.description = fileDescription.getText();
 	
@@ -700,10 +755,18 @@ public final class MicroscopyEditor extends AbstractEditor {
 	 * @param fileName Name of the selected file
 	 * @param description Description for the selected file.
 	 */
-	protected void showFileEditUIElements(String fileName, String description) {
+	protected void showFileEditUIElements(String fileName, String description,
+			String className) {
 		labelFileName.setText(fileName);
 		fileDescription.setText(description);
 		labelFileName.setVisible(true);
+		if (className.equals("MicroscopyFileNode")) {
+			labelFileName.setIcon(microscopyFileIcon);	
+		} else if (className.equals("MicroscopyCompositeFileNode")) {
+			labelFileName.setIcon(microscopyCompositeFileIcon);	
+		} else {
+			// This should not happen.
+		}
 		labelFileDescription.setVisible(true);
 		areaFileScrollPane.setVisible(true);
 	}
