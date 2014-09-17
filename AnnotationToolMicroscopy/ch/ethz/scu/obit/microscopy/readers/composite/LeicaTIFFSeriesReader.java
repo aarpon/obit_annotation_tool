@@ -16,7 +16,8 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
 	protected File folder;
-	protected final String REGEX = "(.*?)_s(\\d.*?)_z(\\d.*?)_ch(\\d.*?)\\.tif";
+	protected final String REGEX =
+			"^(.*?)_s(\\d.*?)_z(\\d.*?)_ch(\\d.*?)\\.ti(f{1,2})$";
 	protected Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
     
 	protected List<File> validFiles = new ArrayList<File>();
