@@ -17,7 +17,8 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	/* Protected instance variables */
 	protected File folder;
 	protected final String REGEX =
-			"^(.*?)_s(\\d.*?)_z(\\d.*?)_ch(\\d.*?)\\.ti(f{1,2})$";
+			"^(.*?)(_s(\\d.*?))?_z(\\d.*?)_ch(\\d.*?)\\.tif{1,2}$";
+			
 	protected Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
     
 	protected List<File> validFiles = new ArrayList<File>();
@@ -102,9 +103,20 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				try {
 
 					// TODO: Use this information
-					int seriesNum = Integer.parseInt(m.group(2));
-					int planeNum = Integer.parseInt(m.group(3));
-					int channelNum = Integer.parseInt(m.group(4));
+					
+					// The series index is not always defined
+					int seriesNum = 0;
+					if (m.group(2) != null) {
+						seriesNum = Integer.parseInt(m.group(3));
+					}
+					
+					// Plane number (z)
+					int planeNum = Integer.parseInt(m.group(4));
+					
+					// Channel number
+					int channelNum = Integer.parseInt(m.group(5));
+					
+					
 
 				} catch (NumberFormatException n) {
 					isValid = false;
