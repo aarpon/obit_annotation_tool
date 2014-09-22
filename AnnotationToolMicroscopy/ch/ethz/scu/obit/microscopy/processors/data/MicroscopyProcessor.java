@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import ch.ethz.scu.obit.microscopy.readers.MicroscopyReader;
 import ch.ethz.scu.obit.microscopy.readers.composite.AbstractCompositeMicroscopyReader;
 import ch.ethz.scu.obit.microscopy.readers.composite.CompositeMicroscopyReaderFactory;
@@ -589,6 +591,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			// Store the type of the composite reader
 			attributes.put("compositeFileType", reader.getType());
 
+			// Store the series indices
+			String seriesIndices = StringUtils.join(reader.getSeriesIndices(), ',');
+			attributes.put("seriesIndices", seriesIndices);
+			
 			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix
 			// machine, we make sure to use forward slashes for path

@@ -15,18 +15,20 @@ import java.util.regex.Pattern;
 public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
-	protected File folder;
-	protected final String REGEX =
+	private File folder;
+	private final String REGEX =
 			"^(.*?)(_s(\\d.*?))?_z(\\d.*?)_ch(\\d.*?)\\.tif{1,2}$";
 			
-	protected Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
+	private Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
     
-	protected List<File> validFiles = new ArrayList<File>();
-	protected File metadataFolder; 
-	protected String basename = "";
+//	private volatile List<File> validFiles = new ArrayList<File>();
+	private File metadataFolder; 
+	private String basename = "";
 	
-	protected boolean isValid = false;
+	private boolean isValid = false;
 	
+	private volatile List<Integer> seriesIndices = new ArrayList<Integer>();
+
 	// Constructor
 	public LeicaTIFFSeriesReader(File folder) {
 
@@ -108,15 +110,20 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					int seriesNum = 0;
 					if (m.group(2) != null) {
 						seriesNum = Integer.parseInt(m.group(3));
+						
+						// Store the series index if not yet present
+						synchronized(seriesIndices) {
+							if (!seriesIndices.contains(seriesNum)) {
+								seriesIndices.add(seriesNum);
+							}
+						}
 					}
-					
+
 					// Plane number (z)
 					int planeNum = Integer.parseInt(m.group(4));
 					
 					// Channel number
 					int channelNum = Integer.parseInt(m.group(5));
-					
-					
 
 				} catch (NumberFormatException n) {
 					isValid = false;
@@ -131,8 +138,8 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				return isValid;
 			}
 
-			// Valid file: append it to the list
-			validFiles.add(file);
+//			// Valid file: append it to the list
+//			validFiles.add(file);
 		}
 
 		// Mark success
@@ -177,4 +184,11 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		return folder;
 	}
 
+	/**
+	 * Return the list of series indices extracted from the file names 
+	 * @return List of series indices
+	 */
+	public List<Integer> getSeriesIndices() {
+		return seriesIndices;
+	}
 }

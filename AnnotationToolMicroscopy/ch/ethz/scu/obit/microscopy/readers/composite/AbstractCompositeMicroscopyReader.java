@@ -4,6 +4,8 @@
 package ch.ethz.scu.obit.microscopy.readers.composite;
 
 import java.io.File;
+import java.util.List;
+
 import ch.ethz.scu.obit.readers.AbstractReader;
 
 /**
@@ -48,5 +50,11 @@ public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 	 * @return the dataset folder.
 	 */
 	abstract public File getFolder();
+	
+	/**
+	 * Returns a list of indices for the series contained in the dataset
+	 * @return
+	 */
+	abstract public List<Integer> getSeriesIndices();
 
 }
