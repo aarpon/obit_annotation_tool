@@ -31,13 +31,12 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 			
 	private Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
     
-//	private volatile List<File> validFiles = new ArrayList<File>();
 	private File metadataFolder; 
 	private String basename = "";
 	
 	private boolean isValid = false;
 
-	protected ImageProcessorReader reader = null;
+	private ImageProcessorReader reader = null;
 	
 	// Constructor
 	public LeicaTIFFSeriesReader(File folder) {
@@ -156,59 +155,70 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 						
 							// Read the file
 							if (reader == null) {
-								// Create the reader
+								
+								// Initialize the reader
 								reader = new ImageProcessorReader(
 										new ChannelSeparator(
-												LociPrefs.makeImageReader()));
+										LociPrefs.makeImageReader()));
 							}
 							
 							// Try to open the image file
-							
 							try {
-							      reader.setId(file.getCanonicalPath());
+								reader.setId(file.getCanonicalPath());
 							} catch (FormatException e) {
 								reader = null;
 							} catch (IOException e) {
 								reader = null;
 							}
-							
+
+							// Store width and height
 							int width = 0;
 							int heigth = 0;
-							
-							// Store width and height
+							String datatype = "Unknown";
 							if (reader != null) {
+
+								// Get width
 								width = reader.getSizeX();
-								heigth = reader.getSizeY();
 								
-								// Try closing it
+								// Get heigth
+								heigth = reader.getSizeY();
+
+								// Get datatype
+								datatype = getDataType();
+								
+								// Now close the file
 								try {
 									reader.close();
 								} catch (IOException e) {
 									// Report
 									System.err.println("Could not close file!");
 								}
+
 							}
 							
-							metadata.put("SizeX", Integer.toString(width));
-							metadata.put("SizeY", Integer.toString(heigth));
+							// Store the extracted values 
+							metadata.put("sizeX", Integer.toString(width));
+							metadata.put("sizeY", Integer.toString(heigth));
+							metadata.put("datatype", datatype);
+							
 						}
 
 						// Update the metadata object
-						int numPlanes = getMetadataValueOrZero(metadata, "SizeZ");
+						int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
 						if ((planeNum + 1) > numPlanes) {
-							metadata.put("SizeZ", Integer.toString(planeNum + 1));
+							metadata.put("sizeZ", Integer.toString(planeNum + 1));
 						}
 
-						int numChannels = getMetadataValueOrZero(metadata, "SizeC");
+						int numChannels = getMetadataValueOrZero(metadata, "sizeC");
 						if ((channelNum + 1) > numChannels) {
-							metadata.put("SizeC", Integer.toString(channelNum + 1));
+							metadata.put("sizeC", Integer.toString(channelNum + 1));
 						}
 						
 						// TODO: Add time
 						int TimeNum = 0;
-						int numTimepoints = getMetadataValueOrZero(metadata, "SizeT");
+						int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
 						if ((TimeNum + 1) > numTimepoints) {
-							metadata.put("SizeT", Integer.toString(TimeNum + 1));
+							metadata.put("sizeT", Integer.toString(TimeNum + 1));
 						}
 						
 						// Now update the series map
@@ -223,14 +233,12 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 			} else {
 
-				// This should not happen -- unless Java regular expressions
-				// are broken...
+				// This should not happen -- unless there is an unexpected issue with
+				// the regular expressions
 				isValid = false;
 				return isValid;
 			}
 
-//			// Valid file: append it to the list
-//			validFiles.add(file);
 		}
 
 		// Mark success
@@ -311,4 +319,29 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		return value;
 	}
 
+	/**
+	 * Return the data type
+	 * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
+	 */
+	public String getDataType() {
+        
+		// Get and store the dataset type
+		String datatype;
+		switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
+			case 1:
+				datatype = "uint8";
+				break;
+			case 2:
+				datatype = "uint16";
+				break;
+			case 4:
+				datatype = "float";
+				break;
+			default:
+				datatype = "unsupported";
+				break;
+		}
+		
+		return datatype;
+	}
 }
