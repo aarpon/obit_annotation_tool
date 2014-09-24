@@ -4,7 +4,10 @@
 package ch.ethz.scu.obit.microscopy.readers.composite;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import ch.ethz.scu.obit.readers.AbstractReader;
 
@@ -20,6 +23,12 @@ import ch.ethz.scu.obit.readers.AbstractReader;
  *
  */
 public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
+
+	/**
+	 * Metadata attributes
+	 */
+	protected final Map<String, HashMap<String, String>> attr =
+			new HashMap<String, HashMap<String, String>>();
 
 	/**
 	 * Return true if the specialized can read and process the dataset
@@ -56,5 +65,14 @@ public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 	 * @return
 	 */
 	abstract public List<Integer> getSeriesIndices();
+	
+	/**
+	 * String-string map of data attribute key:value pair.
+	 * 
+	 * These will be uploaded to openBIS as associated information.
+	 */
+	public Map<String, HashMap<String, String>> getAttributes() {
+		return attr;
+	}
 
 }

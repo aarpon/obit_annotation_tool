@@ -50,16 +50,14 @@ public class MicroscopyReader extends AbstractReader {
 	/**
 	 * Metadata attributes
 	 */
-	protected Map<String, HashMap<String, String>> attr;
+	protected final Map<String, HashMap<String, String>> attr =
+			new HashMap<String, HashMap<String, String>>();
 
 	/**
 	 * @param filename File name with full path.
 	 */
 	public MicroscopyReader(File filename) {
 
-		// Initialize String-String attributes map
-		attr = new HashMap<String, HashMap<String, String>>();
-		
 		// Store the filename
 		this.filename = filename;
 		
@@ -175,7 +173,7 @@ public class MicroscopyReader extends AbstractReader {
 		if (! parse()) {
 			
 			// Reset attr
-			attr = new HashMap<String, HashMap<String, String>>();
+			attr.clear();
 		}
 
 		return attr;

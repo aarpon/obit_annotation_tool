@@ -35,7 +35,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	private int folderLevel = 0;
 
 	/* List of supported file formats */
-	private ArrayList<String> supportedFormats = new ArrayList<String>(
+	private final ArrayList<String> supportedFormats = new ArrayList<String>(
 			Arrays.asList(".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
 					".afm", ".aim", ".al3d", ".am", ".amiramesh", ".apl",
 					".arf", ".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2",
@@ -344,7 +344,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class Folder extends PathAwareDescriptor {
 
-		public Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
+		public final Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
 
 		public Folder(File fullFolder) {
 
@@ -374,10 +374,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		public String description = "";
 
 		// Store the microscopy files associated with this Experiment
-		public Map<String, MicroscopyFile> microscopyFiles =
+		public final Map<String, MicroscopyFile> microscopyFiles =
 				new LinkedHashMap<String, MicroscopyFile>();
 
-		public Map<String, MicroscopyCompositeFile> microscopyCompositeFiles =
+		public final Map<String, MicroscopyCompositeFile> microscopyCompositeFiles =
 				new LinkedHashMap<String, MicroscopyCompositeFile>();
 
 		/**
@@ -415,7 +415,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class UserFolder extends RootDescriptor {
 
-		public Map<String, Experiment> experiments =
+		public final Map<String, Experiment> experiments =
 				new LinkedHashMap<String, Experiment>();
 
 		public UserFolder(File fullFolder) {
@@ -444,7 +444,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		private boolean fileScanned = false;
 
-		public Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
+		private final Map<String, MicroscopyFileSeries> series = 
+				new LinkedHashMap<String, MicroscopyFileSeries>();
 
 		/**
 		 * Constructor.
@@ -565,6 +566,13 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		}
 
+		/**
+		 * Return the extracted microscopy file series.
+		 * @return String, MicroscopyFileSeries map
+		 */
+		public Map<String, MicroscopyFileSeries> getSeries() {
+			return series;
+		}
 	}
 
 	/**
@@ -574,6 +582,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class MicroscopyCompositeFile extends DatasetDescriptor {
 
+		private AbstractCompositeMicroscopyReader reader;
+		
 		/**
 		 * Constructor.
 		 * 
@@ -587,6 +597,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 			// Store the file name
 			this.setName(reader.getName());
+
+			// Store the reader
+			this.reader = reader;
 
 			// Store the type of the composite reader
 			attributes.put("compositeFileType", reader.getType());
@@ -635,6 +648,36 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			return attributes;
 		}
 
+		/**
+		 * Return the extracted microscopy file series.
+		 * @return String, MicroscopyFileSeries map
+		 */
+		public Map<String, MicroscopyFileSeries> getSeries() {
+			
+			// Initialize the series map
+			Map<String, MicroscopyFileSeries> series =
+					new LinkedHashMap<String, MicroscopyFileSeries>();
+			
+			// Get the series attributes
+			Map<String, HashMap<String, String>> seriesAttr =
+					reader.getAttributes();
+			
+			// Process all series
+			for (int i = 0; i < seriesAttr.size(); i++) {
+
+				// Series key
+				String keySeries = "series_" + i;
+
+				// Create a new MicroscopyFileSeries descriptor
+				MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(i,
+						seriesAttr.get(keySeries));
+
+				// Append it to the MicroscopyFile descriptor
+				series.put(keySeries, fileSeries);
+			}
+			
+			return series;
+		}
 	}
 	
 	/**

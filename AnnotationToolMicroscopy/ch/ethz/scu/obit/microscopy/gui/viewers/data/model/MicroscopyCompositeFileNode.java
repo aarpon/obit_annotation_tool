@@ -46,7 +46,7 @@ public class MicroscopyCompositeFileNode extends AbstractNode implements ILazyNo
 	 */
 	@Override
 	public boolean isLeaf() {
-		return true;
+		return false;
 	}
 
 }

@@ -35,8 +35,9 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Microscop
  */
 public final class MicroscopyViewer extends AbstractViewer implements TreeWillExpandListener {
 
-	MicroscopyProcessor microscopyProcessor;
-
+	private MicroscopyProcessor microscopyProcessor;
+	
+	
 	/**
 	 * Constructor
 	 */
@@ -116,9 +117,14 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 					((MicroscopyProcessor.MicroscopyFileSeries) 
 							nodeInfo).getAttributes());
 			
-			// Which file is it?
+			// Which file is it? The parent can be either a MicroscopyFile or
+			// a MicroscopyCompsiteFile
 			fileNode = (AbstractNode)
 					getParentNodeByName(node, "MicroscopyFile");
+			if (fileNode == null) {
+				fileNode = (AbstractNode)
+						getParentNodeByName(node, "MicroscopyCompositeFile");
+			}
 			
 			// A project change must be broadcast
 			broadcastMicroscopyFileChange = true;
@@ -241,10 +247,10 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 				// If files have been expanded already and there are series, 
 				// add them too.
-				for (String key: microscopyFile.series.keySet()) {
+				for (String key: microscopyFile.getSeries().keySet()) {
 
 					// Get the miroscopy file descriptor
-					MicroscopyFileSeries s = microscopyFile.series.get(key);
+					MicroscopyFileSeries s = microscopyFile.getSeries().get(key);
 					
 					// Add the MicroscopyFileSeries
 					microscopyFileNode.add(new MicroscopyFileSeriesNode(s));
@@ -255,13 +261,26 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			// Add its composite files
 			for (String microscopyCompositeKey: e.microscopyCompositeFiles.keySet()) {
 
-				// Get the miroscopy file descriptor
+				// Get the microscopy file descriptor
 				MicroscopyCompositeFile microscopyCompositeFile = 
 						e.microscopyCompositeFiles.get(microscopyCompositeKey);
 				
 				// Add the MicroscopyCompositeFile
 				microscopyCompositeFileNode = new MicroscopyCompositeFileNode(microscopyCompositeFile);
 				experimentNode.add(microscopyCompositeFileNode);
+				
+				// Add the MicroscopyFileSeries
+				Map<String, MicroscopyFileSeries> series =
+						microscopyCompositeFile.getSeries();
+				for (String key : series.keySet()) {
+
+					// Get the miroscopy file descriptor
+					MicroscopyFileSeries s = series.get(key);
+					
+					// Add the MicroscopyFileSeries
+					microscopyCompositeFileNode.add(new MicroscopyFileSeriesNode(s));
+
+				}
 			
 			}
 
@@ -423,9 +442,9 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 					
 					// Add all series to the tree
-					for (String key : m.series.keySet()) {
+					for (String key : m.getSeries().keySet()) {
 
-						MicroscopyFileSeries s = m.series.get(key);
+						MicroscopyFileSeries s = m.getSeries().get(key);
 						model.insertNodeInto(new MicroscopyFileSeriesNode(s),
 								n, n.getChildCount());
 					}
