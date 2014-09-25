@@ -603,10 +603,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 			// Store the type of the composite reader
 			attributes.put("compositeFileType", reader.getType());
-
-			// Store the series indices
-			String seriesIndices = StringUtils.join(reader.getSeriesIndices(), ',');
-			attributes.put("seriesIndices", seriesIndices);
 			
 			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix

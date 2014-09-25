@@ -61,12 +61,6 @@ public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 	abstract public File getFolder();
 	
 	/**
-	 * Returns a list of indices for the series contained in the dataset
-	 * @return
-	 */
-	abstract public List<Integer> getSeriesIndices();
-	
-	/**
 	 * String-string map of data attribute key:value pair.
 	 * 
 	 * These will be uploaded to openBIS as associated information.

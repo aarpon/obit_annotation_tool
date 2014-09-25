@@ -1,15 +1,24 @@
 package ch.ethz.scu.obit.microscopy.readers.composite;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import loci.common.DebugTools;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
@@ -86,12 +95,6 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 					// Store the metadata folder
 					metadataFolder = file;
-
-					// Parse the metadata information
-					if (!scanMetadataFolder()) {
-						isValid = false;
-						return isValid;
-					}
 					
 					// Skip to the next iteration
 					continue;
@@ -201,6 +204,13 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 							metadata.put("sizeY", Integer.toString(heigth));
 							metadata.put("datatype", datatype);
 							
+							// Store default values. These should be replaced
+							// with information extracted from the properties XML
+							// file in the Metadata folder.
+							metadata.put("voxelX", "1.0");
+							metadata.put("voxelY", "1.0");
+							metadata.put("voxelZ", "1.0");
+							
 						}
 
 						// Update the metadata object
@@ -239,6 +249,13 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				return isValid;
 			}
 
+		}
+		
+		// Now scan the Metadata folder
+		// (when all files have been processed already!)
+		if (!scanMetadataFolder()) {
+			isValid = false;
+			return isValid;
 		}
 
 		// Mark success
@@ -284,23 +301,234 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	}
 
 	/**
-	 * Return the list of series indices extracted from the file names 
-	 * @return List of series indices
-	 */
-	public List<Integer> getSeriesIndices() {
-		List<Integer> indices = new ArrayList<Integer>();
-		for (String key : attr.keySet()) {
-			// Get the index from the series_{n} key
-			indices.add(Integer.parseInt(key.substring(7)));
-		}
-		Collections.sort(indices);
-		return indices;
-	}
-	
-	/**
 	 * Scans the MetadataFolder and stores all relevant information.
 	 */
 	private boolean scanMetadataFolder() {
+
+		// Get the required XML file
+		String[] xmlFiles = metadataFolder.list(new FilenameFilter() {
+		    public boolean accept(File directory, String fileName) {
+		        return (fileName.endsWith("_Properties.xml"));
+		    }
+		});
+		
+		if (xmlFiles.length != 1) {
+			return false;
+		}
+		
+		// Now process
+		File xmlFile = new File(metadataFolder + File.separator + xmlFiles[0]);
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			return false;
+		}
+		Document doc;
+		try {
+			doc = db.parse(xmlFile);
+		} catch (SAXException | IOException e) {
+			return false;
+		}
+		doc.getDocumentElement().normalize();
+		  
+		// Get root node
+		Node root = doc.getDocumentElement();
+		if (! root.getNodeName().equals("Data")) {
+			return false;
+		}
+		
+		//
+		// Extract relevant metadata information from the "Image" node
+		//
+		
+		// Get the Image node
+		NodeList nodeList = doc.getElementsByTagName("Image");
+		if (nodeList.getLength() != 1) {
+			return false;
+		}
+		Node imageNode = nodeList.item(0);
+
+		// Get the stage (tile) positions
+		NodeList tileNodes = ((Element)imageNode).getElementsByTagName("Tile");
+		
+		int nSeries = 0;
+		for (int k = 0; k < tileNodes.getLength(); k++) {
+			
+			Node cNode = tileNodes.item(k);
+			
+			if (cNode.getNodeType() == Node.ELEMENT_NODE) {
+				
+				Element cEl = (Element) cNode;
+				
+				String key = "series_" + nSeries;
+				
+				if (attr.containsKey(key)) {
+					HashMap<String, String> seriesMetadata = 
+							attr.get(key);
+					seriesMetadata.put("positionX",
+							cEl.getAttribute("PosX"));
+					seriesMetadata.put("positionY",
+							cEl.getAttribute("PosY"));
+				}
+				
+				nSeries++;
+			}
+		}
+		
+		//
+		// Extract relevant metadata information from the "ImageDescription" node
+		//
+
+		// Get the Image node
+		nodeList = doc.getElementsByTagName("ImageDescription");
+		if (nodeList.getLength() != 1) {
+			return false;
+		}
+		Node imageDescriptionNode = nodeList.item(0);
+
+		// Get the channel descriptions
+		NodeList channelNodes =
+				((Element)imageDescriptionNode).getElementsByTagName(
+						"ChannelDescription");
+
+		int nChannels = channelNodes.getLength();
+		Map<Integer, Float[]> RGBColors = new HashMap<Integer, Float[]>();
+		for (int k = 0; k < nChannels; k++) {
+			
+			Node cNode = channelNodes.item(k);
+			
+			if (cNode.getNodeType() == Node.ELEMENT_NODE) {
+				
+				Element cEl = (Element) cNode;
+				
+				// Get the channel information
+				String LUT = cEl.getAttribute("LUTName");
+				
+				Float[] c;
+				switch (LUT) {
+				case "Red":
+					c = new Float[]{1.0f, 0.0f, 0.0f, 0.0f};
+					break;
+				case "Green":
+					c = new Float[]{0.0f, 1.0f, 0.0f, 0.0f};
+					break;
+				case "Blue":
+					c = new Float[]{0.0f, 0.0f, 1.0f, 0.0f};
+					break;
+				case "Yellow":
+					c = new Float[]{1.0f, 1.0f, 0.0f, 0.0f};
+					break;
+				default:
+					if (k == 0) {
+						c = new Float[]{1.0f, 0.0f, 0.0f, 0.0f};
+					} else if (k == 1) {
+						c = new Float[]{0.0f, 1.0f, 0.0f, 0.0f}; 
+					} else if (k == 2) {
+						c = new Float[]{0.0f, 0.0f, 1.0f, 0.0f}; 
+					} else { 
+						c = new Float[]{1.0f, 1.0f, 1.0f, 0.0f}; 
+					}
+					break;
+				}
+				RGBColors.put(k, c);
+			}
+		}
+		
+		// Add the channel colors to the metadata
+		for (int s = 0; s < nSeries; s++) {
+			
+			String key = "series_" + s;
+			
+			if (attr.containsKey(key)) {
+				HashMap<String, String> seriesMetadata = 
+						attr.get(key);
+				
+				// Get the number of channels
+				int nChannelsInMetadata =
+						Integer.parseInt(seriesMetadata.get("sizeC"));
+				
+				for (int c = 0; c < nChannels; c++) {
+					
+					if (c < nChannelsInMetadata) {
+
+						Float[] color = RGBColors.get(c);
+						
+						seriesMetadata.put("channelColor" + c,
+								"" + color[0] + ", " +	color[1] + ", " +
+								color[2] + ", " + color[3]);
+
+					}
+				}
+			}
+
+		}
+			
+		// Get the dimension descriptions
+		NodeList dimensionNodes =
+				((Element)imageDescriptionNode).getElementsByTagName(
+						"DimensionDescription");
+
+		int nDims = dimensionNodes.getLength();
+		float voxelX = 1.0f;
+		float voxelY = 1.0f;
+		float voxelZ = 1.0f;
+		int nSeriesFromFile = 0;
+		
+		for (int k = 0; k < nDims; k++) {
+			
+			Node cNode = dimensionNodes.item(k);
+			
+			if (cNode.getNodeType() == Node.ELEMENT_NODE) {
+				
+				Element cEl = (Element) cNode;
+				
+				// Get the channel information
+				String dimID = cEl.getAttribute("DimID");
+				
+				switch (dimID) {
+				case "X":
+					voxelX = Float.parseFloat(cEl.getAttribute("Voxel"));
+					break;
+				case "Y":
+					voxelY = Float.parseFloat(cEl.getAttribute("Voxel"));
+					break;
+				case "Z":
+					voxelZ = Float.parseFloat(cEl.getAttribute("Voxel"));
+					break;
+				case "Stage":
+					nSeriesFromFile = Integer.parseInt(
+							cEl.getAttribute("NumberOfElements"));
+					if (nSeries != nSeriesFromFile) {
+						System.err.println(
+								"Mismatch in the expected number of series!");
+					}
+					break;
+				default:
+					// Nothing to do.
+				}
+			}
+		}
+		
+		// Add the voxel sizes to the metadata
+		for (int s = 0; s < nSeries; s++) {
+			
+			String key = "series_" + s;
+			
+			if (attr.containsKey(key)) {
+				HashMap<String, String> seriesMetadata = 
+						attr.get(key);
+				
+				seriesMetadata.put("voxelX", Float.toString(voxelX));
+				seriesMetadata.put("voxelY", Float.toString(voxelY));
+				seriesMetadata.put("voxelZ", Float.toString(voxelZ));
+
+			}
+
+		}
+		
 		return true;
 	}
 	
