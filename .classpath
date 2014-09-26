@@ -28,8 +28,8 @@
 	<classpathentry kind="lib" path="lib/dss_client/stream-supporting-httpinvoker.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S183.0-r31737.jar"/>
 	<classpathentry kind="lib" path="lib/bioformats_package.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S189.0-r32494.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
