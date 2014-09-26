@@ -3,7 +3,10 @@ package ch.ethz.scu.obit.microscopy.readers.composite;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,8 +39,8 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	/* Protected instance variables */
 	private File folder;
 	private final String REGEX =
-			"^(.*?)(_s(\\d.*?))?_z(\\d.*?)_ch(\\d.*?)\\.tif{1,2}$";
-			
+			"^(.*?)((_Series|_s)(\\d.*?))?_z(\\d.*?)_ch(\\d.*?)\\.tif{1,2}$";
+					
 	private Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
     
 	private File metadataFolder; 
@@ -100,9 +103,12 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					continue;
 
 				} else {
+					
 					// We can only have one folder called 'MetaData'
 					isValid = false;
+					errorMessage = "Multiple subfolders found.";
 					return isValid;
+					
 				}
 			}
 
@@ -117,8 +123,9 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				} else if (currentBase.equals(basename)) {
 					// Nothing to do
 				} else {
-					// More than one base name. Invalid Leica TIFF series
+					// More than one base name. Multiple Leica TIFF series.
 					isValid = false;
+					errorMessage = "Multiple series per folder not supported.";
 					return isValid;
 				}
 
@@ -130,15 +137,15 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					int seriesNum = 0;
 
 					// Plane number (z)
-					int planeNum = Integer.parseInt(m.group(4));
+					int planeNum = Integer.parseInt(m.group(5));
 					
 					// Channel number
-					int channelNum = Integer.parseInt(m.group(5));
+					int channelNum = Integer.parseInt(m.group(6));
 					
 					if (m.group(2) != null) {
 						
 						// Get the series number
-						seriesNum = Integer.parseInt(m.group(3));
+						seriesNum = Integer.parseInt(m.group(4));
 						
 						// Build the key
 						String key = "series_" + seriesNum;
@@ -155,6 +162,9 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 							
 							// Create a new SeriesMetadata object 
 							metadata = new HashMap<String, String>();
+							
+							// And add it to the arribute map
+							attr.put(key, metadata);
 						
 							// Read the file
 							if (reader == null) {
@@ -230,14 +240,12 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 						if ((TimeNum + 1) > numTimepoints) {
 							metadata.put("sizeT", Integer.toString(TimeNum + 1));
 						}
-						
-						// Now update the series map
-						attr.put(key, metadata);
 							
 					}
 
 				} catch (NumberFormatException n) {
 					isValid = false;
+					errorMessage = "Unexpected file name structure.";
 					return isValid;
 				}
 
@@ -246,6 +254,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				// This should not happen -- unless there is an unexpected issue with
 				// the regular expressions
 				isValid = false;
+				errorMessage = "Unexpected error.";
 				return isValid;
 			}
 
@@ -260,6 +269,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 		// Mark success
 		isValid = true;
+		errorMessage = "";
 		return isValid;
 
 	}
@@ -301,6 +311,20 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	}
 
 	/**
+	 * Return the list of series indices extracted from the file names 
+	 * @return List of series indices
+	 */
+	public List<Integer> getSeriesIndices() {
+		List<Integer> indices = new ArrayList<Integer>();
+		for (String key : attr.keySet()) {
+			// Get the index from the series_{n} key
+			indices.add(Integer.parseInt(key.substring(7)));
+		}
+		Collections.sort(indices);
+		return indices;
+	}
+
+	/**
 	 * Scans the MetadataFolder and stores all relevant information.
 	 */
 	private boolean scanMetadataFolder() {
@@ -313,6 +337,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		});
 		
 		if (xmlFiles.length != 1) {
+			errorMessage = "Multiple metadata XML files found!";
 			return false;
 		}
 		
@@ -337,8 +362,13 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		// Get root node
 		Node root = doc.getDocumentElement();
 		if (! root.getNodeName().equals("Data")) {
+			errorMessage = "Unexpected metadata XML content.";
 			return false;
 		}
+		
+		// Get the series indices
+		List<Integer> seriesIndices = getSeriesIndices();
+		int nSeriesFromFiles = seriesIndices.size();
 		
 		//
 		// Extract relevant metadata information from the "Image" node
@@ -347,6 +377,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		// Get the Image node
 		NodeList nodeList = doc.getElementsByTagName("Image");
 		if (nodeList.getLength() != 1) {
+			errorMessage = "Unexpected metadata XML content.";
 			return false;
 		}
 		Node imageNode = nodeList.item(0);
@@ -363,7 +394,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				
 				Element cEl = (Element) cNode;
 				
-				String key = "series_" + nSeries;
+				String key = "series_" + seriesIndices.get(k);
 				
 				if (attr.containsKey(key)) {
 					HashMap<String, String> seriesMetadata = 
@@ -378,6 +409,12 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 			}
 		}
 		
+		// If there were no tiles, make sure to set nSeries to match the 
+		// number of series found when scanning the files!
+		if (nSeries == 0) {
+			nSeries = nSeriesFromFiles;
+		}
+
 		//
 		// Extract relevant metadata information from the "ImageDescription" node
 		//
@@ -385,6 +422,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		// Get the Image node
 		nodeList = doc.getElementsByTagName("ImageDescription");
 		if (nodeList.getLength() != 1) {
+			errorMessage = "Unexpected metadata XML content.";
 			return false;
 		}
 		Node imageDescriptionNode = nodeList.item(0);
@@ -440,7 +478,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		// Add the channel colors to the metadata
 		for (int s = 0; s < nSeries; s++) {
 			
-			String key = "series_" + s;
+			String key = "series_" + seriesIndices.get(s);
 			
 			if (attr.containsKey(key)) {
 				HashMap<String, String> seriesMetadata = 
@@ -515,7 +553,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		// Add the voxel sizes to the metadata
 		for (int s = 0; s < nSeries; s++) {
 			
-			String key = "series_" + s;
+			String key = "series_" + seriesIndices.get(s);
 			
 			if (attr.containsKey(key)) {
 				HashMap<String, String> seriesMetadata = 
@@ -571,5 +609,13 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		}
 		
 		return datatype;
+	}
+	
+	/**
+	 * Returns the last error message.
+	 * @return String containing the last error message.
+	 */
+	public String getLastError() {
+		return errorMessage;
 	}
 }

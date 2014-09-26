@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -199,7 +200,12 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 					try {
 						
 						// Parse the folder
-						reader.parse();
+						if (!reader.parse()) {
+							validator.isValid = false;
+							validator.invalidFilesOrFolders.put(file,
+									reader.getErrorMessage());
+							continue;
+						}
 						
 						// Label the folder as composite
 						isCompositeDataset = true;
@@ -584,6 +590,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		private AbstractCompositeMicroscopyReader reader;
 		
+		private List<Integer> seriesIndices = new ArrayList<Integer>();
+		
 		/**
 		 * Constructor.
 		 * 
@@ -603,6 +611,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 			// Store the type of the composite reader
 			attributes.put("compositeFileType", reader.getType());
+			
+			// Store the series indices
+			seriesIndices = reader.getSeriesIndices();
+			String seriesIndicesStr = StringUtils.join(seriesIndices, ',');
+			attributes.put("seriesIndices", seriesIndicesStr);
 			
 			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix
@@ -658,15 +671,20 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			Map<String, HashMap<String, String>> seriesAttr =
 					reader.getAttributes();
 			
+			// Get the series indices
+			
 			// Process all series
 			for (int i = 0; i < seriesAttr.size(); i++) {
 
+				// Series index
+				int index = seriesIndices.get(i);
+				
 				// Series key
-				String keySeries = "series_" + i;
+				String keySeries = "series_" + index;
 
 				// Create a new MicroscopyFileSeries descriptor
-				MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(i,
-						seriesAttr.get(keySeries));
+				MicroscopyFileSeries fileSeries = new MicroscopyFileSeries(
+						index, seriesAttr.get(keySeries));
 
 				// Append it to the MicroscopyFile descriptor
 				series.put(keySeries, fileSeries);
