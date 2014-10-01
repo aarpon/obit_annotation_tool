@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JOptionPane;
 
@@ -36,16 +38,20 @@ public class OpenBISProcessor {
 	private String userName = "";
 	private String userPassword = "";
 	private int timeout = 60000;
-    private IOpenbisServiceFacade facade;
-	private IQueryApiFacade queryFacade;
+	private AtomicReference<IOpenbisServiceFacade> facade =
+			new AtomicReference<IOpenbisServiceFacade>();
+	private AtomicReference<IQueryApiFacade> queryFacade =
+			new AtomicReference<IQueryApiFacade>();
 
 	private boolean isLoggedIn = false;
 	
-	AggregationServiceDescription createProjectService = null;
+	private AggregationServiceDescription createProjectService = null;
 
-	String loginErrorMessage = "";
-	String loginErrorTitle = "";
-	boolean loginErrorRecoverable = true;
+	private AtomicReference<String> loginErrorMessage = 
+			new AtomicReference<String>("");
+	private AtomicReference<String> loginErrorTitle =
+			new AtomicReference<String>("");
+	private AtomicBoolean loginErrorRecoverable = new AtomicBoolean(true);
 
 
 	/**
@@ -85,7 +91,7 @@ public class OpenBISProcessor {
 	 * @return true if we are logged in, false otherwise.
 	 */
 	public boolean isLoggedIn() {
-		return isLoggedIn && facade != null;
+		return isLoggedIn && facade.get() != null;
 	}
 	
 	/**
@@ -94,10 +100,10 @@ public class OpenBISProcessor {
 	 */
 	public boolean checkSession() {
 		try {
-			facade.checkSession();
+			facade.get().checkSession();
 		} catch ( InvalidSessionException e ) {
-			facade = null;
-			queryFacade = null;
+			facade.set(null);
+			queryFacade.set(null);
 			isLoggedIn = false;
 			return false;
 		}
@@ -161,14 +167,14 @@ public class OpenBISProcessor {
 				// the credentials provided were accepted and the user
 				// was successfully logged in.
 				try {
-					facade = OpenbisServiceFacadeFactory.tryCreate(userName,
-							userPassword, openBISURL, timeout);
+					facade.set(OpenbisServiceFacadeFactory.tryCreate(userName,
+							userPassword, openBISURL, timeout));
 				} catch (UserFailureException e) {
-					facade = null; reactToUserFailureException();
+					facade.set(null); reactToUserFailureException();
 				} catch (RemoteConnectFailureException e) {
-					facade = null; reactToRemoteConnectFailureException();
+					facade.set(null); reactToRemoteConnectFailureException();
 				} catch (RemoteAccessException e) {
-					facade = null; reactToRemoteAccessException();
+					facade.set(null); reactToRemoteAccessException();
 				}
 			}
 		};
@@ -182,14 +188,14 @@ public class OpenBISProcessor {
 				// Create also an IQueryApiFacade to access the reporting
 				// plugins on the server.
 				try {
-					queryFacade = FacadeFactory.create(openBISURL,
-						userName, userPassword);
+					queryFacade.set(FacadeFactory.create(openBISURL,
+						userName, userPassword));
 				} catch (UserFailureException e) {
-					queryFacade = null; reactToUserFailureException();
+					queryFacade.set(null); reactToUserFailureException();
 				} catch (RemoteConnectFailureException e) {
-					queryFacade = null; reactToRemoteConnectFailureException();
+					queryFacade.set(null); reactToRemoteConnectFailureException();
 				} catch (RemoteAccessException e) {
-					queryFacade = null; reactToRemoteAccessException();
+					queryFacade.set(null); reactToRemoteAccessException();
 				}
 
 			}
@@ -223,12 +229,14 @@ public class OpenBISProcessor {
 		} catch (InterruptedException e) {
 
 			// Thread interrupted
-			facade = null; queryFacade = null; reactToInterruptedException();
+			facade.set(null);
+			queryFacade.set(null);
+			reactToInterruptedException();
 			
 		}
 
 		// Set isLoggedIn to true
-		if (facade != null && queryFacade != null) {
+		if (facade.get() != null && queryFacade.get() != null) {
 			
 			// Successful login
 			isLoggedIn = true;
@@ -239,9 +247,9 @@ public class OpenBISProcessor {
 		} else {
 			
 			// Failed login. Inform
-			JOptionPane.showMessageDialog(null, loginErrorMessage,
-					loginErrorTitle, JOptionPane.ERROR_MESSAGE);
-			if (loginErrorRecoverable) {
+			JOptionPane.showMessageDialog(null, loginErrorMessage.get(),
+					loginErrorTitle.get(), JOptionPane.ERROR_MESSAGE);
+			if (loginErrorRecoverable.get()) {
 				
 				// We can retry. Make sure to reset user name and password
 				userName = "";
@@ -267,9 +275,9 @@ public class OpenBISProcessor {
 	 * @return true if logging out was successful, false otherwise.
 	 */
 	public boolean logout() throws RemoteAccessException {
-		if (facade != null && isLoggedIn && queryFacade != null) {
-			facade.logout();
-			queryFacade.logout();
+		if (facade.get() != null && isLoggedIn && queryFacade.get() != null) {
+			facade.get().logout();
+			queryFacade.get().logout();
 			isLoggedIn = false;
 			return true;
 		}
@@ -281,10 +289,10 @@ public class OpenBISProcessor {
 	 * @return list of Spaces.
 	 */
 	public List<SpaceWithProjectsAndRoleAssignments> getSpaces() {
-		if (facade == null) {
+		if (facade.get() == null) {
 			return new ArrayList<SpaceWithProjectsAndRoleAssignments>();
 		}
-		return facade.getSpacesWithProjects();
+		return facade.get().getSpacesWithProjects();
 	}			
 
 	/**
@@ -294,10 +302,11 @@ public class OpenBISProcessor {
 	 */
 	public ArrayList<Experiment> getExperimentsForProjects(
 			List<String> expId) {
-		if (facade == null) {
+		if (facade.get() == null) {
 			return new ArrayList<Experiment>();
 		}
-		return (ArrayList<Experiment>) facade.listExperimentsForProjects(expId);
+		return (ArrayList<Experiment>)
+				facade.get().listExperimentsForProjects(expId);
 	}			
 
 
@@ -310,7 +319,8 @@ public class OpenBISProcessor {
 		if (facade == null) {
 			return new ArrayList<Sample>();
 		}
-		return (ArrayList<Sample>) facade.listSamplesForExperiments(expId);
+		return (ArrayList<Sample>)
+				facade.get().listSamplesForExperiments(expId);
 	}			
 		
 	/**
@@ -329,7 +339,7 @@ public class OpenBISProcessor {
 
 		// Retrieve the create_project ingestion service from the server
 		List<AggregationServiceDescription> aggregationServices = 
-				queryFacade.listAggregationServices();
+				queryFacade.get().listAggregationServices();
 
 		// Go over all returned services and store a reference to the
 		// create_project ingestion plug-in.
@@ -383,7 +393,7 @@ public class OpenBISProcessor {
 		parameters.put("projectCode", projectCode.toUpperCase());
 		
 		QueryTableModel tableModel = 
-			queryFacade.createReportFromAggregationService(
+			queryFacade.get().createReportFromAggregationService(
 					createProjectService, parameters);
 		
 		return tableModel;
@@ -393,42 +403,42 @@ public class OpenBISProcessor {
 	 * React to a RemoteConnectFailure exception
 	 */
 	private void reactToRemoteConnectFailureException() {
-		loginErrorMessage = "Could not connect to openBIS.\n"
+		loginErrorMessage.set("Could not connect to openBIS.\n"
 				+ "Please try again later.\n\n"
-				+ "The application will now quit.";
-		loginErrorTitle = "Connection error";
-		loginErrorRecoverable = false;
+				+ "The application will now quit.");
+		loginErrorTitle.set("Connection error");
+		loginErrorRecoverable.set(false);
 	}
 
 	/**
 	 * React to a UserFailureException exception
 	 */
 	private void reactToUserFailureException() {
-		loginErrorMessage = "Login failed. Please try again.";
-		loginErrorTitle = "Authentication error";
-		loginErrorRecoverable = true;
+		loginErrorMessage.set("Login failed. Please try again.");
+		loginErrorTitle.set("Authentication error");
+		loginErrorRecoverable.set(true);
 	}
 
 	/**
 	 * React to a RemoteAccessException exception
 	 */
 	private void reactToRemoteAccessException() {
-		loginErrorMessage = "Could not connect to openBIS: "
+		loginErrorMessage.set("Could not connect to openBIS: "
 				+ "the server appears to be down.\n"
 				+ "Please try again later.\n\n"
-				+ "The application will now quit.";
-		loginErrorTitle = "Connection error";
-		loginErrorRecoverable = false;
+				+ "The application will now quit.");
+		loginErrorTitle.set("Connection error");
+		loginErrorRecoverable.set(false);
 	}
 	
 	/**
 	 * React to a InterruptedException exception
 	 */
 	private void reactToInterruptedException() {
-		loginErrorMessage = "Connection thread interrupted!\n\n" +
-				"The application will now quit.";
-		loginErrorTitle = "Thread interrupted";
-		loginErrorRecoverable = false;
+		loginErrorMessage.set("Connection thread interrupted!\n\n" +
+				"The application will now quit.");
+		loginErrorTitle.set("Thread interrupted");
+		loginErrorRecoverable.set(false);
         Thread.currentThread().interrupt();
 	}
 	
