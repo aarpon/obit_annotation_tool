@@ -38,8 +38,13 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	/* Protected instance variables */
 	private File folder;
 	private final String REGEX =
-			"^(.*?)((_Series|_s)(\\d.*?))?_z(\\d.*?)_ch(\\d.*?)\\.tif{1,2}$";
-					
+			"^(.*?)" +                    // Series basename: group 1
+			"((_Series|_s)(\\d.*?))?" +   // Series number (optional): group 4
+		    "(_t(\\d.*?))?" +             // Time index (optional): group 6
+		    "_z(\\d.*?)" +                // Plane number: group 7
+		    "_ch(\\d.*?)" +               // Channel number: group 8
+		    "\\.tif{1,2}$";               // File extension
+
 	private Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
     
 	private File metadataFolder; 
@@ -111,6 +116,9 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				}
 			}
 
+			// Current series metadata
+			HashMap<String, String> metadata;
+
 			// Extract the information
 			Matcher m = p.matcher(name);
 			if (m.find()) {
@@ -128,133 +136,123 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					return isValid;
 				}
 
-				try {
-
-					// TODO: Use this information
-					
-					// The series index is not always defined
-					int seriesNum = 0;
-
-					// Plane number (z)
-					int planeNum = Integer.parseInt(m.group(5));
-					
-					// Channel number
-					int channelNum = Integer.parseInt(m.group(6));
-					
-					if (m.group(2) != null) {
-						
-						// Get the series number
-						seriesNum = Integer.parseInt(m.group(4));
-						
-						// Build the key
-						String key = "series_" + seriesNum;
-						
-						// Current series metadata
-						HashMap<String, String> metadata;
-						
-						// Store the series index if not yet present
-						if (attr.containsKey(key)) {
-							
-							metadata = attr.get(key);
-							
-						} else {
-							
-							// Create a new SeriesMetadata object 
-							metadata = new HashMap<String, String>();
-							
-							// And add it to the arribute map
-							attr.put(key, metadata);
-						
-							// Read the file
-							if (reader == null) {
-								
-								// Initialize the reader
-								reader = new ImageProcessorReader(
-										new ChannelSeparator(
-										LociPrefs.makeImageReader()));
-							}
-							
-							// Try to open the image file
-							try {
-								reader.setId(file.getCanonicalPath());
-							} catch (FormatException e) {
-								reader = null;
-							} catch (IOException e) {
-								reader = null;
-							}
-
-							// Store width and height
-							int width = 0;
-							int heigth = 0;
-							String datatype = "Unknown";
-							if (reader != null) {
-
-								// Get width
-								width = reader.getSizeX();
-								
-								// Get heigth
-								heigth = reader.getSizeY();
-
-								// Get datatype
-								datatype = getDataType();
-								
-								// Now close the file
-								try {
-									reader.close();
-								} catch (IOException e) {
-									// Report
-									System.err.println("Could not close file!");
-								}
-
-							}
-							
-							// Store the extracted values 
-							metadata.put("sizeX", Integer.toString(width));
-							metadata.put("sizeY", Integer.toString(heigth));
-							metadata.put("datatype", datatype);
-							
-							// Store default values. These should be replaced
-							// with information extracted from the properties XML
-							// file in the Metadata folder.
-							metadata.put("voxelX", "1.0");
-							metadata.put("voxelY", "1.0");
-							metadata.put("voxelZ", "1.0");
-							
-						}
-
-						// Update the metadata object
-						int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
-						if ((planeNum + 1) > numPlanes) {
-							metadata.put("sizeZ", Integer.toString(planeNum + 1));
-						}
-
-						int numChannels = getMetadataValueOrZero(metadata, "sizeC");
-						if ((channelNum + 1) > numChannels) {
-							metadata.put("sizeC", Integer.toString(channelNum + 1));
-						}
-						
-						// TODO: Add time
-						int TimeNum = 0;
-						int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
-						if ((TimeNum + 1) > numTimepoints) {
-							metadata.put("sizeT", Integer.toString(TimeNum + 1));
-						}
-							
-					}
-
-				} catch (NumberFormatException n) {
-					isValid = false;
-					errorMessage = "Unexpected file name structure.";
-					return isValid;
+				//
+				// Extract index information from the file name structure
+				//
+				
+				// The series index is not always defined
+				int seriesNum = 0;
+				if (m.group(2) != null) {
+					seriesNum = Integer.parseInt(m.group(4));
 				}
 
-			} else {
+				// The time number is not always defined
+				int TimeNum = 0;
+				if (m.group(5) != null) {
+					TimeNum = Integer.parseInt(m.group(6));
+				}
 
-				// This should not happen -- unless there is an unexpected issue with
-				// the regular expressions
-				isValid = false;
-				errorMessage = "Unexpected error.";
-				return isValid;
+				// Plane number (z)
+				int planeNum = Integer.parseInt(m.group(7));
+				
+				// Channel number
+				int channelNum = Integer.parseInt(m.group(8));
+					
+				// Build the key
+				String key = "series_" + seriesNum;
+
+				// Store the series index if not yet present
+				if (attr.containsKey(key)) {
+					
+					metadata = attr.get(key);
+					
+				} else {
+						
+					// Create a new SeriesMetadata object 
+					metadata = new HashMap<String, String>();
+						
+					// And add it to the arribute map
+					attr.put(key, metadata);
+						
+					// Read the file
+					if (reader == null) {
+							
+						// Initialize the reader
+						reader = new ImageProcessorReader(
+								new ChannelSeparator(
+										LociPrefs.makeImageReader()));
+					}
+						
+					// Try to open the image file
+					try {
+						reader.setId(file.getCanonicalPath());
+					} catch (FormatException e) {
+						reader = null;
+					} catch (IOException e) {
+						reader = null;
+					}
+
+					// Store width and height
+					int width = 0;
+					int heigth = 0;
+					String datatype = "Unknown";
+					if (reader != null) {
+
+						// Get width
+						width = reader.getSizeX();
+							
+						// Get heigth
+						heigth = reader.getSizeY();
+
+						// Get datatype
+						datatype = getDataType();
+							
+						// Now close the file
+						try {
+							reader.close();
+						} catch (IOException e) {
+							// Report
+							System.err.println("Could not close file!");
+						}
+
+					}
+						
+					// Store the extracted values 
+					metadata.put("sizeX", Integer.toString(width));
+					metadata.put("sizeY", Integer.toString(heigth));
+					metadata.put("datatype", datatype);
+						
+					// Store default values. These should be replaced
+					// with information extracted from the properties XML
+					// file in the Metadata folder.
+					metadata.put("voxelX", "1.0");
+					metadata.put("voxelY", "1.0");
+					metadata.put("voxelZ", "1.0");
+						
+					// TODO: Get wavelengths from metadata
+					
+					// TODO: Get acquisition time from metadata
+					metadata.put("acquisitionDate", "NaN");
+					
+						
+				}
+					
+				// Update the metadata object
+				int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
+				if ((planeNum + 1) > numPlanes) {
+					metadata.put("sizeZ", Integer.toString(planeNum + 1));
+				}
+
+				int numChannels = getMetadataValueOrZero(metadata, "sizeC");
+				if ((channelNum + 1) > numChannels) {
+					metadata.put("sizeC", Integer.toString(channelNum + 1));
+				}
+						
+				int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
+				if ((TimeNum + 1) > numTimepoints) {
+					metadata.put("sizeT", Integer.toString(TimeNum + 1));
+				}
+							
 			}
 
 		}
