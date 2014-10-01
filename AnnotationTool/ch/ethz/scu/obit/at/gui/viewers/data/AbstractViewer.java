@@ -546,17 +546,19 @@ abstract public class AbstractViewer extends Observable
 	protected void clearTree() {
 
 		// Is there already something in the tree?
-		if (tree != null) {
-			TreeModel model = tree.getModel();
-			if (model != null) {
-				DefaultMutableTreeNode rootNode = 
-						(DefaultMutableTreeNode) model.getRoot();
-				if (rootNode != null) {
-					rootNode.removeAllChildren();
-					((DefaultTreeModel) model).reload();
-					rootNode = null;
-					System.gc();
-				}
+		if (tree == null) {
+			return;
+		}
+		
+		// Clear the tree model
+		TreeModel model = tree.getModel();
+		if (model != null) {
+			DefaultMutableTreeNode rootNode =
+					(DefaultMutableTreeNode) model.getRoot();
+			if (rootNode != null) {
+				rootNode.removeAllChildren();
+				((DefaultTreeModel) model).reload();
+				rootNode = null;
 			}
 		}
 
