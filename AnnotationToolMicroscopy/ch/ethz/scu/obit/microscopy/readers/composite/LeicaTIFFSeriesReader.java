@@ -253,6 +253,13 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					metadata.put("sizeT", Integer.toString(TimeNum + 1));
 				}
 							
+			} else {
+				
+				// Found an unexpected file
+				isValid = false;
+				errorMessage = "Unexpected file name found.";
+				return isValid;
+
 			}
 
 		}
@@ -260,6 +267,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		// Now scan the Metadata folder
 		// (when all files have been processed already!)
 		if (!scanMetadataFolder()) {
+			errorMessage = "Could not process Metadata folder.";
 			isValid = false;
 			return isValid;
 		}
