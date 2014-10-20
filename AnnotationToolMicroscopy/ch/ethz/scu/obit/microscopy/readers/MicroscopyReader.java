@@ -23,7 +23,6 @@ import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
 import ome.xml.model.primitives.Color;
 import ome.xml.model.primitives.PositiveFloat;
-import ome.xml.model.primitives.PositiveInteger;
 import ome.xml.model.primitives.Timestamp;
 import ch.ethz.scu.obit.readers.AbstractReader;
 
@@ -520,7 +519,7 @@ public class MicroscopyReader extends AbstractReader {
 		double[] exWavelengths = new double[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			PositiveInteger pEx =
+			PositiveFloat pEx =
 					omexmlMeta.getChannelExcitationWavelength(seriesNum, i);
 		    double ex;
 			if (pEx != null) {
@@ -547,7 +546,7 @@ public class MicroscopyReader extends AbstractReader {
 		double[] emWavelengths = new double[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			PositiveInteger pEm =
+			PositiveFloat pEm =
 					omexmlMeta.getChannelEmissionWavelength(seriesNum, i);
 		    double em;
 			if (pEm != null) {
