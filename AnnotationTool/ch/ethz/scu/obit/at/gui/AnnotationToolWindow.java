@@ -45,7 +45,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 	public AnnotationToolWindow() {
 
 		// Call the frame's constructor
-		super("openBIS Importer Toolset :: Annotation Tool v" +
+		super("openBIS Importer Toolset (oBIT) :: Annotation Tool v" +
 		VersionInfo.version + " " + VersionInfo.status);
 
 		// We instantiate the OutputPane so we can start logging to it

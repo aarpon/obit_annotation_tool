@@ -1,7 +1,6 @@
 package ch.ethz.scu.obit.atadmin.gui.dialogs;
 
 import javax.swing.*;
-
 import ch.ethz.scu.obit.common.settings.AppSettingsManager;
 import ch.ethz.scu.obit.common.version.VersionInfo;
 
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -54,7 +54,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		arrow = Character.toString('\u25CF') + " ";
 		
 		// Set the dialog title
-		setTitle("openBIS Importer Toolset :: Annotation Tool Admin v" +
+		setTitle("openBIS Importer Toolset (oBIT) :: Annotation Tool Admin v" +
 		VersionInfo.version + " " + VersionInfo.status);
 
 		// Read the properties
@@ -68,15 +68,24 @@ public class AnnotationToolAdminDialog extends JDialog {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);
 
-		// Common constraints
+		// Create constraints
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		constraints.fill = GridBagConstraints.BOTH;
-		
+
+		// Add a label for the copyright info
+		JLabel labelInfo = new JLabel(VersionInfo.copyright);
+		Font f = labelInfo.getFont();
+		labelInfo.setFont(new Font(f.getFontName(), f.getStyle(), 9));
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.insets = new Insets(3, 3, 5, 0);
+		add(labelInfo, constraints);
+
 		// Add a label for the selection of the openBIS URL
 		urlLabel = new JLabel(arrow + "Set the openBIS URL");
 		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.gridy = 1;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
@@ -117,7 +126,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
         constraints.gridx = 0;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         constraints.gridwidth = 15;
         constraints.gridheight = 1;     
         constraints.weightx = 0.9;
@@ -168,7 +177,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
         constraints.gridx = 15;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;     
         constraints.weightx = 0.05;
@@ -217,7 +226,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
         constraints.gridx = 16;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;     
         constraints.weightx = 0.05;
@@ -254,7 +263,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
         constraints.gridx = 17;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;     
         constraints.weightx = 0.05;
@@ -280,7 +289,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
         constraints.gridx = 18;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;     
         constraints.weightx = 0.05;
@@ -306,7 +315,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
         constraints.gridx = 19;
-        constraints.gridy = 1;
+        constraints.gridy = 2;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;     
         constraints.weightx = 0.05;
@@ -320,7 +329,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel certLabel = new JLabel(arrow + "Accept self-signed SSL "
 				+ "certificates when logging in to openBIS");
 		constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = 3;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
@@ -383,7 +392,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		constraints.gridx = 0;
-		constraints.gridy = 3;
+		constraints.gridy = 4;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
@@ -394,7 +403,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel acqLabel = new JLabel(arrow + 
 				"Select the acquisition station or type");
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = 5;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
@@ -466,7 +475,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		constraints.gridx = 0;
-		constraints.gridy = 5;
+		constraints.gridy = 6;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -478,7 +487,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 				manager.getAcqStationDescription(
 						manager.getSettingValue("AcquisitionStation")));
 		constraints.gridx = 0;
-		constraints.gridy = 6;
+		constraints.gridy = 7;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -489,7 +498,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Add a label for the user directory
 		JLabel userdirLabel = new JLabel(arrow + "Set user data directory");
 		constraints.gridx = 0;
-		constraints.gridy = 7;
+		constraints.gridy = 8;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -544,7 +553,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });		
 		constraints.gridx = 0;
-		constraints.gridy = 8;
+		constraints.gridy = 9;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -556,7 +565,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel dirLabel = new JLabel(arrow + 
 				"Set Datamover incoming directory");
 		constraints.gridx = 0;
-		constraints.gridy = 9;
+		constraints.gridy = 10;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -611,7 +620,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });		
 		constraints.gridx = 0;
-		constraints.gridy = 10;
+		constraints.gridy = 11;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -624,7 +633,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 				"<html>It is <u>highly recommended</u> to set " +
 		"both folders on the same file system.</html>");
 		constraints.gridx = 0;
-		constraints.gridy = 11;
+		constraints.gridy = 12;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -635,7 +644,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Some spacer
 		JLabel spacerLabel = new JLabel("");
 		constraints.gridx = 0;
-		constraints.gridy = 12;
+		constraints.gridy = 13;
 		constraints.gridwidth = 4;
 		constraints.gridheight = 1;		
 		constraints.weightx = 0.5;
@@ -683,7 +692,7 @@ public class AnnotationToolAdminDialog extends JDialog {
           }
         });
 		constraints.gridx = 16;
-		constraints.gridy = 12;
+		constraints.gridy = 13;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;		
 		constraints.weightx = 0.1;
@@ -702,7 +711,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		constraints.gridx = 18;
-		constraints.gridy = 12;
+		constraints.gridy = 13;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;			
 		constraints.weightx = 0.1;

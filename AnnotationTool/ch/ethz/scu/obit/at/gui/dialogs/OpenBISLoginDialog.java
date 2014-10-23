@@ -1,6 +1,7 @@
 package ch.ethz.scu.obit.at.gui.dialogs;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -23,6 +24,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import ch.ethz.scu.obit.common.settings.AppSettingsManager;
+import ch.ethz.scu.obit.common.version.VersionInfo;
 
 /**
  * openBIS login dialog
@@ -103,7 +105,7 @@ public class OpenBISLoginDialog extends JDialog {
 			add(serverMenu, serverMenuCnstr);
 		}
 		
-		// Add the SCU OpenBIS logo at the top
+		// Add the oBIT and OpenBIS logo at the top
 		JLabel labelLogo = new JLabel(new ImageIcon(
 				this.getClass().getResource("logo.png")));
 		GridBagConstraints logoConstraints = new GridBagConstraints();
@@ -111,7 +113,22 @@ public class OpenBISLoginDialog extends JDialog {
 		logoConstraints.gridx = 0;
 		logoConstraints.gridy = gridY++;
 		add(labelLogo, logoConstraints);
-		
+
+		// Add a label for the copyright info
+		JLabel labelInfo = new JLabel(VersionInfo.copyright);
+		labelInfo.setOpaque(true);
+		labelInfo.setBackground(Color.white);
+		labelInfo.setHorizontalAlignment(SwingConstants.CENTER);
+		labelInfo.setBorder(new EmptyBorder(3, 3, 0, 0));
+		Font f = labelInfo.getFont();
+		labelInfo.setFont(new Font(f.getFontName(), f.getStyle(), 9));
+		GridBagConstraints infoCnstr = new GridBagConstraints();
+		infoCnstr.gridx = 0;
+		infoCnstr.gridy = gridY++;
+		infoCnstr.insets = new Insets(0, 0, 0, 0);
+		infoCnstr.fill = GridBagConstraints.HORIZONTAL;
+		add(labelInfo, infoCnstr);
+	
 		// Add a label for the user name
 		JLabel labelUsername = new JLabel("User name");
 		GridBagConstraints usernameCnstr = new GridBagConstraints();
