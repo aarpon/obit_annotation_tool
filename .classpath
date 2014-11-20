@@ -5,7 +5,6 @@
 	<classpathentry kind="src" path="AnnotationToolCommon"/>
 	<classpathentry kind="src" path="AnnotationToolBDFACSDIVAFCS"/>
 	<classpathentry kind="src" path="AnnotationToolMicroscopy"/>
-	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/dss_client/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cisd-args4j.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cisd-base.jar"/>
@@ -28,8 +27,9 @@
 	<classpathentry kind="lib" path="lib/dss_client/stream-supporting-httpinvoker.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S183.0-r31737.jar"/>
+	<classpathentry kind="lib" path="lib/bioformats_package.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-15.xx.x-r32743.jar"/>
+	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/loci_tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

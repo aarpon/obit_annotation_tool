@@ -20,10 +20,12 @@ import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
+import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyCompositeFileNode;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileSeriesNode;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
+import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFileSeries;
 
@@ -33,8 +35,9 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Microscop
  */
 public final class MicroscopyViewer extends AbstractViewer implements TreeWillExpandListener {
 
-	MicroscopyProcessor microscopyProcessor;
-
+	private MicroscopyProcessor microscopyProcessor;
+	
+	
 	/**
 	 * Constructor
 	 */
@@ -71,6 +74,12 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 		}
 		lastSelectedNode = node;
 
+		// Flag: broadcast project change
+		boolean broadcastMicroscopyFileChange = false;
+		
+		// Keep track of the selected microscopy file node
+		AbstractNode fileNode = null;
+		
 		// Get the node object
 		Object nodeInfo = node.getUserObject();
 
@@ -83,30 +92,73 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			addAttributesToMetadataTable(
 					((MicroscopyProcessor.MicroscopyFile) 
 							nodeInfo).getAttributes());
+			
+			// Store reference to the node
+			fileNode = (AbstractNode) node;
+				
+			// A project change must be broadcast
+			broadcastMicroscopyFileChange = true;
+
+		} else if (className.equals("MicroscopyCompositeFile")) {
+			clearMetadataTable();
+			addAttributesToMetadataTable(
+					((MicroscopyProcessor.MicroscopyCompositeFile) 
+							nodeInfo).getAttributes());
+			
+			// Store reference to the node
+			fileNode = (AbstractNode) node;
+				
+			// A project change must be broadcast
+			broadcastMicroscopyFileChange = true;
+
 		} else if (className.equals("MicroscopyFileSeries")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
 					((MicroscopyProcessor.MicroscopyFileSeries) 
 							nodeInfo).getAttributes());
+			
+			// Which file is it? The parent can be either a MicroscopyFile or
+			// a MicroscopyCompsiteFile
+			fileNode = (AbstractNode)
+					getParentNodeByName(node, "MicroscopyFile");
+			if (fileNode == null) {
+				fileNode = (AbstractNode)
+						getParentNodeByName(node, "MicroscopyCompositeFile");
+			}
+			
+			// A project change must be broadcast
+			broadcastMicroscopyFileChange = true;
+			
 		} else {
 			clearMetadataTable();
 		}
 
-        // Get the folder name
-        AbstractNode folderNode = getParentNodeByName(node, "Experiment");
-        if (folderNode != null && folderNode != lastSelectedExperiment) {
-        		
-        		// Update the lastSelectedFolder property
-        		lastSelectedExperiment = folderNode;
+        // Get the Experiment name
+        AbstractNode expNode = getParentNodeByName(node, "Experiment");
+        if (expNode != null) {
         		
             // Notify the editor to update its view
 			synchronized (this) {
 				setChanged();
 				notifyObservers(new ObserverActionParameters(
 						ObserverActionParameters.Action.EXPERIMENT_CHANGED,
-						folderNode));
+						expNode));
 			}
         }
+        
+        // Should the file editing elements be updated?
+        if (broadcastMicroscopyFileChange) {
+        	
+        	// Notify the change of file
+			synchronized (this) {
+				setChanged();
+				notifyObservers(new ObserverActionParameters(
+						ObserverActionParameters.Action.FILE_CHANGED,
+						fileNode));
+			}
+
+        }
+       
 	}
 
 	/**
@@ -171,6 +223,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 		ExperimentNode experimentNode;
 		MicroscopyFileNode microscopyFileNode;
+		MicroscopyCompositeFileNode microscopyCompositeFileNode;
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
@@ -194,10 +247,10 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 				// If files have been expanded already and there are series, 
 				// add them too.
-				for (String key: microscopyFile.series.keySet()) {
+				for (String key: microscopyFile.getSeries().keySet()) {
 
 					// Get the miroscopy file descriptor
-					MicroscopyFileSeries s = microscopyFile.series.get(key);
+					MicroscopyFileSeries s = microscopyFile.getSeries().get(key);
 					
 					// Add the MicroscopyFileSeries
 					microscopyFileNode.add(new MicroscopyFileSeriesNode(s));
@@ -205,6 +258,32 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 			
 			}
 			
+			// Add its composite files
+			for (String microscopyCompositeKey: e.microscopyCompositeFiles.keySet()) {
+
+				// Get the microscopy file descriptor
+				MicroscopyCompositeFile microscopyCompositeFile = 
+						e.microscopyCompositeFiles.get(microscopyCompositeKey);
+				
+				// Add the MicroscopyCompositeFile
+				microscopyCompositeFileNode = new MicroscopyCompositeFileNode(microscopyCompositeFile);
+				experimentNode.add(microscopyCompositeFileNode);
+				
+				// Add the MicroscopyFileSeries
+				Map<String, MicroscopyFileSeries> series =
+						microscopyCompositeFile.getSeries();
+				for (String key : series.keySet()) {
+
+					// Get the miroscopy file descriptor
+					MicroscopyFileSeries s = series.get(key);
+					
+					// Add the MicroscopyFileSeries
+					microscopyCompositeFileNode.add(new MicroscopyFileSeriesNode(s));
+
+				}
+			
+			}
+
 		}
 	}
 
@@ -363,9 +442,9 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 					DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 					
 					// Add all series to the tree
-					for (String key : m.series.keySet()) {
+					for (String key : m.getSeries().keySet()) {
 
-						MicroscopyFileSeries s = m.series.get(key);
+						MicroscopyFileSeries s = m.getSeries().get(key);
 						model.insertNodeInto(new MicroscopyFileSeriesNode(s),
 								n, n.getChildCount());
 					}
