@@ -9,7 +9,7 @@
 <stringAttribute key="log.level" value=""/>
 <booleanAttribute key="log.overwrite" value="true"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/obit_annotation_tool/AnnotationTool/ch/eth/scu/importer/at/AnnotationTool.java"/>
+<listEntry value="/obit_annotation_tool/AnnotationTool/ch/ethz/scu/obit/at/AnnotationTool.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
