@@ -30,6 +30,6 @@
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/bioformats_package.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S190.0-r32566.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-15.xx.x-r32743.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
