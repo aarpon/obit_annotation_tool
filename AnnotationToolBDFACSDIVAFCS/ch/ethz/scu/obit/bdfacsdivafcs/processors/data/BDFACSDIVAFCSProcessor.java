@@ -2,6 +2,7 @@ package ch.ethz.scu.obit.bdfacsdivafcs.processors.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
+	private List<File> attachments = new ArrayList<File>();
 
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
@@ -163,7 +165,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		public Map<String, Specimen> specimens = 
 				new LinkedHashMap<String, Specimen>();
-
+		
 		/**
 		 * Constructor
 		 * @param fullPath Full path of the experiment.
@@ -209,8 +211,50 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Experiment";
 		}
+		
+		/**
+		 * Add the relative file paths of attachments to the attributes.
+		 * @param attachments List of File objects
+		 * @return true if the attachments could be added; false otherwise.
+		 */
+		public boolean setAttachments(List<File> attachments) {
+			
+			// Create attachment string
+			String attachmentAttr = "";
+			
+			// Make sure the relative path is correct
+			for (File f: attachments) {
+				
+				if (f.getAbsolutePath().startsWith(fullPath.getAbsolutePath())) {
+				
+					// Check that the attachment is contained in the Experiment
+					String filePath = f.getAbsolutePath().replace("\\", "/");
+					int indx = filePath.lastIndexOf(
+							relativePath.replace("\\", "/"));
+					if (indx == -1) { 
+						return false;
+					}
+					
+					// Append the relative attachment path to the semicolon-
+					// separated path string
+					String relAttachmentPath = filePath.substring(indx); 
+					if (attachmentAttr.equals("")) {
+						attachmentAttr = relAttachmentPath;
+					} else {
+						attachmentAttr += ";" + relAttachmentPath; 
+					}
+					
+				}
+			}
+			
+			// Store the attachments as attributes
+			attributes.put("attachments", attachmentAttr);
+			
+			// Return success
+			return true;
+		}
 
-	}
+	} 
 
 
 	/**
@@ -478,6 +522,14 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				continue;
 			}
 
+			// Check whether the file is a valid attachment
+			if (ext.equalsIgnoreCase(".pdf")) {
+
+				// Add the file to the list of attachments
+				attachments.add(file);
+				continue;
+			}			
+			
 			// Check whether we find a data_structure.ois file. This 
 			// means that the whole folder has apparently been annotated
 			// already, but for some unknown reason it has not been
@@ -546,6 +598,18 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				// Store attributes
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentPath, expDesc);
+				
+				// Store attachments
+				if (! attachments.isEmpty()) {
+					if (expDesc.setAttachments(attachments)) {
+						attachments.clear();
+					} else {
+						validator.isValid = false;
+						validator.invalidFilesOrFolders.put(file,
+								"Could not assign attachments to esperiment!");
+						continue;
+					}
+				}
 			}
 
 			// Is the container a Tray or Specimen?
