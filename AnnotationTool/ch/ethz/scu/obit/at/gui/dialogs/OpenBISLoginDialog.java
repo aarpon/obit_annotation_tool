@@ -115,7 +115,9 @@ public class OpenBISLoginDialog extends JDialog {
 		add(labelLogo, logoConstraints);
 
 		// Add a label for the copyright info
-		JLabel labelInfo = new JLabel(VersionInfo.copyright);
+		JLabel labelInfo = new JLabel(
+				"Version " + VersionInfo.version + ". " +
+						VersionInfo.copyright);
 		labelInfo.setOpaque(true);
 		labelInfo.setBackground(Color.white);
 		labelInfo.setHorizontalAlignment(SwingConstants.CENTER);
