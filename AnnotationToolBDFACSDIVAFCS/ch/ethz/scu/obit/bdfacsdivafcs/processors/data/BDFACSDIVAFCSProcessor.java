@@ -115,7 +115,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	public String getType() {
 		return "BDFACSDIVAFCS";
 	}	
-
+	
 	/**
 	 * Descriptor that represents a the user top folder. 
 	 * @author Aaron Ponti
@@ -466,6 +466,28 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
+	 * Checks whether the passed file can be attached.
+	 * @param file File to be checked.
+	 * @return always false! The classes that inherit from AbstractProcessor 
+	 * (and support attachments) should override this method. 
+	 */
+	protected boolean isValidAttachment(File file) {
+		String fileName = file.getName();
+		int indx = fileName.lastIndexOf(".");
+		if (indx == -1) {
+			return false;
+		}
+		String ext = fileName.substring(indx);
+
+		// Check whether the file is a valid attachment
+		if (ext.equalsIgnoreCase(".pdf")) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
 	 * Scan the folder recursively and process all fcs files found
 	 * @param dir Full path to the directory to scan
 	 * @throws IOException Thrown if a FCS file could not be processed
@@ -523,7 +545,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 
 			// Check whether the file is a valid attachment
-			if (ext.equalsIgnoreCase(".pdf")) {
+			if (isValidAttachment(file)) {
 
 				// Add the file to the list of attachments
 				attachments.add(file);
