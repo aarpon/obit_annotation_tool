@@ -94,8 +94,7 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	}
 
 	/**
-	 * Computes and store the folder path relative to the Datamover 
-	 * incoming folder.
+	 * Computes and store the folder path relative to the base path.
      */
 	private void computeAndStoreRelativePath() {
 		String basePathStr = "";
