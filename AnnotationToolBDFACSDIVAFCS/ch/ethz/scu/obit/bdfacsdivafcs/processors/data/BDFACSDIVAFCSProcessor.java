@@ -620,17 +620,17 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				// Store attributes
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentPath, expDesc);
-				
-				// Store attachments
-				if (! attachments.isEmpty()) {
-					if (expDesc.setAttachments(attachments)) {
-						attachments.clear();
-					} else {
-						validator.isValid = false;
-						validator.invalidFilesOrFolders.put(file,
-								"Could not assign attachments to esperiment!");
-						continue;
-					}
+			}
+
+			// Store attachments
+			if (! attachments.isEmpty()) {
+				if (expDesc.setAttachments(attachments)) {
+					attachments.clear();
+				} else {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"Could not assign attachments to esperiment!");
+					continue;
 				}
 			}
 
