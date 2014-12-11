@@ -36,8 +36,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
-	private List<File> attachments = new ArrayList<File>();
+	private Experiment currentExperiment;
 
+	/* List of accepted attachment file extensions */
+	private final String[] validAttachmentExtensions = 
+		{".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"};
+	
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
 
@@ -213,38 +217,40 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 		
 		/**
-		 * Add the relative file paths of attachments to the attributes.
-		 * @param attachments List of File objects
-		 * @return true if the attachments could be added; false otherwise.
+		 * Add the relative file path of the attachment to the attributes.
+		 * @param attachment A file object.
+		 * @return true if the attachment could be added; false otherwise.
 		 */
-		public boolean setAttachments(List<File> attachments) {
+		public boolean addAttachment(File attachment) {
 			
 			// Create attachment string
 			String attachmentAttr = "";
 			
-			// Make sure the relative path is correct
-			for (File f: attachments) {
+			// Get current attachments
+			if (attributes.containsKey("attachments")) {
+				attachmentAttr = attributes.get("attachments");
+			}
+			
+			// Build the attachment string
+			if (attachment.getAbsolutePath().startsWith(fullPath.getAbsolutePath())) {
 				
-				if (f.getAbsolutePath().startsWith(fullPath.getAbsolutePath())) {
-				
-					// Check that the attachment is contained in the Experiment
-					String filePath = f.getAbsolutePath().replace("\\", "/");
-					int indx = filePath.lastIndexOf(
-							relativePath.replace("\\", "/"));
-					if (indx == -1) { 
-						return false;
-					}
-					
-					// Append the relative attachment path to the semicolon-
-					// separated path string
-					String relAttachmentPath = filePath.substring(indx); 
-					if (attachmentAttr.equals("")) {
-						attachmentAttr = relAttachmentPath;
-					} else {
-						attachmentAttr += ";" + relAttachmentPath; 
-					}
-					
+				// Check that the attachment is contained in the Experiment
+				String filePath = attachment.getAbsolutePath().replace("\\", "/");
+				int indx = filePath.lastIndexOf(
+						relativePath.replace("\\", "/"));
+				if (indx == -1) {
+					return false;
 				}
+					
+				// Append the relative attachment path to the semicolon-
+				// separated path string
+				String relAttachmentPath = filePath.substring(indx); 
+				if (attachmentAttr.equals("")) {
+					attachmentAttr = relAttachmentPath;
+				} else {
+					attachmentAttr += ";" + relAttachmentPath; 
+				}
+					
 			}
 			
 			// Store the attachments as attributes
@@ -472,19 +478,18 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * (and support attachments) should override this method. 
 	 */
 	protected boolean isValidAttachment(File file) {
+
+		// Extract the file extension (lower case)
 		String fileName = file.getName();
 		int indx = fileName.lastIndexOf(".");
 		if (indx == -1) {
 			return false;
 		}
-		String ext = fileName.substring(indx);
+		String ext = fileName.substring(indx).toLowerCase();
 
 		// Check whether the file is a valid attachment
-		if (ext.equalsIgnoreCase(".pdf")) {
-			return true;
-		}
-		
-		return false;
+		return Arrays.asList(validAttachmentExtensions).contains(ext);
+
 	}
 
 	/**
@@ -494,8 +499,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	private void recursiveDir(File dir) throws IOException {
 	
-		// Get the directory listing
-		String [] files = dir.list();
+		// To make things simple and robust, we make sure that the first
+		// thing we process at any sub-folder level is an FCS file.
+		String [] files = getSimplySortedList(dir);
 		
 		// Empty subfolders are not accepted
 		if (files.length == 0 && !dir.equals(this.userFolder)) {
@@ -520,6 +526,14 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				continue;
 			}
 
+			// No files are allowed in the root
+			if (dir.equals(this.userFolder)) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						file, "Files must be in sub-folders.");
+				return;
+			}
+			
 			// Delete some known garbage
 			if (deleteIfKnownUselessFile(file)) {
 				continue;
@@ -547,8 +561,24 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			// Check whether the file is a valid attachment
 			if (isValidAttachment(file)) {
 
-				// Add the file to the list of attachments
-				attachments.add(file);
+				// By design, when we find an attachment, the corresponding
+				// Experiment must exist
+				if (currentExperiment == null) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"This attachment does not seem to be assigned"
+							+ " to any experiment!");
+					continue;
+				}
+
+				// Attach the files
+				if (! currentExperiment.addAttachment(file)) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"Could not assign attachments to esperiment!");
+					continue;
+				}
+
 				continue;
 			}			
 			
@@ -579,23 +609,15 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			if (! ext.equalsIgnoreCase(".fcs")) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
-						file, "Unknown file format");
+						file, "Unsupported file format");
 				continue;
 			}
-
-			// An FCS file cannot be at the user folder root!
-			if (file.getParent().equals(this.userFolder.toString())) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						file, "File must be in subfolder.");
-				continue;
-			}
-			
+	
 			// Is it an FCS file? Scan it and extract the information
 			FCSReader processor = new FCSReader(file, false);
 			if (!processor.parse()) {
 				System.err.println("File " + file.getCanonicalPath() + 
-						" could not be parsed! It will be skipped.");
+						" could not be parsed!");
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
 						file, "Parsing failed");
@@ -603,7 +625,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 
 			// Create a new ExperimentDescriptor or reuse an existing one
-			Experiment expDesc;
+			Experiment expDesc = null;
 			String experimentName = getExperimentName(processor);
 			String experimentPath = getExperimentPath(processor, file);
 			if (experimentPath.equals("")) {
@@ -621,18 +643,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentPath, expDesc);
 			}
-
-			// Store attachments
-			if (! attachments.isEmpty()) {
-				if (expDesc.setAttachments(attachments)) {
-					attachments.clear();
-				} else {
-					validator.isValid = false;
-					validator.invalidFilesOrFolders.put(file,
-							"Could not assign attachments to esperiment!");
-					continue;
-				}
-			}
+            
+            // Keep track of current experiment
+            currentExperiment = expDesc;
 
 			// Is the container a Tray or Specimen?
 			if (identifyContainerType(processor).equals("TRAY")) {
@@ -712,6 +725,40 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	
 		}
 
+	}
+
+	/**
+	 * Make sure that the first entry in the file list is an FCS file,
+	 * if there is at least one. 
+	 * @param dir	Current directory
+	 * @param files Array of file (and folder) names at current level
+	 * @return String[] moderately sorted files.
+	 */
+	private String[] getSimplySortedList(File dir) {
+		
+		// Go over the list, the first FCS file we find we put it in front of
+		// the list and return.
+		String [] files = dir.list();
+		int foundIndx = -1;
+		for (int i = 0; i < files.length; i++) {
+			String fileName = files[i];
+			int indx = fileName.lastIndexOf(".");
+			if (indx == -1) {
+				continue;
+			}
+			String ext = fileName.substring(indx).toLowerCase();
+			if (ext.equals(".fcs")) {
+				foundIndx = i;
+				break;
+			}
+		}
+		// Swap the first entry with this one.
+		if (foundIndx > 0) {
+			String tmp = files[foundIndx];
+			files[foundIndx] = files[0];
+			files[0] = tmp;
+		}
+		return files;
 	}
 
 	/**
