@@ -123,7 +123,7 @@ class AppSettings {
 		
 		if (name.equals("BD Biosciences Cell Analyzers and Sorters")) {
 			return "BD LSRFortessa and FACSAria III "
-					+ "(FCS 3.0/3.1 exports from BD FACSDiva™ Software 6/7)";
+					+ "(FCS 3.0/3.1 exports from BD FACSDiva™ Software 6/7/8)";
 		} else if (name.equals("Generic light microscopes")) {
 			return "Generic light microscopes (LOCI bio-formats compatible)";
 		} else {
