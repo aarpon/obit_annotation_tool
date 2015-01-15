@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
@@ -11,6 +15,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -23,6 +28,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import ch.ethz.scu.obit.common.utils.QueryOS;
@@ -446,6 +452,7 @@ public class AppSettingsManager {
 		try {
 			Transformer t = 
 					TransformerFactory.newInstance().newTransformer();
+			t.setOutputProperty(OutputKeys.INDENT, "no");
 			OutputStream outputStream = new FileOutputStream(getSettingsFileName());
 			t.transform(new DOMSource(document), 
 					new StreamResult(outputStream));
@@ -586,11 +593,43 @@ public class AppSettingsManager {
 
 		// Read and parse the XML settings file
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		dbFactory.setIgnoringElementContentWhitespace(true);
 		DocumentBuilder dBuilder;
 		Document doc = null;
 		try {
 			dBuilder = dbFactory.newDocumentBuilder();
-			doc = dBuilder.parse(getSettingsFileName());
+						
+			// Read the file into a String. We need to do this because we MUST
+			// remove any line feeds and blank spaces bewteen XML tags or the
+			// DocumentBuilder will fail parsing the XML content.
+			// DocumentBuilderFactory.setIgnoringElementContentWhitespace(true)
+			// does not seem to help...
+			byte[] b = Files.readAllBytes(Paths.get(getSettingsFileName().toURI()));
+			String xmlString = new String(b, StandardCharsets.UTF_8); 
+			
+			// Make sure the String starts with <?xml
+			int indx = xmlString.indexOf("<?xml");
+			if (indx > 0) {
+				xmlString = xmlString.substring(indx);
+			}
+
+		    // Remove line endings
+		    if (QueryOS.isWindows()) {
+		    	xmlString = xmlString.replaceAll("\r\n", ""); 
+		    } else {
+		    	xmlString = xmlString.replaceAll("\n", ""); 
+		    }
+
+		    // Also, make sure that there are no spaces between elements
+		    xmlString = xmlString.replaceAll(">\\s*<", "><");
+		    		
+		    // Create an input source
+			InputSource is = new InputSource();
+		    is.setCharacterStream(new StringReader(xmlString));
+
+		    // Now parse it
+		    doc = dBuilder.parse(is);
+		    
 		} catch (ParserConfigurationException e) {
 			errorMessage = "Error parsing the settings file.";
 			return null;
