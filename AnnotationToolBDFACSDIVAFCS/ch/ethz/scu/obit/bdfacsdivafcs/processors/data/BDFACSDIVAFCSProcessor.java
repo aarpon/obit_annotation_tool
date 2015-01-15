@@ -2,7 +2,6 @@ package ch.ethz.scu.obit.bdfacsdivafcs.processors.data;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -902,6 +901,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			acqHardwareString = "BD LSR Fortessa";
 		} else if (acqHardwareString.equals("FACSAriaIII")) {
 			acqHardwareString = "BD FACSAria III";
+		} else if (acqHardwareString.equals("BD LSR Fortessa SORP (LSRII)")) {
+			acqHardwareString = "BD LSR Fortessa SORP (LSRII)";
 		} else {
 			validator.isValid = false;
 			validator.invalidFilesOrFolders.put(
@@ -933,7 +934,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					minor = Integer.parseInt(m.group(3));
 					// Known valid versions are 6.1 and 7.0
 					if (!((major == 6 && minor == 1) ||
-							(major == 7 && minor == 0))) {
+							(major == 7 && minor == 0) || 
+							(major == 8 && minor == 0))) {
 						validator.isValid = false;
 						validator.invalidFilesOrFolders.put(
 								processor.getFile(),
