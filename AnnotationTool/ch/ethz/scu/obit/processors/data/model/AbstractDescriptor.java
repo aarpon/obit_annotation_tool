@@ -2,6 +2,7 @@ package ch.ethz.scu.obit.processors.data.model;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Abstract class that represents an entity to be mapped to openBIS.
@@ -15,12 +16,25 @@ import java.util.Map;
  */
 abstract public class AbstractDescriptor {
 
+	// Used to filter the name of the Descriptor
+	static final Pattern p = Pattern.compile("[^a-zA-Z0-9\\-\\_]");
+	
 	/**
 	 * Name of the entity.
 	 * 
 	 * This is displayed in the viewers and in openBIS.
 	 */
 	private String name = "";
+	
+	/**
+	 * Code of the entity.
+	 * 
+	 * This is a filtered version of the name that can be used as an
+	 * openBIS code.
+	 * 
+	 */
+	private String code = "";
+	
 
 	/**
 	 * String-string map of data attribute key:value pair.
@@ -57,13 +71,22 @@ abstract public class AbstractDescriptor {
 	 * Return the name of the entity.
 	 * @return the name of the entity.
 	 */
+	public String getCode() { return code; }
+	
+	/**
+	 * Return the name of the entity.
+	 * @return the name of the entity.
+	 */
 	public String getName() { return name; }
 
 	/**
 	 * Set the name of the descriptor. 
 	 * @param name Name of the Descriptor. 
 	 */
-	public void setName(String name) { this.name = name; }
+	public void setName(String name) {
+		this.name = name;
+		setCode(name);
+	}
 
 	/**
 	 * Return a string representation of the entity.
@@ -145,4 +168,17 @@ abstract public class AbstractDescriptor {
 		String str = userAttributes.toString();
 		return str.substring(1, str.length() - 1);
 	}
+	
+	/**
+	 * Sets the code of the descriptor from the descriptor name.
+	 * Since the name is mapped to an openBIS entity and cannot contain
+	 * characters in the set: [^a-zA-Z0-9-_], this method cleans the 
+	 * passed string.
+	 * @param name Name of the Descriptor. 
+	 */
+	private void setCode(String name) {
+		String code = p.matcher(name).replaceAll("_");
+		this.code = code;
+	}
+	
 }

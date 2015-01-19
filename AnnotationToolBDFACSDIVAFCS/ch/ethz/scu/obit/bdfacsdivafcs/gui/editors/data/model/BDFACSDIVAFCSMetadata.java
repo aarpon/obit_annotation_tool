@@ -76,8 +76,8 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 	 */
 	public String getOpenBISExerimentIdentifier() {
 		String openBISProjectID = openBISProjectNode.getIdentifier();
-		String name = getExperimentName().replaceAll(" ", "_");
-		return (openBISProjectID + "/" + name).toUpperCase();
+		Experiment e = (Experiment) expNode.getUserObject();
+		return (openBISProjectID + "/" + e.getCode()).toUpperCase();
 	}
 	
 	/**
