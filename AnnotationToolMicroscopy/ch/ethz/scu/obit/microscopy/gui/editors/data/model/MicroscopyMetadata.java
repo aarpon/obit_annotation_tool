@@ -59,8 +59,8 @@ public final class MicroscopyMetadata extends AbstractMetadataMapper {
 	 */
 	public String getOpenBISExerimentIdentifier() {
 		String openBISProjectID = openBISProjectNode.getIdentifier();
-		String name = getExperimentName().replaceAll(" ", "_");
-		return (openBISProjectID + "/" + name).toUpperCase();
+		Experiment e = (Experiment) experimentNode.getUserObject();
+		return (openBISProjectID + "/" + e.getCode()).toUpperCase();
 	}
 	
 	/**
