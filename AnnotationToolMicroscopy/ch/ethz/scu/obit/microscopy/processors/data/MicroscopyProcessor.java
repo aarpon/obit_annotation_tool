@@ -469,13 +469,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 			// Append the attibute file size.
 			long s = microscopyFileName.length();
-			float sMB = s / (1024 * 1024);
-			String unit = "MiB";
-			if (sMB > 750) {
-				sMB = sMB / 1024;
-				unit = "GiB";
-			}
-			attributes.put("fileSize", String.format("%.2f", sMB) + " " + unit);
+			attributes.put("datasetSize", String.format("%d", s));
 
 			// Append the attribute relative file name. Since this
 			// will be used by the openBIS dropboxes running on a Unix
@@ -616,6 +610,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			seriesIndices = reader.getSeriesIndices();
 			String seriesIndicesStr = StringUtils.join(seriesIndices, ',');
 			attributes.put("seriesIndices", seriesIndicesStr);
+			
+			// Append the attibute file size.
+			long s = reader.totalDatasetSizeInBytes();
+			attributes.put("datasetSize", String.format("%d", s));
 			
 			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix

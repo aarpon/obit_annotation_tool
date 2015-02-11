@@ -123,6 +123,10 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 			Matcher m = p.matcher(name);
 			if (m.find()) {
 
+				// This is an image file. We add its size to the total size of
+				// the composite dataset.
+				totalDatasetSizeInBytes += file.length();
+
 				// Get base name
 				String currentBase = m.group(1);
 				if (basename.equals("")) {
