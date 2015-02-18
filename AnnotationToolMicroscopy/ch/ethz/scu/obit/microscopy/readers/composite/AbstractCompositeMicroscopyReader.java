@@ -24,6 +24,11 @@ import ch.ethz.scu.obit.readers.AbstractReader;
  */
 public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 
+	/** 
+	 * Total composite dataset file in bytes
+	 */
+	protected long totalDatasetSizeInBytes = 0;
+
 	/**
 	 * Metadata attributes
 	 */
@@ -62,10 +67,18 @@ public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 	
 	/**
 	 * Returns a list of indices for the series contained in the dataset
-	 * @return
+	 * @return list of series indices.
 	 */
 	abstract public List<Integer> getSeriesIndices();
 
+	/**
+	 * Returns total size in bytes for the composite dataset.
+	 * @return total dataset size in bytes.
+	 */
+	public long totalDatasetSizeInBytes() {
+		return totalDatasetSizeInBytes;
+	}
+	
 	/**
 	 * String-string map of data attribute key:value pair.
 	 * 

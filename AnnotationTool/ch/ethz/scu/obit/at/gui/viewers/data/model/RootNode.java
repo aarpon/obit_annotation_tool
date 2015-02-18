@@ -25,4 +25,10 @@ public class RootNode extends AbstractNode {
 	public String toString() {
 		return "/" + this.getUserObject().toString();
 	}
+	
+	/**
+	 * Return tooltip for the root node.
+	 */
+	@Override
+	public String getTooltip() { return "The root of your user folder."; }
 }

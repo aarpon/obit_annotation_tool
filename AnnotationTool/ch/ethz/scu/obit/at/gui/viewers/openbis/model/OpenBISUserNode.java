@@ -62,7 +62,7 @@ public class OpenBISUserNode extends AbstractOpenBISNode {
 	 */
 	@Override
 	public String getTooltip() {
-		return "Shows the user name when logged in.";
+		return "The virtual root of openBIS with all spaces you have access to.";
 	}
 
 	/**

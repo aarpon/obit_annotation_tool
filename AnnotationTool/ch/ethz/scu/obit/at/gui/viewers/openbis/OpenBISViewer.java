@@ -726,8 +726,16 @@ public class OpenBISViewer extends Observable
 		}
 
 		// Call the ingestion server and collect the output
-		QueryTableModel tableModel = openBISProcessor.createProject(
-				space.getCode(), projectCode);
+		QueryTableModel tableModel;
+		try {
+			tableModel = openBISProcessor.createProject(
+					space.getCode(), projectCode);
+		} catch (Exception e) {
+			outputPane.err("Could not create project /" + space.getCode() +
+					"/" + projectCode + "! Please contact your "
+					+ "openBIS administrator!");
+			return false;
+		}
 
 		// Display the output
 		String success= "";
