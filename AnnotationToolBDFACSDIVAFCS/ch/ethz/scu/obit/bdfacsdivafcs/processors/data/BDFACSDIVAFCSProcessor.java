@@ -630,8 +630,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			if (experimentPath.equals("")) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(file,
-						"Folder name does not match experiment name ("
-						+ experimentName + ").");
+						"Containing folder name does not match experiment "
+						+ "name (" + experimentName + ").");
 				continue;				
 			}
             if (folderDescriptor.experiments.containsKey(experimentPath)) {
