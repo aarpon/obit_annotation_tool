@@ -3,10 +3,10 @@ package ch.ethz.scu.obit.common.version;
 public class VersionInfo {
 
 	// Program version
-	public static final String version = "0.5.7";
+	public static final String version = "0.5.8";
 	
 	// Version status: "alpha", "beta", or "" for a stable release
-	public static final String status = "alpha";
+	public static final String status = "";
 
 	// Copyright string
 	public static final String copyright = "Copyright " +

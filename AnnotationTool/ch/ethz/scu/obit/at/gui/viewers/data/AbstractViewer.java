@@ -938,12 +938,22 @@ abstract public class AbstractViewer extends Observable
         int rowIndex = invalidDatasetsTable.getSelectedRow();
         if (rowIndex < 0)
             return;
+    	invalidDataset = new File((String)
+        		invalidDatasetsTable.getModel().getValueAt(
+        				rowIndex, 0));
+    	// Display popup...
         if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
-	        invalidDataset = new File((String)
-	        		invalidDatasetsTable.getModel().getValueAt(
-	        				rowIndex, 0));
         		JPopupMenu popup = createInvalidDatasetsPopup();
             popup.show(e.getComponent(), e.getX(), e.getY());
+            return;
+        }
+        // ... or log to output pane on double click.
+        if (e.getClickCount() == 2) {
+        	String errorMsg = (String)
+        			invalidDatasetsTable.getModel().getValueAt(
+    				rowIndex, 1);
+        	outputPane.log("File or folder '" + invalidDataset.getName() +
+        			"' is invalid for following reason: " + errorMsg);
         }
 	}
 }
