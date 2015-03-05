@@ -5,8 +5,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -17,9 +21,12 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -31,6 +38,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadata;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
@@ -70,6 +78,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 	private JComboBox<String> comboProjectList;
 	private JTextArea expDescription;
 	private JTextArea fileDescription;
+	private JTextArea expTags;
 	private JScrollPane areaFileScrollPane;
 	private JScrollPane areaExpScrollPane;
 	
@@ -141,6 +150,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", 
 					currentMetadata.getExperiment().description); 
+			expUserAttributes.put("tags", expDescr.tags); 
 			expDescr.addUserAttributes(expUserAttributes);
 
 			// Now get the MicroscopyFile children of the Experiment
@@ -309,7 +319,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 
 		// Use a variable y to keep track of the row number in the grid layout
-		int y = 0;
+		int gridy = 0;
 
 		/*
 		 *  Experiment name
@@ -322,35 +332,160 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		labelExpName = new JLabel(expName);
 		labelExpName.setIcon(experimentIcon);		
 		panel.add(labelExpName, constraints);
+
+		/*
+		 * Tags title
+		 */
+		
+		// Create a label for the experiment tags
+		constraints.insets = new Insets(0, 10, 5, 10);
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = gridy++;
+		JLabel labelExpTags = new JLabel("<html><u>Tags");
+		labelExpTags.setHorizontalAlignment(JLabel.CENTER);
+		panel.add(labelExpTags, constraints);
+		
+		/*
+		 * Tags
+		 */
+		
+		// Create a label for the experiment tags
+		constraints.insets = new Insets(0, 0, 0, 0);
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = gridy++;
+		expTags = new JTextArea("");
+		Font f = expTags.getFont();
+		expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
+		expTags.setEditable(false);
+		
+		// Add a context menu to clear the tags
+		expTags.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (QueryOS.isWindows()) {
+					return;
+				}
+				setListenerOnTagsTextArea(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (QueryOS.isMac()) {
+					return;
+				}
+				setListenerOnTagsTextArea(e);
+			}
+		});
+		
+		// Append a custom transfer handler
+		expTags.setTransferHandler(new TransferHandler() {
+			
+			private static final long serialVersionUID = 1L;
+
+			// Check if the transfer is valid
+			public boolean canImport(TransferHandler.TransferSupport info) {
+                
+				// We only import Strings
+                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                    return false;
+                }
+
+                // Can be imported
+                return true;
+            }
+
+			// Import and format the data
+            public boolean importData(TransferHandler.TransferSupport info) {
+                
+            	// Only if we are dropping something onto the field
+            	if (!info.isDrop()) {
+                    return false;
+                }
+                
+                // And only if it is a string flavor
+                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                    return false;
+                }
+
+                // Get and format the strings
+                Transferable t = info.getTransferable();
+                String data;
+                try {
+                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
+                    data = data.replaceAll("(\r\n|\n)", ", ");
+                } 
+                catch (Exception e) {
+                	return false;
+                }
+
+                // Create the complete list
+                String currentText = expTags.getText();
+                if (! currentText.equals("")) {
+                	data = currentText + ", " + data;
+                }
+
+                // Clean the tag list
+                data = cleanTagList(data);
+                
+                // Set the tag list
+                expTags.setText(data);
+
+                // Update the Experiment
+                updateExpTags();
+                
+                // Return success
+                return true;
+            }
+        });
+		panel.add(expTags, constraints);
+		
+		// Create a label for the explanation
+		constraints.insets = new Insets(5, 0, 10, 0);
+        constraints.weightx = 1;
+        constraints.weighty = 0;
+        constraints.gridx = 0;
+        constraints.gridy = gridy++;
+        JLabel labelTagsExpl = new JLabel(
+        		"Drag and drop your tags here from the openBIS Viewer.");
+        labelTagsExpl.setHorizontalAlignment(JLabel.CENTER);
+        panel.add(labelTagsExpl, constraints);
 
 		/*
 		 * Experiment description label
 		 */
 		
 		// Create a label for the experiment description
-		constraints.insets = new Insets(0, 0, 0, 0);
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
-		labelExpDescription = new JLabel("Description");
+		constraints.gridy = gridy++;
+		labelExpDescription = new JLabel("<html><u>Description");
 		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpDescription, constraints);
 
 		/*
 		 * Experiment description text area
 		 */
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		expDescription = new JTextArea(
 				metadata.getExperiment().description);
-		Font f = expDescription.getFont();
+		f = expDescription.getFont();
 		expDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
 		expDescription.setLineWrap(true);
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
@@ -382,7 +517,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
+        constraints.gridy = gridy++;
         JLabel labelExpl = new JLabel("If the experiment already exists "
         		+ "in openBIS, the description will be updated.");
         labelExpl.setHorizontalAlignment(JLabel.CENTER);
@@ -393,28 +528,29 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
+        constraints.gridy = gridy++;
         labelFileName = new JLabel("");
         labelFileName.setIcon(microscopyFileIcon);
         panel.add(labelFileName, constraints);
 
         // Create a label for the file description
-        constraints.insets = new Insets(0, 0, 0, 0);
+        constraints.insets = new Insets(0, 0, 5, 0);
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
-        labelFileDescription = new JLabel("Description");
+        constraints.gridy = gridy++;
+        labelFileDescription = new JLabel("<html><u>Description");
         labelFileDescription.setHorizontalAlignment(JLabel.CENTER);
         panel.add(labelFileDescription, constraints);
 
         /*
          * File description text area
          */
+        constraints.insets = new Insets(0, 0, 5, 0);
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
+        constraints.gridy = gridy++;
         fileDescription = new JTextArea("");
         f = fileDescription.getFont();
         fileDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
@@ -466,8 +602,8 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
-		JLabel labelProjects = new JLabel("Target openBIS project");
+		constraints.gridy = gridy++;
+		JLabel labelProjects = new JLabel("<html><u>Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
 
@@ -561,7 +697,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		panel.add(comboProjectList, constraints);
 		
 		/*
@@ -570,7 +706,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		
 		// Add a spacer
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
@@ -599,7 +735,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 			DatasetDescriptor d = (DatasetDescriptor)
 					currentlySelectedMicroscopyFileNode.getUserObject();
 			
-			// Get current file name and description
+			// Get current file name, description and tags
 			String fileName = currentlySelectedMicroscopyFileNode
 					.toString();
 			String description = d.description;
@@ -638,9 +774,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 		labelExpName.setText(metadata.getExperimentName());
 
 		// Update the description
-		expDescription.setText(
-				metadata.getExperiment().description);
+		expDescription.setText(metadata.getExperiment().description);
 
+		// Update the tags
+		expTags.setText(metadata.getExperiment().tags);
+		
 		// Remove listeners on the comboProjectList element to prevent firing
 		// while we set the value.
 		ActionListener[] listeners = 
@@ -770,5 +908,97 @@ public final class MicroscopyEditor extends AbstractEditor {
 		labelFileDescription.setVisible(true);
 		areaFileScrollPane.setVisible(true);
 	}
+
+	/**
+	 * Sets a mouse event listener on the tags text area
+	 * @param e Mouse event
+	 */
+    private void setListenerOnTagsTextArea(MouseEvent e) {
+
+    	if (e.isPopupTrigger() &&
+                e.getComponent() instanceof JTextArea) {
+
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+    		
+    		// Create the popup menu.
+    	    JPopupMenu popup = new JPopupMenu();
+
+    	    // Add "Clear" menu entry
+    	    JMenuItem clearMenuItem = new JMenuItem("Clear");
+    	    clearMenuItem.addActionListener(new ActionListener() {
+     
+                public void actionPerformed(ActionEvent e)
+                {
+                	// Clean the text area
+                	expTags.setText("");
+                	
+        			// Get the active metadata object
+        			MicroscopyMetadata metadata = metadataMappersList.get(
+        					currentExperimentIndex);
+        			
+        			// Store the experiment description
+        			metadata.getExperiment().tags = "";
+    			}
+            });
+    	    popup.add(clearMenuItem);
+
+    	    // Display the menu
+            popup.show(e.getComponent(), x, y);
+        }
+    }
+
+	/**
+	 * We update the experiment tags.
+	 */
+	protected void updateExpTags() {
+
+		// How many experiments do we have?
+		int nExperiments = metadataMappersList.size();
+
+		// Selected tags
+		String selectedTags = expTags.getText();
+				
+		// Default to set the tags for current experiment only.
+		int n = 0;
+		if (nExperiments > 1) {
+			
+			// Ask the user if he wants to set the tags only 
+			// to this experiment or to all
+			Object[] options = {"To this only", "To all"};
+			n = JOptionPane.showOptionDialog(null,
+					"Set the tag(s) to this experiment only or to all?",
+					"Question",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options,
+					options[0]);
+		}
+		
+		// Apply user's choice
+		if (n == 1) {
+			
+			// Apply to all
+			for (int i = 0; i < nExperiments; i++) {
+				((Experiment)
+				    metadataMappersList.get(i).experimentNode.getUserObject()).tags =
+					selectedTags;
+			}
+			
+		} else {
+			
+			// Apply to current experiment only
+			
+			// Get the active metadata object
+			MicroscopyMetadata metadata = metadataMappersList.get(
+					currentExperimentIndex);
+			
+			// Store the experiment description
+			metadata.getExperiment().tags = selectedTags;
+		}	
+
+    }
 
 }

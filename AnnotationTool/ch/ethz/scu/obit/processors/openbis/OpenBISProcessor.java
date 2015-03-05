@@ -17,6 +17,7 @@ import ch.ethz.scu.obit.common.settings.AppSettingsManager;
 import ch.ethz.scu.obit.common.settings.UserSettingsManager;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
+import ch.systemsx.cisd.openbis.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -26,6 +27,8 @@ import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.FacadeFactory;
 import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.IQueryApiFacade;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.AggregationServiceDescription;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
+import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Metaproject;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.IGeneralInformationService;
 
 /**
  * Processor that takes care of getting user credentials and logging in
@@ -43,8 +46,9 @@ public class OpenBISProcessor {
 	private AtomicReference<IQueryApiFacade> queryFacade =
 			new AtomicReference<IQueryApiFacade>();
 
+	private IGeneralInformationService infoService;
 	private boolean isLoggedIn = false;
-	
+
 	private AggregationServiceDescription createProjectService = null;
 
 	private AtomicReference<String> loginErrorMessage = 
@@ -72,7 +76,7 @@ public class OpenBISProcessor {
 
 		// Set the URL
 		this.openBISURL = manager.getSettingValue("OpenBISURL");
-		
+
 	}
 	
 	/**
@@ -201,6 +205,25 @@ public class OpenBISProcessor {
 			}
 		};
 
+		// Create a thread for getting the metadata querying service
+		Thread infoServiceCreator = new Thread() {
+			
+			public void run() {
+
+				// Create also an IQueryApiFacade to access the reporting
+				// plugins on the server.
+				try {
+					// Instantiate metadata querying service
+					ServiceFinder serviceFinder = new ServiceFinder("openbis",
+							IGeneralInformationService.SERVICE_URL);
+					infoService = serviceFinder.createService(
+							IGeneralInformationService.class, openBISURL);
+				} catch (Exception e) {
+					infoService = null;
+				}
+			}
+		};
+		
 		// Should we accept self-signed certificates?
 		String acceptSelfSignedCerts = 
 				userManager.getSettingValue("AcceptSelfSignedCertificates");
@@ -222,19 +245,24 @@ public class OpenBISProcessor {
 			// the reporting plug-ins on the server.
 			queryFacadeCreator.start();
 			
-			// Wait for both threads to finish
+			// Get the information service in yet another thread.
+			infoServiceCreator.start();
+
+			// Wait for all threads to finish
 			serviceFacadeCreator.join();
 			queryFacadeCreator.join();
+			infoServiceCreator.join();
 
 		} catch (InterruptedException e) {
 
 			// Thread interrupted
 			facade.set(null);
 			queryFacade.set(null);
+			infoService = null;
 			reactToInterruptedException();
 			
 		}
-
+		
 		// Set isLoggedIn to true
 		if (facade.get() != null && queryFacade.get() != null) {
 			
@@ -283,6 +311,23 @@ public class OpenBISProcessor {
 		}
 		return false;
 	}
+
+	/**
+	 * Returns the list of metaprojects for current session.
+	 * @return list of metaprojects.
+	 */
+	public List<String> getMetaprojects() {
+		if (infoService == null) {
+			return new ArrayList<String>();
+		}
+		List<Metaproject> metaprojects = infoService.listMetaprojects(
+				queryFacade.get().getSessionToken());
+		List<String> tags = new ArrayList<String>();
+		for (Metaproject m : metaprojects) {
+			tags.add(m.getName());
+		}
+		return tags;
+	}	
 
 	/**
 	 * Returns the list of Spaces in openBIS (as visible for current user).

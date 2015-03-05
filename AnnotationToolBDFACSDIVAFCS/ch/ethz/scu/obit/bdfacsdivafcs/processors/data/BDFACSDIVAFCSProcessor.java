@@ -157,6 +157,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Experiment description
 		public String description = "";
 		
+		// Experiment tags (comma-separated list)
+		public String tags = "";
+		
 		/**
 		 * ArrayList of Tray's
 		 */

@@ -5,8 +5,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -16,9 +20,12 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -34,6 +41,7 @@ import ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetada
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.model.SampleDescriptor;
+import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 
@@ -60,6 +68,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 	protected Map<JComboBox<String>, Tray> comboGeometryList;
 	protected JComboBox<String> comboProjectList;
 	protected JTextArea expDescription;
+	protected JTextArea expTags;
 
 	/**
 	 * Constructor
@@ -100,7 +109,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		for (BDFACSDIVAFCSMetadata metadata : metadataMappersList) {
 			
 			// Get the experiment node
-			ExperimentNode expNode = metadata.expNode;
+			ExperimentNode expNode = metadata.experimentNode;
 			assert(expNode.getType().equals("Experiment"));
 			
 			// We first start by updating the Experiment descriptor itself
@@ -115,12 +124,13 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 					metadata.getOpenBISSpaceIdentifier());
 			expDescr.addOpenBISAttributes(expOpenBISAttributes);
 
-			// Set the description
+			// Set the description and the tags
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", expDescr.description); 
+			expUserAttributes.put("tags", expDescr.tags); 
 			expDescr.addUserAttributes(expUserAttributes);
-
+			
 			// Now get the Trays and Specimens children of the Experiment
 			for (int i = 0; i < expNode.getChildCount(); i++) {
 	
@@ -360,7 +370,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
 		labelFolderName = new JLabel(
-				metadata.expNode.getParent().toString());
+				metadata.experimentNode.getParent().toString());
 		labelFolderName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/folder.png")));
 		panel.add(labelFolderName, constraints);
@@ -382,25 +392,150 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		labelExpName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/experiment.png")));		
 		panel.add(labelExpName, constraints);
+		
+		/*
+		 * Tags title
+		 */
+		
+		// Create a label for the experiment tags
+		constraints.insets = new Insets(0, 10, 5, 10);
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = gridy++;
+		JLabel labelExpTags = new JLabel("<html><u>Experiment tags");
+		labelExpTags.setHorizontalAlignment(JLabel.CENTER);
+		panel.add(labelExpTags, constraints);
+		
+		/*
+		 * Tags
+		 */
+		
+		// Create a label for the experiment tags
+		constraints.insets = new Insets(0, 0, 0, 0);
+		constraints.gridwidth = 2;
+		constraints.weightx = 2;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = gridy++;
+		expTags = new JTextArea(metadata.getExperiment().tags);
+		Font f = expTags.getFont();
+		expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
+		expTags.setEditable(false);
+		
+		// Add a context menu to clear the tags
+		expTags.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (QueryOS.isWindows()) {
+					return;
+				}
+				setListenerOnTagsTextArea(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (QueryOS.isMac()) {
+					return;
+				}
+				setListenerOnTagsTextArea(e);
+			}
+		});
+		
+		// Append a custom transfer handler
+		expTags.setTransferHandler(new TransferHandler() {
+			
+			private static final long serialVersionUID = 1L;
+
+			// Check if the transfer is valid
+			public boolean canImport(TransferHandler.TransferSupport info) {
+                
+				// We only import Strings
+                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                    return false;
+                }
+
+                // Can be imported
+                return true;
+            }
+
+			// Import and format the data
+            public boolean importData(TransferHandler.TransferSupport info) {
+                
+            	// Only if we are dropping something onto the field
+            	if (!info.isDrop()) {
+                    return false;
+                }
+                
+                // And only if it is a string flavor
+                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                    return false;
+                }
+
+                // Get and format the strings
+                Transferable t = info.getTransferable();
+                String data;
+                try {
+                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
+                    data = data.replaceAll("(\r\n|\n)", ", ");
+                } 
+                catch (Exception e) {
+                	return false;
+                }
+
+                // Create the complete list
+                String currentText = expTags.getText();
+                if (! currentText.equals("")) {
+                	data = currentText + ", " + data;
+                }
+
+                // Clean the tag list
+                data = cleanTagList(data);
+                
+                // Set the tag list
+                expTags.setText(data);
+                
+                // Update the Experiment
+                updateExpTags();
+
+                // Return success
+                return true;
+            }
+        });
+		panel.add(expTags, constraints);
+
+		// Create a label for the explanation
+		constraints.insets = new Insets(5, 0, 10, 0);
+        constraints.weightx = 1;
+        constraints.weighty = 0;
+        constraints.gridx = 0;
+        constraints.gridy = gridy++;
+        JLabel labelTagsExpl = new JLabel(
+        		"Drag and drop your tags here from the openBIS Viewer.");
+        labelTagsExpl.setHorizontalAlignment(JLabel.CENTER);
+        panel.add(labelTagsExpl, constraints);
 
 		/*
 		 * Description label
 		 */
 		
 		// Create a label for the experiment description
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelExpDescription = new JLabel("Experiment description");
+		JLabel labelExpDescription = new JLabel("<html><u>Description");
 		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpDescription, constraints);
 
 		/*
 		 * Description text area
 		 */
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
@@ -408,7 +543,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.gridy = gridy++;
 		expDescription = new JTextArea(metadata.getExperiment().description);
 		expDescription.setLineWrap(true);
-		Font f = expDescription.getFont();
+		f = expDescription.getFont();
 		expDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
 		expDescription.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -445,7 +580,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelGeometry = new JLabel("Plate geometry");
+		JLabel labelGeometry = new JLabel("<html><u>Plate geometry");
 		labelGeometry.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelGeometry, constraints);
 		
@@ -473,7 +608,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 			constraints.weighty = 0;
 			constraints.gridx = 0;
 			constraints.gridy = gridy++;
-			panel.add(new JLabel("<html><i>No plates in this experiment."),
+			panel.add(new JLabel("No plates in this experiment."),
 					constraints);
 			
 		} else {
@@ -553,7 +688,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelProjects = new JLabel("Target openBIS project");
+		JLabel labelProjects = new JLabel("<html><u>Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
 		
@@ -712,6 +847,58 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
     }
 
 	/**
+	 * We update the experiment tags.
+	 */
+	protected void updateExpTags() {
+
+		// How many experiments do we have?
+		int nExperiments = metadataMappersList.size();
+
+		// Selected tags
+		String selectedTags = expTags.getText();
+				
+		// Default to set the tags for current experiment only.
+		int n = 0;
+		if (nExperiments > 1) {
+			
+			// Ask the user if he wants to set the tags only 
+			// to this experiment or to all
+			Object[] options = {"To this only", "To all"};
+			n = JOptionPane.showOptionDialog(null,
+					"Set the tag(s) to this experiment only or to all?",
+					"Question",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options,
+					options[0]);
+		}
+		
+		// Apply user's choice
+		if (n == 1) {
+			
+			// Apply to all
+			for (int i = 0; i < nExperiments; i++) {
+				((Experiment)
+				    metadataMappersList.get(i).experimentNode.getUserObject()).tags =
+					selectedTags;
+			}
+			
+		} else {
+			
+			// Apply to current experiment only
+			
+			// Get the active metadata object
+			BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
+					currentExperimentIndex);
+			
+			// Store the experiment description
+			metadata.getExperiment().tags = selectedTags;
+		}	
+
+    }
+	
+	/**
 	 * Discard metadata information since it went out of sync with the data
 	 * and openBIS models.
 	 */    
@@ -723,4 +910,37 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		}
 		metadataMappersList = new ArrayList<BDFACSDIVAFCSMetadata>();
 	}
+
+	/**
+	 * Sets a mouse event listener on the tags text area
+	 * @param e Mouse event
+	 */
+    private void setListenerOnTagsTextArea(MouseEvent e) {
+
+    	if (e.isPopupTrigger() &&
+                e.getComponent() instanceof JTextArea) {
+
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+    		
+    		// Create the popup menu.
+    	    JPopupMenu popup = new JPopupMenu();
+
+    	    // Add "Clear" menu entry
+    	    JMenuItem clearMenuItem = new JMenuItem("Clear");
+    	    clearMenuItem.addActionListener(new ActionListener() {
+     
+                public void actionPerformed(ActionEvent e)
+                {
+                	expTags.setText("");
+    			}
+            });
+    	    popup.add(clearMenuItem);
+
+    	    // Display the menu
+            popup.show(e.getComponent(), x, y);
+        }
+    }
+    
 }
