@@ -132,12 +132,13 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 					metadata.getOpenBISSpaceIdentifier());
 			expDescr.addOpenBISAttributes(expOpenBISAttributes);
 
-			// Set the description
+			// Set the description and the tags
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", expDescr.description); 
+			expUserAttributes.put("tags", expDescr.tags); 
 			expDescr.addUserAttributes(expUserAttributes);
-
+			
 			// Now get the Trays and Specimens children of the Experiment
 			for (int i = 0; i < expNode.getChildCount(); i++) {
 	
@@ -426,7 +427,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		expTags = new JTextArea("");
+		expTags = new JTextArea(metadata.getExperiment().tags);
 		expTags.setToolTipText("You can drag tags from the openBIS Viewer.");
 		Font f = expTags.getFont();
 		expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
@@ -505,6 +506,9 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
                 // Set the tag list
                 expTags.setText(data);
                 
+                // Update the Experiment
+                updateExpTags();
+
                 // Return success
                 return true;
             }
@@ -839,6 +843,19 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		metadata.getExperiment().description = expDescription.getText();
     }
 
+	/**
+	 * We update the experiment tags.
+	 */
+	protected void updateExpTags() {
+
+		// Get the active metadata object
+		BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
+				currentExperimentIndex);
+		
+		// Store the experiment description
+		metadata.getExperiment().tags = expTags.getText();
+    }
+	
 	/**
 	 * Discard metadata information since it went out of sync with the data
 	 * and openBIS models.
