@@ -18,7 +18,7 @@ import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tra
  */
 public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 
-	public ExperimentNode expNode;
+	public ExperimentNode experimentNode;
 	public OpenBISProjectNode openBISProjectNode;
 	public ArrayList<String> supportedTrayGeometries;
 	
@@ -29,7 +29,7 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 			OpenBISProjectNode openBISProjectNode) {
 	
 		// Assign folder and openBIS project nodes
-		this.expNode = expNode;
+		this.experimentNode = expNode;
 		this.openBISProjectNode = openBISProjectNode;
 		
 		// Set the supported geometries
@@ -43,7 +43,7 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 	 * @return the folder name
 	 */
 	public String getFolderName() {
-		return expNode.getParent().toString();
+		return experimentNode.getParent().toString();
 	}
 	
 	/**
@@ -51,7 +51,7 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 	 * @return the experiment descriptor
 	 */
 	public Experiment getExperiment() {
-		return (Experiment) expNode.getUserObject();
+		return (Experiment) experimentNode.getUserObject();
 	}
 
 	/**
@@ -59,7 +59,7 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 	 * @return the experiment name
 	 */
 	public String getExperimentName() {
-		return expNode.toString();
+		return experimentNode.toString();
 	}
 
 	/**
@@ -76,7 +76,7 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 	 */
 	public String getOpenBISExerimentIdentifier() {
 		String openBISProjectID = openBISProjectNode.getIdentifier();
-		Experiment e = (Experiment) expNode.getUserObject();
+		Experiment e = (Experiment) experimentNode.getUserObject();
 		return (openBISProjectID + "/" + e.getCode()).toUpperCase();
 	}
 	
@@ -111,11 +111,11 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 		Map<String, Tray> emptySet = new LinkedHashMap<String, Tray>();
 		
 		// Do we have a folder node already?
-		if (this.expNode == null) {
+		if (this.experimentNode == null) {
 			return emptySet;
 		}
 		
 		// Return the trays
-		return ((Experiment) this.expNode.getUserObject()).trays;
+		return ((Experiment) this.experimentNode.getUserObject()).trays;
 	}
 }

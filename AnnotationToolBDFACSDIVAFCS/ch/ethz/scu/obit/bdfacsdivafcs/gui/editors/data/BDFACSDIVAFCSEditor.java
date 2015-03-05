@@ -109,7 +109,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		for (BDFACSDIVAFCSMetadata metadata : metadataMappersList) {
 			
 			// Get the experiment node
-			ExperimentNode expNode = metadata.expNode;
+			ExperimentNode expNode = metadata.experimentNode;
 			assert(expNode.getType().equals("Experiment"));
 			
 			// We first start by updating the Experiment descriptor itself
@@ -370,7 +370,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
 		labelFolderName = new JLabel(
-				metadata.expNode.getParent().toString());
+				metadata.experimentNode.getParent().toString());
 		labelFolderName.setIcon(new ImageIcon(
 				this.getClass().getResource("icons/folder.png")));
 		panel.add(labelFolderName, constraints);
@@ -840,12 +840,51 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 	 */
 	protected void updateExpTags() {
 
-		// Get the active metadata object
-		BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
-				currentExperimentIndex);
+		// How many experiments do we have?
+		int nExperiments = metadataMappersList.size();
+
+		// Selected tags
+		String selectedTags = expTags.getText();
+				
+		// Default to set the tags for current experiment only.
+		int n = 0;
+		if (nExperiments > 1) {
+			
+			// Ask the user if he wants to set the tags only 
+			// to this experiment or to all
+			Object[] options = {"To this only", "To all"};
+			n = JOptionPane.showOptionDialog(null,
+					"Set the tag(s) to this experiment only or to all?",
+					"Question",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options,
+					options[0]);
+		}
 		
-		// Store the experiment description
-		metadata.getExperiment().tags = expTags.getText();
+		// Apply user's choice
+		if (n == 1) {
+			
+			// Apply to all
+			for (int i = 0; i < nExperiments; i++) {
+				((Experiment)
+				    metadataMappersList.get(i).experimentNode.getUserObject()).tags =
+					selectedTags;
+			}
+			
+		} else {
+			
+			// Apply to current experiment only
+			
+			// Get the active metadata object
+			BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
+					currentExperimentIndex);
+			
+			// Store the experiment description
+			metadata.getExperiment().tags = selectedTags;
+		}	
+
     }
 	
 	/**

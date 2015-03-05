@@ -38,6 +38,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetadata;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadata;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
@@ -934,12 +935,51 @@ public final class MicroscopyEditor extends AbstractEditor {
 	 */
 	protected void updateExpTags() {
 
-		// Get the active metadata object
-		MicroscopyMetadata metadata = metadataMappersList.get(
-				currentExperimentIndex);
+		// How many experiments do we have?
+		int nExperiments = metadataMappersList.size();
+
+		// Selected tags
+		String selectedTags = expTags.getText();
+				
+		// Default to set the tags for current experiment only.
+		int n = 0;
+		if (nExperiments > 1) {
+			
+			// Ask the user if he wants to set the tags only 
+			// to this experiment or to all
+			Object[] options = {"To this only", "To all"};
+			n = JOptionPane.showOptionDialog(null,
+					"Set the tag(s) to this experiment only or to all?",
+					"Question",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options,
+					options[0]);
+		}
 		
-		// Store the experiment description
-		metadata.getExperiment().tags = expTags.getText();
+		// Apply user's choice
+		if (n == 1) {
+			
+			// Apply to all
+			for (int i = 0; i < nExperiments; i++) {
+				((Experiment)
+				    metadataMappersList.get(i).experimentNode.getUserObject()).tags =
+					selectedTags;
+			}
+			
+		} else {
+			
+			// Apply to current experiment only
+			
+			// Get the active metadata object
+			MicroscopyMetadata metadata = metadataMappersList.get(
+					currentExperimentIndex);
+			
+			// Store the experiment description
+			metadata.getExperiment().tags = selectedTags;
+		}	
+
     }
 
 }
