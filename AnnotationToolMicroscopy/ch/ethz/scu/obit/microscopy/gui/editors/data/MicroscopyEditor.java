@@ -38,7 +38,6 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetadata;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadata;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
@@ -320,7 +319,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 
 		// Use a variable y to keep track of the row number in the grid layout
-		int y = 0;
+		int gridy = 0;
 
 		/*
 		 *  Experiment name
@@ -333,7 +332,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		labelExpName = new JLabel(expName);
 		labelExpName.setIcon(experimentIcon);		
 		panel.add(labelExpName, constraints);
@@ -343,13 +342,13 @@ public final class MicroscopyEditor extends AbstractEditor {
 		 */
 		
 		// Create a label for the experiment tags
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 10, 5, 10);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
-		JLabel labelExpTags = new JLabel("Experiment tags");
+		constraints.gridy = gridy++;
+		JLabel labelExpTags = new JLabel("<html><u>Tags");
 		labelExpTags.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpTags, constraints);
 		
@@ -358,14 +357,13 @@ public final class MicroscopyEditor extends AbstractEditor {
 		 */
 		
 		// Create a label for the experiment tags
-		constraints.insets = new Insets(0, 10, 10, 10);
+		constraints.insets = new Insets(0, 0, 0, 0);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		expTags = new JTextArea("");
-		expTags.setToolTipText("You can drag tags from the openBIS Viewer.");
 		Font f = expTags.getFont();
 		expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
 		expTags.setEditable(false);
@@ -452,27 +450,39 @@ public final class MicroscopyEditor extends AbstractEditor {
         });
 		panel.add(expTags, constraints);
 		
+		// Create a label for the explanation
+		constraints.insets = new Insets(5, 0, 10, 0);
+        constraints.weightx = 1;
+        constraints.weighty = 0;
+        constraints.gridx = 0;
+        constraints.gridy = gridy++;
+        JLabel labelTagsExpl = new JLabel(
+        		"Drag and drop your tags here from the openBIS Viewer.");
+        labelTagsExpl.setHorizontalAlignment(JLabel.CENTER);
+        panel.add(labelTagsExpl, constraints);
+
 		/*
 		 * Experiment description label
 		 */
 		
 		// Create a label for the experiment description
-		constraints.insets = new Insets(0, 0, 0, 0);
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
-		labelExpDescription = new JLabel("Description");
+		constraints.gridy = gridy++;
+		labelExpDescription = new JLabel("<html><u>Description");
 		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpDescription, constraints);
 
 		/*
 		 * Experiment description text area
 		 */
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		expDescription = new JTextArea(
 				metadata.getExperiment().description);
 		f = expDescription.getFont();
@@ -507,7 +517,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
+        constraints.gridy = gridy++;
         JLabel labelExpl = new JLabel("If the experiment already exists "
         		+ "in openBIS, the description will be updated.");
         labelExpl.setHorizontalAlignment(JLabel.CENTER);
@@ -518,28 +528,29 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
+        constraints.gridy = gridy++;
         labelFileName = new JLabel("");
         labelFileName.setIcon(microscopyFileIcon);
         panel.add(labelFileName, constraints);
 
         // Create a label for the file description
-        constraints.insets = new Insets(0, 0, 0, 0);
+        constraints.insets = new Insets(0, 0, 5, 0);
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
-        labelFileDescription = new JLabel("Description");
+        constraints.gridy = gridy++;
+        labelFileDescription = new JLabel("<html><u>Description");
         labelFileDescription.setHorizontalAlignment(JLabel.CENTER);
         panel.add(labelFileDescription, constraints);
 
         /*
          * File description text area
          */
+        constraints.insets = new Insets(0, 0, 5, 0);
         constraints.weightx = 1;
         constraints.weighty = 0;
         constraints.gridx = 0;
-        constraints.gridy = y++;
+        constraints.gridy = gridy++;
         fileDescription = new JTextArea("");
         f = fileDescription.getFont();
         fileDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
@@ -591,8 +602,8 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
-		JLabel labelProjects = new JLabel("Target openBIS project");
+		constraints.gridy = gridy++;
+		JLabel labelProjects = new JLabel("<html><u>Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
 
@@ -686,7 +697,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		constraints.weightx = 1;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		panel.add(comboProjectList, constraints);
 		
 		/*
@@ -695,7 +706,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		
 		// Add a spacer
 		constraints.gridx = 0;
-		constraints.gridy = y++;
+		constraints.gridy = gridy++;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
 		panel.add(new JLabel(""), constraints);
@@ -920,7 +931,15 @@ public final class MicroscopyEditor extends AbstractEditor {
      
                 public void actionPerformed(ActionEvent e)
                 {
+                	// Clean the text area
                 	expTags.setText("");
+                	
+        			// Get the active metadata object
+        			MicroscopyMetadata metadata = metadataMappersList.get(
+        					currentExperimentIndex);
+        			
+        			// Store the experiment description
+        			metadata.getExperiment().tags = "";
     			}
             });
     	    popup.add(clearMenuItem);

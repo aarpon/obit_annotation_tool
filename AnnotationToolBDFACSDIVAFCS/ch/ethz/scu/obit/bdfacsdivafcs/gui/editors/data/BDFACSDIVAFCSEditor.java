@@ -398,13 +398,13 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		 */
 		
 		// Create a label for the experiment tags
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 10, 5, 10);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelExpTags = new JLabel("Experiment tags");
+		JLabel labelExpTags = new JLabel("<html><u>Experiment tags");
 		labelExpTags.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpTags, constraints);
 		
@@ -413,14 +413,13 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		 */
 		
 		// Create a label for the experiment tags
-		constraints.insets = new Insets(0, 10, 10, 10);
+		constraints.insets = new Insets(0, 0, 0, 0);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
 		expTags = new JTextArea(metadata.getExperiment().tags);
-		expTags.setToolTipText("You can drag tags from the openBIS Viewer.");
 		Font f = expTags.getFont();
 		expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
 		expTags.setEditable(false);
@@ -507,24 +506,36 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
         });
 		panel.add(expTags, constraints);
 
+		// Create a label for the explanation
+		constraints.insets = new Insets(5, 0, 10, 0);
+        constraints.weightx = 1;
+        constraints.weighty = 0;
+        constraints.gridx = 0;
+        constraints.gridy = gridy++;
+        JLabel labelTagsExpl = new JLabel(
+        		"Drag and drop your tags here from the openBIS Viewer.");
+        labelTagsExpl.setHorizontalAlignment(JLabel.CENTER);
+        panel.add(labelTagsExpl, constraints);
+
 		/*
 		 * Description label
 		 */
 		
 		// Create a label for the experiment description
-		constraints.insets = new Insets(0, 10, 0, 10);
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelExpDescription = new JLabel("Experiment description");
+		JLabel labelExpDescription = new JLabel("<html><u>Description");
 		labelExpDescription.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelExpDescription, constraints);
 
 		/*
 		 * Description text area
 		 */
+		constraints.insets = new Insets(0, 0, 5, 0);
 		constraints.gridwidth = 2;
 		constraints.weightx = 2;
 		constraints.weighty = 0;
@@ -569,7 +580,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelGeometry = new JLabel("Plate geometry");
+		JLabel labelGeometry = new JLabel("<html><u>Plate geometry");
 		labelGeometry.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelGeometry, constraints);
 		
@@ -677,7 +688,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		constraints.weighty = 0;
 		constraints.gridx = 0;
 		constraints.gridy = gridy++;
-		JLabel labelProjects = new JLabel("Target openBIS project");
+		JLabel labelProjects = new JLabel("<html><u>Target openBIS project");
 		labelProjects.setHorizontalAlignment(JLabel.CENTER);
 		panel.add(labelProjects, constraints);
 		
