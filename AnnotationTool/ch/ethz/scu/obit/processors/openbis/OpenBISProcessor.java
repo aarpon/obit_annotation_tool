@@ -45,8 +45,9 @@ public class OpenBISProcessor {
 			new AtomicReference<IOpenbisServiceFacade>();
 	private AtomicReference<IQueryApiFacade> queryFacade =
 			new AtomicReference<IQueryApiFacade>();
+	private AtomicReference<IGeneralInformationService> infoService =
+			new AtomicReference<IGeneralInformationService>();
 
-	private IGeneralInformationService infoService;
 	private boolean isLoggedIn = false;
 
 	private AggregationServiceDescription createProjectService = null;
@@ -216,10 +217,10 @@ public class OpenBISProcessor {
 					// Instantiate metadata querying service
 					ServiceFinder serviceFinder = new ServiceFinder("openbis",
 							IGeneralInformationService.SERVICE_URL);
-					infoService = serviceFinder.createService(
-							IGeneralInformationService.class, openBISURL);
+					infoService.set(serviceFinder.createService(
+							IGeneralInformationService.class, openBISURL));
 				} catch (Exception e) {
-					infoService = null;
+					infoService.set(null);
 				}
 			}
 		};
@@ -258,7 +259,7 @@ public class OpenBISProcessor {
 			// Thread interrupted
 			facade.set(null);
 			queryFacade.set(null);
-			infoService = null;
+			infoService.set(null);
 			reactToInterruptedException();
 			
 		}
@@ -317,10 +318,10 @@ public class OpenBISProcessor {
 	 * @return list of metaprojects.
 	 */
 	public List<String> getMetaprojects() {
-		if (infoService == null) {
+		if (infoService.get() == null) {
 			return new ArrayList<String>();
 		}
-		List<Metaproject> metaprojects = infoService.listMetaprojects(
+		List<Metaproject> metaprojects = infoService.get().listMetaprojects(
 				queryFacade.get().getSessionToken());
 		List<String> tags = new ArrayList<String>();
 		for (Metaproject m : metaprojects) {
