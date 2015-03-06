@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
+import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
@@ -41,14 +42,14 @@ public class DataViewerTreeToXML {
 	 * Constructor
 	 * @param tree Custom JTree
 	 */
-	public DataViewerTreeToXML(DataViewerTree tree) {
+	public DataViewerTreeToXML(DataViewerTree tree, String userName) {
 
 		DocumentBuilder builder;
 		Document document = null;
 
 		// Get the root node of the JTree
-		AbstractNode rootNode = 
-				(AbstractNode) tree.getModel().getRoot();
+		RootNode rootNode = 
+				(RootNode) tree.getModel().getRoot();
 
 		// We create and save an XML file for each Experiment in the
 		// data model. Experiments are at children of the Tree root,
@@ -80,6 +81,7 @@ public class DataViewerTreeToXML {
 				// Create root element
 				Element root = document.createElement("obitXML");
 				root.setAttribute("version", "1");
+				root.setAttribute("userName", userName);
 
 				// Create and add the experiment
 				Element element = createElement(document, expNode); 

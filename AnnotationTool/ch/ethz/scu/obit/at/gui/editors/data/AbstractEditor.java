@@ -269,9 +269,6 @@ implements ActionListener, Observer {
 		    }
 		}
 
-		// Now build the clean comma-separated string
-		int nElements = s.size();
-
 		// Build the string with a buffer
 		StringBuffer buff = new StringBuffer();
 
