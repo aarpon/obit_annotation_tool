@@ -6,7 +6,7 @@ public class VersionInfo {
 	public static final String version = "0.6.0";
 	
 	// Version status: "alpha", "beta", or "" for a stable release
-	public static final String status = "beta";
+	public static final String status = "";
 
 	// Copyright string
 	public static final String copyright = "Copyright " +
