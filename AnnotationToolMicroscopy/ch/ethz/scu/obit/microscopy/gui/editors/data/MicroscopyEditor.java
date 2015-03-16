@@ -39,7 +39,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.utils.QueryOS;
-import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadata;
+import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadataMapper;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
@@ -57,10 +57,10 @@ public final class MicroscopyEditor extends AbstractEditor {
 			new ArrayList<ExperimentNode>();
 	
 	// List of metadata mappers
-	private List<MicroscopyMetadata> metadataMappersList =
-			new ArrayList<MicroscopyMetadata>();
+	private List<MicroscopyMetadataMapper> metadataMappersList =
+			new ArrayList<MicroscopyMetadataMapper>();
 
-	// Indicate which of the List<MicroscopyMetadata> is the active one
+	// Indicate which of the List<MicroscopyMetadataMapper> is the active one
 	private int currentExperimentIndex = -1;
 
 	// Indicate which is the currently selected file
@@ -127,7 +127,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		}
 
 		// Go over all experiments
-		for (MicroscopyMetadata currentMetadata : metadataMappersList) {
+		for (MicroscopyMetadataMapper currentMetadata : metadataMappersList) {
 			
 			// Get the experiment node
 			ExperimentNode expNode = currentMetadata.experimentNode;
@@ -215,11 +215,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 			return false;
 		}
 		
-		// Create all MicroscopyMetadata objects and initially assign all
+		// Create all MicroscopyMetadataMapper objects and initially assign all
 		// experiments to the first project
 		for (ExperimentNode node : experiments) {
 			metadataMappersList.add(
-					new MicroscopyMetadata(
+					new MicroscopyMetadataMapper(
 							node, openBISProjects.get(0)));
 		}
 		
@@ -244,7 +244,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		if (metadataMappersList.size() < (currentExperimentIndex + 1)) {
 			return;
 		}		
-		MicroscopyMetadata metadata = metadataMappersList.get(
+		MicroscopyMetadataMapper metadata = metadataMappersList.get(
 				currentExperimentIndex);
 
 		// If we are repainting this panel, let's make sure we delete the
@@ -767,7 +767,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		currentExperimentIndex = index;
 
 		// Get the active metadata object
-		MicroscopyMetadata metadata = metadataMappersList.get(
+		MicroscopyMetadataMapper metadata = metadataMappersList.get(
 				currentExperimentIndex);
 
 		// Update the experiment name
@@ -838,7 +838,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 	protected void updateExpDescription() {
 
 		// Get the active metadata object
-		MicroscopyMetadata metadata = metadataMappersList.get(
+		MicroscopyMetadataMapper metadata = metadataMappersList.get(
 				currentExperimentIndex);
 		
 		// Store the experiment description
@@ -872,7 +872,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 		if (p.action != ObserverActionParameters.Action.ABOUT_TO_RESCAN) {
 			return;
 		}
-		metadataMappersList = new ArrayList<MicroscopyMetadata>();
+		metadataMappersList = new ArrayList<MicroscopyMetadataMapper>();
 	}
 
 	/**
@@ -935,7 +935,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                 	expTags.setText("");
                 	
         			// Get the active metadata object
-        			MicroscopyMetadata metadata = metadataMappersList.get(
+        			MicroscopyMetadataMapper metadata = metadataMappersList.get(
         					currentExperimentIndex);
         			
         			// Store the experiment description
@@ -992,7 +992,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 			// Apply to current experiment only
 			
 			// Get the active metadata object
-			MicroscopyMetadata metadata = metadataMappersList.get(
+			MicroscopyMetadataMapper metadata = metadataMappersList.get(
 					currentExperimentIndex);
 			
 			// Store the experiment description

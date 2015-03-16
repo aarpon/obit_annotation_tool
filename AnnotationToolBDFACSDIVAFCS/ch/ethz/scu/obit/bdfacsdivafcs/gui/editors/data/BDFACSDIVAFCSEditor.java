@@ -37,7 +37,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetadata;
+import ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetadataMapper;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.model.SampleDescriptor;
@@ -56,10 +56,10 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 			new ArrayList<ExperimentNode>();
 	
 	// List of metadata mappers
-	protected List<BDFACSDIVAFCSMetadata> metadataMappersList =
-			new ArrayList<BDFACSDIVAFCSMetadata>();
+	protected List<BDFACSDIVAFCSMetadataMapper> metadataMappersList =
+			new ArrayList<BDFACSDIVAFCSMetadataMapper>();
 
-	// Indicate which of the List<BDFACSDIVAFCSMetadata> is the 
+	// Indicate which of the List<BDFACSDIVAFCSMetadataMapper> is the 
 	// active one
 	protected int currentExperimentIndex = -1;
 
@@ -106,7 +106,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		}
 
 		// Go over all experiments
-		for (BDFACSDIVAFCSMetadata metadata : metadataMappersList) {
+		for (BDFACSDIVAFCSMetadataMapper metadata : metadataMappersList) {
 			
 			// Get the experiment node
 			ExperimentNode expNode = metadata.experimentNode;
@@ -311,11 +311,11 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 			return false;
 		}
 		
-		// Create all BDFACSDIVAFCSMetadata objects and initially 
+		// Create all BDFACSDIVAFCSMetadataMapper objects and initially 
 		// assign each folder to the first project
 		for (ExperimentNode node : experiments) {
 			metadataMappersList.add(
-					new BDFACSDIVAFCSMetadata(
+					new BDFACSDIVAFCSMetadataMapper(
 							node, openBISProjects.get(0)));
 		}
 		
@@ -339,7 +339,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		if (metadataMappersList.size() < (currentExperimentIndex + 1)) {
 			return;
 		}
-		BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
+		BDFACSDIVAFCSMetadataMapper metadata = metadataMappersList.get(
 				currentExperimentIndex);
 
 		// Keep track of the y index of elements
@@ -839,7 +839,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 	protected void updateExpDescription() {
 
 		// Get the active metadata object
-		BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
+		BDFACSDIVAFCSMetadataMapper metadata = metadataMappersList.get(
 				currentExperimentIndex);
 		
 		// Store the experiment description
@@ -889,7 +889,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 			// Apply to current experiment only
 			
 			// Get the active metadata object
-			BDFACSDIVAFCSMetadata metadata = metadataMappersList.get(
+			BDFACSDIVAFCSMetadataMapper metadata = metadataMappersList.get(
 					currentExperimentIndex);
 			
 			// Store the experiment description
@@ -908,7 +908,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		if (p.action != ObserverActionParameters.Action.ABOUT_TO_RESCAN) {
 			return;
 		}
-		metadataMappersList = new ArrayList<BDFACSDIVAFCSMetadata>();
+		metadataMappersList = new ArrayList<BDFACSDIVAFCSMetadataMapper>();
 	}
 
 	/**

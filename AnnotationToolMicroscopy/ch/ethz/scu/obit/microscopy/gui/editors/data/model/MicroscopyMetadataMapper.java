@@ -1,57 +1,40 @@
-package ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+package ch.ethz.scu.obit.microscopy.gui.editors.data.model;
 
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
+import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
 
 /**
  * Collects all relevant metadata to allow the registration of an
- * experiment from the BD LSR FORTESSA flow cytometer into OpenBIS.
+ * experiment from a generic light microscope (bioformats-compatible file format).
  * @author Aaron Ponti
  *
  */
-public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
+public final class MicroscopyMetadataMapper extends AbstractMetadataMapper {
 
 	public ExperimentNode experimentNode;
 	public OpenBISProjectNode openBISProjectNode;
-	public ArrayList<String> supportedTrayGeometries;
 	
 	/** 
 	 * Constructor
 	 */
-	public BDFACSDIVAFCSMetadata(ExperimentNode expNode, 
+	public MicroscopyMetadataMapper(ExperimentNode experimentNode, 
 			OpenBISProjectNode openBISProjectNode) {
 	
 		// Assign folder and openBIS project nodes
-		this.experimentNode = expNode;
+		this.experimentNode = experimentNode;
 		this.openBISProjectNode = openBISProjectNode;
 		
-		// Set the supported geometries
-		this.supportedTrayGeometries = new ArrayList<String>();
-		this.supportedTrayGeometries.add("96_WELLS_8X12");
-		this.supportedTrayGeometries.add("384_WELLS_16x24");
 	}
 
-	/**
-	 * Get the folder name
-	 * @return the folder name
-	 */
-	public String getFolderName() {
-		return experimentNode.getParent().toString();
-	}
-	
 	/**
 	 * Get the experiment descriptor
 	 * @return the experiment descriptor
 	 */
 	public Experiment getExperiment() {
-		return (Experiment) experimentNode.getUserObject();
+		return (Experiment) 
+				this.experimentNode.getUserObject();
 	}
 
 	/**
@@ -59,9 +42,9 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 	 * @return the experiment name
 	 */
 	public String getExperimentName() {
-		return experimentNode.toString();
+		return this.experimentNode.toString();
 	}
-
+	
 	/**
 	 * Get the project name
 	 * @return the experiment name
@@ -91,7 +74,7 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 		int indx = openBISProjectID.indexOf("/", 1);
 		
 		if (indx == -1) {
-			// This should not happen, since the identifier came
+			// This should not happen, sice the identifier came
 			// from openBIS in the first place.
 			System.err.println(
 					"Malformed openBIS project identifier!");
@@ -101,21 +84,4 @@ public final class BDFACSDIVAFCSMetadata extends AbstractMetadataMapper {
 		return (openBISProjectID.substring(0, indx).toUpperCase());
 	}
 
-	/**
-	 * Get the plates for the stored Experiment.
-	 * @return Plates contained in current Experiment. 
-	 */
-	public Map<String, Tray> getTraysForExperiment() {
-		
-		// Empty result set
-		Map<String, Tray> emptySet = new LinkedHashMap<String, Tray>();
-		
-		// Do we have a folder node already?
-		if (this.experimentNode == null) {
-			return emptySet;
-		}
-		
-		// Return the trays
-		return ((Experiment) this.experimentNode.getUserObject()).trays;
-	}
 }
