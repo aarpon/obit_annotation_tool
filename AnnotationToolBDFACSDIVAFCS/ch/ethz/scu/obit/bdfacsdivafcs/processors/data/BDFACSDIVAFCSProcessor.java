@@ -41,6 +41,21 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	private final String[] validAttachmentExtensions = 
 		{".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"};
 	
+	/* Map of known hardware strings to supported hardware */
+	private static final Map<String, String> knownHardwareStrings;
+    static
+    {
+    	knownHardwareStrings = new HashMap<String, String>();
+    	
+    	// BD LSR Fortessa
+    	knownHardwareStrings.put("LSRII", "BD LSR Fortessa");
+    	knownHardwareStrings.put("BD LSR Fortessa SORP (LSRII)", "BD LSR Fortessa");
+    	knownHardwareStrings.put("LSRFortessa", "BD LSR Fortessa");
+    	
+    	// FD FACSAria III
+    	knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
+    }
+    
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
 
@@ -156,6 +171,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		// Experiment description
 		public String description = "";
+		
+		// Experiment tags (comma-separated list)
+		public String tags = "";
 		
 		/**
 		 * ArrayList of Tray's
@@ -895,15 +913,15 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	private Map<String, String> getExperimentAttributes(FCSReader processor) {
 		Map<String, String> attributes = new HashMap<String, String>();
+
+		// Owner name
 		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
+
+		// Hardware string
 		String acqHardwareString = processor.getStandardKeyword("$CYT");
-		if (acqHardwareString.equals("LSRII")) {
-			// LSRII is generic. We replace it here with "BD LSR Fortessa"
-			acqHardwareString = "BD LSR Fortessa";
-		} else if (acqHardwareString.equals("FACSAriaIII")) {
-			acqHardwareString = "BD FACSAria III";
-		} else if (acqHardwareString.equals("BD LSR Fortessa SORP (LSRII)")) {
-			acqHardwareString = "BD LSR Fortessa SORP (LSRII)";
+		if (knownHardwareStrings.containsKey(acqHardwareString)) {
+			// Standardize the hardware string
+			acqHardwareString = knownHardwareStrings.get(acqHardwareString);
 		} else {
 			validator.isValid = false;
 			validator.invalidFilesOrFolders.put(
@@ -911,6 +929,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					"Wrong hardware string: " + acqHardwareString);
 		}
 		attributes.put("acq_hardware", acqHardwareString);
+
+		// Software string
 		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
 		if (!acqSoftwareString.contains("BD FACSDiva Software")) {
 			validator.isValid = false;
@@ -952,8 +972,13 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				}
 			}
 		}
+		
+		// Acquisition software
 		attributes.put("acq_software", acqSoftwareString);
+		
+		// Acquisition date
 		attributes.put("date", processor.getStandardKeyword("$DATE"));
+		
 		return attributes;
 	}
 

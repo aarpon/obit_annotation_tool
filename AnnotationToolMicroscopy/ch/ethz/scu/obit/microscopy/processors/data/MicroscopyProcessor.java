@@ -379,6 +379,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		// Experiment description
 		public String description = "";
 
+		// Experiment tags (comma-separated list)
+		public String tags = "";
+
 		// Store the microscopy files associated with this Experiment
 		public final Map<String, MicroscopyFile> microscopyFiles =
 				new LinkedHashMap<String, MicroscopyFile>();

@@ -14,13 +14,17 @@ import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -60,7 +64,9 @@ public class OpenBISViewer extends Observable
 
 	protected JPanel panel;
 	protected JButton scanButton;
-	
+	protected JLabel userTags;
+	protected JList<String> tagList;
+
 	private OpenBISProcessor openBISProcessor;
 
     private OpenBISUserNode userNode;
@@ -163,9 +169,40 @@ public class OpenBISViewer extends Observable
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
-		constraints.weighty = 1.0;
+		constraints.weighty = 0.9;
 		constraints.insets = new Insets(5, 5, 5, 0);
 		panel.add(treeView, constraints);
+
+		// Add a simple label
+		userTags = new JLabel("<html><b>Tags</b></html>");
+		userTags.setVerticalAlignment(SwingConstants.TOP);
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 0, 5, 5);
+		panel.add(userTags, constraints);
+		
+		// Add the list of tags
+        tagList = new JList<String>(new DefaultListModel<String>());
+        tagList.setVisibleRowCount(3);
+        tagList.getSelectionModel().setSelectionMode(
+        		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        tagList.setDragEnabled(true);
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.1;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 5, 5, 0);
+		panel.add(tagList, constraints);
 
 		// Add a rescan button
         scanButton = new JButton("Scan");
@@ -178,14 +215,14 @@ public class OpenBISViewer extends Observable
 
 		// Add to the layout
 		constraints.gridx = 0;
-		constraints.gridy = 2;
+		constraints.gridy = 4;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.insets = new Insets(0, 5, 5, 0);
 		panel.add(scanButton, constraints);
-		
+
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
 		panel.setPreferredSize(new Dimension(400, 700));
@@ -313,6 +350,12 @@ public class OpenBISViewer extends Observable
 		// Set the root of the tree
 		userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
+		// Retrieve metaprojects
+		List<String> metaprojects = openBISProcessor.getMetaprojects();
+
+		// Fill the list
+		setTagList(metaprojects);
+		
 		// Get spaces
 		List<SpaceWithProjectsAndRoleAssignments> spaces = 
 				openBISProcessor.getSpaces();
@@ -753,4 +796,24 @@ public class OpenBISViewer extends Observable
 		return false;
 	}
 	
+	/**
+	 * Clear the list of tags in the UI.
+	 */
+	private void clearTagList() {
+		tagList.setModel(new DefaultListModel<String>());
+	}
+	
+	/**
+	 * Set the list of tags in the UI.
+	 * @param tagList List of tags retrieved from openBIS.
+	 */
+	private void setTagList(List<String> metaprojects) {
+		clearTagList();
+		DefaultListModel<String> listModel = 
+				(DefaultListModel<String>) tagList.getModel();
+		for (String s : metaprojects) {
+			listModel.addElement(s);
+		}
+		
+	}
 }

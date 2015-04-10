@@ -3,9 +3,13 @@ package ch.ethz.scu.obit.at.gui.editors.data;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.tree.TreeModel;
@@ -244,5 +248,36 @@ implements ActionListener, Observer {
 	public JPanel getPanel() {
 		return panel;
 	}
+	
+	/**
+	 * Clean a comma-separated list of tags and remove duplicates.
+	 * @param tagList
+	 * @return
+	 */
+	protected String cleanTagList(String tagList) {
+		
+		// Split the string into items
+		List<String> items = Arrays.asList(tagList.split("\\s*,\\s*"));
+		
+		// Use a set to test for duplicates
+		Set<String> s = new LinkedHashSet<String>();
 
+		// Loop over list of items
+		for (String item : items) {
+		    if (!s.contains(item)) {
+		    	s.add(item);
+		    }
+		}
+
+		// Build the string with a buffer
+		StringBuffer buff = new StringBuffer();
+
+		for (Iterator<String> it = s.iterator(); it.hasNext();) {
+	        buff.append(it.next());
+        	buff.append(" ");
+	    }
+
+		// Return the string
+		return buff.toString().trim().replaceAll(" ", ", ");
+	}
 }

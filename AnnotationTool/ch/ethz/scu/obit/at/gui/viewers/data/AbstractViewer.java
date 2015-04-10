@@ -633,7 +633,7 @@ abstract public class AbstractViewer extends Observable
 	 */	
 	public boolean saveToXML(String outputDirectory) {
 		
-		DataViewerTreeToXML treeToXML = new DataViewerTreeToXML(tree);
+		DataViewerTreeToXML treeToXML = new DataViewerTreeToXML(tree, userName);
 		return (treeToXML.saveToFile(outputDirectory));
 	
 	}

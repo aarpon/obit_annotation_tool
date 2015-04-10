@@ -64,6 +64,9 @@ public class OpenBISLoginDialog extends JDialog {
 		
 		if (servers.size() > 1) {
 			
+			// Display currently selected server in the dialog title
+			setTitle(openBISServerURL);
+
 			// Add a menu
 			JLabel serverMenu = new JLabel("...");
 			serverMenu.setOpaque(true);
@@ -79,6 +82,9 @@ public class OpenBISLoginDialog extends JDialog {
 							new OpenBISPickServerDialog(servers,
 									openBISServerURL);
 					openBISServerURL = dialog.getOpenBISServer();
+					
+					// Display currently selected server in the dialog title
+					setTitle(openBISServerURL);
 				}
 
 				@Override
