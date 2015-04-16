@@ -30,6 +30,6 @@
 	<classpathentry kind="lib" path="lib/bioformats_package.jar"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-GIT-SNAPSHOT-r33544.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-15.xx.x-r33796.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
