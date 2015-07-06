@@ -1,0 +1,5 @@
+..\..\AnnotationTool\ch\ethz\scu\obit\readers\AbstractReader.java
+..\..\AnnotationToolMicroscopy\ch\ethz\scu\obit\microscopy\readers\MicroscopyReader.java
+..\..\AnnotationToolMicroscopy\ch\ethz\scu\obit\microscopy\readers\composite\AbstractCompositeMicroscopyReader.java
+..\..\AnnotationToolMicroscopy\ch\ethz\scu\obit\microscopy\readers\composite\CompositeMicroscopyReaderFactory.java
+..\..\AnnotationToolMicroscopy\ch\ethz\scu\obit\microscopy\readers\composite\LeicaTIFFSeriesReader.java
