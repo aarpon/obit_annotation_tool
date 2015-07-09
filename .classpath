@@ -27,9 +27,11 @@
 	<classpathentry kind="lib" path="lib/dss_client/stream-supporting-httpinvoker.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/bioformats_package.jar"/>
+	<classpathentry kind="lib" path="lib/bioformats_package-5.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/marathon-spring-util-1.2.4.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/sis-base-14.12.0.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-SNAPSHOT-r34329.jar"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-15.xx.x-r33796.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

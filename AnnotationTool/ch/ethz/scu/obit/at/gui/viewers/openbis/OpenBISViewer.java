@@ -169,7 +169,7 @@ public class OpenBISViewer extends Observable
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
-		constraints.weighty = 0.9;
+		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 0);
 		panel.add(treeView, constraints);
 
@@ -189,20 +189,21 @@ public class OpenBISViewer extends Observable
 		
 		// Add the list of tags
         tagList = new JList<String>(new DefaultListModel<String>());
-        tagList.setVisibleRowCount(3);
+        tagList.setVisibleRowCount(5);
         tagList.getSelectionModel().setSelectionMode(
         		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         tagList.setDragEnabled(true);
-
+        JScrollPane tagScrollPane = new JScrollPane(tagList);
+        
 		// Add to the layout
 		constraints.gridx = 0;
 		constraints.gridy = 3;
 		constraints.weightx = 1.0;
-		constraints.weighty = 0.1;
+		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;
 		constraints.insets = new Insets(5, 5, 5, 0);
-		panel.add(tagList, constraints);
+		panel.add(tagScrollPane, constraints);
 
 		// Add a rescan button
         scanButton = new JButton("Scan");

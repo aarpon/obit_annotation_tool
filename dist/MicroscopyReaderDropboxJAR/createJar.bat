@@ -1,37 +1,42 @@
 @ECHO OFF
-REM Make sure to compile with compliance level 1.6
 
-REM Define some variables
-REM Eclipse build folder
-REM SET BIN=bin
-REM IntelliJ build folder
-SET BIN=out\production\obit_annotation_tool
+REM Override the default java compiler and jar command if needed
+SET JAVAC=javac
+SET JAR=jar
+
+REM Get current directory
 SET CURRENT_DIR=%CD%
-SET TEMP_FOLDER=%CURRENT_DIR%\tmp
-SET IN=%CURRENT_DIR%\..\..\%BIN%\ch\ethz\scu\obit
-SET TEMP_OUT=%TEMP_FOLDER%\ch\ethz\scu\obit
-SET OUT=%CURRENT_DIR%\build
 
-ECHO Packaging JAR archive for microscopy dropbox...
+REM Delete ther existing classes if they existing
+IF exist %CURRENT_DIR%\build\ch\ ( RMDIR /S /Q %CURRENT_DIR%\build\ch )
 
-REM Start by creating the needed directories
-MKDIR %OUT%
-MKDIR %TEMP_OUT%\readers\
-MKDIR %TEMP_OUT%\microscopy\readers\
+REM Classpath
+SET CLASSPATH=..\..\lib\bioformats_package-5.0.8.jar
 
-REM Copy the classes
-XCOPY %IN%\readers\AbstractReader.class %TEMP_OUT%\readers\
-XCOPY %IN%\microscopy\readers\MicroscopyReader.class %TEMP_OUT%\microscopy\readers\
+REM Build path
+SET BUILD_PATH=%CURRENT_DIR%\build
 
-REM Package the jar file
-CD %TEMP_FOLDER%
-jar cvf MicroscopyReader.jar ch
-CD %CURRENT_DIR%
+ECHO Generating MicroscopyReader.jar to use in the microscopy core technology dropbox
 
-REM Move it to the build folder
-MOVE /Y %TEMP_FOLDER%\MicroscopyReader.jar %OUT%\
+ECHO Compiling classes...
+%JAVAC% -cp %CLASSPATH% -source 1.7 -target 1.7 @"%CURRENT_DIR%.\files.txt" -d %BUILD_PATH%
 
-REM Clean
-RMDIR /S /Q %TEMP_FOLDER%
+ECHO Packaging JAR archive...
 
-ECHO Done.
+REM Change to the build directory
+cd %BUILD_PATH%
+
+REM Delete current archive
+del MicroscopyReader.jar
+
+REM Create new archive
+%JAR% cvf MicroscopyReader.jar ch
+
+REM Delete the generated classes
+IF exist %CURRENT_DIR%\build\ch\ ( RMDIR /S /Q %CURRENT_DIR%\build\ch )
+
+REM Change back to original directory
+cd %CURRENT_DIR% 
+
+ECHO Generated JAR archive is .\build\MicroscopyReader.jar
+
