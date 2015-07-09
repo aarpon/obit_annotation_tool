@@ -1,7 +1,8 @@
 ECHO OFF
 
 REM Change to working directory
-CD C:\Users\pontia\Documents\openBISImporterToolset\eclipse\scu_annotation_tool\dist
+SET WDIR=%~dp0
+CD %WDIR%
 
 REM Create needed directories
 IF NOT EXIST .\win32 MKDIR .\win32
