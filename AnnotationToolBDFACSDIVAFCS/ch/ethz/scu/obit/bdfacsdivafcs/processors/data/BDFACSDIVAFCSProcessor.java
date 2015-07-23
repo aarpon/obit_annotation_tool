@@ -706,6 +706,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					wellDesc = new Well(wellName, file);
 					// Store attributes
 					wellDesc.addAttributes(getTubeOrWellAttributes(processor));
+					// Store parameter attributes
+					wellDesc.fcsFile.addAttributes(processor.parametersAttr);
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(wellKey, wellDesc);
 				}
@@ -735,6 +737,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					tubeDesc = new Tube(tubeName, file);	
 					// Store attributes
 					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
+					// Store parameter attributes
+					tubeDesc.fcsFile.addAttributes(processor.parametersAttr);
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
