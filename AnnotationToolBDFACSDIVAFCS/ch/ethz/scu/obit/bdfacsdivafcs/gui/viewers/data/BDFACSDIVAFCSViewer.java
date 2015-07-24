@@ -6,6 +6,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.model.FCSFileNode;
+import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.model.FCSFileParemeterListNode;
 import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.model.SpecimenNode;
 import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.model.TrayNode;
 import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.model.TubeNode;
@@ -163,6 +164,11 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 			} catch (IOException e1) {
 				outputPane.err("Could not parse file " + fcsFile + "!");
 			}
+		} else if (className.equals("FCSFileParameterList")) {
+			clearMetadataTable();
+			addAttributesToMetadataTable(
+					((BDFACSDIVAFCSProcessor.FCSFileParameterList)
+							nodeInfo).getAttributes());
 		} else {
 			clearMetadataTable();
 		}
@@ -198,6 +204,7 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 		TubeNode tube;
 		WellNode well;
 		FCSFileNode fcs;
+		FCSFileParemeterListNode fcsparam;
 
 		for (String expKey : folderDescriptor.experiments.keySet()) {
 
@@ -239,6 +246,10 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 						// Add the fcs files
 						fcs = new FCSFileNode(wl.fcsFile);
 						well.add(fcs);
+						
+						// Add the fcs file parameter list
+						fcsparam = new FCSFileParemeterListNode(wl.fcsFile.parameterList);
+						fcs.add(fcsparam);
 					}
 
 				}
@@ -266,6 +277,10 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 					// Add the fcs files
 					fcs = new FCSFileNode(tb.fcsFile);
 					tube.add(fcs);
+					
+					// Add the fcs file parameter list
+					fcsparam = new FCSFileParemeterListNode(tb.fcsFile.parameterList);
+					fcs.add(fcsparam);
 				}
 
 			}

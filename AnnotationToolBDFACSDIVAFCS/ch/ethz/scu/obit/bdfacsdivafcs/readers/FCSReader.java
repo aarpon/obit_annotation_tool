@@ -299,6 +299,30 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
+	 * Return the number of events in the dataset.
+	 * @return number of events.
+	 */
+	public int numEvents() {
+		int numEvents = 0;
+		if (TEXTMapStandard.containsKey("$TOT")) {
+			numEvents = Integer.parseInt(TEXTMapStandard.get("$TOT"));
+		}
+		return numEvents;
+	}
+
+	/**
+	 * Return the number of parameters in the dataset.
+	 * @return number of parameters.
+	 */
+	public int numParameters() {
+		int numParameters = 0;
+		if (TEXTMapStandard.containsKey("$PAR")) {
+			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
+		}
+		return numParameters;
+	}
+
+	/**
 	 * Parse the header.
 	 * @return true if the file header could be parsed successfully, false otherwise. 
 	 * @throws IOException
@@ -519,10 +543,16 @@ public final class FCSReader extends AbstractReader {
 	 */
 	private boolean processParameters() {
 
+		// Number of events
+		int numEvents = numEvents();
+
 		// Number of parameters
 		int numParameters = numParameters();
-		
-		// store the number of parameters
+
+		// Store the number of events
+		parametersAttr.put("numEvents", Integer.toString(numEvents));
+
+		// Store the number of parameters
 		parametersAttr.put("numParameters", Integer.toString(numParameters));
 		
 		// If there are no parameters, we leave.
@@ -609,30 +639,6 @@ public final class FCSReader extends AbstractReader {
 		}
 		
 		return true;
-	}
-
-	/**
-	 * Return the number of parameters in the dataset.
-	 * @return number of parameters.
-	 */
-	private int numParameters() {
-		int numParameters = 0;
-		if (TEXTMapStandard.containsKey("$PAR")) {
-			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
-		}
-		return numParameters;
-	}
-
-	/**
-	 * Return the number of events in the dataset.
-	 * @return number of events.
-	 */
-	private int numEvents() {
-		int numEvents = 0;
-		if (TEXTMapStandard.containsKey("$TOT")) {
-			numEvents = Integer.parseInt(TEXTMapStandard.get("$TOT"));
-		}
-		return numEvents;
 	}
 
 	/**
