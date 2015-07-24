@@ -39,10 +39,10 @@ public final class FCSReader extends AbstractReader {
 	/* Public instance variables */
 	
 	/**
-	 * ArrayList of Parameter's
+	 * String-string map of parametersAttr attributes
 	 */
-	public ArrayList<Parameter> parameters = new ArrayList<Parameter>();
-	
+	public Map<String, String> parametersAttr = new HashMap<String, String>();
+
 	/**
 	 * String-to-string map of key-value pairs for the standard FCS 3.0/3.1 keywords
 	 */
@@ -231,14 +231,10 @@ public final class FCSReader extends AbstractReader {
 		str += "\n\n";
 		str += "Parameters and their attributes:\n\n";
 
-		for (Parameter p : parameters) {
-			str += ("Parameter: name = " + p.name + ", label = " + p.label + 
-					", range = " + p.range + ", bits = " + p.bits + 
-					", decade = " + p.decade + ", " + "log = " + p.log + 
-					", logzero = " + p.logzero + ", gain = " + p.gain +
-					", voltage = " + p.voltage + "\n");
+		for (String key : parametersAttr.keySet()) {
+			str += (key + ": " + parametersAttr.get(key) + "\n");  
 		}
-
+		
 		return str;
 
 	}
@@ -300,6 +296,30 @@ public final class FCSReader extends AbstractReader {
 		allMap.putAll(TEXTMapStandard);
 		allMap.putAll(TEXTMapCustom);
 		return allMap;
+	}
+
+	/**
+	 * Return the number of events in the dataset.
+	 * @return number of events.
+	 */
+	public int numEvents() {
+		int numEvents = 0;
+		if (TEXTMapStandard.containsKey("$TOT")) {
+			numEvents = Integer.parseInt(TEXTMapStandard.get("$TOT"));
+		}
+		return numEvents;
+	}
+
+	/**
+	 * Return the number of parameters in the dataset.
+	 * @return number of parameters.
+	 */
+	public int numParameters() {
+		int numParameters = 0;
+		if (TEXTMapStandard.containsKey("$PAR")) {
+			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
+		}
+		return numParameters;
 	}
 
 	/**
@@ -523,104 +543,102 @@ public final class FCSReader extends AbstractReader {
 	 */
 	private boolean processParameters() {
 
+		// Number of events
+		int numEvents = numEvents();
+
 		// Number of parameters
 		int numParameters = numParameters();
+
+		// Store the number of events
+		parametersAttr.put("numEvents", Integer.toString(numEvents));
+
+		// Store the number of parameters
+		parametersAttr.put("numParameters", Integer.toString(numParameters));
+		
+		// If there are no parameters, we leave.
 		if (numParameters == 0) {
 			return false;
 		}
 
 		// Now go over the parameters and extract all info.
 		// Mind that parameter count starts at 1.
+		String key = "";
 		for (int i = 1; i <= numParameters; i++) {
-			
-			// New Parameter
-			Parameter param = new Parameter();
 
 			// Name
-			String name = TEXTMapStandard.get("$P" + i + "N");
-			if (name != null) {
-				param.name  = name;
-			}
-
+			key = "P" + i + "N";
+			String name = TEXTMapStandard.get("$" + key);
+			if (name == null) {
+				name  = "<not set>";
+			} 
+			parametersAttr.put(key, name);
+			
 			// Label
-			String label = TEXTMapStandard.get("$P" + i + "S");
-			if (label != null) {
-				param.label = label;
+			key = "P" + i + "S";
+			String label = TEXTMapStandard.get("$" + key);
+			if (label == null) {
+				label = "";
 			}
+			parametersAttr.put(key, label);
 			
 			// Range
-			String range = TEXTMapStandard.get("$P" + i + "R");
-			if (range != null) {
-				param.range = Integer.parseInt(range);
+			key = "P" + i + "R";
+			String range = TEXTMapStandard.get("$" + key);
+			if (range == null) {
+				range = "NaN";
 			}
+			parametersAttr.put(key, range);
 
 			// Bits
-			String bits = TEXTMapStandard.get("$P" + i + "B");
-			if (bits != null) {
-				param.bits  = Integer.parseInt(bits);
+			key = "P" + i + "B";
+			String bits = TEXTMapStandard.get("$" + key);
+			if (bits == null) {
+				bits  = "NaN";
 			}
-
+			parametersAttr.put(key, bits);
+			
 			// Linear or logarithmic amplifiers?
-			String decade = TEXTMapStandard.get("$P" + i + "E");
+			float log = 0.0f; float log_zero = 0.0f;
+			key = "P" + i + "E";
+			String decade = TEXTMapStandard.get("$" + key);
 			if (decade != null) {
 				String decadeParts[] = decade.split(",");
-				param.decade = Float.parseFloat(decadeParts[0]);
-				float value = Float.parseFloat(decadeParts[1]);
-				if (param.decade == 0.0) {
+				float f_decade = Float.parseFloat(decadeParts[0]);
+				float f_value = Float.parseFloat(decadeParts[1]);
+				if (f_decade == 0.0) {
 					// Amplification is linear or undefined
-					param.log = 0.0f;
-					param.logzero = 0.0f;
+					log = 0.0f;
+					log_zero = 0.0f;
 				} else {
-					param.log = 1.0f;
-					if (value == 0.0) {
-						param.logzero = 1.0f;
+					log = 1.0f;
+					if (f_value == 0.0) {
+						log_zero = 1.0f;
 					} else {
-						param.logzero = value;
+						log_zero = f_value;
 					}
 				}
 			}
-
+			parametersAttr.put(key + "_LOG", Float.toString(log));
+			parametersAttr.put(key + "_LOGZERO", Float.toString(log_zero));
+			
 			// Gain
-			String gain = TEXTMapStandard.get("$P" + i + "G");
-			if (gain != null) {
-				param.gain = Float.parseFloat(gain);
+			key = "P" + i + "G";
+			String gain = TEXTMapStandard.get("$" + key);
+			if (gain == null) {
+				gain = "NaN";
 			}
-
+			parametersAttr.put(key, gain);
+			
 			// Voltage
-			String voltage = TEXTMapStandard.get("$P" + i + "V");
-			if (voltage != null) {
-				param.voltage = Float.parseFloat(voltage);
+			key = "P" + i + "V";
+			String voltage = TEXTMapStandard.get("$" + key);
+			if (voltage == null) {
+				voltage = "NaN";
 			}
-
-			// Add the Parameter
-			parameters.add(param);
+			parametersAttr.put(key, voltage);
 		}
 		
 		return true;
-	}
-
-	/**
-	 * Return the number of parameters in the dataset.
-	 * @return number of parameters.
-	 */
-	private int numParameters() {
-		int numParameters = 0;
-		if (TEXTMapStandard.containsKey("$PAR")) {
-			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
-		}
-		return numParameters;
-	}
-
-	/**
-	 * Return the number of events in the dataset.
-	 * @return number of events.
-	 */
-	private int numEvents() {
-		int numEvents = 0;
-		if (TEXTMapStandard.containsKey("$TOT")) {
-			numEvents = Integer.parseInt(TEXTMapStandard.get("$TOT"));
-		}
-		return numEvents;
 	}
 
 	/**
@@ -752,27 +770,6 @@ public final class FCSReader extends AbstractReader {
 		
 		// Return success
 		return true;
-	}
-	
-	/**
-	 * Parameter class to store parameter attributes.
-	 * @author Aaron Ponti
-	 */
-	private class Parameter {
-		
-		// We initialize parameters with "invalid" values 
-		public String name = "<not set>";
-		public String label = "<not set>";
-		public int range = -1;
-		public int bits = -1;
-		public float decade = Float.NaN;
-		public float log = Float.NaN;
-		public float logzero = Float.NaN;
-		public float gain = Float.NaN;
-		public float voltage = Float.NaN;
-
-		public Parameter() {
-		}
 	}
 
 }
