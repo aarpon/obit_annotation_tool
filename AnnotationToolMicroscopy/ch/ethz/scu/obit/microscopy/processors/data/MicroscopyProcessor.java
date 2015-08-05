@@ -35,28 +35,37 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	/* Keep track of the folder level when recursing into subfolders */
 	private int folderLevel = 0;
 
-	/* List of supported file formats */
+	/* List of supported file formats
+	 * 
+	 * This is the list of extensions that should be readable by bioformats.
+	 * Some of them would not be compatible with oBIT at this stage, and so
+	 * the actual list of supported formats is much shorter.
+	 *
+	 *      ".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
+	 *      ".afm", ".aim", ".al3d", ".am", ".amiramesh", ".apl",
+	 *      ".arf", ".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2",
+	 *      ".crw", ".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2",
+	 *      ".dm3", ".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf",
+	 *      ".fff", ".ffr", ".fits", ".flex", ".fli", ".frm", ".gel",
+	 *      ".gif", ".grey", ".hdr", ".hed", ".his", ".htd", ".html",
+	 *      ".hx", ".ics", ".ids", ".img", ".ims", ".inr", ".ipl",
+	 *      ".ipm", ".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d",
+	 *      ".labels", ".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb",
+	 *      ".mea", ".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw",
+	 *      ".mtb", ".mvd2", ".naf", ".nd", ".nd2", ".ndpi", ".nef",
+	 *      ".nhdr", ".nrrd", ".obsep", ".oib", ".oif", ".ome", ".par",
+	 *      ".pcx", ".pds", ".pgm", ".pic", ".pict", ".png", ".pnl",
+	 *      ".pr3", ".ps", ".psd", ".r3d", ".raw", ".res", ".scn",
+	 *      ".sdt", ".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk",
+	 *      ".stp", ".svs", ".sxm", ".tfr", ".tga", ".tif", ".tiff",
+	 *      ".tnb", ".top", ".txt", ".v", ".vms", ".vsi", ".vws",
+	 *      ".wat", ".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys",
+	 *      ".zfp", ".zfr", ".zvi"));
+	 */
 	private final ArrayList<String> supportedFormats = new ArrayList<String>(
-			Arrays.asList(".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
-					".afm", ".aim", ".al3d", ".am", ".amiramesh", ".apl",
-					".arf", ".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2",
-					".crw", ".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2",
-					".dm3", ".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf",
-					".fff", ".ffr", ".fits", ".flex", ".fli", ".frm", ".gel",
-					".gif", ".grey", ".hdr", ".hed", ".his", ".htd", ".html",
-					".hx", ".ics", ".ids", ".img", ".ims", ".inr", ".ipl",
-					".ipm", ".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d",
-					".labels", ".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb",
-					".mea", ".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw",
-					".mtb", ".mvd2", ".naf", ".nd", ".nd2", ".ndpi", ".nef",
-					".nhdr", ".nrrd", ".obsep", ".oib", ".oif", ".ome", ".par",
-					".pcx", ".pds", ".pgm", ".pic", ".pict", ".png", ".pnl",
-					".pr3", ".ps", ".psd", ".r3d", ".raw", ".res", ".scn",
-					".sdt", ".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk",
-					".stp", ".svs", ".sxm", ".tfr", ".tga", ".tif", ".tiff",
-					".tnb", ".top", ".txt", ".v", ".vms", ".vsi", ".vws",
-					".wat", ".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys",
-					".zfp", ".zfr", ".zvi"));
+			Arrays.asList(".czi", ".dv", ".ics", ".ids", ".ims", ".lei", 
+					".lif", ".liff", ".lsm", ".nd", ".nd2", ".oib", ".oif",
+					".ome", ".r3d", ".stk", ".tif", ".tiff", ".zvi"));
 
 	/* Public instance variables */
 	public UserFolder folderDescriptor = null;
