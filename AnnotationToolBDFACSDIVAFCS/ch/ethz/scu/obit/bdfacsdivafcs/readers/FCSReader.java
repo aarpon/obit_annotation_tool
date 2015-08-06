@@ -7,15 +7,14 @@ import java.util.*;
 import ch.ethz.scu.obit.readers.AbstractReader;
 
 /**
- * FCSReader parses "Data File Standard for Flow Cytometry, 
- * Version FCS3.0 or FCS3.1" files.
+ * FCSReader parses "Data File Standard for Flow Cytometry, Version FCS3.0 or
+ * FCS3.1" files.
  * 
- * Parsing is currently not complete:
- * 	 - additional byte buffer manipulation needed for datatype "A" (ASCII)
- * 	 - only one DATA segment per file is processed (since apparently no vendor
- * 	   makes use of the possibility to store more than experiment per file)
- * 	 - ANALYSIS segment is not parsed
- *   - OTHER text segment is not parsed
+ * Parsing is currently not complete: - additional byte buffer manipulation
+ * needed for datatype "A" (ASCII) - only one DATA segment per file is processed
+ * (since apparently no vendor makes use of the possibility to store more than
+ * experiment per file) - ANALYSIS segment is not parsed - OTHER text segment is
+ * not parsed
  * 
  * @author Aaron Ponti
  */
@@ -23,11 +22,11 @@ public final class FCSReader extends AbstractReader {
 
 	/* Private instance variables */
 	private File filename;
-	private boolean enableDataParsing; 
+	private boolean enableDataParsing;
 	private RandomAccessFile in = null;
 	private String fcsVersion = "";
 	private int TEXTbegin = 0;
-	private int TEXTend   = 0;
+	private int TEXTend = 0;
 	private int DATAbegin = 0;
 	private int DATAend = 0;
 	private int ANALYSISbegin = 0;
@@ -37,14 +36,15 @@ public final class FCSReader extends AbstractReader {
 	private boolean isFileParsed = false;
 
 	/* Public instance variables */
-	
+
 	/**
 	 * String-string map of parametersAttr attributes
 	 */
 	public Map<String, String> parametersAttr = new HashMap<String, String>();
 
 	/**
-	 * String-to-string map of key-value pairs for the standard FCS 3.0/3.1 keywords
+	 * String-to-string map of key-value pairs for the standard FCS 3.0/3.1
+	 * keywords
 	 */
 	public Map<String, String> TEXTMapStandard = new LinkedHashMap<String, String>();
 
@@ -54,14 +54,17 @@ public final class FCSReader extends AbstractReader {
 	public Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
 
 	/**
-	 * DATA segment (linear array), one of IntBuffer, FloatBuffer, DoubleBuffer, CharBuffer
-	 * TODO Reformat in a more useful way (in a matrix [events x parameters], and correct type) 
+	 * DATA segment (linear array), one of IntBuffer, FloatBuffer, DoubleBuffer,
+	 * CharBuffer TODO Reformat in a more useful way (in a matrix [events x
+	 * parameters], and correct type)
 	 */
 	public Buffer DATA = null;
-	
+
 	/**
-	 * Constructor 
-	 * @param filename Name with full path of the file to be opened.
+	 * Constructor
+	 * 
+	 * @param filename
+	 *            Name with full path of the file to be opened.
 	 */
 	public FCSReader(File filename, boolean parseData) {
 		this.filename = filename;
@@ -72,7 +75,7 @@ public final class FCSReader extends AbstractReader {
 	 * Destructor.
 	 */
 	public void finalize() throws Throwable {
-	
+
 		// Make sure the file is closed
 		if (in != null) {
 			try {
@@ -82,21 +85,22 @@ public final class FCSReader extends AbstractReader {
 			}
 		}
 
-        // Call the parent finalize()
-        super.finalize();
+		// Call the parent finalize()
+		super.finalize();
 	}
 
 	/**
 	 * Return information regarding the file format.
+	 * 
 	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
-		return "Data File Standard for Flow Cytometry, "
-				+ "Version FCS3.0 and FCS3.1.";
+		return "Data File Standard for Flow Cytometry, " + "Version FCS3.0 and FCS3.1.";
 	}
-	
+
 	/**
 	 * Return the FCS file version
+	 * 
 	 * @return a String containing the file version (FCS3.0 or FCS3.1).
 	 */
 	public String getFCSVersion() {
@@ -104,7 +108,8 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
-	 * Parses the file to extract data and metadata. 
+	 * Parses the file to extract data and metadata.
+	 * 
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
@@ -114,7 +119,7 @@ public final class FCSReader extends AbstractReader {
 		try {
 
 			// We use a RandomAccessFile to be able to seek around freely
-			in = new RandomAccessFile(filename,"r");
+			in = new RandomAccessFile(filename, "r");
 
 			// Read the HEADER
 			parseHeader();
@@ -133,12 +138,12 @@ public final class FCSReader extends AbstractReader {
 				// Read the ANALYSIS (if present)
 				parseAnalysis();
 			}
-			
+
 			// Read the OTHER text segment (if present)
 			parseOther();
-		
+
 		} catch (IOException e) {
-			
+
 			errorMessage = "Could not open file.";
 			System.err.println(errorMessage);
 
@@ -157,16 +162,17 @@ public final class FCSReader extends AbstractReader {
 
 		// Reset the error message
 		errorMessage = "";
-		
+
 		// Store and return state
-		isFileParsed = (in != null); 
+		isFileParsed = (in != null);
 		return isFileParsed;
 
 	}
 
 	/**
 	 * Return the file name of associated to the FCSReader.
-	 * @return String containing the file name associated to the FCSReader. 
+	 * 
+	 * @return String containing the file name associated to the FCSReader.
 	 */
 	public String toString() {
 		return filename.getName();
@@ -174,39 +180,37 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Return a simplified class name to use in XML.
+	 * 
 	 * @return simplified class name.
 	 */
 	@Override
 	public String getType() {
 		return "fcs";
-	}	
-	
+	}
+
 	/**
-	 * Returns the stored File object (pointing to the FCS file being 
-	 * processed)
+	 * Returns the stored File object (pointing to the FCS file being processed)
+	 * 
 	 * @return File object pointing to the FCS file
 	 */
 	public File getFile() {
 		return filename;
 	}
-	
+
 	/**
 	 * Return the parsed FCSReader metadata information.
-	 * @return String containing the metadata of the FCSReader. 
+	 * 
+	 * @return String containing the metadata of the FCSReader.
 	 */
 	public String metadataDump() {
-		
+
 		if (!isFileParsed) {
 			return "File could not be parsed.";
 		}
 
-		String str = 
-				"Valid " + fcsVersion + " file with TEXT: "     + 
-						TEXTbegin     + " - " + TEXTend     + ", DATA: " +
-						DATAbegin     + " - " + DATAend     + ", ANALYSIS: " +
-						ANALYSISbegin + " - " + ANALYSISend + ", OTHER: " +
-						OTHERbegin    + ".\n" +
-						"DELIMITER: (char) "  + (int)DELIMITER + "\n\n";  
+		String str = "Valid " + fcsVersion + " file with TEXT: " + TEXTbegin + " - " + TEXTend + ", DATA: " + DATAbegin
+				+ " - " + DATAend + ", ANALYSIS: " + ANALYSISbegin + " - " + ANALYSISend + ", OTHER: " + OTHERbegin
+				+ ".\n" + "DELIMITER: (char) " + (int) DELIMITER + "\n\n";
 
 		// Output the list of standard key-value pairs
 		Set<String> keySet = TEXTMapStandard.keySet();
@@ -214,17 +218,17 @@ public final class FCSReader extends AbstractReader {
 		str += "Standard TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
 
 		for (String key : keySet) {
-			str += (key + ": " + TEXTMapStandard.get(key) + "\n");  
+			str += (key + ": " + TEXTMapStandard.get(key) + "\n");
 		}
 
-		// Output the list of custom key-value pairs 
+		// Output the list of custom key-value pairs
 		keySet = TEXTMapCustom.keySet();
 
 		str += "\n\n";
 		str += "Custom TEXT keyword-value pairs (" + keySet.size() + "):\n\n";
 
 		for (String key : keySet) {
-			str += (key + ": " + TEXTMapCustom.get(key) + "\n");  
+			str += (key + ": " + TEXTMapCustom.get(key) + "\n");
 		}
 
 		// Output the list of parameters (and their attributes)
@@ -232,15 +236,16 @@ public final class FCSReader extends AbstractReader {
 		str += "Parameters and their attributes:\n\n";
 
 		for (String key : parametersAttr.keySet()) {
-			str += (key + ": " + parametersAttr.get(key) + "\n");  
+			str += (key + ": " + parametersAttr.get(key) + "\n");
 		}
-		
+
 		return str;
 
 	}
 
 	/**
 	 * Returns all standard FCS 3.0/3.1 keywords as a String - String map
+	 * 
 	 * @return The String - String Map of all standard FCS 3.0/3.1 keywords
 	 */
 	public Map<String, String> getStandardKeywords() {
@@ -249,9 +254,11 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Return the value associated to a standard FCS 3.0/3.1 keyword or empty
-	 * @param key One of the standard keywords (staring with "$")
-	 * @return The value associated with the passed keyword or empty String
-	 * if not found
+	 * 
+	 * @param key
+	 *            One of the standard keywords (staring with "$")
+	 * @return The value associated with the passed keyword or empty String if
+	 *         not found
 	 */
 	public String getStandardKeyword(String key) {
 		if (TEXTMapStandard.containsKey(key)) {
@@ -262,21 +269,24 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
-	 * Returns all custom, non FCS 3.0/3.1-compliant keywords as a String - 
+	 * Returns all custom, non FCS 3.0/3.1-compliant keywords as a String -
 	 * String map
-	 * @return The String - String Map of all custom, non FCS 
-	 * 3.0/3.1-compliant keywords
+	 * 
+	 * @return The String - String Map of all custom, non FCS 3.0/3.1-compliant
+	 *         keywords
 	 */
 	public Map<String, String> getCustomKeywords() {
 		return TEXTMapStandard;
 	}
-	
+
 	/**
 	 * Return the value associated with a custom, non FCS 3.0/3.1-compliant
 	 * keyword or empty
-	 * @param key A custom keywords (without $ at the beginning)
-	 * @return The value associated with the passed keyword or empty String
-	 * if not found
+	 * 
+	 * @param key
+	 *            A custom keywords (without $ at the beginning)
+	 * @return The value associated with the passed keyword or empty String if
+	 *         not found
 	 */
 	public String getCustomKeyword(String key) {
 		if (TEXTMapCustom.containsKey(key)) {
@@ -285,10 +295,11 @@ public final class FCSReader extends AbstractReader {
 			return "";
 		}
 	}
-	
+
 	/**
-	 * Returns all keywords as a String - String map (FCS 3.0/3.1-compliant 
-	 * and custom)
+	 * Returns all keywords as a String - String map (FCS 3.0/3.1-compliant and
+	 * custom)
+	 * 
 	 * @return The String - String Map of all keywords
 	 */
 	public Map<String, String> getAllKeywords() {
@@ -300,6 +311,7 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Return the number of events in the dataset.
+	 * 
 	 * @return number of events.
 	 */
 	public int numEvents() {
@@ -312,6 +324,7 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Return the number of parameters in the dataset.
+	 * 
 	 * @return number of parameters.
 	 */
 	public int numParameters() {
@@ -323,54 +336,153 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
+	 * Export the read data to a CSV file
+	 * 
+	 * @param csvFile
+	 *            Full path of the CSV file
+	 * @return true if the CSV file could be saved, false otherwise.
+	 */
+	public boolean exportDataToCSV(File csvFile) {
+
+		FileWriter fw;
+		try {
+			fw = new FileWriter(csvFile);
+		} catch (IOException e) {
+			return false;
+		}
+		BufferedWriter writer = new BufferedWriter(fw);
+
+		// Write the parameters names as header line
+		for (int i = 1; i <= numParameters(); i++) {
+			try {
+				writer.write(parametersAttr.get("P" + i + "N") + ",");
+			} catch (IOException e) {
+				// Close writer
+				try {
+					writer.close();
+				} catch (IOException e1) {
+					return false;
+				}
+				return false;
+			}
+		}
+
+		// Next line
+		try {
+			writer.write("\n");
+		} catch (IOException e) {
+			// Close writer
+			try {
+				writer.close();
+			} catch (IOException e1) {
+				return false;
+			}
+			return false;
+		}
+
+		// Store some constants
+		int numParameters = numParameters();
+		String datatype = datatype();
+
+		// Write the values
+		int nParameter = 0;
+		while (DATA.hasRemaining()) {
+			try {
+				if (datatype.equals("F")) {
+					writer.write(((FloatBuffer) DATA).get() + ",");
+				} else if (datatype.equals("I")) {
+					writer.write(((IntBuffer) DATA).get() + ",");
+				} else if (datatype.equals("D")) {
+					writer.write(((DoubleBuffer) DATA).get() + ",");
+				} else if (datatype.equals("A")) {
+					System.out.println("Data is stored with ASCII-encoded integer value."
+							+ "Additional processing is required which is not implemented yet!");
+					writer.write(((CharBuffer) DATA).get() + ",");
+				} else {
+					throw new IOException("Unknown data type!");
+				}
+
+				// New line
+				nParameter++;
+				if (nParameter == numParameters) {
+					writer.write("\n");
+					nParameter = 0;
+				}
+			} catch (IOException e) {
+				// Close writer
+				try {
+					writer.close();
+				} catch (IOException e1) {
+					return false;
+				}
+				return false;
+			}
+		}
+
+		// Close writer
+		try {
+			writer.close();
+		} catch (IOException e) {
+			return false;
+		}
+
+		return true;
+
+	}
+
+	/**
 	 * Parse the header.
-	 * @return true if the file header could be parsed successfully, false otherwise. 
+	 * 
+	 * @return true if the file header could be parsed successfully, false
+	 *         otherwise.
 	 * @throws IOException
 	 */
 	private boolean parseHeader() throws IOException {
-		
+
 		// Read and check the version
 		in.seek(0);
 		byte[] VERSION = new byte[6];
 		in.read(VERSION);
 		fcsVersion = new String(VERSION);
-		if (!(fcsVersion.equals("FCS3.0") || 
-				fcsVersion.equals("FCS3.1"))) {
-			errorMessage = filename + 
-					" is not a valid FCS version 3.0 or 3.1 file!";
+		if (!(fcsVersion.equals("FCS3.0") || fcsVersion.equals("FCS3.1"))) {
+			errorMessage = filename + " is not a valid FCS version 3.0 or 3.1 file!";
 			System.out.println(errorMessage);
 			return false;
 		}
-		
+
 		// We will use an 8-byte array several times in the following
 		byte[] eightByteArray = new byte[8];
-		
+
 		// ASCII-encoded offset to first byte of TEXT segment (bytes 10 - 17)
 		in.seek(10);
 		in.read(eightByteArray);
 		TEXTbegin = Integer.parseInt((new String(eightByteArray)).trim());
-		
+
 		// ASCII-encoded offset to last byte of TEXT segment (bytes 18 - 25)
 		in.seek(18);
 		in.read(eightByteArray);
 		TEXTend = Integer.parseInt((new String(eightByteArray)).trim());
-		
+
 		// ASCII-encoded offset to first byte of DATA segment (bytes 26 - 33)
-		// This can be a valid offset, or 0: if it is 0, it means that the segment
+		// This can be a valid offset, or 0: if it is 0, it means that the
+		// segment
 		// is larger than 99,999,999 bytes
 		in.seek(26);
 		in.read(eightByteArray);
 		DATAbegin = Integer.parseInt((new String(eightByteArray)).trim());
-		
+
 		// ASCII-encoded offset to last byte of DATA segment (bytes 34 - 41)
-		// This can be a valid offset, or 0: if it is 0, it means that the segment
+		// This can be a valid offset, or 0: if it is 0, it means that the
+		// segment
 		// is larger than 99,999,999 bytes
 		in.seek(34);
 		in.read(eightByteArray);
 		DATAend = Integer.parseInt((new String(eightByteArray)).trim());
-		
-		// ASCII-encoded offset to first byte of ANALYSIS segment (bytes 42 - 49)
-		// This can be a valid offset, 0, or even blank. If 0, $BEGINANALYSIS must 
+
+		// ASCII-encoded offset to first byte of ANALYSIS segment (bytes 42 -
+		// 49)
+		// This can be a valid offset, 0, or even blank. If 0, $BEGINANALYSIS
+		// must
 		// be checked
 		in.seek(42);
 		in.read(eightByteArray);
@@ -380,9 +492,9 @@ public final class FCSReader extends AbstractReader {
 		} else {
 			ANALYSISbegin = Integer.parseInt(tmp);
 		}
-		
+
 		// ASCII-encoded offset to last byte of ANALYSIS segment (bytes 50 - 57)
-		// This can be a valid offset, 0, or even blank. If 0, $ENDANALYSIS must 
+		// This can be a valid offset, 0, or even blank. If 0, $ENDANALYSIS must
 		// be checked
 		in.seek(50);
 		tmp = (new String(eightByteArray)).trim();
@@ -392,7 +504,8 @@ public final class FCSReader extends AbstractReader {
 			ANALYSISend = Integer.parseInt(tmp);
 		}
 
-		// ASCII-encoded offset to user defined OTHER segments (bytes 58 - beginning of next segment)
+		// ASCII-encoded offset to user defined OTHER segments (bytes 58 -
+		// beginning of next segment)
 		in.seek(58);
 		tmp = (new String(eightByteArray)).trim();
 		if (tmp.length() == 0) {
@@ -400,49 +513,53 @@ public final class FCSReader extends AbstractReader {
 		} else {
 			OTHERbegin = Integer.parseInt(tmp);
 		}
-		
-		// The TEXT and DATA offsets can theoretically be swapped in the header segment
+
+		// The TEXT and DATA offsets can theoretically be swapped in the header
+		// segment
 		swapOffsetsIfNeeded();
-		
+
 		return true;
 	}
 
 	/**
 	 * Parse the TEXT segment.
+	 * 
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
 	 */
-	private boolean parseText() throws IOException  {
+	private boolean parseText() throws IOException {
 		// Read the TEXT segment
 		in.seek(TEXTbegin);
-		int LEN = (TEXTend - TEXTbegin + 1); // TEXT cannot be longer than 99,999,999 bytes
+		int LEN = (TEXTend - TEXTbegin + 1); // TEXT cannot be longer than
+												// 99,999,999 bytes
 		byte[] bText = new byte[LEN];
 		in.read(bText);
-		
+
 		// Get the delimiter character
-		DELIMITER = (char)bText[0];
+		DELIMITER = (char) bText[0];
 
 		// Get the keyword-value pairs and store them in the hash map
 		storeKeyValuePairs(new String(bText));
-		
+
 		return true;
 	}
 
 	/**
 	 * Parse the DATA (events) segment.
-	 * @return true if the parsing was successful (or no data was present), false otherwise.
+	 * 
+	 * @return true if the parsing was successful (or no data was present),
+	 *         false otherwise.
 	 * @throws IOException
-	 * TODO Add support for multiple DATA segments.
+	 *             TODO Add support for multiple DATA segments.
 	 */
-	private boolean parseData() throws IOException  {
+	private boolean parseData() throws IOException {
 
 		// Seek to the DATA segment
 		long dataOffset;
 		try {
-			dataOffset = Long.parseLong(TEXTMapStandard.get("$BEGINDATA").trim()); 
+			dataOffset = Long.parseLong(TEXTMapStandard.get("$BEGINDATA").trim());
 		} catch (NumberFormatException e) {
-			errorMessage = "Invalid offset for the DATA segment! " +
-					"This is a bug! Please report it.";
+			errorMessage = "Invalid offset for the DATA segment! " + "This is a bug! Please report it.";
 			System.out.println(errorMessage);
 			return false;
 		}
@@ -450,10 +567,10 @@ public final class FCSReader extends AbstractReader {
 			System.out.println("No DATA present.");
 			return true;
 		}
-		
+
 		// Seek to the beginning of the data offset
 		in.seek(dataOffset);
-		
+
 		// Read and store the data
 		return readDataBlock();
 
@@ -461,31 +578,34 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Parse the ANALYSIS segment.
+	 * 
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
-	 * TODO Implement
+	 *             TODO Implement
 	 */
-	private boolean parseAnalysis() throws IOException  {
-		return true;		
+	private boolean parseAnalysis() throws IOException {
+		return true;
 	}
 
 	/**
 	 * Parse the OTHER segment.
+	 * 
 	 * @return true if parsing was successful, false otherwise.
 	 * @throws IOException
-	 * TODO Implement
+	 *             TODO Implement
 	 */
 	private boolean parseOther() throws IOException {
-		return true;		
+		return true;
 	}
 
 	/**
-	 * The TEXT and DATA offsets can theoretically be swapped in the header segment.
-	 * We make sure that TEXT is assigned the lower and DATA the higher offset.
+	 * The TEXT and DATA offsets can theoretically be swapped in the header
+	 * segment. We make sure that TEXT is assigned the lower and DATA the higher
+	 * offset.
 	 */
 	private void swapOffsetsIfNeeded() {
 		// If the data block is larger than 99,999,999 bytes,
-		// DATAbegin will be 0. 
+		// DATAbegin will be 0.
 		// In this case we do NOT want to swap!
 		if (DATAbegin == 0) {
 			return;
@@ -497,36 +617,40 @@ public final class FCSReader extends AbstractReader {
 			DATAbegin = tmp;
 			tmp = TEXTend;
 			TEXTend = DATAend;
-			DATAend = tmp;			
+			DATAend = tmp;
 		}
 	}
 
 	/**
 	 * Extracts and returns the value in a segment for a given key.
-	 * @param segment String containing the full segment (e.g. TEXT).
+	 * 
+	 * @param segment
+	 *            String containing the full segment (e.g. TEXT).
 	 */
 	private void storeKeyValuePairs(String segment) {
 		assert(segment.charAt(0) == DELIMITER);
 		assert(segment.charAt(segment.length() - 1) == DELIMITER);
-		
-		// Process all 
+
+		// Process all
 		int beginIndex = 0;
 		int interIndex = 0;
-		int endIndex   = 0;
-		
+		int endIndex = 0;
+
 		// Parse the full segment
 		while (true) {
-			interIndex   = segment.indexOf(DELIMITER, beginIndex + 1);
+			interIndex = segment.indexOf(DELIMITER, beginIndex + 1);
 			if (interIndex == -1) {
-					break;
+				break;
 			}
-			endIndex     = segment.indexOf(DELIMITER, interIndex + 1);
-			String key   = segment.substring(beginIndex + 1, interIndex).trim();
+			endIndex = segment.indexOf(DELIMITER, interIndex + 1);
+			String key = segment.substring(beginIndex + 1, interIndex).trim();
 			String value = segment.substring(interIndex + 1, endIndex).trim();
-			
-			// If the key starts with a $ sign, we found a standard FCS keyword and
-			// we store it in the TEXTMapStandard map; otherwise, we have a custom 
-			// keyword we store it in the TEXTMapCustom map 
+
+			// If the key starts with a $ sign, we found a standard FCS keyword
+			// and
+			// we store it in the TEXTMapStandard map; otherwise, we have a
+			// custom
+			// keyword we store it in the TEXTMapCustom map
 			if (key.charAt(0) == '$') {
 				TEXTMapStandard.put(key, value);
 			} else {
@@ -535,11 +659,12 @@ public final class FCSReader extends AbstractReader {
 			beginIndex = endIndex;
 		}
 	}
-	
+
 	/**
 	 * Process the extracted parameters from the standard TEXT map.
-	 * @return 	true if there were parameters and they could be processed successfully,
-	 * 			false otherwise.
+	 * 
+	 * @return true if there were parameters and they could be processed
+	 *         successfully, false otherwise.
 	 */
 	private boolean processParameters() {
 
@@ -554,7 +679,7 @@ public final class FCSReader extends AbstractReader {
 
 		// Store the number of parameters
 		parametersAttr.put("numParameters", Integer.toString(numParameters));
-		
+
 		// If there are no parameters, we leave.
 		if (numParameters == 0) {
 			return false;
@@ -569,10 +694,10 @@ public final class FCSReader extends AbstractReader {
 			key = "P" + i + "N";
 			String name = TEXTMapStandard.get("$" + key);
 			if (name == null) {
-				name  = "<not set>";
-			} 
+				name = "<not set>";
+			}
 			parametersAttr.put(key, name);
-			
+
 			// Label
 			key = "P" + i + "S";
 			String label = TEXTMapStandard.get("$" + key);
@@ -580,7 +705,7 @@ public final class FCSReader extends AbstractReader {
 				label = "";
 			}
 			parametersAttr.put(key, label);
-			
+
 			// Range
 			key = "P" + i + "R";
 			String range = TEXTMapStandard.get("$" + key);
@@ -593,12 +718,13 @@ public final class FCSReader extends AbstractReader {
 			key = "P" + i + "B";
 			String bits = TEXTMapStandard.get("$" + key);
 			if (bits == null) {
-				bits  = "NaN";
+				bits = "NaN";
 			}
 			parametersAttr.put(key, bits);
-			
+
 			// Linear or logarithmic amplifiers?
-			float log = 0.0f; float log_zero = 0.0f;
+			float log = 0.0f;
+			float log_zero = 0.0f;
 			key = "P" + i + "E";
 			String decade = TEXTMapStandard.get("$" + key);
 			if (decade != null) {
@@ -620,7 +746,7 @@ public final class FCSReader extends AbstractReader {
 			}
 			parametersAttr.put(key + "_LOG", Float.toString(log));
 			parametersAttr.put(key + "_LOGZERO", Float.toString(log_zero));
-			
+
 			// Gain
 			key = "P" + i + "G";
 			String gain = TEXTMapStandard.get("$" + key);
@@ -628,7 +754,7 @@ public final class FCSReader extends AbstractReader {
 				gain = "NaN";
 			}
 			parametersAttr.put(key, gain);
-			
+
 			// Voltage
 			key = "P" + i + "V";
 			String voltage = TEXTMapStandard.get("$" + key);
@@ -636,18 +762,26 @@ public final class FCSReader extends AbstractReader {
 				voltage = "NaN";
 			}
 			parametersAttr.put(key, voltage);
+			
+			// Log or linear
+			key = "P" + i + "DISPLAY";
+			String display = TEXTMapCustom.get(key);
+			if (display == null) {
+				display = "LIN";
+			}
+			parametersAttr.put(key, display);
 		}
-		
+
 		return true;
 	}
 
 	/**
-	 * Return the datatype of the data bytes, one of "I", "F", "D", or "A".
-	 * I: unsigned integer;
-	 * F: single-precision IEEE floating point;
-	 * D: double-precision IEEE floating point;
-	 * A: ASCII.
-	 * @return datatype of the measurements ("I", "F", "D", "A"), or "N" if not defined.
+	 * Return the datatype of the data bytes, one of "I", "F", "D", or "A". I:
+	 * unsigned integer; F: single-precision IEEE floating point; D:
+	 * double-precision IEEE floating point; A: ASCII.
+	 * 
+	 * @return datatype of the measurements ("I", "F", "D", "A"), or "N" if not
+	 *         defined.
 	 */
 	private String datatype() {
 		String datatype = "N";
@@ -656,14 +790,14 @@ public final class FCSReader extends AbstractReader {
 		}
 		return datatype;
 	}
-	
+
 	/**
-	 * Return the endianity of the data bytes, one of "L", "B", "U".
-	 * L: little endian (1,2,3,4);
-	 * B: big endian (4,3,2,1);
-	 * U: unsupported (3,4,1,2); 
-	 * N: not defined.
-	 * @return endianity of the data bytes ("L", "B", "U"), or "N" if not defined.
+	 * Return the endianity of the data bytes, one of "L", "B", "U". L: little
+	 * endian (1,2,3,4); B: big endian (4,3,2,1); U: unsupported (3,4,1,2); N:
+	 * not defined.
+	 * 
+	 * @return endianity of the data bytes ("L", "B", "U"), or "N" if not
+	 *         defined.
 	 */
 	private String endianity() {
 		String datatype = "N";
@@ -681,12 +815,15 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
-	 * Return the data acquisition mode, one of "C", "L", "U".
-	 * C: One correlated multivariate histogram stored as a multidimensional array;
-	 * L: list mode: for each event, the value of each parameter is stored in the order in which the parameters are described. 
-	 * U: Uncorrelated univariate histograms: there can be more than one univariate histogram per data set. 
+	 * Return the data acquisition mode, one of "C", "L", "U". C: One correlated
+	 * multivariate histogram stored as a multidimensional array; L: list mode:
+	 * for each event, the value of each parameter is stored in the order in
+	 * which the parameters are described. U: Uncorrelated univariate
+	 * histograms: there can be more than one univariate histogram per data set.
 	 * N: not defined.
-	 * @return acquisition mode of the data ("C", "L", "U"), or "N" if not defined.
+	 * 
+	 * @return acquisition mode of the data ("C", "L", "U"), or "N" if not
+	 *         defined.
 	 */
 	private String mode() {
 		if (TEXTMapStandard.containsKey("$MODE")) {
@@ -699,23 +836,21 @@ public final class FCSReader extends AbstractReader {
 		}
 		return "N";
 	}
-	
+
 	/**
-	 * Reads and stores the data segment 
+	 * Reads and stores the data segment
+	 * 
 	 * @return true if reading the data segment was successful, false otherwise
-	 * TODO Use the information about the type of data
+	 *         TODO Use the information about the type of data
 	 */
 	private boolean readDataBlock() {
-		
+
 		// To read the data in the correct format we need to know the
 		// number of parameters, the number of events, the datatype and
 		// the endianity.
-		int nParameters   = numParameters();
-		int nEvents       = numEvents();
-		String datatype   = datatype();
-		String endianity  = endianity();
-		String mode       = mode();
-		
+		String datatype = datatype();
+		String endianity = endianity();
+
 		// Endianity
 		ByteOrder endian;
 		if (endianity.equals("L")) {
@@ -727,16 +862,16 @@ public final class FCSReader extends AbstractReader {
 			System.out.println(errorMessage);
 			return false;
 		}
-		
+
 		// Allocate a (byte) buffer to hold the data segment
 		int size = (DATAend - DATAbegin + 1);
 		byte[] recordBuffer = new byte[size];
 
-		// Create a ByteBuffer wrapped around the byte array that 
+		// Create a ByteBuffer wrapped around the byte array that
 		// reads with the desired endianity
 		ByteBuffer record = ByteBuffer.wrap(recordBuffer);
 		record.order(endian);
-		
+
 		// Read
 		try {
 			in.read(recordBuffer);
@@ -745,32 +880,33 @@ public final class FCSReader extends AbstractReader {
 			System.out.println(errorMessage);
 			return false;
 		}
-		
+
 		// Read the data with the correct endianity and data type
 		// TODO In particular for datatype = 'A', additional handling
 		// will be necessary
 		if (datatype.equals("I")) {
-			DATA = record.asIntBuffer(); 
+			DATA = record.asIntBuffer();
 		} else if (datatype.equals("F")) {
 			DATA = record.asFloatBuffer();
 		} else if (datatype.equals("D")) {
-			DATA = record.asDoubleBuffer();			
+			DATA = record.asDoubleBuffer();
 		} else if (datatype.equals("A")) {
-			System.out.println("Data is stored with ASCII-encoded integer value." +
-					"Additional processing is required which is not implemented yet!");
+			System.out.println("Data is stored with ASCII-encoded integer value."
+					+ "Additional processing is required which is not implemented yet!");
 			DATA = record.asCharBuffer();
 		} else {
 			errorMessage = "Unknown data type!";
 			System.out.println(errorMessage);
 			return false;
 		}
-		
+
+		// Make sure to be at the beginning of the buffer
+		DATA.rewind();
+
 		// Reset error message
 		errorMessage = "";
-		
+
 		// Return success
 		return true;
 	}
-
 }
-
