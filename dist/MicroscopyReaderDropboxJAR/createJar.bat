@@ -7,7 +7,7 @@ SET JAR=jar
 REM Get current directory
 SET CURRENT_DIR=%CD%
 
-REM Delete ther existing classes if they existing
+REM Delete the existing classes if they existing
 IF exist %CURRENT_DIR%\build\ch\ ( RMDIR /S /Q %CURRENT_DIR%\build\ch )
 
 REM Classpath
