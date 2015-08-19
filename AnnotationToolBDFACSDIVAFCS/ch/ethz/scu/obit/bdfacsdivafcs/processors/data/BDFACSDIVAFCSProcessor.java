@@ -170,7 +170,13 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
-		// Experiment description
+        // Experiment version
+        // This is used to keep track of the structure of the experiment so that
+        // older versions of Experiments stored in openBIS are recognized and 
+        // can potentially be upgraded. 
+        public final String version = "1";
+
+        // Experiment description
 		public String description = "";
 		
 		// Experiment tags (comma-separated list)

@@ -128,7 +128,8 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 			Map<String, String> expUserAttributes = 
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", expDescr.description); 
-			expUserAttributes.put("tags", expDescr.tags); 
+			expUserAttributes.put("tags", expDescr.tags);
+			expUserAttributes.put("version", expDescr.version);
 			expDescr.addUserAttributes(expUserAttributes);
 			
 			// Now get the Trays and Specimens children of the Experiment

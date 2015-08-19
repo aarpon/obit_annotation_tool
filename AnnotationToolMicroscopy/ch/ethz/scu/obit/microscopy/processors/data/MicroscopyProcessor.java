@@ -385,6 +385,12 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class Experiment extends ExperimentDescriptor {
 
+        // Experiment version
+        // This is used to keep track of the structure of the experiment
+        // so that older versions of Experiments stored in openBIS are
+		// recognized and can potentially be upgraded. 
+        public final String version = "1";
+
 		// Experiment description
 		public String description = "";
 

@@ -150,7 +150,8 @@ public final class MicroscopyEditor extends AbstractEditor {
 					new Hashtable<String, String>();
 			expUserAttributes.put("description", 
 					currentMetadata.getExperiment().description); 
-			expUserAttributes.put("tags", expDescr.tags); 
+			expUserAttributes.put("tags", expDescr.tags);
+			expUserAttributes.put("version", expDescr.version);
 			expDescr.addUserAttributes(expUserAttributes);
 
 			// Now get the MicroscopyFile children of the Experiment
