@@ -23,7 +23,7 @@ public class TestFCSProcessor {
 		//FCSProcessor processor = new FCSProcessor("/work/openbis/openbis_data/Quality Control MD/Kymb 090512/488 and 405 excitation_Tube_001.fcs", false);
 		
 		// Exported FCS - Tray
-		FCSReader processor = new FCSReader(new File("/work/openbis/openbis_data/Quality Control MD/Kymb 090512/96 Well - V bottom/Specimen_001_A10_A10.fcs"), false);
+		FCSReader processor = new FCSReader(new File("F:/Data/oBIT/March_2015_20150324_001.fcs"), false);
 		
 		try {
 			processor.parse();
@@ -33,6 +33,8 @@ public class TestFCSProcessor {
 		}
 		
 		System.out.println(processor.metadataDump());
+	
+		processor.exportDataToCSV(new File("F:/Data/oBIT/March_2015_20150324_001.cvs"));
 		
 	}
 

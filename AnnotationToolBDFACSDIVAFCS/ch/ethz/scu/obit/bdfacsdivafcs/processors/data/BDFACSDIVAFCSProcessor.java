@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.model.SampleDescriptor;
 import ch.ethz.scu.obit.bdfacsdivafcs.readers.FCSReader;
 import ch.ethz.scu.obit.processors.AbstractProcessor;
+import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
@@ -169,7 +170,13 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
-		// Experiment description
+        // Experiment version
+        // This is used to keep track of the structure of the experiment so that
+        // older versions of Experiments stored in openBIS are recognized and 
+        // can potentially be upgraded. 
+        public final String version = "1";
+
+        // Experiment description
 		public String description = "";
 		
 		// Experiment tags (comma-separated list)
@@ -288,6 +295,11 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	public class FCSFile extends DatasetDescriptor {
 
 		/**
+		 * List of parameters with their attributes
+		 */
+		public FCSFileParameterList parameterList = null;
+
+		/**
 		 * Constructor.
 		 * @param fcsFileName FCS file name with full path
 		 */
@@ -327,6 +339,49 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	}
 	
+	/**
+	 * Descriptor representing all parameters associated to an FCS File.
+	 * An FCSFileParameterList is always a child of a FCS File.
+	 * @author Aaron Ponti
+	 */
+	public class FCSFileParameterList extends AbstractDescriptor {
+
+		/**
+		 * Constructor
+		 * @param numEvents Number of events.
+		 * @param numParameters Number of parameters.
+		 * @param parameterAttrib List of Parameter attributes.
+		 */
+		public FCSFileParameterList(int numEvents, int numParameters, 
+				Map<String, String> parameterAttrib) {
+
+			// Set the parameter number and lists and the associated event 
+			// number.
+			attributes.put("numEvents", Integer.toString(numEvents));
+			attributes.put("numParameters", Integer.toString(numParameters));
+			attributes.putAll(parameterAttrib);
+		}
+
+		/**
+		 * Return a String representation of the extracted FCS file.
+		 * @return String representation of the FCS file.
+		 */
+		@Override
+		public String toString() {
+			return "Parameters";
+		}
+
+		/**
+		 * Return a simplified class name to use in XML.
+		 * @return simplified class name.
+		 */
+		@Override		
+		public String getType() {
+			return "FCSFileParamList";
+		}
+
+	}
+		
 	/**
 	 * Descriptor representing a specimen obtained from the FCS file.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
@@ -706,8 +761,14 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					wellDesc = new Well(wellName, file);
 					// Store attributes
 					wellDesc.addAttributes(getTubeOrWellAttributes(processor));
+					// Store events and parameter attributes
+					wellDesc.fcsFile.parameterList = 
+							new FCSFileParameterList(
+									processor.numEvents(),
+									processor.numParameters(),
+									processor.parametersAttr);
 					// Store it in the specimen descriptor
-					specDesc.tubes.put(wellKey, wellDesc);
+					specDesc.tubes.put(wellKey, wellDesc);				
 				}
 	
 			} else {
@@ -735,6 +796,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					tubeDesc = new Tube(tubeName, file);	
 					// Store attributes
 					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
+					// Store events and parameter attributes
+					tubeDesc.fcsFile.parameterList = 
+							new FCSFileParameterList(
+									processor.numEvents(),
+									processor.numParameters(),
+									processor.parametersAttr);
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
