@@ -70,7 +70,7 @@ public class UserSettingsManager {
 	private void initialize(ArrayList<String> configuredServers) {
 		listUserSettings = new ArrayList<UserSettings>();
 		for (int i = 0; i < configuredServers.size(); i++) {
-			listUserSettings.add(new UserSettings());
+			listUserSettings.add(new UserSettings(configuredServers.get(i)));
 		}
 		favoriteServerSettingsIndex = 0;
 		currentServerSettingsIndex = 0;
