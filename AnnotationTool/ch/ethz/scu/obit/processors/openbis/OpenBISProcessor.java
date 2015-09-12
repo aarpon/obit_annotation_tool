@@ -37,6 +37,8 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.IGeneralInformationService
  */
 public class OpenBISProcessor {
 
+	AppSettingsManager appManager;
+	
 	private String openBISURL = "";
 	private String userName = "";
 	private String userPassword = "";
@@ -64,20 +66,39 @@ public class OpenBISProcessor {
 	 */
 	public OpenBISProcessor() {
 
-		// Get the openBIS URL from the appProperties
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
+		// Load the application settings
+		appManager = new AppSettingsManager();
+		if (! appManager.isFileValid()) {
 			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
+					"The application settings are either not present " +
+					"or not valid!\n" +
 			"Please contact your administrator. The application\n" +
 			"will now exit!",
 			"Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
+		
+		// Load the user settings
+		UserSettingsManager userManager = new UserSettingsManager();
 
-		// Set the URL
-		this.openBISURL = manager.getSettingValue("OpenBISURL");
-
+		// Get the configure openBIS URLs
+		ArrayList<String> configuredServers = appManager.getAllServers();
+		
+		// Get the favorite server (if set)
+		String favoriteServer = userManager.getFavoriteOpenBISServer();
+		
+		// Pick the favorite server is possible, otherwise revert to the
+		// default one from the application settings
+		if (configuredServers.contains(favoriteServer)) {
+			// Set the favorite URL
+			this.openBISURL = favoriteServer;
+			appManager.setServer(favoriteServer);
+		} else {
+			// Set the default URL for the machine
+			this.openBISURL = configuredServers.get(0);
+			appManager.setServer(configuredServers.get(0));
+		}
+		
 	}
 	
 	/**
@@ -152,13 +173,6 @@ public class OpenBISProcessor {
 		if (isLoggedIn) {
 			return true;
 		}
-		
-		// Now save the user settings
-		AppSettingsManager manager = new AppSettingsManager();
-		UserSettingsManager userManager = new UserSettingsManager(
-				manager.getSettingsForServer(openBISURL));
-		userManager.save();
-		manager = null;
 	
 		// Create a thread for logging in to openBIS and returning an
 		// IOpenbisServiceFacade
@@ -227,7 +241,7 @@ public class OpenBISProcessor {
 		
 		// Should we accept self-signed certificates?
 		String acceptSelfSignedCerts = 
-				userManager.getSettingValue("AcceptSelfSignedCertificates");
+				appManager.getSettingValue("AcceptSelfSignedCertificates");
 
 		// Set the force-accept-ssl-certificate option if requested
 		// by the administrator

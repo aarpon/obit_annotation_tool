@@ -14,7 +14,10 @@ public class VersionInfo {
 			" 2012 - 2015, Single Cell Unit, " +
 			"D-BSSE, ETH Zurich (Basel)";
 
-	// Properties (XML) file version
-	public static final int propertiesVersion = 4;
+	// Application settings (XML) file version
+	public static final int applicationSettingsVersion = 5;
+
+	// User settings (XML) file version
+	public static final int userSettingsVersion = 1;
 
 }

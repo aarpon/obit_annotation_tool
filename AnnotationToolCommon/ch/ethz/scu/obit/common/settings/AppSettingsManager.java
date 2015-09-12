@@ -185,7 +185,7 @@ public class AppSettingsManager {
 	 * Return the index of currently active setting
 	 * @return index of currently active setting.
 	 */
-	public boolean setCurrent(int newCurrent) throws ArrayIndexOutOfBoundsException {
+	public boolean setCurrentIndex(int newCurrent) throws ArrayIndexOutOfBoundsException {
 		if (newCurrent < 0 || newCurrent > (listAppSettings.size() - 1)) {
 			throw new ArrayIndexOutOfBoundsException();
 		}
@@ -352,11 +352,20 @@ public class AppSettingsManager {
 		currentSettingsIndex = 0;
 		isFileRead = true;
 	
-		// Check that the file version is current
-		if (fileVersion != VersionInfo.propertiesVersion) {
-			errorMessage = "The settings file is obsolete.";
-			isFileCurrent = false;
-			return false;
+		// Check that the file version is current.
+		if (fileVersion != VersionInfo.applicationSettingsVersion) {
+			
+			 // The change between version 4 and 5 is cosmetic, and we can re-save the settings.
+			if (VersionInfo.applicationSettingsVersion == 5 && fileVersion == 4) {
+				
+				// Save a new file at version.
+				save();
+				
+			} else {
+				errorMessage = "The settings file is obsolete.";
+				isFileCurrent = false;
+				return false;
+			}
 		}
 		
 		// Set file to be current
@@ -401,9 +410,9 @@ public class AppSettingsManager {
 			document = builder.newDocument();
 
 			// Create root element
-			Element root = document.createElement("AnnotationTool_Properties");
+			Element root = document.createElement("AnnotationTool_App_Settings");
 			root.setAttribute("version",
-					Integer.toString(VersionInfo.propertiesVersion));
+					Integer.toString(VersionInfo.applicationSettingsVersion));
 
 			// Get all properties for all servers and store them in an XML document
 			for (AppSettings appSettings : listAppSettings) {
@@ -645,5 +654,6 @@ public class AppSettingsManager {
 		// Return the document
 		return doc;
 	}
+
 }
 

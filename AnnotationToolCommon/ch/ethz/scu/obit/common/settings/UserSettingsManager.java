@@ -34,7 +34,9 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
  */
 public class UserSettingsManager {
 
-	protected AppSettings appSettings = null;
+	protected int favoriteServerSettingsIndex = 0;
+	protected ArrayList<UserSettings> listUserSettings = null;
+	protected int currentServerSettingsIndex;
 	protected String errorMessage = "";
 
 	// Public interface
@@ -48,14 +50,56 @@ public class UserSettingsManager {
 	 * 
 	 */
 	public UserSettingsManager() {
-		this.appSettings = null;
+		// Try to load, otherwise initialize
+		if (!load()) {
+			initialize();
+		}
 	}
 	
 	/**
-	 * Alternative Constructor
+	 * Initialize application settings with default values.
 	 */
-	public UserSettingsManager(AppSettings appSettings) {
-		this.appSettings = appSettings;
+	private void initialize() {
+		favoriteServerSettingsIndex = 0;
+		listUserSettings = new ArrayList<UserSettings>();
+		listUserSettings.add(new UserSettings());
+		currentServerSettingsIndex = 0;
+	}
+
+	/**
+	 * Set the current active settings by openBIS URL
+	 * @param openBISURL openBIS URL
+	 * @return true if the settings for the specified openBIS URL could be set,
+	 * false otherwise.
+	 */
+	public boolean setActiveOpenBISServer(String openBISURL) {
+		for (int i = 0; i < listUserSettings.size(); i++) {
+			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
+				currentServerSettingsIndex = i;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Set the current active settings by openBIS URL
+	 * @param openBISURL openBIS URL
+	 * @return true if the settings for the specified openBIS URL could be set,
+	 * false otherwise.
+	 */
+	public String getActiveOpenBISServer() {
+		return listUserSettings.get(currentServerSettingsIndex).getOpenBISURL();
+	}
+
+	/**
+	 * Set the current active settings by openBIS URL
+	 * @param openBISURL openBIS URL
+	 * @return true if the settings for the specified openBIS URL could be set,
+	 * false otherwise.
+	 */
+	public String getFavoriteOpenBISServer() {
+		return listUserSettings.get(favoriteServerSettingsIndex).getOpenBISURL();
 	}
 
 	/**
@@ -64,35 +108,27 @@ public class UserSettingsManager {
 	 * @return name with full path of the properties files
 	 */
 	public ArrayList<String> getSettingsNames() {
-		if (appSettings == null) {
-			return new ArrayList<String>();
-		}
-		return AppSettings.getSettingsNames();
+		return UserSettings.getSettingsNames();
 	}
 
 	/**
-	 * Return the value of the setting for current server.
+	 * Return the value for the requested setting and currently active server.
 	 * 
 	 * @param name setting name
 	 * @return the value of the attribute for current setting.
 	 */
 	public String getSettingValue(String name) {
-		if (appSettings == null) {
-			return "";
-		}
-		return appSettings.getSettingValue(name);
+		UserSettings userSettings = listUserSettings.get(currentServerSettingsIndex);
+		return userSettings.getSettingValue(name);
 	}
 
 	/**
-	 * Return the URL of current openBIS server
-	 * 
-	 * @return the URL of current openBIS server.
+	 * Set the value of a specific setting and currently active server.
+	 * @param name Name of the setting
+	 * @param value Value of the setting
 	 */
-	public String getServer() {
-		if (appSettings == null) {
-			return "";
-		}
-		return appSettings.getOpenBISURL();
+	public void setSettingValue(String name, String value) {
+		listUserSettings.get(currentServerSettingsIndex).setSettingValue(name, value);
 	}
 
 	/**
@@ -119,30 +155,61 @@ public class UserSettingsManager {
 		// Get the root node
 		Element rootNode = doc.getDocumentElement();
 
-		// Now process all children
-		NodeList openBISURLNodes = rootNode.getChildNodes();
+		// Do we have old-style user settings?
+		if (rootNode.getNodeName().equals("AnnotationTool_Properties")) {
 		
-		Node openBISURL = openBISURLNodes.item(0);
+			// This is an old-style user settings. We reset it, since the new ones do not
+			// use any of the original values.
+			initialize();
+			save();
+			return false;
+		}
 
-		// Create a new AppSettings object
-		appSettings = new AppSettings();
+		// Now process all children
+		NodeList serversNode = rootNode.getChildNodes();
+		
+		// Get the favorite server
+		NamedNodeMap attrs = serversNode.item(0).getAttributes();
+		String favoriteOpenBISURL = attrs.item(0).getNodeValue();
 
-		// Get and add the attributes
-		NamedNodeMap attrs = openBISURL.getAttributes();
+		// Allocate space to store the loaded settings
+		ArrayList<UserSettings> loadedListSettings = new ArrayList<UserSettings>();
 
-		for (int j = 0; j < attrs.getLength(); j++) {
+		// Get all servers
+		NodeList serverNode = serversNode.item(0).getChildNodes();
+		for (int i = 0; i < serverNode.getLength(); i ++) {
+			Node server = serverNode.item(i);
+			
+			// Create a new AppSettings object
+			UserSettings settings = new UserSettings();
+			
+			// Get and add the attributes
+			NamedNodeMap serverAttrs = server.getAttributes();
+			
+			for (int j = 0; j < serverAttrs.getLength(); j++) {
 
-			// Get attribute name and value
-			String name = attrs.item(j).getNodeName();
-			String value = attrs.item(j).getNodeValue();
+				// Get attribute name and value
+				String name = serverAttrs.item(j).getNodeName();
+				String value = serverAttrs.item(j).getNodeValue();
 
-			// Store it
-			appSettings.setSettingValue(name, value);
+				// Store it
+				settings.setSettingValue(name, value);
+			}
+			
+			// Append user settings for current server
+			loadedListSettings.add(settings);
+			
 		}
 
 		// Reset error message
 		errorMessage = "";
 
+		// Now store the loaded settings
+		listUserSettings = loadedListSettings;
+		
+		// Set the favorite one
+		setActiveOpenBISServer(favoriteOpenBISURL);
+		
 		// Return success
 		return true;
 	}
@@ -159,7 +226,7 @@ public class UserSettingsManager {
 	public boolean save() {
 
 		// Check that the settings are set
-		if (appSettings == null) {
+		if (listUserSettings == null || listUserSettings.size() == 0) {
 			errorMessage = "No settings to save!";
 			return false;
 		}
@@ -173,31 +240,46 @@ public class UserSettingsManager {
 			document = builder.newDocument();
 
 			// Create root element
-			Element root = document.createElement("AnnotationTool_Properties");
+			Element root = document.createElement("AnnotationTool_User_Settings");
 			root.setAttribute("version",
-					Integer.toString(VersionInfo.propertiesVersion));
+					Integer.toString(VersionInfo.userSettingsVersion));
 
-			// Get its properties
-			Map<String, String> currentProperties = appSettings.getAllSettings();
+			// Create servers element
+			Element servers = document.createElement("servers");
+			servers.setAttribute("favoriteServerURL", 
+					listUserSettings.get(favoriteServerSettingsIndex).getOpenBISURL());
+			
+			// Get all user properties for all servers and store them in an XML document
+			for (UserSettings userSettings : listUserSettings) {
+				
+				// Get its properties
+			    Map<String, String> currentProperties = 
+			    		userSettings.getAllSettings();
 
-			// Create the experiment
-			Element element = document.createElement("server");
+				// Create the experiment
+			    Element element = document.createElement("server"); 
+			    element.setAttribute("OpenBISURL", userSettings.getOpenBISURL());
 
-			// Append all properties as attributes
-			for (Map.Entry<String, String> curr : currentProperties.entrySet()) {
+				// Append all properties as attributes
+				for (Map.Entry<String, String> curr : currentProperties.entrySet() ) {
+					
+					// Get the property name and value
+					String propertyName = curr.getKey();
+					String propertyValue = curr.getValue();
+					
+					// Store them as attributes of the server element
+					element.setAttribute(propertyName, propertyValue);
+					
+				}
 
-				// Get the property name and value
-				String propertyName = curr.getKey();
-				String propertyValue = curr.getValue();
-
-				// Store them as attributes of the server element
-				element.setAttribute(propertyName, propertyValue);
+				// Append the server element to the document
+				servers.appendChild(element);
 
 			}
-
-			// Append the server element to the document
-			root.appendChild(element);
-
+			
+			// Append the servers node
+			root.appendChild(servers);
+			
 			// Add the whole tree to the document (by adding the root node)
 			document.appendChild(root);
 
@@ -253,13 +335,10 @@ public class UserSettingsManager {
 	}
 
 	/**
-	 * Create the application data directory
+	 * Create the user data directory
 	 * 
-	 * @return true if the application data directory could be created
+	 * @return true if the user data directory could be created
 	 *         successfully, false otherwise.
-	 * 
-	 *         This function might require write access to a restricted system
-	 *         folder. It should be used only in code run with admin privileges.
 	 */
 	private boolean createApplicationSettingsDir() {
 

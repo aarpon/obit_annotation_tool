@@ -770,7 +770,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 
     	// Try changing the index 
     	try {
-    		manager.setCurrent(index);
+    		manager.setCurrentIndex(index);
     	} catch (ArrayIndexOutOfBoundsException e) {
     		JOptionPane.showMessageDialog(null,
     				"There was a mistake setting the index of current " +

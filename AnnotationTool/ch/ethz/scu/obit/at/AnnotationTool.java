@@ -4,7 +4,7 @@ import javax.swing.JOptionPane;
 
 import ch.ethz.scu.obit.at.gui.AnnotationToolWindow;
 import ch.ethz.scu.obit.common.settings.AppSettingsManager;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+
 
 /**
  * AnnotationTool is an application to drive the import of data from the 
@@ -30,8 +30,10 @@ public class AnnotationTool {
 			System.exit(0);
 		}
 		
+		// Read the application settings
 		AppSettingsManager manager = new AppSettingsManager();
 
+		// Check
 		if (!manager.isFileRead()) {
 			JOptionPane.showMessageDialog(null,
 				    "The application settings could not be read.\n" +
@@ -63,21 +65,7 @@ public class AnnotationTool {
 				    JOptionPane.WARNING_MESSAGE);
 			System.exit(0);
 		}
-		
-		// Create user setting file
-		UserSettingsManager userManager = new UserSettingsManager(
-				manager.getSettingsForServer(manager.getServer()));
-		if (!userManager.save()) {
-			JOptionPane.showMessageDialog(null,
-				    "The user settings file could not be created.\n" +
-			"Please ask an administrator to check file system permissions.\n\n"
-			+ "The application will close now.",
-				    "First-time setup",
-				    JOptionPane.WARNING_MESSAGE);
-			System.exit(0);
-		}
 
-		
 		// Open the main window and run the scan in the background
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
