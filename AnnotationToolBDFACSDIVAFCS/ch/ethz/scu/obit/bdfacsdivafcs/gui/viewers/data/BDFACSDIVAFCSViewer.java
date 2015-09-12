@@ -18,6 +18,7 @@ import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tra
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tube;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Well;
 import ch.ethz.scu.obit.bdfacsdivafcs.readers.FCSReader;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 import java.awt.event.*;
 
@@ -36,7 +37,9 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 	/**
 	 * Constructor
 	 */
-	public BDFACSDIVAFCSViewer() {
+	public BDFACSDIVAFCSViewer(GlobalSettingsManager globalSettingsManager) {
+		
+		super(globalSettingsManager);
 	}
 
 	/**

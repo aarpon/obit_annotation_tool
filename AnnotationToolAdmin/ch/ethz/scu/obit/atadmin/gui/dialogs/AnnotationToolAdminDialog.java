@@ -95,7 +95,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 
         // Add a drop-down menu for the selection of the URL
         ArrayList<String> openBISURLOptions = manager.getAllServers();
-        String openBISURL = manager.getServer();
+        String openBISURL = manager.getActiveServer();
         int index = -1;
         for (int i = 0; i < openBISURLOptions.size(); i++) {
             if (openBISURLOptions.get(i).equals(openBISURL)) {
@@ -142,9 +142,9 @@ public class AnnotationToolAdminDialog extends JDialog {
                 // Ask the user to specify a new openBIS URL
                 String url = JOptionPane.showInputDialog(
                         "Edit openBIS URL:",
-                        manager.getServer());
+                        manager.getActiveServer());
                 if (url == null || url.equals("") ||
-                		url.equalsIgnoreCase(manager.getServer())) {
+                		url.equalsIgnoreCase(manager.getActiveServer())) {
                     return;
                 }
                 // TODO Validate URL better
@@ -168,7 +168,7 @@ public class AnnotationToolAdminDialog extends JDialog {
                 }
 
                 // Update URL
-                manager.setServer(url);
+                manager.setCurrentServerURL(url);
 
                 // Update UI
                 refillServerList();
@@ -800,7 +800,7 @@ public class AnnotationToolAdminDialog extends JDialog {
         for (String currOpenBISURL : openBISURLOptions) {
             openBISURLList.addItem(currOpenBISURL);
         }
-        openBISURLList.setSelectedItem(manager.getServer());
+        openBISURLList.setSelectedItem(manager.getActiveServer());
         // Add the action listeners back
     	for (ActionListener a : actionListeners) {
     		openBISURLList.addActionListener(a);
@@ -811,7 +811,7 @@ public class AnnotationToolAdminDialog extends JDialog {
      * Updates all fields with the values from current AppSettings
      */
     private void updateUI() {
-    	openBISURLList.setSelectedItem(manager.getServer());
+    	openBISURLList.setSelectedItem(manager.getActiveServer());
     	acqStationsList.setSelectedItem(manager.getSettingValue("AcquisitionStation"));
     	acceptSelfSignedCertsList.setSelectedItem(manager.getSettingValue("AcceptSelfSignedCertificates"));
     	userdirButton.setText(manager.getSettingValue("UserDataDir"));

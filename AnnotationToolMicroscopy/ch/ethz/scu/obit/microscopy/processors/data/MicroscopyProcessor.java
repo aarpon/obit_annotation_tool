@@ -31,6 +31,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 	/* Folder to scan (recursively) */
 	private File userFolder;
+	
+	private File userRootFolder;
 
 	/* Keep track of the folder level when recursing into subfolders */
 	private int folderLevel = 0;
@@ -95,9 +97,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		// Set the root folder
 		this.userFolder = folder;
+		this.userRootFolder = folder.getParentFile();
 
 		// Create a descriptor for the user folder
-		folderDescriptor = new UserFolder(folder);
+		folderDescriptor = new UserFolder(folder, userRootFolder);
 
 	}
 
@@ -313,7 +316,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 					// Store it in the Experiment descriptor
 					if (! expDesc.microscopyCompositeFiles.containsKey(microscopyCompositeFileKey)) {
 						MicroscopyCompositeFile microscopyCompositeFileDesc;
-						microscopyCompositeFileDesc = new MicroscopyCompositeFile(reader);
+						microscopyCompositeFileDesc = new MicroscopyCompositeFile(reader, userRootFolder);
 						expDesc.microscopyCompositeFiles.put(microscopyCompositeFileKey,
 								microscopyCompositeFileDesc);
 					}
@@ -329,7 +332,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				String microscopyFileName = fileName;
 				String microscopyFileKey = experimentName + "_"
 						+ microscopyFileName;
-				microscopyFileDesc = new MicroscopyFile(file);
+				microscopyFileDesc = new MicroscopyFile(file, userRootFolder);
 
 				// Store it in the Experiment descriptor
 				expDesc.microscopyFiles.put(microscopyFileKey,
@@ -361,10 +364,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		public final Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
 
-		public Folder(File fullFolder) {
+		public Folder(File fullFolder, File userRootDataPath) {
 
 			// Invoke parent constructor
-			super(fullFolder);
+			super(fullFolder, userRootDataPath);
 
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
@@ -413,7 +416,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		public Experiment(File name) {
 
 			// Call base constructor
-			super(name);
+			super(name, userRootFolder);
 
 			// Store the experiment name
 			this.setName(name.getName());
@@ -442,10 +445,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		public final Map<String, Experiment> experiments =
 				new LinkedHashMap<String, Experiment>();
 
-		public UserFolder(File fullFolder) {
+		public UserFolder(File fullFolder, File userRootFolder) {
 
 			// Invoke parent constructor
-			super(fullFolder);
+			super(fullFolder, userRootFolder);
 
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
@@ -477,10 +480,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		 * @param microscopyFileName
 		 *            Microscopy file name with full path
 		 */
-		public MicroscopyFile(File microscopyFileName) throws IOException {
+		public MicroscopyFile(File microscopyFileName, File userRootDataPath) throws IOException {
 
 			// Call base constructor
-			super(microscopyFileName);
+			super(microscopyFileName, userRootDataPath);
 
 			// Store the file name
 			this.setName(microscopyFileName.getName());
@@ -610,10 +613,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		 * @param microscopyFileName
 		 *            Microscopy file name with full path
 		 */
-		public MicroscopyCompositeFile(AbstractCompositeMicroscopyReader reader) throws IOException {
+		public MicroscopyCompositeFile(AbstractCompositeMicroscopyReader reader, File userRootDataPath) throws IOException {
 
 			// Call base constructor
-			super(reader.getFolder());
+			super(reader.getFolder(), userRootDataPath);
 
 			// Store the file name
 			this.setName(reader.getName());

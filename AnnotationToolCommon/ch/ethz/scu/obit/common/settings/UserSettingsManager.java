@@ -31,6 +31,8 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
  * Commodity class to manage the AnnotationTool user application properties
  * 
  * @author Aaron Ponti
+ * 
+ * This class is only visible within its package.
  */
 public class UserSettingsManager {
 
@@ -49,21 +51,60 @@ public class UserSettingsManager {
 	 * @see UserSettingsManager#load()
 	 * 
 	 */
-	public UserSettingsManager() {
-		// Try to load, otherwise initialize
+	public UserSettingsManager(ArrayList<String> configuredServers) {
+
+		// Try to load and validate, otherwise initialize
 		if (!load()) {
-			initialize();
+			initialize(configuredServers);
+		} else {
+			validate(configuredServers);
 		}
+		
+		// Save
+		save();
 	}
 	
 	/**
 	 * Initialize application settings with default values.
 	 */
-	private void initialize() {
-		favoriteServerSettingsIndex = 0;
+	private void initialize(ArrayList<String> configuredServers) {
 		listUserSettings = new ArrayList<UserSettings>();
-		listUserSettings.add(new UserSettings());
+		for (int i = 0; i < configuredServers.size(); i++) {
+			listUserSettings.add(new UserSettings());
+		}
+		favoriteServerSettingsIndex = 0;
 		currentServerSettingsIndex = 0;
+	}
+	
+	/**
+	 * Validate the servers stored in the User settings with those stored in the Application settings.
+	 * @param configuredServers List of openBIS server URLs.
+	 */
+	private void validate(ArrayList<String> configuredServers) {
+		
+		if (listUserSettings.size() != configuredServers.size()) {
+			initialize(configuredServers);
+			return;
+		}
+		
+		int numServers = listUserSettings.size();
+		
+		for (int i = 0; i < numServers; i++) {
+			
+			UserSettings current = listUserSettings.get(i);
+			
+			boolean found = false;
+			
+			for (int j = 0; j < numServers; j++) {
+				if (current.getOpenBISURL().equals(configuredServers.get(j))) {
+					found = true;
+					break;
+				}
+			}
+			if (! found) {
+				initialize(configuredServers);
+			}
+		}
 	}
 
 	/**
@@ -72,10 +113,11 @@ public class UserSettingsManager {
 	 * @return true if the settings for the specified openBIS URL could be set,
 	 * false otherwise.
 	 */
-	public boolean setActiveOpenBISServer(String openBISURL) {
+	public boolean setActiveServer(String openBISURL) {
 		for (int i = 0; i < listUserSettings.size(); i++) {
 			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
 				currentServerSettingsIndex = i;
+				favoriteServerSettingsIndex = i;
 				return true;
 			}
 		}
@@ -88,7 +130,7 @@ public class UserSettingsManager {
 	 * @return true if the settings for the specified openBIS URL could be set,
 	 * false otherwise.
 	 */
-	public String getActiveOpenBISServer() {
+	public String getActiveServer() {
 		return listUserSettings.get(currentServerSettingsIndex).getOpenBISURL();
 	}
 
@@ -137,7 +179,7 @@ public class UserSettingsManager {
 	 * 
 	 * @return true if the settings were loaded correctly, false otherwise.
 	 */
-	public boolean load() {
+	private boolean load() {
 
 		// Make sure the Properties file exists
 		if (! settingsFileExists()) {
@@ -158,10 +200,7 @@ public class UserSettingsManager {
 		// Do we have old-style user settings?
 		if (rootNode.getNodeName().equals("AnnotationTool_Properties")) {
 		
-			// This is an old-style user settings. We reset it, since the new ones do not
-			// use any of the original values.
-			initialize();
-			save();
+			// This is an old-style user settings. 
 			return false;
 		}
 
@@ -208,7 +247,7 @@ public class UserSettingsManager {
 		listUserSettings = loadedListSettings;
 		
 		// Set the favorite one
-		setActiveOpenBISServer(favoriteOpenBISURL);
+		setActiveServer(favoriteOpenBISURL);
 		
 		// Return success
 		return true;
@@ -223,7 +262,7 @@ public class UserSettingsManager {
 	 * 
 	 * @return true if the properties were saved successfully, false otherwise
 	 */
-	public boolean save() {
+	private boolean save() {
 
 		// Check that the settings are set
 		if (listUserSettings == null || listUserSettings.size() == 0) {

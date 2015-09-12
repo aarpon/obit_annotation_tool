@@ -47,7 +47,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.view.DataViewerTree;
 import ch.ethz.scu.obit.at.gui.viewers.data.view.DataViewerTreeToXML;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
@@ -58,6 +58,8 @@ import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
  */
 abstract public class AbstractViewer extends Observable
 	implements ActionListener, TreeSelectionListener {
+
+	protected GlobalSettingsManager globalSettingsManager;
 
 	// The valueChanged() method is fired twice when selection is changed  
 	// in a JTree, so we keep track of the last processed node to avoid 
@@ -131,7 +133,9 @@ abstract public class AbstractViewer extends Observable
 	 * Constructor
 	 * The constructor creates the actual panel to be displayed on the UI.
 	 */
-	public AbstractViewer() {
+	public AbstractViewer(GlobalSettingsManager globalSettingsManager) {
+		
+		this.globalSettingsManager = globalSettingsManager;
 		
 		// Create a new JPanel
 		panel = new JPanel();
@@ -157,7 +161,8 @@ abstract public class AbstractViewer extends Observable
 		panel.add(title, constraints);
 		
 		// Create the Tree
-		rootNode = new RootNode(new RootDescriptor(new File("/")));
+		rootNode = new RootNode(new RootDescriptor(new File("/"),
+				new File(globalSettingsManager.getUserDataRootDir())));
 		
 		// Create a tree that allows one selection at a time.
 		tree = new DataViewerTree(rootNode);
@@ -343,19 +348,10 @@ abstract public class AbstractViewer extends Observable
 		clearInvalidDatasetsTable();
 		clearMetadataTable();
 		
-		// Get the datamover incoming folder from the application properties
+		// Get the user data folder from the application properties
 		// to which we append the user name to personalize the working space
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
 		File userDataFolder = new File(
-				manager.getSettingValue("UserDataDir") +
+				globalSettingsManager.getUserDataRootDir() +
 				File.separator + userName);
 		
 		// Does the folder exist? If not, we create it. Please mind,
@@ -364,7 +360,8 @@ abstract public class AbstractViewer extends Observable
 		checkAndCreateFolderOrDie(userDataFolder, "user directory");
 
 		// Prepare a new root node for the Tree
-		rootNode = new RootNode(new RootDescriptor(userDataFolder));
+		rootNode = new RootNode(new RootDescriptor(userDataFolder, 
+				new File(globalSettingsManager.getUserDataRootDir())));
 		
 		// Then define and start the worker
 		class Worker extends SwingWorker<Boolean, Void> {
@@ -563,7 +560,8 @@ abstract public class AbstractViewer extends Observable
 		}
 
 		// Create a RootNode
-		rootNode = new RootNode(new RootDescriptor(new File("/")));
+		rootNode = new RootNode(new RootDescriptor(new File("/"),
+				new File(globalSettingsManager.getUserDataRootDir())));
 
 		// Create a tree that allows one selection at a time.
 		tree.setModel(new DefaultTreeModel(rootNode));
@@ -735,17 +733,7 @@ abstract public class AbstractViewer extends Observable
             public void actionPerformed(ActionEvent e)
             {
             	// Build the full path of the invalid dataset
-            	UserSettingsManager manager = new UserSettingsManager();
-        		if (! manager.load()) {
-        			JOptionPane.showMessageDialog(null,
-        					"Could not read application settings!\n" +
-        			"Please contact your administrator. The application\n" +
-        			"will now exit!",
-        			"Error", JOptionPane.ERROR_MESSAGE);
-        			System.exit(1);
-        		}
-        		File userDataFolder = new File(
-        				manager.getSettingValue("UserDataDir"));
+        		File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
 
             	// Full path to the invalid dataset
 				File fullPath = new File(userDataFolder +
@@ -816,17 +804,7 @@ abstract public class AbstractViewer extends Observable
             	}
             	
             	// Build the full path of the file/folder to move
-            	UserSettingsManager manager = new UserSettingsManager();
-        		if (! manager.load()) {
-        			JOptionPane.showMessageDialog(null,
-        					"Could not read application settings!\n" +
-        			"Please contact your administrator. The application\n" +
-        			"will now exit!",
-        			"Error", JOptionPane.ERROR_MESSAGE);
-        			System.exit(1);
-        		}
-        		File userDataFolder = new File(
-        				manager.getSettingValue("UserDataDir"));
+        		File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
             	File fullPath = new File(userDataFolder +
         				File.separator + invalidDataset);
             	
@@ -868,17 +846,7 @@ abstract public class AbstractViewer extends Observable
             public void actionPerformed(ActionEvent e)
             {
             	// Build the full path of the file/folder to delete
-            	UserSettingsManager manager = new UserSettingsManager();
-        		if (! manager.load()) {
-        			JOptionPane.showMessageDialog(null,
-        					"Could not read application settings!\n" +
-        			"Please contact your administrator. The application\n" +
-        			"will now exit!",
-        			"Error", JOptionPane.ERROR_MESSAGE);
-        			System.exit(1);
-        		}
-        		File userDataFolder = new File(
-        				manager.getSettingValue("UserDataDir"));
+        		File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
             	File fullPath = new File(userDataFolder +
         				File.separator + invalidDataset);
             	

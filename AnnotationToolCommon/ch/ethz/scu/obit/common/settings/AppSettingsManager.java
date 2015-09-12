@@ -36,7 +36,11 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
 
 /**
  * Commodity class to manage the AnnotationTool application properties
+ * 
  * @author Aaron Ponti
+ * 
+ * This class is only visible within its package.
+ *  
  */
 public class AppSettingsManager {
 
@@ -239,18 +243,37 @@ public class AppSettingsManager {
 	 * Return the URL of current openBIS server
 	 * @return the URL of current openBIS server.
 	 */
-	public String getServer() {
+	public String getActiveServer() {
 		return listAppSettings.get(currentSettingsIndex).getOpenBISURL();
 	}
 
 	/**
+	 * Set the current active settings by openBIS URL
+	 * @param openBISURL openBIS URL
+	 * @return true if the settings for the specified openBIS URL could be set,
+	 * false otherwise.
+	 */
+	public boolean setActiveServer(String openBISURL) {
+		for (int i = 0; i < listAppSettings.size(); i++) {
+			if (listAppSettings.get(i).getOpenBISURL().equals(openBISURL)) {
+				currentSettingsIndex = i;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Set the URL of current openBIS server
 	 * @param openBISURL URL for current openBIS server
 	 */
-	public void setServer(String openBISURL) {
+	public void setCurrentServerURL(String openBISURL) {
+		if (openBISURL.equals("")) {
+			return;
+		}
 		listAppSettings.get(currentSettingsIndex).setOpenBISURL(openBISURL);
 	}
-	
+
 	/**
 	 * Check whether all Properties in the file are set. 
 	 * @return true if all Properties in the file are set,

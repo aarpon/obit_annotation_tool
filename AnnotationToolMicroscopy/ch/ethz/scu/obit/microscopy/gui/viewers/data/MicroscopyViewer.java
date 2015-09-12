@@ -20,6 +20,7 @@ import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyCompositeFileNode;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileSeriesNode;
@@ -41,8 +42,10 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 	/**
 	 * Constructor
 	 */
-	public MicroscopyViewer() {
+	public MicroscopyViewer(GlobalSettingsManager globalSettingsManager) {
 		
+		super(globalSettingsManager);
+
 		// Listen for when a node is about to be opened (for lazy loading)
 		tree.addTreeWillExpandListener(this);
 

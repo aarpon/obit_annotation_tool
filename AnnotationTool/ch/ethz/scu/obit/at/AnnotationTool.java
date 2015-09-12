@@ -3,7 +3,7 @@ package ch.ethz.scu.obit.at;
 import javax.swing.JOptionPane;
 
 import ch.ethz.scu.obit.at.gui.AnnotationToolWindow;
-import ch.ethz.scu.obit.common.settings.AppSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 
 /**
@@ -18,51 +18,14 @@ public class AnnotationTool {
 	 */
 	public static void main(String[] args) {
 
-		// Check whether the application has been set up already.
-		// If not, we inform the user and quit.
-		if (!AppSettingsManager.settingsFileExists()) {
-			JOptionPane.showMessageDialog(null,
-				    "The application has not ben configured yet.\n" +
-			"Please ask an administrator to do it for you.\n\n"
-			+ "The application will close now.",
-				    "First-time setup",
-				    JOptionPane.WARNING_MESSAGE);
-			System.exit(0);
-		}
 		
-		// Read the application settings
-		AppSettingsManager manager = new AppSettingsManager();
-
-		// Check
-		if (!manager.isFileRead()) {
-			JOptionPane.showMessageDialog(null,
-				    "The application settings could not be read.\n" +
-			"Please ask an administrator to re-configure the "
-			+ "application.\n\n"
-			+ "The application will close now.",
-				    "Obsolete settings",
-				    JOptionPane.WARNING_MESSAGE);
-			System.exit(0);
-		}		
-		
-		if (!manager.isFileCurrent()) {
-			JOptionPane.showMessageDialog(null,
-				    "The application settings are obsolete.\n" +
-			"Please ask an administrator to re-configure the "
-			+ "application.\n\n"
-			+ "The application will close now.",
-				    "Obsolete settings",
-				    JOptionPane.WARNING_MESSAGE);
-			System.exit(0);
-		}		
-
-		if (!manager.isFileValid()) {
-			JOptionPane.showMessageDialog(null,
-				    "The application settings are not valid.\n" +
-			"Please ask an administrator to reconfigure the application.\n\n"
-			+ "The application will close now.",
-				    "First-time setup",
-				    JOptionPane.WARNING_MESSAGE);
+		// Check whether the application has been set up properly and it is ready
+		// to be used.
+		try {
+			GlobalSettingsManager.isConfigurationValid();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), 
+					"Initialization error", JOptionPane.WARNING_MESSAGE);
 			System.exit(0);
 		}
 

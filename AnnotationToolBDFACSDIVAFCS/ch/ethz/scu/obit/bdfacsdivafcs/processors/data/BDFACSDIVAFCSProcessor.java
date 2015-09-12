@@ -36,6 +36,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
+	private File userRootFolder;
 	private Experiment currentExperiment;
 
 	/* List of accepted attachment file extensions */
@@ -80,9 +81,10 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		// Set the root folder
 		this.userFolder = folder;
+		this.userRootFolder = folder.getParentFile();
 
 		// Create a descriptor for the user folder
-		folderDescriptor = new UserFolder(folder); 
+		folderDescriptor = new UserFolder(folder, userRootFolder); 
 
 	}
 
@@ -144,10 +146,10 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public Map<String, Experiment> experiments = 
 				new LinkedHashMap<String, Experiment>();
 		
-		public UserFolder(File fullFolder) {
+		public UserFolder(File fullFolder, File userRootDataPath) {
 			
 			// Invoke parent constructor
-			super(fullFolder);
+			super(fullFolder, userRootDataPath);
 			
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
@@ -198,9 +200,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * Constructor
 		 * @param fullPath Full path of the experiment.
 		 */
-		public Experiment(File fullPath) {
+		public Experiment(File fullPath, File userRootDataPath) {
 
-			super(fullPath);
+			super(fullPath, userRootDataPath);
 			this.setName(fullPath.getName());
 			
 			// Set the attribute relative path. Since this will be 
@@ -217,9 +219,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * @param fullPath Full path of the experiment.
 		 * @param name Name of the experiment.
 		 */
-		public Experiment(File fullPath, String name) {
+		public Experiment(File fullPath, String name, File userRootDataPath) {
 
-			super(fullPath);
+			super(fullPath, userRootDataPath);
 			this.setName(name);
 			
 			// Set the attribute relative path. Since this will be 
@@ -306,7 +308,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public FCSFile(File fcsFileName) throws IOException {
 
 			// Call base constructor
-			super(fcsFileName);
+			super(fcsFileName, userRootFolder);
 
 			// Store the file name
 			this.setName(fcsFileName.getName());
@@ -711,7 +713,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				expDesc = folderDescriptor.experiments.get(experimentPath);
 			} else {
 				expDesc = new Experiment(new File(experimentPath),
-						experimentName);
+						experimentName, userRootFolder);
 				// Store attributes
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentPath, expDesc);

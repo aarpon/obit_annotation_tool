@@ -1,9 +1,7 @@
 package ch.ethz.scu.obit.at.gui.viewers.data;
 
-import javax.swing.JOptionPane;
-
 import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.BDFACSDIVAFCSViewer;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.MicroscopyViewer;
 
 /**
@@ -17,28 +15,17 @@ public class ViewerFactory {
 	 * application properties.
 	 * @return a concrete implementation of an AbstractViewer
 	 */
-	public static AbstractViewer createViewer() {
-
-		// Get the application properties
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
+	public static AbstractViewer createViewer(GlobalSettingsManager globalSettingsManager) {
 
 		// Declare an AbstractViewer
 		AbstractViewer metadataViewer = null;
 		
 		// Return the viewer that fits the "AcquisitionStation"
-		String acqStation = manager.getSettingValue("AcquisitionStation");	
+		String acqStation = globalSettingsManager.getAcquisitionStation();	
 		if (acqStation.equals("BD Biosciences Cell Analyzers and Sorters")) {
-			metadataViewer = new BDFACSDIVAFCSViewer();
+			metadataViewer = new BDFACSDIVAFCSViewer(globalSettingsManager);
 		} else if (acqStation.equals("Generic light microscopes")) {
-			metadataViewer = new MicroscopyViewer();
+			metadataViewer = new MicroscopyViewer(globalSettingsManager);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);

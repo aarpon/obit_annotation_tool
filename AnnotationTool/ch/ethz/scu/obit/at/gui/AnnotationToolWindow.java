@@ -22,6 +22,7 @@ import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.ViewerFactory;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.version.VersionInfo;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 
@@ -34,6 +35,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 
 	private static final long serialVersionUID = 1L;
 
+	private GlobalSettingsManager globalSettingsManager;
 	private OpenBISProcessor openBISProcessor; 
     private OpenBISViewer openBISViewer;
 	private AbstractViewer metadataViewer;
@@ -48,11 +50,14 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		super("openBIS Importer Toolset (oBIT) :: Annotation Tool v" +
 		VersionInfo.version + " " + VersionInfo.status);
 
+		// Load the settings
+		globalSettingsManager = new GlobalSettingsManager();
+		
 		// We instantiate the OutputPane so we can start logging to it
         OutputPane outputPane = new OutputPane();
 
         // Instantiate an OpenBISProcessor
-		openBISProcessor = new OpenBISProcessor();
+		openBISProcessor = new OpenBISProcessor(globalSettingsManager);
 		
 		// And now we ask the user to login.
 		// Here we will insist on getting valid openBIS credentials, since a
@@ -101,7 +106,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 
 		// Add the metadata viewer
 		try {
-			metadataViewer = ViewerFactory.createViewer();
+			metadataViewer = ViewerFactory.createViewer(globalSettingsManager);
 		} catch (Exception e1) {
 			System.err.println("There was a problem instantiating "
 					+ "the tools for current acquisition station.");
@@ -132,7 +137,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		metadataViewer.setOutputPane(outputPane);
 		
 		// Add the openBIS viewer
-		openBISViewer = new OpenBISViewer(openBISProcessor, outputPane);
+		openBISViewer = new OpenBISViewer(openBISProcessor, outputPane, globalSettingsManager);
 		
 		// Set constraints and add widget
 		constraints.gridx = 2;
@@ -148,7 +153,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		// the last one, since it requires non-null references to the 
 		// metadata, the openBIS viewers, and the output pane!
         EditorContainer editorContainer = new EditorContainer(
-                metadataViewer, openBISViewer, outputPane);
+        		metadataViewer, openBISViewer, outputPane, globalSettingsManager);
 
 		// Set constraints and add widget
 		constraints.gridx = 1;

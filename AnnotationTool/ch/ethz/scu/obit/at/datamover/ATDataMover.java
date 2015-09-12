@@ -6,7 +6,8 @@ import java.security.SecureRandom;
 
 import javax.swing.JOptionPane;
 
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
+
 
 /**
  * Moves the user folder to the Datamover incoming folder.
@@ -26,31 +27,20 @@ public class ATDataMover {
 	 * Constructor
 	 * @param userName openBIS user name 
 	 */
-	public ATDataMover(String userName) {
+	public ATDataMover(GlobalSettingsManager globalSettingsManager, String userName) {
 
 		// Initialize random number generator
 		random = new SecureRandom();
 
-		// Get the folder from the properties
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
-
 		// Get the user data dir
-		sourceDir = new File(manager.getSettingValue("UserDataDir") +
+		sourceDir = new File(globalSettingsManager.getUserDataRootDir() +
 				File.separator + userName);
 		if (!sourceDir.isDirectory()) {
 			throw new IllegalArgumentException("sourceDir must be a directory!");
 		}
 		
 		// Get the datamover incoming dir
-		targetDir = new File(manager.getSettingValue("DatamoverIncomingDir"));
+		targetDir = new File(globalSettingsManager.getDatamoverIncomingDir());
 		if (!targetDir.isDirectory()) {
 			throw new IllegalArgumentException("sourceDir must be a directory!");
 		}

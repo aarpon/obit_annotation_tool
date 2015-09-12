@@ -45,6 +45,7 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSampleListNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.settings.UserSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
@@ -67,6 +68,7 @@ public class OpenBISViewer extends Observable
 	protected JLabel userTags;
 	protected JList<String> tagList;
 
+	private GlobalSettingsManager globalSettingsManager;
 	private OpenBISProcessor openBISProcessor;
 
     private OpenBISUserNode userNode;
@@ -89,8 +91,12 @@ public class OpenBISViewer extends Observable
 	/**
 	 * Constructor
 	 */
-	public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane) {
+	public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane,
+			GlobalSettingsManager globalSettingsManager) {
 
+		// Store the global settings manager
+		this.globalSettingsManager = globalSettingsManager;
+		
 		// Store the OpenBISProcessor reference
 		this.openBISProcessor = openBISProcessor;
 
@@ -100,17 +106,6 @@ public class OpenBISViewer extends Observable
 		// Create a panel
 		panel = new JPanel();
 		
-		// Get the openBIS URL from the appProperties
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
-
 		// Set a grid bag layout
 		panel.setLayout(new GridBagLayout());
 

@@ -9,8 +9,8 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	 * Constructor
 	 * @param fullPath Full path to the experiment folder.
 	 */
-	public ExperimentDescriptor(File fullPath) {
-		super(fullPath);
+	public ExperimentDescriptor(File fullPath, File userRootDataPath) {
+		super(fullPath, userRootDataPath);
 	}
 
 	/**

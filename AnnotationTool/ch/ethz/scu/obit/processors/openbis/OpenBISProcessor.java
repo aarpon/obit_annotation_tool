@@ -13,8 +13,7 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.ethz.scu.obit.at.gui.dialogs.OpenBISLoginDialog;
-import ch.ethz.scu.obit.common.settings.AppSettingsManager;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.common.api.client.ServiceFinder;
@@ -37,7 +36,7 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.IGeneralInformationService
  */
 public class OpenBISProcessor {
 
-	AppSettingsManager appManager;
+	GlobalSettingsManager globalSettingsManager;
 	
 	private String openBISURL = "";
 	private String userName = "";
@@ -64,41 +63,14 @@ public class OpenBISProcessor {
 	/**
 	 * Constructor
 	 */
-	public OpenBISProcessor() {
+	public OpenBISProcessor(GlobalSettingsManager globalSettingsManager) {
 
-		// Load the application settings
-		appManager = new AppSettingsManager();
-		if (! appManager.isFileValid()) {
-			JOptionPane.showMessageDialog(null,
-					"The application settings are either not present " +
-					"or not valid!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
+		// Store the reference to the global settings manager
+		this.globalSettingsManager = globalSettingsManager;
 		
-		// Load the user settings
-		UserSettingsManager userManager = new UserSettingsManager();
+		// Set the currently active server
+		this.openBISURL = globalSettingsManager.getActiveServer();
 
-		// Get the configure openBIS URLs
-		ArrayList<String> configuredServers = appManager.getAllServers();
-		
-		// Get the favorite server (if set)
-		String favoriteServer = userManager.getFavoriteOpenBISServer();
-		
-		// Pick the favorite server is possible, otherwise revert to the
-		// default one from the application settings
-		if (configuredServers.contains(favoriteServer)) {
-			// Set the favorite URL
-			this.openBISURL = favoriteServer;
-			appManager.setServer(favoriteServer);
-		} else {
-			// Set the default URL for the machine
-			this.openBISURL = configuredServers.get(0);
-			appManager.setServer(configuredServers.get(0));
-		}
-		
 	}
 	
 	/**
@@ -144,7 +116,7 @@ public class OpenBISProcessor {
 
 		// Modal dialog: stops here until the dialog is disposed
 		// (when a username and password have been provided)
-        OpenBISLoginDialog loginDialog = new OpenBISLoginDialog();
+        OpenBISLoginDialog loginDialog = new OpenBISLoginDialog(globalSettingsManager);
 		userName = loginDialog.getUsername();
 		userPassword = loginDialog.getPassword();
 		openBISURL = loginDialog.getOpenBISServer();
@@ -240,8 +212,7 @@ public class OpenBISProcessor {
 		};
 		
 		// Should we accept self-signed certificates?
-		String acceptSelfSignedCerts = 
-				appManager.getSettingValue("AcceptSelfSignedCertificates");
+		String acceptSelfSignedCerts = globalSettingsManager.acceptSelfSignedCertificates();
 
 		// Set the force-accept-ssl-certificate option if requested
 		// by the administrator
