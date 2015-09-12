@@ -44,7 +44,7 @@ public class OpenBISLoginDialog extends JDialog {
 	/**
 	 * Constructor
 	 */
-	public OpenBISLoginDialog(GlobalSettingsManager globalSettingsManager) {
+	public OpenBISLoginDialog(final GlobalSettingsManager globalSettingsManager) {
 		
 		// Get the list of configured servers and set the active one
 		servers = globalSettingsManager.getAllServers();
@@ -81,6 +81,9 @@ public class OpenBISLoginDialog extends JDialog {
 							new OpenBISPickServerDialog(servers,
 									openBISServerURL);
 					openBISServerURL = dialog.getOpenBISServer();
+					
+					// Update the selected server in the global settings
+					globalSettingsManager.setActiveServer(openBISServerURL);
 					
 					// Display currently selected server in the dialog title
 					setTitle(openBISServerURL);
