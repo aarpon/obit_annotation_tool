@@ -89,6 +89,14 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 		// Get a list of all files
 		File[] allFiles = folder.listFiles();
+		if (allFiles == null) {
+			
+			// Mark failure
+			isValid = false;
+			errorMessage = "The folder is empty.";
+			return isValid;
+
+		}
 
 		// Now process them
 		for (File file : allFiles) {
@@ -344,6 +352,11 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		        return (fileName.endsWith("_Properties.xml"));
 		    }
 		});
+		
+		if (xmlFiles == null) {
+			errorMessage = "No metadata XML files found!";
+			return false;
+		}
 		
 		if (xmlFiles.length != 1) {
 			errorMessage = "Multiple metadata XML files found!";

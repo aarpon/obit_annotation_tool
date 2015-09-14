@@ -171,6 +171,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		// Get the directory listing
 		String[] files = dir.list();
+		if (files == null) {
+			return;
+		}
 
 		// Empty subfolders are not accepted
 		if (files.length == 0 && !dir.equals(this.userFolder)) {

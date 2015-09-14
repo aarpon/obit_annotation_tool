@@ -826,6 +826,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Go over the list, the first FCS file we find we put it in front of
 		// the list and return.
 		String [] files = dir.list();
+		if (files == null) {
+			return new String[0];
+		}
 		int foundIndx = -1;
 		for (int i = 0; i < files.length; i++) {
 			String fileName = files[i];
