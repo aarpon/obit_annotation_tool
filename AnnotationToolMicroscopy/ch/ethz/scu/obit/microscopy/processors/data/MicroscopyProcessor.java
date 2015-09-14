@@ -29,11 +29,16 @@ import ch.ethz.scu.obit.processors.data.validator.GenericValidator;
  */
 public final class MicroscopyProcessor extends AbstractProcessor {
 
+	private static final int ROOT_LEVEL = 0;
+	private static final int EXPERIMENT_LEVEL = 1;
+	private static final int DATASET_LEVEL = 2;
+	private static final int COMPOSITE_DATASET_LEVEL = 3;
+	
 	/* Folder to scan (recursively) */
 	private File userFolder;
 
 	/* Keep track of the folder level when recursing into subfolders */
-	private int folderLevel = 0;
+	private int folderLevel = ROOT_LEVEL;
 
 	/* List of supported file formats
 	 * 
@@ -117,7 +122,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		// indeed a folder. So we can scan it recursively to find and
 		// reconstruct the structure of all contained experiments.
 		try {
-			folderLevel = 0;
+			folderLevel = ROOT_LEVEL;
 			recursiveDir(this.userFolder);
 		} catch (IOException e) {
 			this.errorMessage = "Could not parse the folder.";
@@ -151,9 +156,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	private void recursiveDir(File dir) throws IOException {
 
-		// We do not allow recursion above folderLevel 2; deeper levels must
-		// be taken care of by the CompositeMicroscopyReaders.
-		if (folderLevel == 2) {
+		// We do not allow recursion above folderLevel = DATASET_LEVEL == 2;
+		// deeper levels must be taken care of by the CompositeMicroscopyReaders.
+		if (folderLevel == DATASET_LEVEL) {
 			return;
 		}
 
@@ -185,7 +190,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			// Is it a directory?
 			if (file.isDirectory()) {
 
-				if (folderLevel < 2) {
+				if (folderLevel < DATASET_LEVEL) {
 					
 					// Recurse into the subfolder
 					recursiveDir(file);
@@ -274,8 +279,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 					continue;
 				}
 
-				// Do we have an unknown file? If we do, we move on to the next.
-				if (!supportedFormats.contains(ext)) {
+				// Do we have an unknown file (i.e. neither a supported dataset 
+				// format nor a valid attachment)? If we do, we add it to the 
+				// list of invalid files and move on to the next.
+				if (!supportedFormats.contains(ext) &&
+						!ExperimentDescriptor.isValidAttachment(file)) {
 					validator.isValid = false;
 					validator.invalidFilesOrFolders.put(file,
 							"Invalid file type.");
@@ -295,6 +303,19 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				folderDescriptor.experiments.put(experimentName, expDesc);
 			}
 
+			// If the file is an attachment, add it and move on
+			if (ExperimentDescriptor.isValidAttachment(file)) {
+				
+				if (! expDesc.addAttachment(file)) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"Could not assign attachments to esperiment!");
+				}
+
+				// Move on to the next file
+				continue;
+				
+			}
 			// Now add the dataset to the tree
 			if (isCompositeDataset) {
 
@@ -338,7 +359,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			}
 			
 			// This should not happen!
-			if (folderLevel > 2) {
+			if (folderLevel > DATASET_LEVEL) {
 				
 				// Do we have an unknown file? If we do, we move on to the next.
 				validator.isValid = false;
@@ -359,7 +380,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class Folder extends PathAwareDescriptor {
 
-		public final Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
+		public final Map<String, Experiment> experiments =
+				new LinkedHashMap<String, Experiment>();
 
 		public Folder(File fullFolder) {
 

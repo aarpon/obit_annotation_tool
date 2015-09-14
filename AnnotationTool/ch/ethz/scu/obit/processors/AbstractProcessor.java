@@ -15,7 +15,7 @@ abstract public class AbstractProcessor {
 	 * In case of error, put an explanation in errorMessage.
 	 */
 	protected String errorMessage = "";
-	
+
 	/**
 	 * Validator
 	 */
@@ -66,16 +66,6 @@ abstract public class AbstractProcessor {
 	}
 	
 	/**
-	 * Checks whether the passed file can be attached.
-	 * @param file File to be checked.
-	 * @return always false! The classes that inherit from AbstractProcessor 
-	 * (and support attachments) should override this method. 
-	 */
-	protected boolean isValidAttachment(File file) {
-		return false;
-	}
-
-	/** 
 	 * Deletes safely-to-remove files like .DS_Store, Thumbs.db, ...
 	 * @return true if the file was recognized as a useless hidden
 	 * file and deleted, false if the file is a relevant file to be 
