@@ -701,6 +701,12 @@ public class OpenBISViewer extends Observable
                 JPopupMenu popup =
                         createSpacePopup((OpenBISSpaceNode) node);
                 popup.show(e.getComponent(), x, y);
+            } else if (nodeType.equals("OpenBISProjectNode")) {
+                JPopupMenu popup =
+                        createProjectPopup((OpenBISProjectNode) node);
+                popup.show(e.getComponent(), x, y);            	
+            } else {
+            	// Nothing to do.
             }
         }
     }
@@ -733,6 +739,36 @@ public class OpenBISViewer extends Observable
 	    return popup;
 	}
 
+	/**
+	 * Create a popup menu with actions for a project node
+	 * @return a JPopupMenu for the passed item
+	 */
+	private JPopupMenu createProjectPopup(final OpenBISProjectNode node) {
+		
+		// Create the popup menu.
+	    JPopupMenu popup = new JPopupMenu();
+
+	    // Create new project
+	    String menuEntry = "Set as default target project";
+	    JMenuItem menuItem = new JMenuItem(menuEntry);
+	    menuItem.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+            	// Set the project with given identified as default target
+            	if (setAsDefaultProject(node.getIdentifier())) {
+            		outputPane.log("Project successfully set as default.");
+            	} else {
+            		outputPane.err("Project could not be set as default.");
+            	}
+			}
+        });
+	    popup.add(menuItem);
+	
+	    return popup;
+	}
+
+	
 	/**
 	 * Asks the user to give a project name and will then try to create
 	 * it as a child of the passed OpenBISSpaceNode
@@ -791,6 +827,14 @@ public class OpenBISViewer extends Observable
 		return false;
 	}
 	
+	/**
+	 * Set the project with given identifier as the default target.
+	 * @param projectId The openBIS project identifier.
+	 */
+	private boolean setAsDefaultProject(final String projectId) {
+		return globalSettingsManager.setDefaultProject(projectId);
+	}
+
 	/**
 	 * Clear the list of tags in the UI.
 	 */

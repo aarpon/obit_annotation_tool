@@ -38,6 +38,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadataMapper;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
@@ -86,10 +87,11 @@ public final class MicroscopyEditor extends AbstractEditor {
 	 * Constructor
 	 */
 	public MicroscopyEditor(AbstractViewer dataViewer, 
-			OpenBISViewer openBISViewer) {
+			OpenBISViewer openBISViewer, 
+			GlobalSettingsManager globalSettingsManager) {
 
 		// Store the reference to the data and openBIS viewers
-		super(dataViewer, openBISViewer);
+		super(dataViewer, openBISViewer, globalSettingsManager);
 
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();

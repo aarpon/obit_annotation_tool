@@ -140,7 +140,7 @@ public class GlobalSettingsManager {
 	 * @return true if the server could be set successfully, false otherwise.
 	 */
 	public boolean setFavoriteServer(String openBISURL) {
-		return userManager.setFavoriteServer(openBISURL);
+		return userManager.storeFavoriteServer(openBISURL);
 	}
 
 	/**
@@ -167,8 +167,8 @@ public class GlobalSettingsManager {
 	 * @param project openBIS identifier of the project.
 	 * @return true if the project could be set successfully, false otherwise.
 	 */
-	public void setDefaultProject(String project) {
-		userManager.setDefaultProject(project);
+	public boolean setDefaultProject(String project) {
+		return userManager.storeDefaultProject(project);
 	}
 
 	/**

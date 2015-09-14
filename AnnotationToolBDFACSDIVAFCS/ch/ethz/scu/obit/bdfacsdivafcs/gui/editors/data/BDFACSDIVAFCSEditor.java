@@ -41,6 +41,7 @@ import ch.ethz.scu.obit.bdfacsdivafcs.gui.editors.data.model.BDFACSDIVAFCSMetada
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.model.SampleDescriptor;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
@@ -74,10 +75,11 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 	 * Constructor
 	 */
 	public BDFACSDIVAFCSEditor(AbstractViewer dataViewer, 
-			OpenBISViewer openBISViewer) {
+			OpenBISViewer openBISViewer, 
+			GlobalSettingsManager globalSettingsManager) {
 
 		// Store the reference to the data and openBIS viewers
-		super(dataViewer, openBISViewer);
+		super(dataViewer, openBISViewer, globalSettingsManager);
 
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -293,8 +295,9 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 
 	/**
 	 * Map the data and openBIS models
+	 * @throws Exception 
 	 */
-	protected boolean initMetadata() {
+	protected boolean initMetadata() throws Exception {
 		
 		// Make sure both viewers have completed their models
 		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
@@ -312,12 +315,16 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 			return false;
 		}
 		
+		// Retrieve the default target project from the User settings or
+		// revert to the first project in the list if none is set.
+		OpenBISProjectNode defaultProjectNode = getDefaultProjectOrFirst();
+		
 		// Create all BDFACSDIVAFCSMetadataMapper objects and initially 
 		// assign each folder to the first project
 		for (ExperimentNode node : experiments) {
 			metadataMappersList.add(
 					new BDFACSDIVAFCSMetadataMapper(
-							node, openBISProjects.get(0)));
+							node, defaultProjectNode));
 		}
 		
 		// Set the index of the experiment (if needed)

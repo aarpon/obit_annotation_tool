@@ -142,12 +142,12 @@ class UserSettingsManager {
 	}
 
 	/**
-	 * Set the favorite server. The favorite server MUST be one of the servers
-	 * passed in the UserSettingsManager class constructor.
+	 * Set and persist the favorite server. The favorite server MUST be one 
+	 * of the servers passed in the UserSettingsManager class constructor.
 	 * @param openBISURL openBIS URL
 	 * @return true if the favorite server could be set, false otherwise.
 	 */
-	public boolean setFavoriteServer(String openBISURL) {
+	public boolean storeFavoriteServer(String openBISURL) {
 		for (int i = 0; i < listUserSettings.size(); i++) {
 			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
 				favoriteServerSettingsIndex = i;
@@ -165,7 +165,7 @@ class UserSettingsManager {
 	}
 
 	/**
-	 * Set the default project for the active server.
+	 * Set and persist the default project for the active server.
 	 * 
 	 * Please notice that the validation of the passed project identifier must 
 	 * be done externally. The UserSettingsManager and the UserSettings classes
@@ -174,10 +174,17 @@ class UserSettingsManager {
 	 * This is a User Setting.
 	 *  
 	 * @param project openBIS identifier of the project.
+	 * @return true if the default project could be stored and persisted,
+	 * false otherwise.  
 	 */
-	public void setDefaultProject(String project) {
+	public boolean storeDefaultProject(String project) {
+		
+		// Set the default project
 		listUserSettings.get(currentServerSettingsIndex)
 		.setSettingValue("DefaultOpenBISProject", project);
+		
+		// Store
+		return save();
 	}
 
 	/**
@@ -199,26 +206,6 @@ class UserSettingsManager {
 	 */
 	public ArrayList<String> getSettingsNames() {
 		return UserSettings.getSettingsNames();
-	}
-
-	/**
-	 * Return the value for the requested setting and currently active server.
-	 * 
-	 * @param name setting name
-	 * @return the value of the attribute for current setting.
-	 */
-	public String getSettingValue(String name) {
-		UserSettings userSettings = listUserSettings.get(currentServerSettingsIndex);
-		return userSettings.getSettingValue(name);
-	}
-
-	/**
-	 * Set the value of a specific setting and currently active server.
-	 * @param name Name of the setting
-	 * @param value Value of the setting
-	 */
-	public void setSettingValue(String name, String value) {
-		listUserSettings.get(currentServerSettingsIndex).setSettingValue(name, value);
 	}
 
 	/**

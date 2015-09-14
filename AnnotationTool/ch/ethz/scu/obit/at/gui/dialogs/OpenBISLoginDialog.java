@@ -79,7 +79,8 @@ public class OpenBISLoginDialog extends JDialog {
 					// Modal dialog
 					OpenBISPickServerDialog dialog =
 							new OpenBISPickServerDialog(servers,
-									openBISServerURL);
+									openBISServerURL,
+									globalSettingsManager);
 					openBISServerURL = dialog.getOpenBISServer();
 					
 					// Update the selected server in the global settings

@@ -11,9 +11,12 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 /**
  * openBIS pick server dialog
@@ -25,21 +28,22 @@ public class OpenBISPickServerDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	protected JComboBox<String> openBISURLList;
-	
+	protected JCheckBox openBISSetDefault;
 	private String currentServer;
 	private String selectedServer;
 	
 	/**
 	 * Constructor
 	 */
-	public OpenBISPickServerDialog(ArrayList<String> servers, String current) {
+	public OpenBISPickServerDialog(ArrayList<String> servers, 
+			String current, final GlobalSettingsManager globalSettigsManager) {
 
 		// Store the currently selected server and keep track of
 		// what the original selection was in case the user cancels
 		// the selection.
 		currentServer = current;
 		selectedServer = current;
-
+		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);
@@ -82,9 +86,20 @@ public class OpenBISPickServerDialog extends JDialog {
 		constraints.insets = new Insets(5, 5, 5, 5);
         add(openBISURLList, constraints);
 
-        // Add a spacer
+        // Add a checkbox
+        openBISSetDefault = new JCheckBox("Set selected as default server");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;			
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 5, 5, 5);
+        add(openBISSetDefault, constraints);
+		
+        // Add a spacer
+		constraints.gridx = 0;
+		constraints.gridy = 3;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;			
 		constraints.weightx = 0.33;
@@ -95,7 +110,7 @@ public class OpenBISPickServerDialog extends JDialog {
 		// Create an OK button
 		JButton okButton = new JButton("OK");
 		constraints.gridx = 1;
-		constraints.gridy = 2;
+		constraints.gridy = 3;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;			
 		constraints.weightx = 0.33;
@@ -103,6 +118,10 @@ public class OpenBISPickServerDialog extends JDialog {
         constraints.insets = new Insets(5, 5, 5, 5);
 		okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+            	// Store the default server if so requested by the user
+            	if (openBISSetDefault.isSelected()) {
+            		globalSettigsManager.setFavoriteServer(selectedServer);
+            	}
             	setVisible(false);
         		dispose();
             }
@@ -120,7 +139,7 @@ public class OpenBISPickServerDialog extends JDialog {
             }
         });
 		constraints.gridx = 2;
-		constraints.gridy = 2;
+		constraints.gridy = 3;
 		constraints.gridwidth = 1;
 		constraints.gridheight = 1;			
 		constraints.weightx = 0.33;

@@ -19,7 +19,8 @@ public class EditorFactory {
 	 * @param openBISViewer reference to the openBIS viewer
 	 * @return a concrete implementation of an AbstractViewer
 	 */
-	public static AbstractEditor createEditor(GlobalSettingsManager globalSettingsManager, 
+	public static AbstractEditor createEditor(
+			GlobalSettingsManager globalSettingsManager, 
 			AbstractViewer dataViewer, OpenBISViewer openBISViewer) {
 
 		// Declare an AbstractEditor
@@ -28,9 +29,11 @@ public class EditorFactory {
 		// Create the concrete editor
 		String acqStation = globalSettingsManager.getAcquisitionStation();	
 		if (acqStation.equals("BD Biosciences Cell Analyzers and Sorters")) {
-			metadataEditor = new BDFACSDIVAFCSEditor(dataViewer, openBISViewer);
+			metadataEditor = new BDFACSDIVAFCSEditor(
+					dataViewer, openBISViewer, globalSettingsManager);
 		} else if (acqStation.equals("Generic light microscopes")) {
-			metadataEditor = new MicroscopyEditor(dataViewer, openBISViewer);
+			metadataEditor = new MicroscopyEditor(
+					dataViewer, openBISViewer, globalSettingsManager);
 		} else {
 			System.err.println("Unknown acquisition station! Aborting.");
 			System.exit(1);
