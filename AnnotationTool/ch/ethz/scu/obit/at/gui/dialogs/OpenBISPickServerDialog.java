@@ -90,7 +90,7 @@ public class OpenBISPickServerDialog extends JDialog {
         openBISSetDefault = new JCheckBox("Set selected as default server");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
-		constraints.gridwidth = 1;
+		constraints.gridwidth = 3;
 		constraints.gridheight = 1;			
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
