@@ -30,11 +30,11 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
 /**
  * Commodity class to manage the AnnotationTool user application properties
  * 
- * @author Aaron Ponti
- * 
  * This class is only visible within its package.
+
+ * @author Aaron Ponti
  */
-public class UserSettingsManager {
+class UserSettingsManager {
 
 	protected int favoriteServerSettingsIndex = 0;
 	protected ArrayList<UserSettings> listUserSettings = null;
@@ -117,7 +117,6 @@ public class UserSettingsManager {
 		for (int i = 0; i < listUserSettings.size(); i++) {
 			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
 				currentServerSettingsIndex = i;
-				favoriteServerSettingsIndex = i;
 				return true;
 			}
 		}
@@ -135,13 +134,62 @@ public class UserSettingsManager {
 	}
 
 	/**
-	 * Set the current active settings by openBIS URL
-	 * @param openBISURL openBIS URL
-	 * @return true if the settings for the specified openBIS URL could be set,
-	 * false otherwise.
+	 * Get the favorite server.
+	 * @return the URL of the favorite server.
 	 */
-	public String getFavoriteOpenBISServer() {
+	public String getFavoriteServer() {
 		return listUserSettings.get(favoriteServerSettingsIndex).getOpenBISURL();
+	}
+
+	/**
+	 * Set the favorite server. The favorite server MUST be one of the servers
+	 * passed in the UserSettingsManager class constructor.
+	 * @param openBISURL openBIS URL
+	 * @return true if the favorite server could be set, false otherwise.
+	 */
+	public boolean setFavoriteServer(String openBISURL) {
+		for (int i = 0; i < listUserSettings.size(); i++) {
+			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
+				favoriteServerSettingsIndex = i;
+				if (! save()) {
+					errorMessage = "Could not store settings to disk.";
+					return false;
+				} else {
+					errorMessage = "";
+					return true;
+				}
+			}
+		}
+		errorMessage = "Invalid openBIS URL.";
+		return false;
+	}
+
+	/**
+	 * Set the default project for the active server.
+	 * 
+	 * Please notice that the validation of the passed project identifier must 
+	 * be done externally. The UserSettingsManager and the UserSettings classes
+	 * do not attempt to check the passed identifier against openBIS. 
+	 * 
+	 * This is a User Setting.
+	 *  
+	 * @param project openBIS identifier of the project.
+	 */
+	public void setDefaultProject(String project) {
+		listUserSettings.get(currentServerSettingsIndex)
+		.setSettingValue("DefaultOpenBISProject", project);
+	}
+
+	/**
+	 * Get the default project for the activer server.
+	 * 
+	 * This is a User Setting.
+	 *  
+	 * @return openBIS identifier of the project.
+	 */
+	public String getDefaultProject() {
+		return listUserSettings.get(currentServerSettingsIndex)
+				.getSettingValue("DefaultOpenBISProject");
 	}
 
 	/**

@@ -46,7 +46,6 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
