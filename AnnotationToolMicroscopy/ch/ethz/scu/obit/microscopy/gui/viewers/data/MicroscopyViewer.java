@@ -87,6 +87,9 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 		String className = nodeInfo.getClass().getSimpleName();
 		if (className.equals("Experiment")) {
 			clearMetadataTable();
+			addAttributesToMetadataTable(
+					((MicroscopyProcessor.Experiment) 
+							nodeInfo).getAttributes());
 		} else if (className.equals("MicroscopyFile")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
