@@ -165,6 +165,22 @@ class UserSettingsManager {
 	}
 
 	/**
+	 * Set without persisting the favorite server. The favorite server MUST be 
+	 * one of the servers passed in the UserSettingsManager class constructor.
+	 * @param openBISURL openBIS URL
+	 * @return true if the favorite server could be set, false otherwise.
+	 */
+	private boolean setFavoriteServer(String openBISURL) {
+		for (int i = 0; i < listUserSettings.size(); i++) {
+			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
+				favoriteServerSettingsIndex = i;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Set and persist the default project for the active server.
 	 * 
 	 * Please notice that the validation of the passed project identifier must 
@@ -282,6 +298,7 @@ class UserSettingsManager {
 		listUserSettings = loadedListSettings;
 		
 		// Set the favorite one
+		setFavoriteServer(favoriteOpenBISURL);
 		setActiveServer(favoriteOpenBISURL);
 		
 		// Return success
