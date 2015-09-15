@@ -323,8 +323,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 		// assign each folder to the first project
 		for (ExperimentNode node : experiments) {
 			metadataMappersList.add(
-					new BDFACSDIVAFCSMetadataMapper(
-							node, defaultProjectNode));
+					new BDFACSDIVAFCSMetadataMapper(node, defaultProjectNode));
 		}
 		
 		// Set the index of the experiment (if needed)

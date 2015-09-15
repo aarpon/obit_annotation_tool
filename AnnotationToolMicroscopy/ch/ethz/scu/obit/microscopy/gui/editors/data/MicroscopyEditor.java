@@ -199,9 +199,10 @@ public final class MicroscopyEditor extends AbstractEditor {
 
 	/**
 	 * Map the data and openBIS models
+	 * @throws Exception 
 	 */
 	@Override
-	protected boolean initMetadata() {
+	protected boolean initMetadata() throws Exception {
 		
 		// Make sure both viewers have completed their models
 		if (!openBISViewer.isReady() || !dataViewer.isReady()) {
@@ -218,12 +219,15 @@ public final class MicroscopyEditor extends AbstractEditor {
 			return false;
 		}
 		
+		// Retrieve the default target project from the User settings or
+		// revert to the first project in the list if none is set.
+		OpenBISProjectNode defaultProjectNode = getDefaultProjectOrFirst();
+		
 		// Create all MicroscopyMetadataMapper objects and initially assign all
 		// experiments to the first project
 		for (ExperimentNode node : experiments) {
 			metadataMappersList.add(
-					new MicroscopyMetadataMapper(
-							node, openBISProjects.get(0)));
+					new MicroscopyMetadataMapper(node, defaultProjectNode));
 		}
 		
 		// Set the index of the experiment (if needed)
