@@ -13,8 +13,8 @@ public class DatasetDescriptor extends PathAwareDescriptor{
 	 * Constructor
 	 * @param fullPath Full path of the entity
 	 */
-	public DatasetDescriptor(File fullPath) {
-		super(fullPath);
+	public DatasetDescriptor(File fullPath, File userRootDataPath) {
+		super(fullPath, userRootDataPath);
 	}
 
 	/**

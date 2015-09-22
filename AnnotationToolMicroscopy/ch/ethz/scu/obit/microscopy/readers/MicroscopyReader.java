@@ -21,9 +21,8 @@ import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
+import ome.units.quantity.Length;
 import ome.xml.model.primitives.Color;
-import ome.xml.model.primitives.PositiveFloat;
-import ome.xml.model.primitives.PositiveInteger;
 import ome.xml.model.primitives.Timestamp;
 import ch.ethz.scu.obit.readers.AbstractReader;
 
@@ -415,7 +414,9 @@ public class MicroscopyReader extends AbstractReader {
 	 */
 	public double[] getVoxelSizes(int seriesNum) {
 		
-		PositiveFloat pVoxelX, pVoxelY, pVoxelZ;
+		Length pVoxelX;
+		Length pVoxelY;
+		Length pVoxelZ;
 		double voxelX, voxelY, voxelZ;
 		
 	    // Voxel size X
@@ -423,7 +424,7 @@ public class MicroscopyReader extends AbstractReader {
 	    if (pVoxelX == null) {
 	        voxelX = Double.NaN;
 	    } else {
-	        voxelX = pVoxelX.getValue();
+	        voxelX = (double) pVoxelX.value();
 	    }
 	    
 	    // Voxel size Y
@@ -438,7 +439,7 @@ public class MicroscopyReader extends AbstractReader {
 	    	}
 	    	
 	    } else {
-	        voxelY = pVoxelY.getValue();
+	        voxelY = (double) pVoxelY.value();
 	    }
 	    
 	    // Voxel size Z
@@ -446,7 +447,7 @@ public class MicroscopyReader extends AbstractReader {
 	    if (pVoxelZ == null) {
 	        voxelZ = Double.NaN;
 	    } else {
-	        voxelZ = pVoxelZ.getValue();
+	        voxelZ = (double) pVoxelZ.value();
 	    }
 
         // Return
@@ -520,11 +521,11 @@ public class MicroscopyReader extends AbstractReader {
 		double[] exWavelengths = new double[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			PositiveInteger pEx =
+			Length pEx =
 					omexmlMeta.getChannelExcitationWavelength(seriesNum, i);
 		    double ex;
 			if (pEx != null) {
-		        ex = (double) pEx.getValue();
+		        ex = (double) pEx.value();
 		    } else {
 		    	ex = Double.NaN;
 		    }
@@ -547,11 +548,11 @@ public class MicroscopyReader extends AbstractReader {
 		double[] emWavelengths = new double[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			PositiveInteger pEm =
+			Length pEm =
 					omexmlMeta.getChannelEmissionWavelength(seriesNum, i);
 		    double em;
 			if (pEm != null) {
-		        em = (double) pEm.getValue();
+		        em = (double) pEm.value();
 		    } else {
 		    	em = Double.NaN;
 		    }
@@ -618,14 +619,14 @@ public class MicroscopyReader extends AbstractReader {
 		Set<String> keys = metadata.keySet();
 		if (keys.contains("X position")) {
 			Object m = metadata.get("X position");
-			x = ((Number)m).doubleValue(); // Java 6 compatibility
+			x = (double) ((Length)m).value(); // Java 6 compatibility
 		} else {
 			x = Double.NaN;
 		}
 
 		if (keys.contains("Y position")) {
 			Object m = metadata.get("Y position");
-			y = ((Number)m).doubleValue(); // Java 6 compatibility
+			y = (double) ((Length)m).value(); // Java 6 compatibility
 		} else {
 			y = Double.NaN;
 		}

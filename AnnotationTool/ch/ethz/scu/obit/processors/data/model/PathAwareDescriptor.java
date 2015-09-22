@@ -3,10 +3,6 @@ package ch.ethz.scu.obit.processors.data.model;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
-
 /**
  * Provides utility methods to handle path-related information for the
  * descriptor.
@@ -35,20 +31,10 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	 * Constructor
 	 * @param fullPath Full path of the entity
 	 */
-	public PathAwareDescriptor(File fullPath) {
+	public PathAwareDescriptor(File fullPath, File userRootDataPath) {
 
 		// Store base and full path
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
-		this.basePath = new File(
-				manager.getSettingValue("UserDataDir"));
+		this.basePath = userRootDataPath;
 		this.fullPath = fullPath;
 		
 		// Compute and store the relative path

@@ -45,7 +45,7 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSampleListNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
@@ -67,6 +67,7 @@ public class OpenBISViewer extends Observable
 	protected JLabel userTags;
 	protected JList<String> tagList;
 
+	private GlobalSettingsManager globalSettingsManager;
 	private OpenBISProcessor openBISProcessor;
 
     private OpenBISUserNode userNode;
@@ -89,8 +90,12 @@ public class OpenBISViewer extends Observable
 	/**
 	 * Constructor
 	 */
-	public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane) {
+	public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane,
+			GlobalSettingsManager globalSettingsManager) {
 
+		// Store the global settings manager
+		this.globalSettingsManager = globalSettingsManager;
+		
 		// Store the OpenBISProcessor reference
 		this.openBISProcessor = openBISProcessor;
 
@@ -100,17 +105,6 @@ public class OpenBISViewer extends Observable
 		// Create a panel
 		panel = new JPanel();
 		
-		// Get the openBIS URL from the appProperties
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
-
 		// Set a grid bag layout
 		panel.setLayout(new GridBagLayout());
 
@@ -707,6 +701,12 @@ public class OpenBISViewer extends Observable
                 JPopupMenu popup =
                         createSpacePopup((OpenBISSpaceNode) node);
                 popup.show(e.getComponent(), x, y);
+            } else if (nodeType.equals("OpenBISProjectNode")) {
+                JPopupMenu popup =
+                        createProjectPopup((OpenBISProjectNode) node);
+                popup.show(e.getComponent(), x, y);            	
+            } else {
+            	// Nothing to do.
             }
         }
     }
@@ -739,6 +739,36 @@ public class OpenBISViewer extends Observable
 	    return popup;
 	}
 
+	/**
+	 * Create a popup menu with actions for a project node
+	 * @return a JPopupMenu for the passed item
+	 */
+	private JPopupMenu createProjectPopup(final OpenBISProjectNode node) {
+		
+		// Create the popup menu.
+	    JPopupMenu popup = new JPopupMenu();
+
+	    // Create new project
+	    String menuEntry = "Set as default target project";
+	    JMenuItem menuItem = new JMenuItem(menuEntry);
+	    menuItem.addActionListener(new ActionListener() {
+ 
+            public void actionPerformed(ActionEvent e)
+            {
+            	// Set the project with given identified as default target
+            	if (setAsDefaultProject(node.getIdentifier())) {
+            		outputPane.log("Project successfully set as default.");
+            	} else {
+            		outputPane.err("Project could not be set as default.");
+            	}
+			}
+        });
+	    popup.add(menuItem);
+	
+	    return popup;
+	}
+
+	
 	/**
 	 * Asks the user to give a project name and will then try to create
 	 * it as a child of the passed OpenBISSpaceNode
@@ -797,6 +827,14 @@ public class OpenBISViewer extends Observable
 		return false;
 	}
 	
+	/**
+	 * Set the project with given identifier as the default target.
+	 * @param projectId The openBIS project identifier.
+	 */
+	private boolean setAsDefaultProject(final String projectId) {
+		return globalSettingsManager.setDefaultProject(projectId);
+	}
+
 	/**
 	 * Clear the list of tags in the UI.
 	 */

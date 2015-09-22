@@ -13,8 +13,7 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.ethz.scu.obit.at.gui.dialogs.OpenBISLoginDialog;
-import ch.ethz.scu.obit.common.settings.AppSettingsManager;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.openbis.common.api.client.ServiceFinder;
@@ -37,6 +36,8 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.IGeneralInformationService
  */
 public class OpenBISProcessor {
 
+	GlobalSettingsManager globalSettingsManager;
+	
 	private String openBISURL = "";
 	private String userName = "";
 	private String userPassword = "";
@@ -62,21 +63,13 @@ public class OpenBISProcessor {
 	/**
 	 * Constructor
 	 */
-	public OpenBISProcessor() {
+	public OpenBISProcessor(GlobalSettingsManager globalSettingsManager) {
 
-		// Get the openBIS URL from the appProperties
-		UserSettingsManager manager = new UserSettingsManager();
-		if (! manager.load()) {
-			JOptionPane.showMessageDialog(null,
-					"Could not read application settings!\n" +
-			"Please contact your administrator. The application\n" +
-			"will now exit!",
-			"Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
-
-		// Set the URL
-		this.openBISURL = manager.getSettingValue("OpenBISURL");
+		// Store the reference to the global settings manager
+		this.globalSettingsManager = globalSettingsManager;
+		
+		// Set the currently active server
+		this.openBISURL = globalSettingsManager.getActiveServer();
 
 	}
 	
@@ -123,7 +116,7 @@ public class OpenBISProcessor {
 
 		// Modal dialog: stops here until the dialog is disposed
 		// (when a username and password have been provided)
-        OpenBISLoginDialog loginDialog = new OpenBISLoginDialog();
+        OpenBISLoginDialog loginDialog = new OpenBISLoginDialog(globalSettingsManager);
 		userName = loginDialog.getUsername();
 		userPassword = loginDialog.getPassword();
 		openBISURL = loginDialog.getOpenBISServer();
@@ -152,13 +145,6 @@ public class OpenBISProcessor {
 		if (isLoggedIn) {
 			return true;
 		}
-		
-		// Now save the user settings
-		AppSettingsManager manager = new AppSettingsManager();
-		UserSettingsManager userManager = new UserSettingsManager(
-				manager.getSettingsForServer(openBISURL));
-		userManager.save();
-		manager = null;
 	
 		// Create a thread for logging in to openBIS and returning an
 		// IOpenbisServiceFacade
@@ -226,8 +212,7 @@ public class OpenBISProcessor {
 		};
 		
 		// Should we accept self-signed certificates?
-		String acceptSelfSignedCerts = 
-				userManager.getSettingValue("AcceptSelfSignedCertificates");
+		String acceptSelfSignedCerts = globalSettingsManager.acceptSelfSignedCertificates();
 
 		// Set the force-accept-ssl-certificate option if requested
 		// by the administrator

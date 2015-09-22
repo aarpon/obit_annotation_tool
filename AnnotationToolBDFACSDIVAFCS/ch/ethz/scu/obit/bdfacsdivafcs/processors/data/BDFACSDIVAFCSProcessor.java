@@ -36,12 +36,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 	/* Private instance variables */
 	private File userFolder;
+	private File userRootFolder;
 	private Experiment currentExperiment;
 
-	/* List of accepted attachment file extensions */
-	private final String[] validAttachmentExtensions = 
-		{".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"};
-	
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
     static
@@ -80,9 +77,10 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		// Set the root folder
 		this.userFolder = folder;
+		this.userRootFolder = folder.getParentFile();
 
 		// Create a descriptor for the user folder
-		folderDescriptor = new UserFolder(folder); 
+		folderDescriptor = new UserFolder(folder, userRootFolder); 
 
 	}
 
@@ -144,10 +142,10 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public Map<String, Experiment> experiments = 
 				new LinkedHashMap<String, Experiment>();
 		
-		public UserFolder(File fullFolder) {
+		public UserFolder(File fullFolder, File userRootDataPath) {
 			
 			// Invoke parent constructor
-			super(fullFolder);
+			super(fullFolder, userRootDataPath);
 			
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
@@ -198,9 +196,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * Constructor
 		 * @param fullPath Full path of the experiment.
 		 */
-		public Experiment(File fullPath) {
+		public Experiment(File fullPath, File userRootDataPath) {
 
-			super(fullPath);
+			super(fullPath, userRootDataPath);
 			this.setName(fullPath.getName());
 			
 			// Set the attribute relative path. Since this will be 
@@ -217,9 +215,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * @param fullPath Full path of the experiment.
 		 * @param name Name of the experiment.
 		 */
-		public Experiment(File fullPath, String name) {
+		public Experiment(File fullPath, String name, File userRootDataPath) {
 
-			super(fullPath);
+			super(fullPath, userRootDataPath);
 			this.setName(name);
 			
 			// Set the attribute relative path. Since this will be 
@@ -240,50 +238,6 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			return "Experiment";
 		}
 		
-		/**
-		 * Add the relative file path of the attachment to the attributes.
-		 * @param attachment A file object.
-		 * @return true if the attachment could be added; false otherwise.
-		 */
-		public boolean addAttachment(File attachment) {
-			
-			// Create attachment string
-			String attachmentAttr = "";
-			
-			// Get current attachments
-			if (attributes.containsKey("attachments")) {
-				attachmentAttr = attributes.get("attachments");
-			}
-			
-			// Build the attachment string
-			if (attachment.getAbsolutePath().startsWith(fullPath.getAbsolutePath())) {
-				
-				// Check that the attachment is contained in the Experiment
-				String filePath = attachment.getAbsolutePath().replace("\\", "/");
-				int indx = filePath.lastIndexOf(
-						relativePath.replace("\\", "/"));
-				if (indx == -1) {
-					return false;
-				}
-					
-				// Append the relative attachment path to the semicolon-
-				// separated path string
-				String relAttachmentPath = filePath.substring(indx); 
-				if (attachmentAttr.equals("")) {
-					attachmentAttr = relAttachmentPath;
-				} else {
-					attachmentAttr += ";" + relAttachmentPath; 
-				}
-					
-			}
-			
-			// Store the attachments as attributes
-			attributes.put("attachments", attachmentAttr);
-			
-			// Return success
-			return true;
-		}
-
 	} 
 
 
@@ -306,7 +260,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public FCSFile(File fcsFileName) throws IOException {
 
 			// Call base constructor
-			super(fcsFileName);
+			super(fcsFileName, userRootFolder);
 
 			// Store the file name
 			this.setName(fcsFileName.getName());
@@ -544,27 +498,6 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Checks whether the passed file can be attached.
-	 * @param file File to be checked.
-	 * @return always false! The classes that inherit from AbstractProcessor 
-	 * (and support attachments) should override this method. 
-	 */
-	protected boolean isValidAttachment(File file) {
-
-		// Extract the file extension (lower case)
-		String fileName = file.getName();
-		int indx = fileName.lastIndexOf(".");
-		if (indx == -1) {
-			return false;
-		}
-		String ext = fileName.substring(indx).toLowerCase();
-
-		// Check whether the file is a valid attachment
-		return Arrays.asList(validAttachmentExtensions).contains(ext);
-
-	}
-
-	/**
 	 * Scan the folder recursively and process all fcs files found
 	 * @param dir Full path to the directory to scan
 	 * @throws IOException Thrown if a FCS file could not be processed
@@ -631,7 +564,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 
 			// Check whether the file is a valid attachment
-			if (isValidAttachment(file)) {
+			if (ExperimentDescriptor.isValidAttachment(file)) {
 
 				// By design, when we find an attachment, the corresponding
 				// Experiment must exist
@@ -711,7 +644,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				expDesc = folderDescriptor.experiments.get(experimentPath);
 			} else {
 				expDesc = new Experiment(new File(experimentPath),
-						experimentName);
+						experimentName, userRootFolder);
 				// Store attributes
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentPath, expDesc);
@@ -824,6 +757,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Go over the list, the first FCS file we find we put it in front of
 		// the list and return.
 		String [] files = dir.list();
+		if (files == null) {
+			return new String[0];
+		}
 		int foundIndx = -1;
 		for (int i = 0; i < files.length; i++) {
 			String fileName = files[i];

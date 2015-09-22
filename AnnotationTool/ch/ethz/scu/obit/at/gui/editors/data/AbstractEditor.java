@@ -20,6 +20,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 /**
  * Abstract editor for processors
@@ -29,6 +30,9 @@ abstract public class AbstractEditor extends Observable
 implements ActionListener, Observer {
 
 	protected JPanel panel;
+	
+	// Reference to the global settings manager
+	protected GlobalSettingsManager globalSettingsManager;
 	
 	/**
 	 * References to the data viewer and model  
@@ -55,10 +59,12 @@ implements ActionListener, Observer {
 	 * @param openBISViewer Reference to the openBIS viewer
 	 */
 	public AbstractEditor(AbstractViewer dataViewer, 
-			OpenBISViewer openBISViewer) {
+			OpenBISViewer openBISViewer,
+			GlobalSettingsManager globalSettingsManager) {
 		
 		panel = new JPanel();
 		
+		this.globalSettingsManager = globalSettingsManager;
 		this.dataViewer = dataViewer;
 		this.openBISViewer = openBISViewer;
 		
@@ -218,10 +224,11 @@ implements ActionListener, Observer {
 	 * Creates a list of MetadataMappers used to map data entities to
 	 * openBIS entities (with optionally additional metadata information
 	 * the user will provide through UI elements in the editor).
+	 * @throws Exception 
 	 * 
 	 * @see AbstractMetadataMapper
 	 */
-	abstract protected boolean initMetadata();
+	abstract protected boolean initMetadata() throws Exception;
 
 	/**
 	 * Renders all widgets on the panel
@@ -279,5 +286,40 @@ implements ActionListener, Observer {
 
 		// Return the string
 		return buff.toString().trim().replaceAll(" ", ", ");
+	}
+	
+	/**
+	 * Return the default target openBIS project as set in the User settings
+	 * or the first returned project from openBIS if none is set. 
+	 * @return openBISProject node.
+	 * @throws Exception if the openBIS server nodes have not been retrieved yet.
+	 */
+	public OpenBISProjectNode getDefaultProjectOrFirst() throws Exception {
+		
+		// This method must be called after the openBIS server nodes
+		// have been retrieved.
+		if (openBISProjects.size() == 0) {
+			throw new Exception("No projects retrieved yet!");
+		}
+
+		// Retrieve the default target project from the User settings or
+		// revert to the first project in the list if none is set.
+		OpenBISProjectNode defaultProjectNode = null;
+		String defaultProject = globalSettingsManager.getDefaultProject();
+		if (defaultProject.equals("")) {
+			defaultProjectNode = openBISProjects.get(0);
+		} else {
+			for (OpenBISProjectNode current : openBISProjects) {
+				if (current.getIdentifier().equals(defaultProject)) {
+					defaultProjectNode = current;
+					break;
+				}
+			}
+			if (defaultProjectNode == null) {
+				throw new Exception("The stored default project does not exist!");
+			}
+		}
+		
+		return defaultProjectNode;
 	}
 }

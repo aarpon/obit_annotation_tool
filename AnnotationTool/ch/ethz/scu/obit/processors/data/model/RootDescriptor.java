@@ -15,8 +15,8 @@ public class RootDescriptor extends PathAwareDescriptor{
 	 * Constructor.
 	 * @param fullUserFolderPath Full user folder path.
 	 */
-	public RootDescriptor(File fullUserFolderPath) {
-		super(fullUserFolderPath);
+	public RootDescriptor(File fullUserFolderPath, File userRootDataPath) {
+		super(fullUserFolderPath, userRootDataPath);
 	}
 	
 	/**

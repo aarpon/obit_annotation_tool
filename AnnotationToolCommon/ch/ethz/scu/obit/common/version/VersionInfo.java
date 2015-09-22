@@ -3,7 +3,7 @@ package ch.ethz.scu.obit.common.version;
 public class VersionInfo {
 
 	// Program version
-	public static final String version = "0.7.0";
+	public static final String version = "0.8.0";
 	
 	// Version status: "alpha", "beta", or "" for a stable release
 	public static final String status = "";
@@ -14,7 +14,10 @@ public class VersionInfo {
 			" 2012 - 2015, Single Cell Unit, " +
 			"D-BSSE, ETH Zurich (Basel)";
 
-	// Properties (XML) file version
-	public static final int propertiesVersion = 4;
+	// Application settings (XML) file version
+	public static final int applicationSettingsVersion = 5;
+
+	// User settings (XML) file version
+	public static final int userSettingsVersion = 1;
 
 }

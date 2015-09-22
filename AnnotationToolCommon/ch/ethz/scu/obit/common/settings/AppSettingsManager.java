@@ -36,7 +36,11 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
 
 /**
  * Commodity class to manage the AnnotationTool application properties
+ * 
  * @author Aaron Ponti
+ * 
+ * This class is only visible within its package.
+ *  
  */
 public class AppSettingsManager {
 
@@ -185,7 +189,7 @@ public class AppSettingsManager {
 	 * Return the index of currently active setting
 	 * @return index of currently active setting.
 	 */
-	public boolean setCurrent(int newCurrent) throws ArrayIndexOutOfBoundsException {
+	public boolean setCurrentIndex(int newCurrent) throws ArrayIndexOutOfBoundsException {
 		if (newCurrent < 0 || newCurrent > (listAppSettings.size() - 1)) {
 			throw new ArrayIndexOutOfBoundsException();
 		}
@@ -239,18 +243,37 @@ public class AppSettingsManager {
 	 * Return the URL of current openBIS server
 	 * @return the URL of current openBIS server.
 	 */
-	public String getServer() {
+	public String getActiveServer() {
 		return listAppSettings.get(currentSettingsIndex).getOpenBISURL();
 	}
 
 	/**
+	 * Set the current active settings by openBIS URL
+	 * @param openBISURL openBIS URL
+	 * @return true if the settings for the specified openBIS URL could be set,
+	 * false otherwise.
+	 */
+	public boolean setActiveServer(String openBISURL) {
+		for (int i = 0; i < listAppSettings.size(); i++) {
+			if (listAppSettings.get(i).getOpenBISURL().equals(openBISURL)) {
+				currentSettingsIndex = i;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Set the URL of current openBIS server
 	 * @param openBISURL URL for current openBIS server
 	 */
-	public void setServer(String openBISURL) {
+	public void setCurrentServerURL(String openBISURL) {
+		if (openBISURL.equals("")) {
+			return;
+		}
 		listAppSettings.get(currentSettingsIndex).setOpenBISURL(openBISURL);
 	}
-	
+
 	/**
 	 * Check whether all Properties in the file are set. 
 	 * @return true if all Properties in the file are set,
@@ -352,11 +375,20 @@ public class AppSettingsManager {
 		currentSettingsIndex = 0;
 		isFileRead = true;
 	
-		// Check that the file version is current
-		if (fileVersion != VersionInfo.propertiesVersion) {
-			errorMessage = "The settings file is obsolete.";
-			isFileCurrent = false;
-			return false;
+		// Check that the file version is current.
+		if (fileVersion != VersionInfo.applicationSettingsVersion) {
+			
+			 // The change between version 4 and 5 is cosmetic, and we can re-save the settings.
+			if (VersionInfo.applicationSettingsVersion == 5 && fileVersion == 4) {
+				
+				// Save a new file at version.
+				save();
+				
+			} else {
+				errorMessage = "The settings file is obsolete.";
+				isFileCurrent = false;
+				return false;
+			}
 		}
 		
 		// Set file to be current
@@ -401,9 +433,9 @@ public class AppSettingsManager {
 			document = builder.newDocument();
 
 			// Create root element
-			Element root = document.createElement("AnnotationTool_Properties");
+			Element root = document.createElement("AnnotationTool_App_Settings");
 			root.setAttribute("version",
-					Integer.toString(VersionInfo.propertiesVersion));
+					Integer.toString(VersionInfo.applicationSettingsVersion));
 
 			// Get all properties for all servers and store them in an XML document
 			for (AppSettings appSettings : listAppSettings) {
@@ -645,5 +677,6 @@ public class AppSettingsManager {
 		// Return the document
 		return doc;
 	}
+
 }
 

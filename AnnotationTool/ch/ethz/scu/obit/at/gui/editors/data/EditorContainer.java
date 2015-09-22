@@ -12,7 +12,6 @@ import java.util.Observer;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
@@ -20,7 +19,7 @@ import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
-import ch.ethz.scu.obit.common.settings.UserSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 public class EditorContainer extends JPanel implements ActionListener, Observer {
 
@@ -32,17 +31,20 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 	protected AbstractViewer dataViewer;
 	protected OpenBISViewer openBISViewer;
 	protected OutputPane outputPane;
+	protected GlobalSettingsManager globalSettingsManager;
 
 	/**
 	 * Constructor
 	 */
 	public EditorContainer(AbstractViewer dataViewer, 
-			OpenBISViewer openBISViewer, OutputPane outputPane) {
+			OpenBISViewer openBISViewer, OutputPane outputPane,
+			GlobalSettingsManager globalSettingsManager) {
 		
 		// Store the references
 		this.dataViewer = dataViewer;
 		this.openBISViewer = openBISViewer;
 		this.outputPane = outputPane;
+		this.globalSettingsManager = globalSettingsManager;
 		
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -65,7 +67,7 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 		add(title, constraints);
 
 		// Add the editor
-		metadataEditor = EditorFactory.createEditor(dataViewer, openBISViewer);
+		metadataEditor = EditorFactory.createEditor(globalSettingsManager, dataViewer, openBISViewer);
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
@@ -110,18 +112,8 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 				return;
 			}
 
-			// Get the application properties
-			UserSettingsManager manager = new UserSettingsManager();
-			if (! manager.load()) {
-				JOptionPane.showMessageDialog(null,
-						"Could not read application settings!\n" +
-				"Please contact your administrator. The application\n" +
-				"will now exit!",
-				"Error", JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
-			}
-			String outputDirectory = 
-					manager.getSettingValue("UserDataDir");
+			// Get the output directory
+			String outputDirectory = globalSettingsManager.getUserDataRootDir();
 
 			// Save to XML (*_properties.oix)
 			if (dataViewer.saveToXML(outputDirectory)) {
@@ -144,7 +136,7 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 			}
 
 			// Now move the user folder to the datamover incoming folder
-			new ATDataMover(openBISViewer.getUserName()).move();
+			new ATDataMover(globalSettingsManager, openBISViewer.getUserName()).move();
 			outputPane.log("Data transferred.");
 			
 			// Re-scan

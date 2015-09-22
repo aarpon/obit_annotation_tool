@@ -23,7 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import ch.ethz.scu.obit.common.settings.AppSettingsManager;
+import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.version.VersionInfo;
 
 /**
@@ -44,13 +44,12 @@ public class OpenBISLoginDialog extends JDialog {
 	/**
 	 * Constructor
 	 */
-	public OpenBISLoginDialog() {
+	public OpenBISLoginDialog(final GlobalSettingsManager globalSettingsManager) {
 		
-		// Get the list of configured servers and set the default one
-		AppSettingsManager manager = new AppSettingsManager();
-		servers = manager.getAllServers();
-		openBISServerURL = servers.get(0);
-		
+		// Get the list of configured servers and set the active one
+		servers = globalSettingsManager.getAllServers();
+		openBISServerURL = globalSettingsManager.getActiveServer();
+
 		// Use a variable to keep track of where we are in the layout
 		int gridY = 0;
 		
@@ -80,8 +79,12 @@ public class OpenBISLoginDialog extends JDialog {
 					// Modal dialog
 					OpenBISPickServerDialog dialog =
 							new OpenBISPickServerDialog(servers,
-									openBISServerURL);
+									openBISServerURL,
+									globalSettingsManager);
 					openBISServerURL = dialog.getOpenBISServer();
+					
+					// Update the selected server in the global settings
+					globalSettingsManager.setActiveServer(openBISServerURL);
 					
 					// Display currently selected server in the dialog title
 					setTitle(openBISServerURL);
