@@ -25,6 +25,7 @@ public class ATDataMover {
 	
 	/**
 	 * Constructor
+	 * @param globalSettingsManager The application global settings manager. 
 	 * @param userName openBIS user name 
 	 */
 	public ATDataMover(GlobalSettingsManager globalSettingsManager, String userName) {
@@ -47,7 +48,14 @@ public class ATDataMover {
 		
 	}
 
-	// Move sourceDir to targetDir/{uniqueID}/
+	/**
+	 * Move sourceDir to targetDir/{uniqueID}/
+	 * 
+	 * Please notice that this method currently asks the user to decide what
+	 * to do in case the move fails with a dialog and allows him to exit the 
+	 * application.
+	 *
+	 */
 	public void move() {
 		
 		// Get a unique ID

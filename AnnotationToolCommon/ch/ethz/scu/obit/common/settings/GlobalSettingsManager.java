@@ -67,7 +67,7 @@ public class GlobalSettingsManager {
 	
 	/**
 	 * Get the URL of the active server.
-	 * @return
+	 * @return URL of the active openBIS server.
 	 */
 	public String getActiveServer() {
 		return appManager.getActiveServer();
@@ -184,8 +184,10 @@ public class GlobalSettingsManager {
 
 	/**
 	 * Checks that the configuration files are valid and ready to use.
-	 * @return
-	 * @throws Exception 
+	 * @return true if the configuration is valid, false otherwise. 
+	 * @throws Exception if the configuration is not valid for some reason. The
+	 *                   exception message contains the actual explanation and
+	 *                   is meant to be shown to the user (e.g. in a dialog).
 	 */
 	static public boolean isConfigurationValid() throws Exception {
 		

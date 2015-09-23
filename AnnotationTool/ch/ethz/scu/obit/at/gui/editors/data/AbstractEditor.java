@@ -259,7 +259,7 @@ implements ActionListener, Observer {
 	/**
 	 * Clean a comma-separated list of tags and remove duplicates.
 	 * @param tagList
-	 * @return
+	 * @return comma-separated list of tags.
 	 */
 	protected String cleanTagList(String tagList) {
 		

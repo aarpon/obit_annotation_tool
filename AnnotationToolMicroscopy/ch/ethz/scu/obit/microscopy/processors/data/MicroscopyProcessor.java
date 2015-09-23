@@ -74,7 +74,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 					".lif", ".liff", ".lsm", ".nd", ".nd2", ".oib", ".oif",
 					".ome", ".r3d", ".stk", ".tif", ".tiff", ".zvi"));
 
-	/* Public instance variables */
+	/**
+	 * Descriptor for the user folder (root of the tree).
+	 */
 	public UserFolder folderDescriptor = null;
 
 	/**
@@ -634,9 +636,12 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		
 		/**
 		 * Constructor.
+		 * @param reader An AbstractCompositeMicroscopyReader object: in reality,
+		 *               a concrete specialization.
+		 * @param userRootDataPath The full path to the root of the user data 
+		 *               folder.
 		 * 
-		 * @param microscopyFileName
-		 *            Microscopy file name with full path
+		 * @throws IOException if scanning the folder fails. 
 		 */
 		public MicroscopyCompositeFile(AbstractCompositeMicroscopyReader reader, File userRootDataPath) throws IOException {
 

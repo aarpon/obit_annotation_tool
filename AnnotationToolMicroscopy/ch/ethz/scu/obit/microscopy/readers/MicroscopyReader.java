@@ -160,6 +160,7 @@ public class MicroscopyReader extends AbstractReader {
 	 * String-string map of data attribute key:value pair.
 	 * 
 	 * These will be uploaded to openBIS as associated information.
+	 * @return String-string map of attributes.
 	 */
 	public Map<String, HashMap<String, String>> getAttributes() {
 		

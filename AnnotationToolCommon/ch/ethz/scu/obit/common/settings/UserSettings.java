@@ -50,8 +50,8 @@ class UserSettings {
 
 	/**
 	 * Store a setting
-	 * @param name: setting name
-	 * @param value: setting value
+	 * @param name setting name
+	 * @param value setting value
 	 */
 	public void setSettingValue(String name, String value) {
 		settings.put(name, value);
@@ -59,7 +59,7 @@ class UserSettings {
 	
 	/**
 	 * Get a setting
-	 * @param name: setting name
+	 * @param name setting name
 	 */
 	public String getSettingValue(String name) {
 		return settings.get(name);

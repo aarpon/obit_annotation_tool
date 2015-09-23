@@ -749,7 +749,6 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * Make sure that the first entry in the file list is an FCS file,
 	 * if there is at least one. 
 	 * @param dir	Current directory
-	 * @param files Array of file (and folder) names at current level
 	 * @return String[] moderately sorted files.
 	 */
 	private String[] getSimplySortedList(File dir) {

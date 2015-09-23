@@ -844,7 +844,8 @@ public class OpenBISViewer extends Observable
 	
 	/**
 	 * Set the list of tags in the UI.
-	 * @param tagList List of tags retrieved from openBIS.
+	 * @param metaprojects List of tags retrieved from openBIS.
+	 *                     Tags are called 'metaprojects' in openBIS.
 	 */
 	private void setTagList(List<String> metaprojects) {
 		clearTagList();

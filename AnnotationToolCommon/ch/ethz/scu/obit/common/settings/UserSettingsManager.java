@@ -124,10 +124,8 @@ class UserSettingsManager {
 	}
 	
 	/**
-	 * Set the current active settings by openBIS URL
-	 * @param openBISURL openBIS URL
-	 * @return true if the settings for the specified openBIS URL could be set,
-	 * false otherwise.
+	 * Get the openBIS URL of currently active server.
+	 * @return the URL of the currently active openBIS server.
 	 */
 	public String getActiveServer() {
 		return listUserSettings.get(currentServerSettingsIndex).getOpenBISURL();

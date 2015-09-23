@@ -91,7 +91,7 @@ abstract public class AbstractViewer extends Observable
 	protected OutputPane outputPane;
 	
 	/**
-	 * Read-only table model
+	 * Read-only table model.
 	 * @author Aaron Ponti
 	 *
 	 */
