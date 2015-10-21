@@ -9,7 +9,7 @@ public class VersionInfo {
 	/**
 	 * Program version
 	 */
-	public static final String version = "0.8.0";
+	public static final String version = "0.8.1";
 	
 	/**
 	 * Version status: "alpha", "beta", or "" for a stable release
