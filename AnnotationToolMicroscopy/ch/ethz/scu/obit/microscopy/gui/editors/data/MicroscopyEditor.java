@@ -85,6 +85,9 @@ public final class MicroscopyEditor extends AbstractEditor {
 	
 	/**
 	 * Constructor
+	 * @param dataViewer data viwer
+	 * @param openBISViewer openBIS viewer
+	 * @param globalSettingsManager global settings manager
 	 */
 	public MicroscopyEditor(AbstractViewer dataViewer, 
 			OpenBISViewer openBISViewer, 

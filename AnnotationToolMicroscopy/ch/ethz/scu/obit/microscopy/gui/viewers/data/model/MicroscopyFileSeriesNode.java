@@ -16,6 +16,11 @@ public class MicroscopyFileSeriesNode extends AbstractNode implements ILazyNode 
 
 	protected boolean isLoaded = false;
 
+	/**
+	 * Constructor
+	 * @param microscopyFileSeries A microscopy file series descriptor.
+	 */
+
 	public MicroscopyFileSeriesNode(MicroscopyFileSeries microscopyFileSeries) {
 		super(microscopyFileSeries);
 		this.type = microscopyFileSeries.getType();

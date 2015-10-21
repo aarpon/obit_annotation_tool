@@ -89,6 +89,9 @@ public class OpenBISViewer extends Observable
 
 	/**
 	 * Constructor
+	 * @param openBISProcessor openBIS Processor
+	 * @param outputPane output pane
+	 * @param globalSettingsManager global settings manager
 	 */
 	public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane,
 			GlobalSettingsManager globalSettingsManager) {
@@ -261,6 +264,7 @@ public class OpenBISViewer extends Observable
 
 	/**
 	 * Return the Tree's data model.
+	 * @return data model tree
 	 */
 	public TreeModel getDataModel() {
 		return tree.getModel();
@@ -844,7 +848,8 @@ public class OpenBISViewer extends Observable
 	
 	/**
 	 * Set the list of tags in the UI.
-	 * @param tagList List of tags retrieved from openBIS.
+	 * @param metaprojects List of tags retrieved from openBIS.
+	 *                     Tags are called 'metaprojects' in openBIS.
 	 */
 	private void setTagList(List<String> metaprojects) {
 		clearTagList();

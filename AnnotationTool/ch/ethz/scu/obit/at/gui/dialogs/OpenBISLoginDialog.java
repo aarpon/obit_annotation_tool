@@ -43,6 +43,7 @@ public class OpenBISLoginDialog extends JDialog {
 
 	/**
 	 * Constructor
+	 * @param globalSettingsManager The global settings manager.
 	 */
 	public OpenBISLoginDialog(final GlobalSettingsManager globalSettingsManager) {
 		

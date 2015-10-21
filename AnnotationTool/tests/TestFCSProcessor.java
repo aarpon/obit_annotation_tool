@@ -5,6 +5,10 @@ import java.io.IOException;
 
 import ch.ethz.scu.obit.bdfacsdivafcs.readers.FCSReader;
 
+/**
+ * @author pontia
+ *
+ */
 public class TestFCSProcessor {
 
 	/**

@@ -13,6 +13,10 @@ public class DataViewerTree extends JTree {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 * @param node Root node.
+	 */
 	public DataViewerTree(DefaultMutableTreeNode node) {
 		
 		// Pass the node on to the base constructor

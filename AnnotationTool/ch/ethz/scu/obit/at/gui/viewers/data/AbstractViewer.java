@@ -91,7 +91,7 @@ abstract public class AbstractViewer extends Observable
 	protected OutputPane outputPane;
 	
 	/**
-	 * Read-only table model
+	 * Read-only table model.
 	 * @author Aaron Ponti
 	 *
 	 */
@@ -132,6 +132,7 @@ abstract public class AbstractViewer extends Observable
 	/**
 	 * Constructor
 	 * The constructor creates the actual panel to be displayed on the UI.
+	 * @param globalSettingsManager The global settings manager.
 	 */
 	public AbstractViewer(GlobalSettingsManager globalSettingsManager) {
 		
@@ -531,6 +532,7 @@ abstract public class AbstractViewer extends Observable
 	
 	/**
 	 * Return the Tree's data model.
+	 * @return the data model.
 	 */
 	public TreeModel getDataModel() {
 		return tree.getModel();

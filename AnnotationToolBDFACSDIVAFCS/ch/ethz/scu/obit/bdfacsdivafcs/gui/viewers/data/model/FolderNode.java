@@ -12,6 +12,10 @@ public class FolderNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 * @param object A path aware descriptor.
+	 */
 	public FolderNode(PathAwareDescriptor object) {
 		super(object);
 		this.type = "root";

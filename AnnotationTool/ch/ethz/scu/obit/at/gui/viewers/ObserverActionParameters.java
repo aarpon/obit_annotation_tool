@@ -7,13 +7,21 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
  *
  * This is used by the viewers (data and openBIS) to notify the editors that 
  * something has to be done. The matching editors and viewers (per hardware 
- * category might decide which of the following actions to implement).
+ * category) might decide which of the following actions to implement.
  * 
  * @author Aaron Ponti
  */
 public class ObserverActionParameters {
 
+    /**
+     * @author Aaron Ponti
+     * Possible actions.
+     *
+     */
     public enum Action {
+        /**
+         * Action for the observers.
+         */
         ABOUT_TO_RESCAN,             /** About to start a rescan of data or
                                          openBIS -> metadata must be reset */
         SCAN_COMPLETE,               /** Scan of the data folder or the openBIS
@@ -31,9 +39,21 @@ public class ObserverActionParameters {
                                          openBIS. */   
     }
 
+	/**
+	 * Action
+	 */
 	public ObserverActionParameters.Action action;
+    
+	/**
+     * (Viewer) Node that triggered the action.  
+     */
     public AbstractNode node = null;
 
+    /**
+     * Constructor
+     * @param action Action to be passed to the obeservers (editors).
+     * @param node Node that triggered the action (from the viewers).
+     */
     public ObserverActionParameters(
     		ObserverActionParameters.Action action, AbstractNode node) {
         this.action = action;

@@ -3,6 +3,10 @@ package ch.ethz.scu.obit.at.gui.viewers.openbis.model;
 import javax.swing.Icon;
 
 
+/**
+ * @author Aaron Ponti
+ * openBIS User node.
+ */
 public class OpenBISUserNode extends AbstractOpenBISNode {
 
 	private static final long serialVersionUID = 1L;

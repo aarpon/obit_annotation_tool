@@ -21,6 +21,10 @@ import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
+/**
+ * @author Aaron Ponti
+ * The Metadata editor container.
+ */
 public class EditorContainer extends JPanel implements ActionListener, Observer {
 
 	private static final long serialVersionUID = 1L;
@@ -35,6 +39,10 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 
 	/**
 	 * Constructor
+	 * @param dataViewer The (specialized) data viewer.
+	 * @param openBISViewer The openBIS viewer.
+	 * @param outputPane The output pane.
+	 * @param globalSettingsManager The global settings manager.
 	 */
 	public EditorContainer(AbstractViewer dataViewer, 
 			OpenBISViewer openBISViewer, OutputPane outputPane,

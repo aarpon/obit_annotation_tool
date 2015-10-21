@@ -28,7 +28,7 @@ class AppSettings {
 
 	/**
 	 * Constructor
-	 * @param openBISURL: URL of the openBIS server  
+	 * @param openBISURL URL of the openBIS server
 	 */
 	public AppSettings(String openBISURL) {
 		ArrayList<String> names = getSettingsNames();
@@ -55,7 +55,7 @@ class AppSettings {
 
 	/**
 	 * Sets the openBIS URL
-	 * @param openBISURL: openBIS URL
+	 * @param openBISURL openBIS URL
 	 */
 	public void setOpenBISURL(String openBISURL) {
 		setSettingValue("OpenBISURL", openBISURL);
@@ -63,8 +63,8 @@ class AppSettings {
 
 	/**
 	 * Store a setting
-	 * @param name: setting name
-	 * @param value: setting value
+	 * @param name setting name
+	 * @param value setting value
 	 */
 	public void setSettingValue(String name, String value) {
 		settings.put(name, value);
@@ -72,7 +72,8 @@ class AppSettings {
 	
 	/**
 	 * Get a setting
-	 * @param name: setting name
+	 * @param name setting name
+	 * @return value for the requested name
 	 */
 	public String getSettingValue(String name) {
 		return settings.get(name);
@@ -133,7 +134,8 @@ class AppSettings {
 
 	/**
 	 * Return default option for a given setting 
-	 * @return name String with the default value for a given setting name
+	 * @param name String with the default value for a given setting name
+	 * @return setings value 
 	 */		
 	public static String defaultValueForSetting(String name) {
 	

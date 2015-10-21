@@ -55,6 +55,9 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	private ImageProcessorReader reader = null;
 	
 	// Constructor
+	/**
+	 * @param folder Folder to be scanned.
+	 */
 	public LeicaTIFFSeriesReader(File folder) {
 
 		DebugTools.enableLogging("ERROR");

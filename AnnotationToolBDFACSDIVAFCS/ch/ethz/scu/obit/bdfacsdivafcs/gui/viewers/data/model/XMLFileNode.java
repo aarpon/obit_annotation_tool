@@ -12,6 +12,10 @@ public class XMLFileNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor.
+	 * @param object A path aware descriptor. 
+	 */
 	public XMLFileNode(PathAwareDescriptor object) {
 		super(object);
 		this.type = object.getType();

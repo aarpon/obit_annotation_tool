@@ -34,6 +34,9 @@ public class OpenBISPickServerDialog extends JDialog {
 	
 	/**
 	 * Constructor
+	 * @param servers List of openBIS server URLs.
+	 * @param current URL of the currently active openBIS server.
+	 * @param globalSettigsManager The global settings manager.
 	 */
 	public OpenBISPickServerDialog(ArrayList<String> servers, 
 			String current, final GlobalSettingsManager globalSettigsManager) {

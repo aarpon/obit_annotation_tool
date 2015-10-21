@@ -12,6 +12,10 @@ public class TubeNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor.
+	 * @param object A sample descriptor. 
+	 */
 	public TubeNode(SampleDescriptor object) {
 		super(object);
 		this.type = object.getType();

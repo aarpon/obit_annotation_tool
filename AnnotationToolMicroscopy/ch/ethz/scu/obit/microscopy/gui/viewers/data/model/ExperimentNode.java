@@ -12,6 +12,10 @@ public class ExperimentNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 * @param object An experiment descriptor.
+	 */
 	public ExperimentNode(ExperimentDescriptor object) {
 		super(object);
 		this.type = object.getType();

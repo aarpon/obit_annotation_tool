@@ -12,6 +12,10 @@ public class FCSFileParemeterListNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 * @param object A FCS file parameter list.
+	 */
 	public FCSFileParemeterListNode(FCSFileParameterList object) {
 		super(object);
 		this.type = object.getType();

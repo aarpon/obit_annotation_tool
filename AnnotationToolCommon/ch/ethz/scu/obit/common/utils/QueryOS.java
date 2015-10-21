@@ -2,6 +2,11 @@ package ch.ethz.scu.obit.common.utils;
 
 import java.io.File;
 
+/**
+ * @author Aaron Ponti
+ * Commodity class for OS-related functions.
+ *
+ */
 public class QueryOS {
 
 	/**

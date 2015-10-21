@@ -12,7 +12,7 @@ import java.io.IOException;
 public abstract class PathAwareDescriptor extends AbstractDescriptor{
 
 	/**
-	 * Base path (Datamover's incoming directory) 
+	 * Global root of the users folder (parent to the current {user} folder). 
 	 */
 	protected File basePath;
 
@@ -22,14 +22,14 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 	protected File fullPath;
 	
 	/**
-	 * Path of the entity, relative to the base dir 
-	 * (Datamover's incoming directory) 
+	 * Path of the entity, relative to the root of the user dir 
 	 */
 	protected String relativePath;
 	
 	/**
 	 * Constructor
 	 * @param fullPath Full path of the entity
+	 * @param userRootDataPath Full path to the root of the user folder
 	 */
 	public PathAwareDescriptor(File fullPath, File userRootDataPath) {
 
@@ -49,7 +49,8 @@ public abstract class PathAwareDescriptor extends AbstractDescriptor{
 
 	/**
 	 * Return the folder name containing the processed dataset relative 
-	 * to the Datamover incoming folder.
+	 * to the user folder.
+	 * @return relative path 
 	 */
 	public String getRelativePath() {
 		return relativePath;

@@ -101,6 +101,7 @@ public class AppSettingsManager {
 
 	/**
 	 * Add a new server
+	 * @param openBISURL openBIS URL
 	 */
 	public void add(String openBISURL) {
 		add();
@@ -110,6 +111,7 @@ public class AppSettingsManager {
 	/**
      * Remove the Setting with given index
      * @param index of the AppSettings in the listAppSettings array.
+	 * @throws ArrayIndexOutOfBoundsException It the index is out of bounds.
      */
 	public void remove(int index) throws ArrayIndexOutOfBoundsException {
     	
@@ -187,7 +189,9 @@ public class AppSettingsManager {
 
 	/**
 	 * Return the index of currently active setting
+	 * @param newCurrent index of the new currently-active settings.
 	 * @return index of currently active setting.
+	 * @throws ArrayIndexOutOfBoundsException if index is out of bounds.
 	 */
 	public boolean setCurrentIndex(int newCurrent) throws ArrayIndexOutOfBoundsException {
 		if (newCurrent < 0 || newCurrent > (listAppSettings.size() - 1)) {
@@ -515,6 +519,7 @@ public class AppSettingsManager {
 	 * 
 	 * This function is guaranteed to return an ArrayList<String> with at least
 	 * one element.
+	 * @param name Name of the setting.
 	 * 
 	 * @return an ArrayList<String> with all options for a given property name
 	 */		
@@ -524,6 +529,7 @@ public class AppSettingsManager {
 
 	/**
 	 * Return default option for a given property 
+	 * @param name name of the setting
 	 * @return an String with the default value for a given property name
 	 */		
 	public String defaultValueForSetting(String name) {

@@ -3,6 +3,10 @@ package ch.ethz.scu.obit.bdfacsdivafcs.processors.data.model;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 
 
+/**
+ * @author Aaron Ponti
+ * A sample descriptor.
+ */
 public abstract class SampleDescriptor extends AbstractDescriptor{
 
 	/**

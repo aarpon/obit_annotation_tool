@@ -13,6 +13,10 @@ public class OpenBISViewerTree extends JTree {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * openBIS Viewer tree
+	 * @param node Root node.
+	 */
 	public OpenBISViewerTree(DefaultMutableTreeNode node) {
 		
 		// Pass the node on to the base constructor
