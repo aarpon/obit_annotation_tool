@@ -388,9 +388,17 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class Folder extends PathAwareDescriptor {
 
+		/**
+		 * Hash map of experiments
+		 */
 		public final Map<String, Experiment> experiments =
 				new LinkedHashMap<String, Experiment>();
 
+		/**
+		 * Constructor
+		 * @param fullFolder Full path to the folder
+		 * @param userRootDataPath Full path to the user data folder. 
+		 */
 		public Folder(File fullFolder, File userRootDataPath) {
 
 			// Invoke parent constructor
@@ -415,22 +423,33 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class Experiment extends ExperimentDescriptor {
 
-        // Experiment version
-        // This is used to keep track of the structure of the experiment
-        // so that older versions of Experiments stored in openBIS are
-		// recognized and can potentially be upgraded. 
+        /**
+         *  Experiment version
+         * This is used to keep track of the structure of the experiment
+         * so that older versions of Experiments stored in openBIS are
+		 * recognized and can potentially be upgraded.
+		 */ 
         public final String version = "1";
 
-		// Experiment description
+		/**
+		 *  Experiment description
+		 */
 		public String description = "";
 
-		// Experiment tags (comma-separated list)
+		/**
+		 *  Experiment tags (comma-separated list)
+		 */
 		public String tags = "";
 
-		// Store the microscopy files associated with this Experiment
+		/**
+		 *  Store the microscopy files associated with this Experiment
+		 */
 		public final Map<String, MicroscopyFile> microscopyFiles =
 				new LinkedHashMap<String, MicroscopyFile>();
 
+		/**
+		 * Hash map of microscopy composite file descriptors.
+		 */
 		public final Map<String, MicroscopyCompositeFile> microscopyCompositeFiles =
 				new LinkedHashMap<String, MicroscopyCompositeFile>();
 
@@ -469,9 +488,17 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	 */
 	public class UserFolder extends RootDescriptor {
 
+		/**
+		 * Hash map of experiments.
+		 */
 		public final Map<String, Experiment> experiments =
 				new LinkedHashMap<String, Experiment>();
 
+		/**
+		 * Constructor
+		 * @param fullFolder Full path to the folder
+		 * @param userRootFolder Full path to the user data folder. 
+		 */
 		public UserFolder(File fullFolder, File userRootFolder) {
 
 			// Invoke parent constructor
@@ -504,8 +531,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		/**
 		 * Constructor.
 		 * 
-		 * @param microscopyFileName
-		 *            Microscopy file name with full path
+		 * @param microscopyFileName Microscopy file name with full path.
+		 * @param userRootDataPath Full path the the user data folder.
+		 * @throws IOException if parsing the microscopy file failed.
 		 */
 		public MicroscopyFile(File microscopyFileName, File userRootDataPath) throws IOException {
 
@@ -561,6 +589,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		/**
 		 * Scans the file and stores the metadata into the attributes
 		 * String-String map
+		 * @return true of the scan was successful, false otherwise.
 		 */
 		public boolean scanForSeries() {
 

@@ -12,6 +12,10 @@ public class SpecimenNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor.
+	 * @param object A sample descriptor. 
+	 */
 	public SpecimenNode(SampleDescriptor object) {
 		super(object);
 		this.type = object.getType();

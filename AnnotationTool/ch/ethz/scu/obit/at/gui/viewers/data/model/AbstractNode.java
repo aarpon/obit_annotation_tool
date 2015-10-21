@@ -15,15 +15,31 @@ public abstract class AbstractNode extends DefaultMutableTreeNode {
 
 	protected String type;
 	
+	/**
+	 * Constructor.
+	 * @param object A descriptor.
+	 */
 	public AbstractNode(AbstractDescriptor object) {
 		super(object);
 		this.type = object.getType();
 	}
 
+	/**
+	 * Return the icon to be rendered in the tree viewer.
+	 * @return icon to be renderd.
+	 */
 	public abstract javax.swing.Icon getIcon();
 	
+	/**
+	 * Return the type of the node.
+	 * @return type of the node.
+	 */
 	public String getType() { return type; }
 
+	/**
+	 * Return the tooltip to be displayed on the node on mouseover.
+	 * @return tooltip string.
+	 */
 	public String getTooltip() { return ""; }
 	
 }

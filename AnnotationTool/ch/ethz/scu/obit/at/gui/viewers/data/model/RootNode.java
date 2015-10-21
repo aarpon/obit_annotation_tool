@@ -11,16 +11,29 @@ public class RootNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 * @param object A Root object.
+	 */
 	public RootNode(RootDescriptor object) {
 		super(object);
 		this.type = "root";
 	}
 
+	/**
+	 * Return the icon for the root node.
+	 * @return icon for the root node.
+	 */
+	@Override
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
 				getClass().getResource("icons/root.png"));
 	}
 	
+	/**
+	 * Node name to be displayed.
+	 * Node name (underlying descriptor name).
+	 */
 	@Override
 	public String toString() {
 		return "/" + this.getUserObject().toString();
@@ -28,6 +41,7 @@ public class RootNode extends AbstractNode {
 	
 	/**
 	 * Return tooltip for the root node.
+	 * @return tooltip for the root node.
 	 */
 	@Override
 	public String getTooltip() { return "The root of your user folder."; }

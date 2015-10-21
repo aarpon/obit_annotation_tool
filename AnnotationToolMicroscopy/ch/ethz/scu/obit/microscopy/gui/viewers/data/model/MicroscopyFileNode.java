@@ -15,6 +15,11 @@ public class MicroscopyFileNode extends AbstractNode implements ILazyNode {
 
 	protected boolean isLoaded = false;
 
+	/**
+	 * Constructor
+	 * @param object A dataset descriptor.
+	 */
+
 	public MicroscopyFileNode(DatasetDescriptor object) {
 		super(object);
 		this.type = object.getType();

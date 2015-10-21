@@ -1,11 +1,16 @@
 package ch.ethz.scu.obit.at.interfaces;
 
+/**
+ * @author Aaron Ponti
+ * Interface for a lazy-loaded node.
+ */
 public interface ILazyNode {
 
 	/**
 	 * Return true if the node is a leaf (i.e. it cannot be expanded) or false
 	 * if it is not (and can therefore be expanded). 
 	 * This is essential for lazy loading.
+	 * @return true if the node is a leaf, false otherwise.
 	 */
 	public boolean isLeaf();
 	

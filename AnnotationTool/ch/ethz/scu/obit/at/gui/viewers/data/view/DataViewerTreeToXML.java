@@ -41,6 +41,7 @@ public class DataViewerTreeToXML {
 	/**
 	 * Constructor
 	 * @param tree Custom JTree
+	 * @param userName user name.
 	 */
 	public DataViewerTreeToXML(DataViewerTree tree, String userName) {
 

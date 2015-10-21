@@ -134,7 +134,8 @@ class AppSettings {
 
 	/**
 	 * Return default option for a given setting 
-	 * @return name String with the default value for a given setting name
+	 * @param name String with the default value for a given setting name
+	 * @return setings value 
 	 */		
 	public static String defaultValueForSetting(String name) {
 	

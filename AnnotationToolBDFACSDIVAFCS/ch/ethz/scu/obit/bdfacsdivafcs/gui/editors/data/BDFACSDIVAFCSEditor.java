@@ -73,6 +73,9 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 
 	/**
 	 * Constructor
+	 * @param dataViewer data viewer.
+	 * @param openBISViewer openBIS viewer.
+	 * @param globalSettingsManager global settings manager.
 	 */
 	public BDFACSDIVAFCSEditor(AbstractViewer dataViewer, 
 			OpenBISViewer openBISViewer, 

@@ -13,6 +13,7 @@ public class ViewerFactory {
 	/**
 	 * Creates a data viewer depending on the "AcquisitionStation" value in the
 	 * application properties.
+	 * @param globalSettingsManager global settings manager.
 	 * @return a concrete implementation of an AbstractViewer
 	 */
 	public static AbstractViewer createViewer(GlobalSettingsManager globalSettingsManager) {

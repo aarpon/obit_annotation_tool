@@ -18,12 +18,25 @@ import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tra
  */
 public final class BDFACSDIVAFCSMetadataMapper extends AbstractMetadataMapper {
 
+	/**
+	 * Selected experiment node.
+	 */
 	public ExperimentNode experimentNode;
+	
+	/**
+	 * Selected openBIS project node.
+	 */
 	public OpenBISProjectNode openBISProjectNode;
+	
+	/**
+	 * Support tray geometries.
+	 */
 	public ArrayList<String> supportedTrayGeometries;
 	
 	/** 
 	 * Constructor
+	 * @param expNode Experiment node (in the data viewr)
+	 * @param openBISProjectNode  openBIS project node (in the openBIS viewer)
 	 */
 	public BDFACSDIVAFCSMetadataMapper(ExperimentNode expNode, 
 			OpenBISProjectNode openBISProjectNode) {

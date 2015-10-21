@@ -4,6 +4,11 @@ import java.io.File;
 import java.util.Arrays;
 
 
+/**
+ * @author Aaron Ponti
+ * Experiment descriptor.
+ *
+ */
 public class ExperimentDescriptor extends PathAwareDescriptor{
 
 	/**
@@ -15,6 +20,7 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	/** 
 	 * Constructor
 	 * @param fullPath Full path to the experiment folder.
+	 * @param userRootDataPath Full path to the root of the user folder.
 	 */
 	public ExperimentDescriptor(File fullPath, File userRootDataPath) {
 		super(fullPath, userRootDataPath);

@@ -41,6 +41,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 	
 	/**
 	 * Constructor
+	 * @param globalSettingsManager global settings manager
 	 */
 	public MicroscopyViewer(GlobalSettingsManager globalSettingsManager) {
 		

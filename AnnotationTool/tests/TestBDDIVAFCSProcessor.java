@@ -2,6 +2,10 @@ package tests;
 
 import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor;
 
+/**
+ * @author pontia
+ *
+ */
 public class TestBDDIVAFCSProcessor {
 
 	/**

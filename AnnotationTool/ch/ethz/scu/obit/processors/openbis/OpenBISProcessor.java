@@ -62,6 +62,7 @@ public class OpenBISProcessor {
 
 	/**
 	 * Constructor
+	 * @param globalSettingsManager global settings manager
 	 */
 	public OpenBISProcessor(GlobalSettingsManager globalSettingsManager) {
 
@@ -127,7 +128,7 @@ public class OpenBISProcessor {
 	 * Login to openBIS. Credentials provided by the user through a dialog.
 	 * @return true if login was successful (or if already logged in), 
 	 * false otherwise.
-	 * @throws InterruptedException 
+	 * @throws InterruptedException If login was interrupted.
 	 */
 	public boolean login() throws InterruptedException {
 
@@ -287,6 +288,7 @@ public class OpenBISProcessor {
 	/**
 	 * Log out from openBIS
 	 * @return true if logging out was successful, false otherwise.
+	 * @throws RemoteAccessException If remote access failed.
 	 */
 	public boolean logout() throws RemoteAccessException {
 		if (facade.get() != null && isLoggedIn && queryFacade.get() != null) {
@@ -329,6 +331,7 @@ public class OpenBISProcessor {
 	/**
 	 * Returns the list of Experiment for a project list (as visible for 
 	 * current user).
+	 * @param expId List of experiment ids.
 	 * @return list of Experiments.
 	 */
 	public ArrayList<Experiment> getExperimentsForProjects(
@@ -344,6 +347,7 @@ public class OpenBISProcessor {
 	/**
 	 * Returns the list of Samples for an Experiment list (as visible for 
 	 * current user).
+	 * @param expId List of experiment ids.
 	 * @return list of Samples.
 	 */
 	public ArrayList<Sample> getSamplesForExperiments(List<String> expId) {

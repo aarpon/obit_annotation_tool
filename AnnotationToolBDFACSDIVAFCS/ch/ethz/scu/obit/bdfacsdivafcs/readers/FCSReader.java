@@ -63,8 +63,9 @@ public final class FCSReader extends AbstractReader {
 	/**
 	 * Constructor
 	 * 
-	 * @param filename
-	 *            Name with full path of the file to be opened.
+	 * @param filename Name with full path of the file to be opened.
+	 * @param parseData True if the data should be read, false if only metadata
+	 *        should be parsed. 
 	 */
 	public FCSReader(File filename, boolean parseData) {
 		this.filename = filename;
@@ -111,7 +112,7 @@ public final class FCSReader extends AbstractReader {
 	 * Parses the file to extract data and metadata.
 	 * 
 	 * @return true if parsing was successful, false otherwise.
-	 * @throws IOException
+	 * @throws IOException if parsing the FCS file failed.
 	 */
 	@Override
 	public boolean parse() throws IOException {

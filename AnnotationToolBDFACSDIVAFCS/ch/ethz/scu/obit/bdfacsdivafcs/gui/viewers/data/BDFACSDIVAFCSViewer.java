@@ -36,6 +36,7 @@ public final class BDFACSDIVAFCSViewer extends AbstractViewer {
 
 	/**
 	 * Constructor
+	 * @param globalSettingsManager global settings manager.
 	 */
 	public BDFACSDIVAFCSViewer(GlobalSettingsManager globalSettingsManager) {
 		

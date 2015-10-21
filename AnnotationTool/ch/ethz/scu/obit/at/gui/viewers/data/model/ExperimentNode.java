@@ -11,16 +11,28 @@ public class ExperimentNode extends AbstractNode {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor.
+	 * @param object An Experiment descriptor. 
+	 */
 	public ExperimentNode(ExperimentDescriptor object) {
 		super(object);
 		this.type = object.getType();
 	}
 
+	/**
+	 * Return the icon for the experiment.
+	 * @return icon for the experiment.
+	 */
 	public javax.swing.Icon getIcon() {
 		return new javax.swing.ImageIcon(
 				getClass().getResource("icons/experiment.png"));
 	}
 
+	/**
+	 * Return the tooltip for the Experiment node.
+	 * @return Tooltip for the Experiment node. 
+	 */
 	public String getTooltip() {
 		return "Experiment";
 	}

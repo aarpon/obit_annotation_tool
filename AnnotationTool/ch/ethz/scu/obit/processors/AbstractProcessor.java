@@ -36,7 +36,7 @@ abstract public class AbstractProcessor {
 	 * could be completed.  
 	 * 
 	 * @return true if parsing was successful, false otherwise.
-	 * @throws Exception
+	 * @throws Exception if parsing failed.
 	 */
 	abstract public boolean parse() throws Exception;
 	
@@ -60,6 +60,7 @@ abstract public class AbstractProcessor {
 	 * errorMessage String is set property. 
 	 * 
 	 * This function returns last error message.
+	 * @return error message.
 	 */
 	public String getErrorMessage() {
 		return errorMessage;

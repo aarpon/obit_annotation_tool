@@ -54,7 +54,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
     	knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
     }
     
-	/* Public instance variables */
+	/**
+	 *  A folder descriptor.
+	 */  
 	public UserFolder folderDescriptor = null;
 
 	/**
@@ -139,9 +141,17 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	public class UserFolder extends RootDescriptor {
 		
+		/**
+		 * Hash map of experiments.
+		 */ 
 		public Map<String, Experiment> experiments = 
 				new LinkedHashMap<String, Experiment>();
 		
+		/**
+		 * Constructor
+		 * @param fullFolder Full path to the global users folder path.
+		 * @param userRootDataPath Full path to current user folder.
+		 */
 		public UserFolder(File fullFolder, File userRootDataPath) {
 			
 			// Invoke parent constructor
@@ -168,16 +178,23 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
 		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
-        // Experiment version
-        // This is used to keep track of the structure of the experiment so that
-        // older versions of Experiments stored in openBIS are recognized and 
-        // can potentially be upgraded. 
+        /**
+         *  Experiment version
+         *  
+         *  This is used to keep track of the structure of the experiment so that
+         *  older versions of Experiments stored in openBIS are recognized and
+         *  can potentially be upgraded.
+         */
         public final String version = "1";
 
-        // Experiment description
+        /**
+         *  Experiment description
+         */
 		public String description = "";
 		
-		// Experiment tags (comma-separated list)
+		/**
+		 *  Experiment tags (comma-separated list)
+		 */
 		public String tags = "";
 		
 		/**
@@ -194,7 +211,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		
 		/**
 		 * Constructor
-		 * @param fullPath Full path of the experiment.
+		 * @param fullPath Full path to the experiment folder.
+		 * @param userRootDataPath Full path to current user folder.
 		 */
 		public Experiment(File fullPath, File userRootDataPath) {
 
@@ -214,6 +232,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * Alternative constructor
 		 * @param fullPath Full path of the experiment.
 		 * @param name Name of the experiment.
+		 * @param userRootDataPath Full path to current user folder.
 		 */
 		public Experiment(File fullPath, String name, File userRootDataPath) {
 
@@ -256,6 +275,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		/**
 		 * Constructor.
 		 * @param fcsFileName FCS file name with full path
+		 * @throws IOException If parsing the file failed.
 		 */
 		public FCSFile(File fcsFileName) throws IOException {
 
@@ -378,7 +398,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	public class Tray extends SampleDescriptor {
 
-		// Define the supported tray geometries as a static list
+		/**
+		 *  Define the supported tray geometries as a static list
+		 */
 		public final List<String> supportedTrayGeometries =
 				Arrays.asList("96_WELLS_8X12", "384_WELLS_16x24");
 	
@@ -424,6 +446,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 */
 	public class Tube extends SampleDescriptor {
 		
+		/**
+		 * An FCS file processor.
+		 */
 		public FCSFile fcsFile;
 		
 		/**
@@ -431,7 +456,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * @param name Name of the Tube.
 		 * @param fcsFullFileName Full file name of the FCS file associated
 		 * with the Tube.
-		 * @throws IOException 
+		 * @throws IOException If parsing the FCS file failed.
 		 */
 		public Tube(String name, File fcsFullFileName) 
 				throws IOException {
@@ -476,7 +501,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 * @param name Name of the Well.
 		 * @param fcsFullFileName Full file name of the FCS file associated
 		 * with the Well.
-		 * @throws IOException 
+		 * @throws IOException if parsing the FCS file failed.
 		 */
 		public Well(String name, File fcsFullFileName) 
 				throws IOException {

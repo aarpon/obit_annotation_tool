@@ -15,6 +15,7 @@ public class EditorFactory {
 	/**
 	 * Creates a data editor depending on the "AcquisitionStation" value in the
 	 * application properties.
+	 * @param globalSettingsManager The global settings manager.
 	 * @param dataViewer reference to a metadata viewer
 	 * @param openBISViewer reference to the openBIS viewer
 	 * @return a concrete implementation of an AbstractViewer

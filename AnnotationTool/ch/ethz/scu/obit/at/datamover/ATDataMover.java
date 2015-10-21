@@ -177,6 +177,7 @@ public class ATDataMover {
 	 * Static function to delete a folder recursively.
 	 * @param folder Folder to be deleted recursively. It folder is a
 	 * file, it will be deleted and the function will return immediately.
+	 * @return true if the folder could be deleted successfully, false otherwise.
 	 */
 	public static boolean deleteRecursively(File folder) {
 

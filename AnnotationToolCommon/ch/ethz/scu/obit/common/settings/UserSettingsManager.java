@@ -47,6 +47,7 @@ class UserSettingsManager {
 	 * Default Constructor. 
 	 * 
 	 * When using this constructor, settings must be explicitly loaded.
+	 * @param configuredServers List of configured openBIS server URLs.
 	 * 
 	 * @see UserSettingsManager#load()
 	 * 

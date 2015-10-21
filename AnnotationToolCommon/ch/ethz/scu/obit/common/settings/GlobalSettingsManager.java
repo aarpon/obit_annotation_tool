@@ -147,6 +147,7 @@ public class GlobalSettingsManager {
 	 * Get the user's favorite server.
 	 * 
 	 * This is a User Setting.
+	 * @param openBISURL OpenBIS server URL. 
 	 *  
 	 * @return the URL of the server to use.
 	 */
