@@ -397,8 +397,6 @@ public class OpenBISProcessor {
 		return false;
 	}
 
-	// Call the aggregation plugin to create a project with given code in space
-	// i
 	/**
 	 * Create a project with given code in the specified space.
 	 * @param spaceCode Code of the project to be created.

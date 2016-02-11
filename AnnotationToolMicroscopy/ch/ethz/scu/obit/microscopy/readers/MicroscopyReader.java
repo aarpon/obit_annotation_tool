@@ -11,7 +11,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import loci.common.DebugTools;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -69,9 +68,6 @@ public class MicroscopyReader extends AbstractReader {
 	 * Initialize the reader and sets up the OMEXML metadata store
 	 */
 	protected boolean init() {
-
-		// Set debug level
-		DebugTools.enableLogging("ERROR");
 
 		// Create the reader
 		reader = new ImageProcessorReader(
