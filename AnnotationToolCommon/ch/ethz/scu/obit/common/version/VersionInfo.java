@@ -21,7 +21,7 @@ public class VersionInfo {
 	 */
 	public static final String copyright = "Copyright " +
 			Character.toString('\u00A9') + 
-			" 2012 - 2015, Single Cell Unit, " +
+			" 2012 - 2016, Single Cell Unit, " +
 			"D-BSSE, ETH Zurich (Basel)";
 
 	/**
