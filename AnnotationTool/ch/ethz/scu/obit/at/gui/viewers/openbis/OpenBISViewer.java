@@ -124,6 +124,7 @@ public class OpenBISViewer extends Observable
 		constraints.gridy = 0;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
+		constraints.gridwidth = 3;
 		constraints.insets = new Insets(0, 5, 5, 0);
 		panel.add(title, constraints);
 		
@@ -167,40 +168,9 @@ public class OpenBISViewer extends Observable
 		constraints.gridy = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
+		constraints.gridwidth = 3;
 		constraints.insets = new Insets(5, 5, 5, 0);
 		panel.add(treeView, constraints);
-
-		// Add a simple label
-		userTags = new JLabel("<html><b>Tags</b></html>");
-		userTags.setVerticalAlignment(SwingConstants.TOP);
-
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 2;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 0, 5, 5);
-		panel.add(userTags, constraints);
-		
-		// Add the list of tags
-        tagList = new JList<String>(new DefaultListModel<String>());
-        tagList.setVisibleRowCount(5);
-        tagList.getSelectionModel().setSelectionMode(
-        		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        tagList.setDragEnabled(true);
-        JScrollPane tagScrollPane = new JScrollPane(tagList);
-        
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 3;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 5, 5, 0);
-		panel.add(tagScrollPane, constraints);
 
 		// Add a rescan button
         scanButton = new JButton("Scan");
@@ -213,13 +183,70 @@ public class OpenBISViewer extends Observable
 
 		// Add to the layout
 		constraints.gridx = 0;
-		constraints.gridy = 4;
+		constraints.gridy = 2;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		//constraints.gridwidth = 1;
+		//constraints.gridheight = 1;
+		constraints.gridwidth = 3;
+		constraints.insets = new Insets(0, 5, 5, 0);
+		panel.add(scanButton, constraints);
+
+		// Add a simple label
+		userTags = new JLabel("<html><b>Tags</b></html>");
+		//userTags.setVerticalAlignment(SwingConstants.TOP);
+
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.weightx = 0.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.insets = new Insets(5, 0, 0, 5);
+		panel.add(userTags, constraints);
+		
+		// Add a spacer
+		constraints.gridx = 1;
+		constraints.gridy = 3;
 		constraints.weightx = 1.0;
 		constraints.weighty = 0.0;
 		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(0, 5, 5, 0);
-		panel.add(scanButton, constraints);
+		constraints.insets = new Insets(5, 0, 0, 0);
+		panel.add(new JLabel(""), constraints);
+		
+		// Add a push button
+        JButton addTagButton = new JButton("Create new tag...");
+        addTagButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+            	createNewMetaProject();
+            }
+        });  
+		constraints.gridx = 2;
+		constraints.gridy = 3;
+		constraints.weightx = 0.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 1;
+		constraints.insets = new Insets(5, 0, 0, 0);
+		panel.add(addTagButton, constraints);
+		
+		// Add the list of tags
+        tagList = new JList<String>(new DefaultListModel<String>());
+        tagList.setVisibleRowCount(5);
+        tagList.getSelectionModel().setSelectionMode(
+        		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        tagList.setDragEnabled(true);
+        JScrollPane tagScrollPane = new JScrollPane(tagList);
+        
+		// Add to the layout
+		constraints.gridx = 0;
+		constraints.gridy = 4;
+		constraints.weightx = 1.0;
+		constraints.weighty = 0.0;
+		constraints.gridwidth = 3;
+		//constraints.gridheight = 1;
+		constraints.insets = new Insets(5, 5, 5, 0);
+		panel.add(tagScrollPane, constraints);
 
 		// Set sizes
 		panel.setMinimumSize(new Dimension(400, 700));
@@ -812,6 +839,59 @@ public class OpenBISViewer extends Observable
 			outputPane.err("Could not create project /" + space.getCode() +
 					"/" + projectCode + "! Please contact your "
 					+ "openBIS administrator!");
+			return false;
+		}
+
+		// Display the output
+		String success= "";
+		String message = "";
+		List<Serializable[]> rows = tableModel.getRows();
+		for (Serializable[] row : rows) {
+			success = (String)row[0];
+			message = (String)row[1];
+			if (success.equals("true")) {
+				outputPane.log(message);
+				return true;
+			}
+		}
+		outputPane.err(message);
+		return false;
+	}
+	
+	/**
+	 * Asks the user to give a project name and will then try to create
+	 * it as a child of the passed OpenBISSpaceNode
+	 * @param node An OpenBISSpaceNode
+	 * @return true if creation was successfull, false otherwise.
+	 */
+	private boolean createNewMetaProject() {
+		
+		// Retrieve and store the createProject service
+		if (!openBISProcessor.retrieveAndStoreServices()) {
+				
+			// TODO Throw an exception to distinguish the case where
+			// the project could not be created.
+			outputPane.err("Could not retrieve openBIS services! " +
+					"Please contact your administrator!");
+			return false;
+
+		}
+
+		// Ask the user to specify a project name
+		String metaprojectCode = JOptionPane.showInputDialog(
+				"Please enter new tag name (code)");
+		if (metaprojectCode == null || metaprojectCode.equals("")) {
+			outputPane.warn("Creation of new tag aborted by user.");
+			return false;
+		}
+
+		// Call the ingestion server and collect the output
+		QueryTableModel tableModel;
+		try {
+			tableModel = openBISProcessor.createMetaProject(metaprojectCode);
+		} catch (Exception e) {
+			outputPane.err("Could not create tag /" + metaprojectCode +
+					"! Please contact your openBIS administrator!");
 			return false;
 		}
 
