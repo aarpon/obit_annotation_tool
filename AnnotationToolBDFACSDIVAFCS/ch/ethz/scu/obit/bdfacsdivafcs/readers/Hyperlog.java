@@ -407,7 +407,7 @@ public class Hyperlog {
 
 		System.out.print(testName + ": Forward transform => [");
 		for (int i = 0; i < y.length; i++) {
-			System.out.print(new DecimalFormat("#0.0000").format(y[i]) + " ");
+			System.out.print(new DecimalFormat("#0.000000").format(y[i]) + " ");
 			if (Math.abs(y[i] - y_exp[i]) > tol) {
 				System.err.println(" => FAILED!");
 				return;
@@ -419,13 +419,46 @@ public class Hyperlog {
 		
 		System.out.print(testName + ": Inverse transform => [");
 		for (int i = 0; i < z.length; i++) {
-			System.out.print(new DecimalFormat("#0.0000").format(z[i]) + " ");
+			System.out.print(new DecimalFormat("#0.000000").format(z[i]) + " ");
 			if (Math.abs(z[i] - x[i]) > tol) {
 				System.err.println(" => FAILED!");
 				return;
 			}
 		}
 		System.out.println("] => PASSED!");
+	}
+	
+	/**
+	 * Return the max value of the array.
+	 * @param x Array of values.
+	 * @return max value of the array.
+	 */
+	public static double max(double[] x) {
+		double mx = x[0];
+		for (int i = 1; i < x.length; i++) {
+			if (x[i] > mx) {
+				mx = x[i];
+			}
+		}
+		return mx;
+	}
+
+	/**
+	 * Return the max value of a matrix per column..
+	 * @param M Matrix of values.
+	 * @return array of max values per column.
+	 */
+	public static double[] max(double[][] M) {
+		double[] mx = {M[0][0], M[0][1]};
+		for (int i = 1; i < M.length; i++) {
+			if (M[i][0] > mx[0]) {
+				mx[0] = M[i][0];
+			}
+			if (M[i][1] > mx[1]) {
+				mx[1] = M[i][1];
+			}
+		}
+		return mx;
 	}
 	
 	/** 
@@ -459,5 +492,17 @@ public class Hyperlog {
 				0.221407, 0.259838, 0.386553, 0.774211, 1.000000}; 
 		test(x, y3_exp, T, W, M, A, "Test 3", tol); 
 
+		// Test 4
+		T = max(x); W = 0.01; M = 4.0; A = 1.0;
+		double[] y4_exp = {0.017447, 0.106439, 0.182593, 0.202000, 0.207833,
+				0.221407, 0.259838, 0.386553, 0.774211, 1.000000}; 
+		test(x, y4_exp, T, W, M, A, "Test 4", tol); 
+
+		// Test 5
+		double[][] N = new double[10][2];
+		N[2][0] = 5;
+		N[7][1] = 2;
+		double[] mx = max(N);
+		System.out.println("max x = " + mx[0] + "; max y = " + mx[1]);
 	}
 }
