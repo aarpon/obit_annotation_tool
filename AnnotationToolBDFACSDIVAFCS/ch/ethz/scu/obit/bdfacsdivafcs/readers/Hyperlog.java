@@ -387,6 +387,154 @@ public class Hyperlog {
 	}
 	
 	/**
+	 * Estimate parameters for the Hyperlog transform from the min and max
+	 * values of the array to be transformed.
+	 * @param mn min value of the data to be transformed.
+	 * @param mx max value of the data to be transformed. 
+	 * @return array of parameters [T, M, W, A] (see description above).
+	 */
+	public static double[] estimateParamHeuristic(double mn, double mx) {
+		
+        double T = mx;
+        double M = Math.log10(T);
+        double W = M/10;
+        double A;
+        
+        if (mn > -10.0) {
+        	A = 0;
+        } else {
+        	A = Math.log10(Math.abs(mn));
+        }
+
+        double[] params = {T, W, M, A};
+        
+        return params;
+	}
+	
+	/**
+	 * Estimate parameters for the Hyperlog transform from the min and max
+	 * values of the array to be transformed.
+	 * @param x array of values for which the parameters are to be estimated.
+	 * @return array of parameters [T, M, W, A] (see description above).
+	 */
+	public static double[] estimateParamHeuristic(double[] x) {
+		
+		// Extact min and max values
+		double[] bnds = Hyperlog.bounds(x);
+		
+		// Estimate the parameters
+		return Hyperlog.estimateParamHeuristic(bnds[0], bnds[1]);
+	}	
+	/**
+	 * Multiplies all values in the input array by a constant factor.
+	 * 
+	 * This is used to bring back the top of the scale of the transformed
+	 * array to the same value. If x was the original linear scale that
+	 * was transformed by the Hyperlog, f would be max(x). 
+	 * 
+	 * @param y Array of (transformed) values to be scaled.
+	 * @param f Constant factor.
+	 * @return Array of values each scaled by the factor f.
+	 */
+	public static double[] arrayMult(double[] y, double f) {
+	
+		double[] z = new double[y.length];
+		for (int i = 0; i < y.length; i++) {
+			z[i] = f * y[i];
+		}
+		return z;
+	}
+	
+	/**
+	 * Return the max value of the array.
+	 * @param x Array of values.
+	 * @return max value of the array.
+	 */
+	public static double max(double[] x) {
+		double mx = x[0];
+		for (int i = 1; i < x.length; i++) {
+			if (x[i] > mx) {
+				mx = x[i];
+			}
+		}
+		return mx;
+	}
+
+	/**
+	 * Return the min value of the array.
+	 * @param x Array of values.
+	 * @return min value of the array.
+	 */
+	public static double min(double[] x) {
+		double mn = x[0];
+		for (int i = 1; i < x.length; i++) {
+			if (x[i] < mn) {
+				mn = x[i];
+			}
+		}
+		return mn;
+	}
+
+	/**
+	 * Return the bounds (min and max value) of the array.
+	 * @param x Array of values.
+	 * @return array of [min, max] values of the array.
+	 */
+	public static double[] bounds(double[] x) {
+		double mn = x[0];
+		double mx = x[0];
+		double[] extrema = {mn, mx}; 
+		for (int i = 1; i < x.length; i++) {
+			if (x[i] < mn) {
+				mn = x[i];
+			}
+			if (x[i] > mx) {
+				mx = x[i];
+			}
+		}
+		extrema[0] = mn;
+		extrema[1] = mx;
+		return extrema;
+	}
+	
+	
+	/**
+	 * Return the max value of a matrix per column.
+	 * @param M Matrix of values.
+	 * @return array of max values per column.
+	 */
+	public static double[] max(double[][] M) {
+		double[] mx = {M[0][0], M[0][1]};
+		for (int i = 1; i < M.length; i++) {
+			if (M[i][0] > mx[0]) {
+				mx[0] = M[i][0];
+			}
+			if (M[i][1] > mx[1]) {
+				mx[1] = M[i][1];
+			}
+		}
+		return mx;
+	}
+
+	/**
+	 * Return the min value of a matrix per column.
+	 * @param M Matrix of values.
+	 * @return array of min values per column.
+	 */
+	public static double[] min(double[][] M) {
+		double[] mn = {M[0][0], M[0][1]};
+		for (int i = 1; i < M.length; i++) {
+			if (M[i][0] < mn[0]) {
+				mn[0] = M[i][0];
+			}
+			if (M[i][1] < mn[1]) {
+				mn[1] = M[i][1];
+			}
+		}
+		return mn;
+	}
+
+	/**
 	 * Test routine
 	 * @param x array of values to be transformed
 	 * @param y_exp array of expected transformation values
@@ -428,39 +576,6 @@ public class Hyperlog {
 		System.out.println("] => PASSED!");
 	}
 	
-	/**
-	 * Return the max value of the array.
-	 * @param x Array of values.
-	 * @return max value of the array.
-	 */
-	public static double max(double[] x) {
-		double mx = x[0];
-		for (int i = 1; i < x.length; i++) {
-			if (x[i] > mx) {
-				mx = x[i];
-			}
-		}
-		return mx;
-	}
-
-	/**
-	 * Return the max value of a matrix per column..
-	 * @param M Matrix of values.
-	 * @return array of max values per column.
-	 */
-	public static double[] max(double[][] M) {
-		double[] mx = {M[0][0], M[0][1]};
-		for (int i = 1; i < M.length; i++) {
-			if (M[i][0] > mx[0]) {
-				mx[0] = M[i][0];
-			}
-			if (M[i][1] > mx[1]) {
-				mx[1] = M[i][1];
-			}
-		}
-		return mx;
-	}
-	
 	/** 
 	 * Program entry point.
 	 * @param args Program arguments
@@ -471,8 +586,70 @@ public class Hyperlog {
 		double tol = 1e-6;
 		double T, W, M, A;
 		
-		// Tests
+		// Input array
 		double[] x = {-10.0, -5.0, -1.0, 0.0, 0.3, 1.0, 3.0, 10.0, 100.0, 1000.0};
+
+		// Test min, max and bounds
+
+		double mn = min(x);
+		System.out.print("Min = " + mn);	
+		if (Math.abs(mn + 10.0) > tol) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
+		
+		double mx = max(x);
+		System.out.print("Max = " + mx);	
+		if (Math.abs(mx - 1000.0) > tol) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
+		
+		double[] bds = bounds(x);
+		System.out.print("Min bound = " + bds[0]);	
+		if (Math.abs(bds[0] + 10.0) > tol) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
+		System.out.print("Max bound = " + bds[1]);	
+		if (Math.abs(bds[1] - 1000.0) > tol) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
+
+		// Test estimate parameters
+		double[] bnds = bounds(x);
+		double[] params = estimateParamHeuristic(bnds[0], bnds[1]);
+		System.out.print("Parameters from bounds: T =  " + params[0] + 
+				", W = " + params[1] + ", M = " + params[2] +
+				", A = " + params[3]);
+		if ((Math.abs(params[0] - 1000.0) > tol) ||
+				(Math.abs(params[1] - 0.3) > tol) ||
+				(Math.abs(params[2] - 3.0) > tol) ||
+				(Math.abs(params[3] - 1.0) > tol)) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
+
+		double[] paramsA = estimateParamHeuristic(x);
+		System.out.print("Parameters from bounds: T =  " + paramsA[0] + 
+				", W = " + paramsA[1] + ", M = " + paramsA[2] +
+				", A = " + paramsA[3]);
+		if ((Math.abs(paramsA[0] - 1000.0) > tol) ||
+				(Math.abs(paramsA[1] - 0.3) > tol) ||
+				(Math.abs(paramsA[2] - 3.0) > tol) ||
+				(Math.abs(paramsA[3] - 1.0) > tol)) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
+
+		// Test transforms and inverse transforms
 
 		// Test 1
 		T = 1000.0; W = 1.0; M = 4.0; A = 0.0;
@@ -502,7 +679,12 @@ public class Hyperlog {
 		double[][] N = new double[10][2];
 		N[2][0] = 5;
 		N[7][1] = 2;
-		double[] mx = max(N);
-		System.out.println("max x = " + mx[0] + "; max y = " + mx[1]);
+		double[] dmx = max(N);
+		System.out.print("max x = " + dmx[0] + "; max y = " + dmx[1]);
+		if ((Math.abs(dmx[0] - 5.0) > tol) || (Math.abs(dmx[1] - 2.0) > tol)) {
+			System.err.println(" => FAILED!");
+			return;
+		}
+		System.out.println(" => PASSED!");
 	}
 }
