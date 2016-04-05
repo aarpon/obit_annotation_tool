@@ -26,10 +26,10 @@
 	<classpathentry kind="lib" path="lib/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/query_api/sis-base-14.12.0.jar"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S223.0-r35701.jar"/>
 	<classpathentry kind="lib" path="lib/bioformats_package-5.1.8.jar"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/query_api/marathon-spring-util-1.2.5.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S226.1-r36066.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

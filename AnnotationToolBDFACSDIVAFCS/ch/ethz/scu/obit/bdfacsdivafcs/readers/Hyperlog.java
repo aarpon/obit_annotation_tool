@@ -424,7 +424,8 @@ public class Hyperlog {
 		
 		// Estimate the parameters
 		return Hyperlog.estimateParamHeuristic(bnds[0], bnds[1]);
-	}	
+	}
+
 	/**
 	 * Multiplies all values in the input array by a constant factor.
 	 * 
