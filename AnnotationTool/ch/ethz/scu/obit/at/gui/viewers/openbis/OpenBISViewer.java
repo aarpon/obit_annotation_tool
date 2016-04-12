@@ -23,8 +23,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -877,10 +877,40 @@ public class OpenBISViewer extends Observable
 
 		}
 
-		// Ask the user to specify a project name
-		String metaprojectCode = JOptionPane.showInputDialog(
-				"Please enter new tag name (code)");
-		if (metaprojectCode == null || metaprojectCode.equals("")) {
+		// Ask the user to specify a metaproject name and description.
+		// The maximum length of a metaproject code in openBIS is 60
+		// characters.
+		String metaprojectCode;
+		String metaprojectDescr;
+		JTextField nameTextField = new JTextField(30);
+		JTextField descrTextField = new JTextField();
+		Object[] fields = { 
+		    "Tag name", nameTextField,
+		    "Tag description (optional)", descrTextField
+		};
+		int option = JOptionPane.showConfirmDialog(null, fields,
+				"Create new tag...",
+				JOptionPane.OK_CANCEL_OPTION);
+		if (option == JOptionPane.OK_OPTION) {
+			metaprojectCode = nameTextField.getText();
+			metaprojectDescr = descrTextField.getText();
+			if (metaprojectCode == null || metaprojectCode.equals("")) {
+				outputPane.warn("Creation of new tag aborted by user.");
+				return false;
+			}
+			if (metaprojectCode.length() > 60) {
+				outputPane.err("The name of the tag cannot be more"
+						+ " than 60 characters long.");
+				return false;
+			}
+			if (metaprojectCode.contains(" ") ||
+					metaprojectCode.contains("\\") ||
+					metaprojectCode.contains("/")) {
+				outputPane.err("The name of the tag cannot contain spaces,"
+						+ " slashes, or backslashes.");
+				return false;
+			}
+		} else {
 			outputPane.warn("Creation of new tag aborted by user.");
 			return false;
 		}
@@ -888,7 +918,8 @@ public class OpenBISViewer extends Observable
 		// Call the ingestion server and collect the output
 		QueryTableModel tableModel;
 		try {
-			tableModel = openBISProcessor.createMetaProject(metaprojectCode);
+			tableModel = openBISProcessor.createMetaProject(metaprojectCode,
+					metaprojectDescr);
 		} catch (Exception e) {
 			outputPane.err("Could not create tag /" + metaprojectCode +
 					"! Please contact your openBIS administrator!");
@@ -904,6 +935,12 @@ public class OpenBISViewer extends Observable
 			message = (String)row[1];
 			if (success.equals("true")) {
 				outputPane.log(message);
+
+				// Now retrieve the updated metaproject list
+				// and update the view
+				clearTagList();
+				setTagList(openBISProcessor.getMetaprojects());
+
 				return true;
 			}
 		}

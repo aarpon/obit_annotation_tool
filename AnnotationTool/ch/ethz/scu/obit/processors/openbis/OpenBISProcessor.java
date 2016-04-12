@@ -303,7 +303,7 @@ public class OpenBISProcessor {
 	}
 
 	/**
-	 * Returns the list of metaprojects for current session.
+	 * Retrieves and returns the list of metaprojects for current session.
 	 * @return list of metaprojects.
 	 */
 	public List<String> getMetaprojects() {
@@ -390,14 +390,14 @@ public class OpenBISProcessor {
 					service.getServiceKey().equals("flow_create_project") ||
 					service.getServiceKey().equals("micr_create_project")) {
 				createProjectService = service;
-				
+
 			} else if (service.getServiceKey().equals("shared_create_metaproject")) {
 				createMetaProjectService = service;
 			} else {
 				// Continue;
 			}
         }
-		
+
 		// Have we found them?
 		return (createProjectService != null & createMetaProjectService != null);
 	}
@@ -440,6 +440,7 @@ public class OpenBISProcessor {
 	/**
 	 * Create a metaproject (tag) with given code for current user.
 	 * @param metaprojectCode Code of the metaproject (tag) to be created.
+	 * @param metaprojectDescr Description for the metaproject (optional).
 	 * @return a QueryTableModel with one row containing "success" and "message"
 	 * column. You can query the content of the QueryTableModel as follows:
 	 * 
@@ -457,17 +458,19 @@ public class OpenBISProcessor {
 	 *	}
 	 *	System.err.println(message);
 	 */
-	public QueryTableModel createMetaProject(String metaprojectCode) {
+	public QueryTableModel createMetaProject(String metaprojectCode,
+			String metaprojectDescr) {
 		
 		// Set the parameters
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("userName", this.userName);
 		parameters.put("metaprojectCode", metaprojectCode);
+		parameters.put("metaprojectDescr", metaprojectDescr);
 		
 		QueryTableModel tableModel = 
-			queryFacade.get().createReportFromAggregationService(
-					createMetaProjectService, parameters);
-		
+				queryFacade.get().createReportFromAggregationService(
+							createMetaProjectService, parameters);
+
 		return tableModel;
 	}
 	
