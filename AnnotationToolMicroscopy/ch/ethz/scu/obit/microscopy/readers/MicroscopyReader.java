@@ -44,6 +44,16 @@ public class MicroscopyReader extends AbstractReader {
 	protected IMetadata omexmlMeta;
 	
 	protected boolean isFileScanned = false;
+	
+	private final static double[][] defaultChannelColors = {
+			{255.0,   0.0,   0.0, 255.0},
+			{  0.0, 255.0,   0.0, 255.0},
+			{  0.0,   0.0, 255.0, 255.0},
+			{255.0, 255.0,   0.0, 255.0},
+			{255.0,   0.0, 255.0, 255.0},
+			{  0.0, 255.0, 255.0, 255.0},
+			{255.0, 255.0, 255.0, 255.0},
+	};
 
 	/**
 	 * Metadata attributes
@@ -464,7 +474,12 @@ public class MicroscopyReader extends AbstractReader {
 		String[] channelNames = new String[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			String channelName = omexmlMeta.getChannelName(seriesNum, i);
+			String channelName;	
+			try {
+				channelName = omexmlMeta.getChannelName(seriesNum, i);
+			} catch (IndexOutOfBoundsException e) {
+				channelName = null;
+			}
 			if (channelName == null) {
 				channelName = "CHANNEL_" + i;
 			}
@@ -518,8 +533,12 @@ public class MicroscopyReader extends AbstractReader {
 		double[] exWavelengths = new double[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			Length pEx =
-					omexmlMeta.getChannelExcitationWavelength(seriesNum, i);
+			Length pEx;
+			try { 
+				pEx = omexmlMeta.getChannelExcitationWavelength(seriesNum, i);
+			} catch (IndexOutOfBoundsException e) {
+				pEx = null;
+			}
 		    double ex;
 			if (pEx != null) {
 		        ex = (double) pEx.value();
@@ -545,8 +564,12 @@ public class MicroscopyReader extends AbstractReader {
 		double[] emWavelengths = new double[nChannels];
 		
 		for (int i = 0; i < nChannels; i++) {
-			Length pEm =
-					omexmlMeta.getChannelEmissionWavelength(seriesNum, i);
+			Length pEm;
+			try {
+				pEm = omexmlMeta.getChannelEmissionWavelength(seriesNum, i);
+			} catch (IndexOutOfBoundsException e) {
+				pEm = null;
+			}
 		    double em;
 			if (pEm != null) {
 		        em = (double) pEm.value();
@@ -649,12 +672,22 @@ public class MicroscopyReader extends AbstractReader {
 		double[][] colors = new double[nChannels][4];
 		
 		for (int i = 0; i < nChannels; i++) {
-			Color color = omexmlMeta.getChannelColor(seriesNum, i);
+			Color color;
+			try {
+				color = omexmlMeta.getChannelColor(seriesNum, i);
+			} catch (IndexOutOfBoundsException e) {
+				color = null;
+			}
 			if (color == null) {
-				colors[i][0] = Double.NaN;
-				colors[i][1] = Double.NaN;
-				colors[i][2] = Double.NaN;
-				colors[i][3] = Double.NaN;
+				if (nChannels == 1) {
+					// If one channel only, make it gray
+					colors[i][0] = 255.0;
+					colors[i][1] = 255.0;
+					colors[i][2] = 255.0;
+					colors[i][3] = 255.0;
+				} else {
+					colors[i] = defaultChannelColors[i];
+				}
 			} else {
 				colors[i][0] = color.getRed();
 				colors[i][1] = color.getGreen();
