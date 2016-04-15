@@ -1,2 +1,0 @@
-..\..\AnnotationTool\ch\ethz\scu\obit\readers\AbstractReader.java
-..\..\AnnotationToolBDFACSDIVAFCS\ch\ethz\scu\obit\bdfacsdivafcs\readers\FCSReader.java

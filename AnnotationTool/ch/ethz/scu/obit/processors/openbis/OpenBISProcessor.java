@@ -52,6 +52,8 @@ public class OpenBISProcessor {
 	private boolean isLoggedIn = false;
 
 	private AggregationServiceDescription createProjectService = null;
+	
+	private AggregationServiceDescription createMetaProjectService = null;
 
 	private AtomicReference<String> loginErrorMessage = 
 			new AtomicReference<String>("");
@@ -301,7 +303,7 @@ public class OpenBISProcessor {
 	}
 
 	/**
-	 * Returns the list of metaprojects for current session.
+	 * Retrieves and returns the list of metaprojects for current session.
 	 * @return list of metaprojects.
 	 */
 	public List<String> getMetaprojects() {
@@ -359,16 +361,16 @@ public class OpenBISProcessor {
 	}			
 		
 	/**
-	 * Retrieve and store the create_project ingestion service from the
-	 * server.
-	 * @return true if the service could be retrieved successfully,
-	 * false otherwise. If the services was retrieved already, returns true
+	 * Retrieve and store the create_project and create_metaproject ingestion 
+	 * services from the server.
+	 * @return true if the services could be retrieved successfully,
+	 * false otherwise. If the services were retrieved already, returns true
 	 * with no additional actions.
 	 */
 	public boolean retrieveAndStoreServices() {
 		
-		// Do we still have the service?
-		if (createProjectService != null) {
+		// Do we already have the services?
+		if (createProjectService != null && createMetaProjectService != null) {
 			return true;
 		}
 
@@ -380,25 +382,26 @@ public class OpenBISProcessor {
 		// create_project ingestion plug-in.
 		for (AggregationServiceDescription service : aggregationServices)
         {
-			// The 'micr_create_project' and 'flow_create_project' plug-ins
-			// are identical and we can use either one; but we have to check
-			// for both since we do not know which core technologies are
-			// enabled.
-			if (service.getServiceKey().equals("flow_create_project") ||
+			// The 'shared_create_project', 'micr_create_project' and 
+			// 'flow_create_project' plug-ins are identical and we can
+			// use either one; but we have to check for all since we do
+			// not know which core technologies are enabled.
+			if (service.getServiceKey().equals("shared_create_project") ||
+					service.getServiceKey().equals("flow_create_project") ||
 					service.getServiceKey().equals("micr_create_project")) {
 				createProjectService = service;
-				
-				// Found, we can return success
-				return true;
+
+			} else if (service.getServiceKey().equals("shared_create_metaproject")) {
+				createMetaProjectService = service;
+			} else {
+				// Continue;
 			}
         }
-		
-		// Not found, we return failure
-		return false;
+
+		// Have we found them?
+		return (createProjectService != null & createMetaProjectService != null);
 	}
 
-	// Call the aggregation plugin to create a project with given code in space
-	// i
 	/**
 	 * Create a project with given code in the specified space.
 	 * @param spaceCode Code of the project to be created.
@@ -431,6 +434,43 @@ public class OpenBISProcessor {
 			queryFacade.get().createReportFromAggregationService(
 					createProjectService, parameters);
 		
+		return tableModel;
+	}
+
+	/**
+	 * Create a metaproject (tag) with given code for current user.
+	 * @param metaprojectCode Code of the metaproject (tag) to be created.
+	 * @param metaprojectDescr Description for the metaproject (optional).
+	 * @return a QueryTableModel with one row containing "success" and "message"
+	 * column. You can query the content of the QueryTableModel as follows:
+	 * 
+	 *  {code}
+	 *  String success= "";
+	 *	String message = "";
+	 *	List<Serializable[]> rows = tableModel.getRows();
+	 *	for (Serializable[] row : rows) {
+	 *		success = (String)row[0];
+	 *		message = (String)row[1];
+	 *		if (success.equals("true")) {
+	 *			System.out.println(message);
+	 *			return true;
+	 *		}
+	 *	}
+	 *	System.err.println(message);
+	 */
+	public QueryTableModel createMetaProject(String metaprojectCode,
+			String metaprojectDescr) {
+		
+		// Set the parameters
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("userName", this.userName);
+		parameters.put("metaprojectCode", metaprojectCode);
+		parameters.put("metaprojectDescr", metaprojectDescr);
+		
+		QueryTableModel tableModel = 
+				queryFacade.get().createReportFromAggregationService(
+							createMetaProjectService, parameters);
+
 		return tableModel;
 	}
 	

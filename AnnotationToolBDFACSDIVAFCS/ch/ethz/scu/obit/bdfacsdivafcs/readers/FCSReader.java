@@ -245,6 +245,19 @@ public final class FCSReader extends AbstractReader {
 	}
 
 	/**
+	 * Returns all parameter names.
+	 * 
+	 * @return The String array of parameter names.
+	 */
+	public ArrayList<String> getParameterNames() {
+		ArrayList<String> paramNames = new ArrayList<String>(numParameters());
+		for (int i = 1; i <= numParameters(); i++) {
+			paramNames.add(parametersAttr.get("P" + i + "N"));
+		}
+		return paramNames;
+	}
+
+	/**
 	 * Returns all standard FCS 3.0/3.1 keywords as a String - String map
 	 * 
 	 * @return The String - String Map of all standard FCS 3.0/3.1 keywords
@@ -334,6 +347,86 @@ public final class FCSReader extends AbstractReader {
 			numParameters = Integer.parseInt(TEXTMapStandard.get("$PAR"));
 		}
 		return numParameters;
+	}
+
+	/**
+	 * Return subset of measurements with optional stride for parameter with 
+	 * given column index in double precision.
+	 * @param columnIndex Index of the measurement column.
+	 * @param nValues number of values to be read. Set to 0 to read them all.
+	 * @param sampled True if the nValues must be sampled with constant stride
+	 *                throughout the total number of rows, false if the first 
+	 *                nValues rows must simply be returned. 
+	 * @return array of measurements.
+	 * @throws IOException if the data type is invalid.
+	 */
+	public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
+			boolean sampled) throws IOException {
+
+		// Some constants
+		int nParams = numParameters();
+		int nEvents = numEvents();
+		String datatype = datatype();
+
+		int step;
+		// If all values must be read, the step is 1.
+		if (nValues == 0 || nValues > nEvents) {
+			nValues = nEvents;
+			step = 1;
+		} else {
+			if (sampled) {
+				step = (int) (((float) nEvents) / nValues);
+				if (step == 0) {
+					step = 1;
+				}
+			} else {
+				step = 1;
+			}
+		}
+				
+		// Allocate space for the events
+		double[] m = new double[nValues];
+		
+		// Go through the buffer and return the values for the requested column
+		DATA.rewind();
+		int c = 0; // Global measurement counter
+		int n = 0; // Row counter
+		int t = 0; // Accepted value counter
+		while (DATA.hasRemaining()) {
+		
+			// Get the value, convert it to double
+			double tmp;
+			if (datatype.equals("F")) {
+				tmp = (double) ((FloatBuffer) DATA).get();
+			} else if (datatype.equals("I")) {
+				tmp = (double) ((IntBuffer) DATA).get();
+			} else if (datatype.equals("D")) {
+				tmp = (double) ((DoubleBuffer) DATA).get();
+			} else if (datatype.equals("A")) {
+				tmp = (double) ((CharBuffer) DATA).get();
+			} else {
+				throw new IOException("Unknown data type!");
+			}
+
+			// If we are at the right column, we store it
+			if (c % nParams == columnIndex) {
+				if (n % step == 0) {
+					m[t] = tmp;
+					t++;
+
+					// Are we done?
+					if (t >= nValues) {
+						break;
+					}
+				}
+				n++;
+			}
+			c++;
+
+		}
+
+		// Return the array
+		return m;
 	}
 
 	/**
