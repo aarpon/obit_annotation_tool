@@ -686,7 +686,9 @@ public class MicroscopyReader extends AbstractReader {
 					colors[i][2] = 255.0;
 					colors[i][3] = 255.0;
 				} else {
-					colors[i] = defaultChannelColors[i];
+					// Recycle after we have run out of default colors
+					int n = i % defaultChannelColors.length;
+					colors[i] = defaultChannelColors[n];
 				}
 			} else {
 				colors[i][0] = color.getRed();
