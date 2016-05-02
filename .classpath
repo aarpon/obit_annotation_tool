@@ -30,6 +30,6 @@
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/query_api/marathon-spring-util-1.2.5.jar"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S226.1-r36066.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S228.0-r36348.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
