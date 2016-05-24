@@ -1,8 +1,11 @@
 package ch.ethz.scu.obit.common.settings;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import ch.ethz.scu.obit.common.utils.QueryOS;
 
 /**
  * Class to store Annotation Tool settings for one specific openBIS server
@@ -104,6 +107,12 @@ class AppSettings {
 		} else if (name.equals("AcquisitionStation")) {
 			options.add("BD Biosciences Cell Analyzers and Sorters");
 			options.add("Generic light microscopes");
+		} else if (name.equals("HumanFriendlyHostName")) {
+			try {
+				options.add(QueryOS.getHostName());
+			} catch (UnknownHostException e) {
+				options.add("Unknown");
+			}			
 		} else if (name.equals("UserDataDir")) {
 			options.add("");			
 		} else if (name.equals("DatamoverIncomingDir")) {
@@ -158,6 +167,7 @@ class AppSettings {
 		names.add("OpenBISURL");
 		names.add("AcceptSelfSignedCertificates");
 		names.add("AcquisitionStation");
+		names.add("HumanFriendlyHostName");
 		names.add("UserDataDir");
 		names.add("DatamoverIncomingDir");
 		
@@ -192,6 +202,8 @@ class AppSettings {
 		} else if (name.equals("AcceptSelfSignedCertificates")) {
 			return false;
 		} else if (name.equals("AcquisitionStation")) {
+			return false;
+		} else if (name.equals("HumanFriendlyHostName")) {
 			return false;
 		} else if (name.equals("UserDataDir")) {
 			return true;			

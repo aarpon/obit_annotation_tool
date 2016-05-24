@@ -42,8 +42,10 @@ public class DataViewerTreeToXML {
 	 * Constructor
 	 * @param tree Custom JTree
 	 * @param userName user name.
+	 * @param machineName machine name.
 	 */
-	public DataViewerTreeToXML(DataViewerTree tree, String userName) {
+	public DataViewerTreeToXML(DataViewerTree tree, 
+			String userName, String machineName) {
 
 		DocumentBuilder builder;
 		Document document = null;
@@ -83,6 +85,7 @@ public class DataViewerTreeToXML {
 				Element root = document.createElement("obitXML");
 				root.setAttribute("version", "1");
 				root.setAttribute("userName", userName);
+				root.setAttribute("machineName", machineName);
 
 				// Create and add the experiment
 				Element element = createElement(document, expNode); 

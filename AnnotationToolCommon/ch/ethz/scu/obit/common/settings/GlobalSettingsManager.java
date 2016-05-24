@@ -28,7 +28,7 @@ import java.util.ArrayList;
  * AppSettingsManager allows to both read applications settings from disk and
  * write them back modified. It is recommended not to use this direct access 
  * from the Annotation Tool, since by modifying the application settings 
- * without synchronizing with the user settings you can create inconsisten 
+ * without synchronizing with the user settings you can create an inconsistent 
  * state. Use the GlobalSettingsManager class instead.  
  * 
  * @author Aaron Ponti
@@ -128,6 +128,17 @@ public class GlobalSettingsManager {
 		return appManager.getSettingValue("AcquisitionStation");
 	}
 
+	/**
+	 * Return the acquisition station human-friendly name.
+	 * 
+	 * This is an Application Setting.
+	 *  
+	 * @return the acquisition station.
+	 */
+	public String getAcquisitionStationFriendlyHostName() {
+		return appManager.getSettingValue("HumanFriendlyHostName");
+	}
+	
 	/**
 	 * Set the user's favorite server.
 	 * 
