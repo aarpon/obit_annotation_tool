@@ -11,8 +11,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
 
-public class TestOSQuery {
+/**
+ * Test QueryOS
+ * @author Aaron Ponti
+ *
+ */
+public class TestQueryOS {
 
+	/**
+	 * Test QueryOS.getHostName()
+	 */
 	@Test
 	public void testGetHostname() {
 
@@ -34,7 +42,7 @@ public class TestOSQuery {
 	 */
 	public static void main(String[] args) {
 
-		Result result = JUnitCore.runClasses(TestOSQuery.class);
+		Result result = JUnitCore.runClasses(TestQueryOS.class);
 		for (Failure failure : result.getFailures()) {
 			System.out.println(failure.toString());
 		}
