@@ -515,6 +515,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Add a text field for the human-friendly machine name
 		machineNameText = new JTextArea("");
 		machineNameText.setLineWrap(false);
+		machineNameText.getDocument().putProperty("filterNewlines", Boolean.TRUE);
 		machineNameText.getDocument().addDocumentListener(new DocumentListener() {
 
             @Override
