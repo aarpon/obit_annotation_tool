@@ -59,6 +59,13 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Define a text decorator
 		arrow = Character.toString('\u25CF') + " ";
 
+		// Use the system default look-and-feel
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			System.err.println("Couldn't set look and feel.");
+		}
+
 		// Icon
 		ImageIcon appIcon = new ImageIcon(
 				this.getClass().getResource("icons/icon_admin.png"));
