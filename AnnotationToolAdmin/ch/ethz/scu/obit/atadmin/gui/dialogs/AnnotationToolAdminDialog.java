@@ -58,14 +58,21 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 		// Define a text decorator
 		arrow = Character.toString('\u25CF') + " ";
-		
+
+		// Icon
+		ImageIcon appIcon = new ImageIcon(
+				this.getClass().getResource("icons/icon_admin.png"));
+
+		// Set it to the window
+		setIconImage(appIcon.getImage());
+
 		// Set the dialog title
 		setTitle("openBIS Importer Toolset (oBIT) :: Annotation Tool Admin v" +
 		VersionInfo.version + " " + VersionInfo.status);
 
 		// Read the properties
 		manager = new AppSettingsManager();
-		
+
 		// Make the dialog modal and not resizable
 		setModal(true);
 		setResizable(false);
