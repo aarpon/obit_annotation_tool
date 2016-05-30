@@ -1,6 +1,8 @@
 package ch.ethz.scu.obit.updater.gui;
 
 import java.awt.AWTException;
+import java.awt.Desktop;
+import java.awt.Font;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
@@ -12,12 +14,17 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Scanner;
 
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import ch.ethz.scu.obit.common.settings.AppUpdaterSettingsManager;
 import ch.ethz.scu.obit.common.version.VersionInfo;
@@ -169,9 +176,9 @@ public class AnnotationToolUpdaterTray {
         boolean updates = versionInt > VersionInfo.versionStringToInteger(VersionInfo.version);
 
         if (updates) {
-            JOptionPane.showMessageDialog(null, "A new version (" +
-        VersionInfo.versionIntegerToString(versionInt)
-                    + ") of the Annotation Tool is ready to be dowloaded!");
+            JOptionPane.showMessageDialog(null, 
+                    new UrlTextPane(VersionInfo.versionIntegerToString(versionInt)),
+                    "Updates available!", JOptionPane.PLAIN_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(null,
                     "Congratulations! You are running the latest " +
@@ -189,17 +196,23 @@ public class AnnotationToolUpdaterTray {
 
         // Settings
         boolean useProxy = manager.getSettingValue("useProxyServer").equals("1");
-        String proxyAddress = manager.getSettingValue("proxyServerName");
-        int proxyPort;
-        try {
-            proxyPort = Integer.parseInt(manager.getSettingValue("proxyServerPort"));
-        } catch (NumberFormatException e) {
-            proxyPort = 0;
+        String proxyAddress = "";
+        int proxyPort = 0;
+        if (useProxy) {
+
+            // Get the proxy address
+            proxyAddress = manager.getSettingValue("proxyServerName");
+
+            // Get the proxy port
+            try {
+                proxyPort = Integer.parseInt(manager.getSettingValue("proxyServerPort"));
+            } catch (NumberFormatException e) {
+                proxyPort = 0;
+            }
         }
-
-        URL updateURL;
-
+        
         // Set the update server URL
+        URL updateURL;
         try {
             updateURL = new URL("https://raw.githubusercontent.com/aarpon/obit_annotation_tool/master/updates/VERSION");
         } catch (MalformedURLException e) {
@@ -285,4 +298,65 @@ public class AnnotationToolUpdaterTray {
         // Return the extracted version info
         return versionInt;
     }
+    
+
+    /**
+     * Custom JTextPane with a link to the download page.
+     * @author Aaron Ponti
+     *
+     */
+    class UrlTextPane extends JTextPane {
+
+        private static final long serialVersionUID = 1L;
+
+        public UrlTextPane(String version) {
+
+            // Copy font style
+            Font font = (new JLabel()).getFont();
+            StringBuffer style = new StringBuffer(
+                    "font-family:" + font.getFamily() + ";");
+            style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
+            style.append("font-size:" + font.getSize() + "pt;");
+
+            // More configuration
+            setEditable(false);
+            setOpaque(false);
+            addHyperlinkListener((HyperlinkListener) new UrlHyperlinkListener());
+
+            // Add the text
+            setContentType("text/html");
+            setText("<html><body style=\"" + style + "\">" +
+                "A new version of the Annotation Tool " + 
+                "(" + version +") is ready to be " + 
+                "<a href=\"https://github.com/aarpon/obit_annotation_tool/releases/latest\">downloaded</a>!" +
+                "</body></html>");
+        }
+
+        /**
+         * Listener for hyperlink interaction
+         * @author Aaron Ponti
+         *
+         */
+        private class UrlHyperlinkListener implements HyperlinkListener {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent event) {
+                if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    try {
+                        Desktop.getDesktop().browse(event.getURL().toURI());
+                    } catch (final IOException e) {
+                        JOptionPane.showMessageDialog(null,
+                                "Could not connect to download URL!",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (final URISyntaxException e) {
+                        JOptionPane.showMessageDialog(null,
+                                "Could not connect to download URL!",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }                
+            }
+        };
+    }
+   
 }
