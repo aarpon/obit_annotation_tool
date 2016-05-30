@@ -19,7 +19,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import ch.ethz.scu.obit.common.settings.AppUpdaterSettingsManager;
 import ch.ethz.scu.obit.common.version.VersionInfo;
+import ch.ethz.scu.obit.updater.gui.dialogs.AnnotationToolUpdaterSettingsDialog;
 
 /**
  * Create the application menu (with all functionalities implemented) and sets
@@ -28,6 +30,16 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
  * @author Aaron Ponti
  */
 public class AnnotationToolUpdaterTray {
+
+    /**
+     * Settings manager
+     */
+    AppUpdaterSettingsManager manager;
+
+    /**
+     * Settings dialog
+     */
+    AnnotationToolUpdaterSettingsDialog settingsDialog;
 
     /**
      * Whether we should use a proxy for connection or not
@@ -49,10 +61,8 @@ public class AnnotationToolUpdaterTray {
      */
     public AnnotationToolUpdaterTray() {
 
-        // TODO: read settings (proxy) from configuration file
-        useProxy = false;
-        proxyAddress = "proxy.example.com";
-        proxyPort = 8080;
+        // Read settings or initialize them
+        manager = new AppUpdaterSettingsManager();
 
         // Set the system look and feel
         try {
@@ -114,14 +124,21 @@ public class AnnotationToolUpdaterTray {
         // Show the settings dialog
         settingsItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,
-                        "This will open the settings dialog.");
+                if (settingsDialog == null) {
+                    settingsDialog = new AnnotationToolUpdaterSettingsDialog(manager);
+                } else {
+                    settingsDialog.setVisible(true);
+                }
+
             }
         });
 
         // Clean up and exit
         exitItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if (settingsDialog != null) {
+                    settingsDialog.dispose();
+                }
                 tray.remove(trayIcon);
                 System.exit(0);
             }
@@ -170,12 +187,15 @@ public class AnnotationToolUpdaterTray {
      */
     private int retrieveRemoteVersion() {
 
-        // Temp
-        boolean useProxy = false;
-
         // Settings
-        String proxyAddress = ""; // TODO: read from settings file
-        int proxyPort = 8080; // TODO: read from settings file
+        boolean useProxy = manager.getSettingValue("useProxyServer").equals("1");
+        String proxyAddress = manager.getSettingValue("proxyServerName");
+        int proxyPort;
+        try {
+            proxyPort = Integer.parseInt(manager.getSettingValue("proxyServerPort"));
+        } catch (NumberFormatException e) {
+            proxyPort = 0;
+        }
 
         URL updateURL;
 
