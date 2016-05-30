@@ -37,7 +37,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
     int proxyPort;
 
     protected AppUpdaterSettingsManager manager;
-    
+
     JCheckBox useProxyCheckBox;
     JLabel proxyServerLabel; 
     JTextArea proxyServerText;
@@ -55,7 +55,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
 
         // This is used only locally 
         boolean useProxy = manager.getSettingValue("useProxyServer").equals("1");
-       
+
         // Set the dialog title
         setTitle("Annotation Tool Updater v" + VersionInfo.version + " " +
         VersionInfo.status + ": Settings");
@@ -122,7 +122,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
         add(proxyServerLabel, constraints);        
 
         // Add a text field for the human-friendly machine name
-        proxyServerText = new JTextArea("");
+        proxyServerText = new JTextArea(manager.getSettingValue("proxyServerName"));
         proxyServerText.setEnabled(useProxy);
         proxyServerText.setLineWrap(false);
         proxyServerText.getDocument().putProperty("filterNewlines", Boolean.TRUE);
@@ -146,7 +146,6 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
                         proxyServerText.getText());
             }
         });
-        proxyServerText.setText("");
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.gridwidth = 20;
@@ -169,7 +168,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
         add(proxyPortLabel, constraints);        
 
         // Add a text field for the human-friendly machine name
-        proxyPortText = new JTextArea("");
+        proxyPortText = new JTextArea(manager.getSettingValue("proxyServerPort"));
         proxyPortText.setEnabled(useProxy);
         proxyPortText.setLineWrap(false);
         proxyPortText.getDocument().putProperty("filterNewlines", Boolean.TRUE);
@@ -193,11 +192,10 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
                         proxyPortText.getText());
             }
         });
-        proxyPortText.setText("");
         constraints.gridx = 0;
         constraints.gridy = 4;
         constraints.gridwidth = 20;
-        constraints.gridheight = 1;     
+        constraints.gridheight = 1;
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         constraints.insets = new Insets(5, 5, 5, 5);
@@ -208,7 +206,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
         constraints.gridx = 0;
         constraints.gridy = 5;
         constraints.gridwidth = 4;
-        constraints.gridheight = 1;     
+        constraints.gridheight = 1;
         constraints.weightx = 0.5;
         constraints.weighty = 1.0;
         constraints.insets = new Insets(5, 5, 5, 5);
@@ -256,7 +254,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
         constraints.gridx = 16;
         constraints.gridy = 6;
         constraints.gridwidth = 2;
-        constraints.gridheight = 1;     
+        constraints.gridheight = 1;
         constraints.weightx = 0.1;
         constraints.weighty = 1.0;
         constraints.insets = new Insets(5, 5, 5, 5);
@@ -267,7 +265,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
         closeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 // Are all the Settings set?
                 if (!manager.allSet()) {
                     JOptionPane.showMessageDialog(null,
@@ -276,7 +274,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
 
                     return;
                 }
-                
+
                 // Just hide
                 setVisible(false);
             }
@@ -301,7 +299,7 @@ public class AnnotationToolUpdaterSettingsDialog extends JDialog {
         setVisible(true);
 
     }
-    
+
     /**
      * Enable all setting widgets
      */
