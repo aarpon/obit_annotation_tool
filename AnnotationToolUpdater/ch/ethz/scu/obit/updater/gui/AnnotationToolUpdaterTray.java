@@ -80,7 +80,7 @@ public class AnnotationToolUpdaterTray {
 
         // Tray icon
         final ImageIcon appIcon = new ImageIcon(
-                this.getClass().getResource("icons/icon_uploader.png"));
+                this.getClass().getResource("icons/icon_updater.png"));
         final TrayIcon trayIcon = new TrayIcon(appIcon.getImage());
         trayIcon.setImageAutoSize(true);
         final SystemTray tray = SystemTray.getSystemTray();
@@ -155,7 +155,7 @@ public class AnnotationToolUpdaterTray {
         try {
             tray.add(trayIcon);
         } catch (AWTException e) {
-            System.out.println("TrayIcon could not be added.");
+            System.err.println("TrayIcon could not be added.");
             return;
         }
 
@@ -182,7 +182,9 @@ public class AnnotationToolUpdaterTray {
         } else {
             JOptionPane.showMessageDialog(null,
                     "Congratulations! You are running the latest " +
-            "version of the Annotation Tool!");
+            "version of the Annotation Tool!",
+            "No updates available",
+            JOptionPane.INFORMATION_MESSAGE);
         }
 
     }
