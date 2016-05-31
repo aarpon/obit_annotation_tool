@@ -36,6 +36,14 @@ COPY .\winrun4j\WinRun4J64.exe .\win64\AnnotationToolUpdater.exe
 REM Generate 64-bit Windows executable
 .\winrun4j\RCEDIT64.exe /I .\win64\AnnotationToolUpdater.exe .\win64\icon_updater.ico
 
+REM Copy the manifest to prevent Windows from asking the admin password
+REM (since the file name contains 'update')
+COPY .\AnnotationToolUpdaterIni\AnnotationToolUpdater.exe.manifest .\win64\
+
+REM To make sure that the manifest file is considered, update the last 
+REM modification time of the executable.
+@COPY /B .\win64\AnnotationToolUpdater.exe+,, .\win64\AnnotationToolUpdater.exe
+
 REM Delete the icon and ini files since they were embedded in the executables
 DEL /Q .\win64\*.ico
 
