@@ -1,13 +1,18 @@
 package ch.ethz.scu.obit.atadmin.gui.dialogs;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import ch.ethz.scu.obit.common.settings.AppSettingsManager;
+import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.common.version.VersionInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -39,6 +44,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JButton userdirButton;
 	protected JButton saveButton;
 	protected JButton closeButton;
+	protected JTextArea machineNameText;
 	protected JComboBox<String> acqStationsList;
     protected JComboBox<String> openBISURLList;	
 	protected JComboBox<String> acceptSelfSignedCertsList;
@@ -52,14 +58,28 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 		// Define a text decorator
 		arrow = Character.toString('\u25CF') + " ";
-		
+
+		// Use the system default look-and-feel
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			System.err.println("Couldn't set look and feel.");
+		}
+
+		// Icon
+		ImageIcon appIcon = new ImageIcon(
+				this.getClass().getResource("icons/icon_admin.png"));
+
+		// Set it to the window
+		setIconImage(appIcon.getImage());
+
 		// Set the dialog title
 		setTitle("openBIS Importer Toolset (oBIT) :: Annotation Tool Admin v" +
 		VersionInfo.version + " " + VersionInfo.status);
 
 		// Read the properties
 		manager = new AppSettingsManager();
-		
+
 		// Make the dialog modal and not resizable
 		setModal(true);
 		setResizable(false);
@@ -495,10 +515,76 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(acqStationDescription, constraints);
 		
+		// Add a label for the human-friendly machine name
+		JLabel machineNameLabel = new JLabel(arrow + "User-friendly machine name");
+		constraints.gridx = 0;
+		constraints.gridy = 8;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(machineNameLabel, constraints);
+		
+		// Add a text field for the human-friendly machine name
+		machineNameText = new JTextArea("");
+		machineNameText.setLineWrap(false);
+		machineNameText.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+		machineNameText.getDocument().addDocumentListener(new DocumentListener() {
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+            	manager.setSettingValue("HumanFriendlyHostName",
+            			machineNameText.getText());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+            	manager.setSettingValue("HumanFriendlyHostName",
+            			machineNameText.getText());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+            	manager.setSettingValue("HumanFriendlyHostName",
+            			machineNameText.getText());
+            }
+        });
+		
+		machineNameText.setText(manager.getSettingValue("HumanFriendlyHostName"));
+		constraints.gridx = 0;
+		constraints.gridy = 9;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(machineNameText, constraints);
+		
+		// Add a label for the info text
+		JLabel infoMachineNameLabel;
+		String hostnameStr = "";
+		try {
+			hostnameStr = "For reference, the machine host name is " +
+					QueryOS.getHostName() + ".";
+		} catch (UnknownHostException e1) {
+			hostnameStr = "";
+		}
+		infoMachineNameLabel = new JLabel(hostnameStr);
+		constraints.gridx = 0;
+		constraints.gridy = 10;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;		
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(infoMachineNameLabel, constraints);
+		
+		
 		// Add a label for the user directory
 		JLabel userdirLabel = new JLabel(arrow + "Set user data directory");
 		constraints.gridx = 0;
-		constraints.gridy = 8;
+		constraints.gridy = 11;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -553,7 +639,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });		
 		constraints.gridx = 0;
-		constraints.gridy = 9;
+		constraints.gridy = 12;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -565,7 +651,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		JLabel dirLabel = new JLabel(arrow + 
 				"Set Datamover incoming directory");
 		constraints.gridx = 0;
-		constraints.gridy = 10;
+		constraints.gridy = 13;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -620,7 +706,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });		
 		constraints.gridx = 0;
-		constraints.gridy = 11;
+		constraints.gridy = 14;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -633,7 +719,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 				"<html>It is <u>highly recommended</u> to set " +
 		"both folders on the same file system.</html>");
 		constraints.gridx = 0;
-		constraints.gridy = 12;
+		constraints.gridy = 15;
 		constraints.gridwidth = 20;
 		constraints.gridheight = 1;		
 		constraints.weightx = 1.0;
@@ -644,7 +730,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		// Some spacer
 		JLabel spacerLabel = new JLabel("");
 		constraints.gridx = 0;
-		constraints.gridy = 13;
+		constraints.gridy = 16;
 		constraints.gridwidth = 4;
 		constraints.gridheight = 1;		
 		constraints.weightx = 0.5;
@@ -692,7 +778,7 @@ public class AnnotationToolAdminDialog extends JDialog {
           }
         });
 		constraints.gridx = 16;
-		constraints.gridy = 13;
+		constraints.gridy = 16;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;		
 		constraints.weightx = 0.1;
@@ -711,7 +797,7 @@ public class AnnotationToolAdminDialog extends JDialog {
             }
         });
 		constraints.gridx = 18;
-		constraints.gridy = 13;
+		constraints.gridy = 16;
 		constraints.gridwidth = 2;
 		constraints.gridheight = 1;			
 		constraints.weightx = 0.1;
@@ -813,6 +899,7 @@ public class AnnotationToolAdminDialog extends JDialog {
     private void updateUI() {
     	openBISURLList.setSelectedItem(manager.getActiveServer());
     	acqStationsList.setSelectedItem(manager.getSettingValue("AcquisitionStation"));
+    	machineNameText.setText(manager.getSettingValue("HumanFriendlyHostName"));
     	acceptSelfSignedCertsList.setSelectedItem(manager.getSettingValue("AcceptSelfSignedCertificates"));
     	userdirButton.setText(manager.getSettingValue("UserDataDir"));
     	dirButton.setText(manager.getSettingValue("DatamoverIncomingDir"));
@@ -855,4 +942,5 @@ public class AnnotationToolAdminDialog extends JDialog {
     				"Set the openBIS URL (this is current default)");
     	}
     }
+
 }

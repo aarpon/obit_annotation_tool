@@ -9,7 +9,7 @@ public class VersionInfo {
 	/**
 	 * Program version
 	 */
-	public static final String version = "0.8.3";
+	public static final String version = "0.8.4";
 	
 	/**
 	 * Version status: "alpha", "beta", or "" for a stable release
@@ -27,11 +27,59 @@ public class VersionInfo {
 	/**
 	 *  Application settings (XML) file version
 	 */
-	public static final int applicationSettingsVersion = 5;
+	public static final int applicationSettingsVersion = 6;
+
+    /**
+     *  Application updater settings (XML) file version
+     */
+    public static final int applicationUpdaterSettingsVersion = 1;
 
 	/**
 	 *  User settings (XML) file version
 	 */
 	public static final int userSettingsVersion = 1;
+
+	/**
+	 * Convert the version from string to integer
+	 * @param version string like "0.8.4"
+	 * @return version integer like 
+	 */
+	public static int versionStringToInteger(String version) {
+		
+		// Extract the various parts
+		String[] parts = version.split("\\.");
+		if (parts.length < 2 || parts.length > 3) {
+			return -1;
+		}
+		int major = Integer.parseInt(parts[0]);
+		int minor = Integer.parseInt(parts[1]);
+		int patch = 0;
+		if (parts.length == 3) {
+			patch = Integer.parseInt(parts[2]);
+		}
+		
+		// Return the integer representation of the version string
+		int versionInt = 1000000 * major + 10000 * minor + 100 * patch;
+		return versionInt;
+	}
+	
+	/**
+	 * Convert the version from integer to string 
+	 * @param version string like 
+	 * @return version integer like "0.8.4"
+	 */
+	public static String versionIntegerToString(int version) {
+		
+		// Process the integer version
+        int major = version / 1000000;
+        version = version - major * 1000000;
+        int minor = version / 10000;
+        version = version - minor * 10000;
+        int patch = version / 100;
+
+        // Return the string representation of the version integer 
+        String versionString = "" + major + "." + minor + "." + patch;
+        return versionString;
+	}
 
 }

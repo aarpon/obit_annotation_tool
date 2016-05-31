@@ -1,6 +1,9 @@
 package ch.ethz.scu.obit.common.utils;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 
 /**
  * @author Aaron Ponti
@@ -94,5 +97,19 @@ public class QueryOS {
 		
 		return userDir;
 	}
-	
+
+	/**
+	 * Retrieve the host name
+	 * @return Host name.
+	 * @throws UnknownHostException If retrieving the host name was not possible.
+	 */
+	static public String getHostName() throws UnknownHostException {
+
+		// Trying retrieving the host name. If it is not possible,
+		// an UnknownHostException exception is launched.
+	    InetAddress addr;
+	    addr = InetAddress.getLocalHost();
+	    return addr.getHostName();
+	}
+
 }

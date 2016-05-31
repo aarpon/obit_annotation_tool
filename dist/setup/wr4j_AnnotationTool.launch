@@ -22,7 +22,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="obit_annotation_tool"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms512m -Xmx2048m -XX:MaxPermSize=512m"/>
 <stringAttribute key="process.priority" value=""/>
-<stringAttribute key="single.instance" value=""/>
+<stringAttribute key="single.instance" value="true"/>
 <booleanAttribute key="splash.autohide" value="true"/>
 <stringAttribute key="splash.image" value=""/>
 </launchConfiguration>

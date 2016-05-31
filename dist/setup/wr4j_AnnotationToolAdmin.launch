@@ -21,7 +21,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.ethz.scu.obit.atadmin.AnnotationToolAdmin"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="obit_annotation_tool"/>
 <stringAttribute key="process.priority" value=""/>
-<stringAttribute key="single.instance" value=""/>
+<stringAttribute key="single.instance" value="true"/>
 <booleanAttribute key="splash.autohide" value="true"/>
 <stringAttribute key="splash.image" value=""/>
 </launchConfiguration>

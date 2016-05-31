@@ -382,8 +382,9 @@ public class AppSettingsManager {
 		// Check that the file version is current.
 		if (fileVersion != VersionInfo.applicationSettingsVersion) {
 			
-			 // The change between version 4 and 5 is cosmetic, and we can re-save the settings.
-			if (VersionInfo.applicationSettingsVersion == 5 && fileVersion == 4) {
+			// The change between version 4, 5 and 6 is cosmetic, and we can 
+			// just re-save the settings.
+			if (fileVersion == 4 || fileVersion == 5) {
 				
 				// Save a new file at version.
 				save();
@@ -544,7 +545,7 @@ public class AppSettingsManager {
 	public String getAcqStationDescription(String name) {
 		return AppSettings.getAcqStationDescription(name);
 	}
-	
+
 	/**
 	 * Check whether the properties file already exists
 	 * @return 	true if the properties file already exists, false
