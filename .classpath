@@ -6,6 +6,7 @@
 	<classpathentry kind="src" path="AnnotationToolBDFACSDIVAFCS"/>
 	<classpathentry kind="src" path="AnnotationToolMicroscopy"/>
 	<classpathentry kind="src" output="test_bin" path="AnnotationToolUnitTest"/>
+	<classpathentry kind="src" path="AnnotationToolUpdater"/>
 	<classpathentry kind="lib" path="lib/dss_client/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cisd-args4j.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cisd-base.jar"/>
