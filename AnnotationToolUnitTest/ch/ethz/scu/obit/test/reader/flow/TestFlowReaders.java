@@ -63,12 +63,10 @@ public class TestFlowReaders {
             String name = exp.getName();
             Map<String, String> attributes = exp.getAttributes();
             String code = exp.getCode();
-            Map<String, String> openBISAttributes = exp.getOpenBISAttributes();
 
             // Check
             assertEquals(name, "Eva Spore Counting 190612");
             assertEquals(code, "Eva_Spore_Counting_190612");
-            assertEquals(openBISAttributes.size(), 0);
             assertEquals(attributes.get("acq_hardware"), "BD LSR Fortessa");
             assertEquals(attributes.get("acq_software"), "BD FACSDiva Software Version 6.1.3");
             assertEquals(attributes.get("owner_name"), "SingleCellUnit");
@@ -110,6 +108,27 @@ public class TestFlowReaders {
                     String traySpecimenCode = traySpecimen.getCode();
                     assertEquals(traySpecimenName, "Specimen_001");
                     assertEquals(traySpecimenCode, "Specimen_001");
+
+                    // Get the wells
+                    Map<String, Tube> wellList = traySpecimen.tubes;
+                    Set<String> wellKeys = wellList.keySet();
+                    assertEquals(wellKeys.size(), 1);
+
+                    // Iterate over the only well
+                    for (String wellKey: wellKeys) {
+
+                        // Get the tray
+                        Tube well = wellList.get(wellKey);
+
+                        // Get some attributes
+                        String wellName = well.getName();
+                        String wellCode = well.getCode();
+
+                        // Test the attributes
+                        assertEquals(wellName, "A01");
+                        assertEquals(wellCode, "A01");
+
+                    }
 
                 }
 
@@ -161,14 +180,115 @@ public class TestFlowReaders {
     }
 
     /**
+     * Test reading a FACS Sortware 1 experiment.
+     */
+    @Test
+    public void testInflux1ExperimentScan() {
+
+        // "User" folder
+        String userFolder = dataFolder + "/influx/1";
+
+        // Initialize the processor
+        BDFACSDIVAFCSProcessor processor = new BDFACSDIVAFCSProcessor(userFolder);
+
+        // Scan the project
+        boolean success = processor.parse();
+
+        // Check that the scanning was successful
+        assertEquals(success, true);
+
+        // Extract the one experiment
+        Map<String, Experiment> expList = processor.folderDescriptor.experiments;
+        Set<String> keys = expList.keySet();
+        assertEquals(keys.size(), 1);
+
+        // Iterate over the only experiment
+        for (String key: keys) {
+
+            // Get the Experiment
+            Experiment exp = expList.get(key);
+
+            // Now get some experiment properties
+            String name = exp.getName();
+            Map<String, String> attributes = exp.getAttributes();
+            String code = exp.getCode();
+
+            // Check
+            assertEquals(name, "sort_20160427");
+            assertEquals(code, "sort_20160427");
+            assertEquals(attributes.get("acq_hardware"), "BD Influx");
+            assertEquals(attributes.get("acq_software"), "BD FACS™ Sortware 1.2.0.142");
+            assertEquals(attributes.get("owner_name"), "");
+
+            // Get the specimens
+            Map<String, Specimen> specimenList = exp.specimens;
+
+            Set<String> specimenKeys = specimenList.keySet();
+            assertEquals(specimenKeys.size(), 1);
+
+            // Iterate over the only specimen
+            for (String specimenKey: specimenKeys) {
+
+                // Get the specimen
+                Specimen specimen = specimenList.get(specimenKey);
+
+                String specimenName = specimen.getName();
+                String specimenCode = specimen.getCode();
+                assertEquals(specimenName, "20160427");
+                assertEquals(specimenCode, "20160427");
+
+                // Get the tubes
+                Map<String, Tube> tubeList = specimen.tubes;
+                Set<String> tubeKeys = tubeList.keySet();
+                assertEquals(tubeKeys.size(), 2);
+
+                // Iterate over the only tube
+                for (String tubeKey: tubeKeys) {
+
+                    // Get the tray specimen
+                    Tube tube = tubeList.get(tubeKey);
+
+                    String tubeName = tube.getName();
+                    String tubeCode = tube.getCode();
+                    
+                    boolean tubeNameMatch = tubeName.equals("Kash_J63") ||
+                            tubeName.equals("Kash_J64");
+
+                    boolean tubeCodeMatch = tubeCode.equals("Kash_J63") ||
+                            tubeCode.equals("Kash_J64");
+                    
+                    assertEquals(tubeNameMatch, true);
+                    assertEquals(tubeCodeMatch, true);
+
+                    FCSFile fcsFile = tube.fcsFile;
+                    String fcsFileName = fcsFile.getName();
+                    String fscFileRelPath = fcsFile.getRelativePath();
+
+                    boolean fileNameMatch = fcsFileName.equals("Kash_J63.fcs") ||
+                            fcsFileName.equals("Kash_J64.fcs");
+
+                    boolean filePathMatch = 
+                            fscFileRelPath.equals("1\\sort_20160427\\Kash_J63.fcs") ||
+                            fscFileRelPath.equals("1\\sort_20160427\\Kash_J64.fcs");
+
+                    assertEquals(fileNameMatch, true);
+                    assertEquals(filePathMatch, true);
+
+                }
+            }
+        }
+
+    }
+    
+    /**
      * Test reading a single FCS 3.0 file from Influx (DIVA Sortware 1.2).
      */
     @Test
-    public void testSingleInfluxFileRead() {
+    public void testSingleInflux1FileRead() {
 
         // Test an FCS 3.1 file from FACSAriaIII (DIVA 8.0.1)
         File fcsFile = new File(dataFolder + 
-                "/influx/1/20160427/Kash_J63.fcs");
+                "/influx/1/sort_20160427/Kash_J63.fcs");
 
         // Open the file (with data scan)
         FCSReader reader = new FCSReader(fcsFile, true);
@@ -189,18 +309,18 @@ public class TestFlowReaders {
 
         // Warning: the APPLICATION key is called CREATOR in FCS files coming
         // from Aria or Fortessa! Moreover, the string says "soRtware"...
-        assertEquals(reader.getCustomKeyword("APPLICATION"), "BD FACS™ Sortware 1.2.0.142");
+        assertEquals(reader.getCustomKeyword("APPLICATION"),
+                "BD FACS™ Sortware 1.2.0.142");
 
         // Warning: the $FIL key contains the ABSOLUTE path to the file!
         // In the case of Aria and Fortessa, only the file name is stored!
-        //assertEquals(reader.getStandardKeyword("$FIL"), "Kash_J63.fcs");
+        String fileName = new File(reader.getStandardKeyword("$FIL")).getName();
+        assertEquals(fileName, "Kash_J63.fcs");
 
         // Warning there is no EXPERIMENT NAME key!
-        //assertEquals(reader.getCustomKeyword("EXPERIMENT NAME"), "150115KK YVI - Exp1");
-
+        
         // Warning there is no TUBE NAME key!
-        // assertEquals(reader.getCustomKeyword("TUBE NAME"), "test sort");
-
+        
         // Test data
         assertEquals(reader.numEvents(), 50000);
         assertEquals(reader.numParameters(), 27);
