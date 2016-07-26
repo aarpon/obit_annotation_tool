@@ -41,24 +41,24 @@ public class TestFlowReaders {
 
         // Initialize the processor
         BDFACSDIVAFCSProcessor processor = new BDFACSDIVAFCSProcessor(userFolder);
-        
+
         // Scan the project
         boolean success = processor.parse();
-        
+
         // Check that the scanning was successful
         assertEquals(success, true);
-        
+
         // Extract the one experiment
         Map<String, Experiment> expList = processor.folderDescriptor.experiments;
         Set<String> keys = expList.keySet();
         assertEquals(keys.size(), 1);
-        
+
         // Iterate over the only experiment
         for (String key: keys) {
-         
+
             // Get the Experiment
             Experiment exp = expList.get(key);
-            
+
             // Now get some experiment properties
             String name = exp.getName();
             Map<String, String> attributes = exp.getAttributes();
@@ -72,28 +72,28 @@ public class TestFlowReaders {
             assertEquals(attributes.get("acq_hardware"), "BD LSR Fortessa");
             assertEquals(attributes.get("acq_software"), "BD FACSDiva Software Version 6.1.3");
             assertEquals(attributes.get("owner_name"), "SingleCellUnit");
-            
+
             // Get the trays (plates)
             Map<String, Tray> trayList = exp.trays;
             Set<String> trayKeys = trayList.keySet();
             assertEquals(trayKeys.size(), 1);
-            
+
             // Iterate over the only tray
             for (String trayKey: trayKeys) {
-                
+
                 // Get the tray
                 Tray tray = trayList.get(trayKey);
-                
+
                 // Get some attributes
                 String trayName = tray.getName();
                 String trayCode = tray.getCode();
                 String trayGeometry = tray.geometry;
-                
+
                 // Test the attributes
                 assertEquals(trayName, "96 Well - beads 10 ul");
                 assertEquals(trayCode, "96_Well_-_beads_10_ul");
                 assertEquals(trayGeometry, "96_WELLS_8X12");
-                
+
                 // Get the specimens
                 Map<String, Specimen> traySpecimenList = tray.specimens;
 
@@ -102,10 +102,10 @@ public class TestFlowReaders {
 
                 // Iterate over the only tray specimen
                 for (String traySpecimenKey: traySpecimenKeys) {
-                    
+
                     // Get the tray specimen
                     Specimen traySpecimen = traySpecimenList.get(traySpecimenKey);
-                    
+
                     String traySpecimenName = traySpecimen.getName();
                     String traySpecimenCode = traySpecimen.getCode();
                     assertEquals(traySpecimenName, "Specimen_001");
@@ -114,40 +114,40 @@ public class TestFlowReaders {
                 }
 
             }
-            
+
             // Get the specimens
             Map<String, Specimen> specimenList = exp.specimens;
-            
+
             Set<String> specimenKeys = specimenList.keySet();
             assertEquals(specimenKeys.size(), 1);
-            
+
             // Iterate over the only specimen
             for (String specimenKey: specimenKeys) {
-                
+
                 // Get the specimen
                 Specimen specimen = specimenList.get(specimenKey);
-                
+
                 String specimenName = specimen.getName();
                 String specimenCode = specimen.getCode();
                 assertEquals(specimenName, "Specimen_001");
                 assertEquals(specimenCode, "Specimen_001");
-                
+
                 // Get the tubes
                 Map<String, Tube> tubeList = specimen.tubes;
                 Set<String> tubeKeys = tubeList.keySet();
                 assertEquals(tubeKeys.size(), 1);
-                
+
                 // Iterate over the only tube
                 for (String tubeKey: tubeKeys) {
-                    
+
                     // Get the tray specimen
                     Tube tube = tubeList.get(tubeKey);
-                    
+
                     String tubeName = tube.getName();
                     String tubeCode = tube.getCode();
                     assertEquals(tubeName, "Tube_001");
                     assertEquals(tubeCode, "Tube_001");
-                    
+
                     FCSFile fcsFile = tube.fcsFile;
                     String fcsFileName = fcsFile.getName();
                     String fscFileRelPath = fcsFile.getRelativePath();
@@ -157,9 +157,55 @@ public class TestFlowReaders {
                 }
             }
         }
-        
+
     }
-    
+
+    /**
+     * Test reading a single FCS 3.0 file from Influx (DIVA Sortware 1.2).
+     */
+    @Test
+    public void testSingleInfluxFileRead() {
+
+        // Test an FCS 3.1 file from FACSAriaIII (DIVA 8.0.1)
+        File fcsFile = new File(dataFolder + 
+                "/influx/1/20160427/Kash_J63.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+
+        // Test several keywords
+        assertEquals(reader.getFCSVersion(), "FCS3.0");
+        assertEquals(reader.getStandardKeyword("$CYT"), "BD Influx System (USB)");
+        assertEquals(reader.getStandardKeyword("$DATATYPE"), "I");
+
+        // Warning: the APPLICATION key is called CREATOR in FCS files coming
+        // from Aria or Fortessa! Moreover, the string says "soRtware"...
+        assertEquals(reader.getCustomKeyword("APPLICATION"), "BD FACS™ Sortware 1.2.0.142");
+
+        // Warning: the $FIL key contains the ABSOLUTE path to the file!
+        // In the case of Aria and Fortessa, only the file name is stored!
+        //assertEquals(reader.getStandardKeyword("$FIL"), "Kash_J63.fcs");
+
+        // Warning there is no EXPERIMENT NAME key!
+        //assertEquals(reader.getCustomKeyword("EXPERIMENT NAME"), "150115KK YVI - Exp1");
+
+        // Warning there is no TUBE NAME key!
+        // assertEquals(reader.getCustomKeyword("TUBE NAME"), "test sort");
+
+        // Test data
+        assertEquals(reader.numEvents(), 50000);
+        assertEquals(reader.numParameters(), 27);
+    }
+
     /**
      * Test reading a single FCS 3.1 file from FACSAriaIII (DIVA 8.0.1).
      */
@@ -172,7 +218,7 @@ public class TestFlowReaders {
 
         // Open the file (with data scan)
         FCSReader reader = new FCSReader(fcsFile, true);
-        
+
         // Scan the file
         boolean success;
         try {
@@ -181,7 +227,7 @@ public class TestFlowReaders {
             success = false;
         }
         assertEquals(success, true);
-        
+
         // Test several keywords
         assertEquals(reader.getFCSVersion(), "FCS3.1");
         assertEquals(reader.getStandardKeyword("$CYT"), "FACSAriaIII");
@@ -190,7 +236,7 @@ public class TestFlowReaders {
         assertEquals(reader.getCustomKeyword("CREATOR"), "BD FACSDiva Software Version 8.0.1");
         assertEquals(reader.getCustomKeyword("EXPERIMENT NAME"), "150115KK YVI - Exp1");
         assertEquals(reader.getCustomKeyword("TUBE NAME"), "test sort");
-        
+
         // Test data
         assertEquals(reader.numEvents(), 87);
         assertEquals(reader.numParameters(), 14);
@@ -200,12 +246,12 @@ public class TestFlowReaders {
      * Constructor.
      */
     public TestFlowReaders() {
-       
+
         // Store data folder
         dataFolder = this.getClass().getResource("data").getFile();
 
     }
-    
+
     /** 
      * Entry point
      * @param args Ignored.
