@@ -21,7 +21,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import loci.common.DebugTools;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.plugins.util.ImageProcessorReader;
@@ -37,7 +36,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
 	private File folder;
-	private final String REGEX =
+	private final static String REGEX =
 			"^(.*?)" +                    // Series basename: group 1
 			"((_Series|_s)(\\d.*?))?" +   // Series number (optional): group 4
 		    "(_t(\\d.*?))?" +             // Time index (optional): group 6
@@ -45,7 +44,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		    "_ch(\\d.*?)" +               // Channel number: group 8
 		    "\\.tif{1,2}$";               // File extension
 
-	private Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
+	private static Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
 
 	private File metadataFolder; 
 	private String basename = "";
@@ -70,8 +69,47 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 	 */
 	static public boolean canRead(File folder) {
 
-		// TODO: Implement!
-		return true; 
+	    boolean expectedFiles = false;
+	    boolean expectedMetadataFolder = false;
+
+	    // Get a list of all files
+        File[] allFiles = folder.listFiles();
+
+        for (File file : allFiles) {
+
+            // Get the file name
+            String name = file.getName();
+
+            // Check files
+            if (!expectedFiles) {
+
+                // The regex test is run only once.
+                if (file.isFile()) {
+
+                    Matcher m = p.matcher(name);
+                    if (m.find()) {
+                        expectedFiles = true;
+                        continue;
+
+                    }
+                }
+            }
+
+            // Do we have the 'MetaData' folder?
+            if (!expectedMetadataFolder && file.isDirectory()) {
+                if (name.equalsIgnoreCase("MetaData")) {
+
+                    expectedMetadataFolder = true;
+                    continue;
+                }
+            }
+
+            if (expectedFiles && expectedMetadataFolder) {
+                return true;
+            }
+        }
+
+		return (expectedFiles & expectedMetadataFolder); 
 
 	}
 
@@ -105,7 +143,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 			// Get the file name
 			String name = file.getName();
 
-			// Do we have the 'MetaData' fodler?
+			// Do we have the 'MetaData' folder?
 			if (file.isDirectory()) {
 				if (name.equalsIgnoreCase("MetaData")) {
 

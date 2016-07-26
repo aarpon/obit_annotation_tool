@@ -169,10 +169,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 		// Declare an AbstractCompositeMicroscopyReader 
 		AbstractCompositeMicroscopyReader reader = null;
-		
+
 		// Keep track whether we are processing a composite microscopy dataset
 		boolean isCompositeDataset = false;
-		
+
 		// Update the folder level
 		folderLevel++;
 
@@ -199,13 +199,13 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 			if (file.isDirectory()) {
 
 				if (folderLevel < DATASET_LEVEL) {
-					
+
 					// Recurse into the subfolder
 					recursiveDir(file);
 
 				// Move on to the next file/folder
 				continue;
-					
+
 				} else {
 
 					// Get a reader to process the folder as a composite
@@ -214,13 +214,13 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 					if (reader == null) {
 						validator.isValid = false;
 						validator.invalidFilesOrFolders.put(file,
-								"No reader for folder " + file);
+								"Unsupported composite file format in folder " + file);
 						continue;
 					}
 
 					// Now process the folder
 					try {
-						
+
 						// Parse the folder
 						if (!reader.parse()) {
 							validator.isValid = false;
@@ -228,7 +228,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 									reader.getErrorMessage());
 							continue;
 						}
-						
+
 						// Label the folder as composite
 						isCompositeDataset = true;
 
