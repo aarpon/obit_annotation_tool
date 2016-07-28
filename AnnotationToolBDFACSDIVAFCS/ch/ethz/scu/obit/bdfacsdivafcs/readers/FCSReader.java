@@ -35,7 +35,8 @@ public final class FCSReader extends AbstractReader {
 	private char DELIMITER;
 	private boolean isFileParsed = false;
 	private boolean isDataLoaded = false;
-
+	private int[] bytesPerParameter;
+	
 	/* Public instance variables */
 
 	/**
@@ -357,7 +358,7 @@ public final class FCSReader extends AbstractReader {
 	 *                throughout the total number of rows, false if the first 
 	 *                nValues rows must simply be returned. 
 	 * @return array of measurements.
-	 * @throws IOException If the datatype is not recognized.
+	 * @throws IOException If something unexpected with the datatype is found. 
 	 */
 	public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
 			boolean sampled) throws IOException {
@@ -367,10 +368,18 @@ public final class FCSReader extends AbstractReader {
             return new double[0];
         }
 
+        // Datatype
+        String datatype = datatype();
+
+        // If the datatype is INTEGER, we currently only support 16 bit
+        if (datatype == "I" && bytesPerParameter[columnIndex] != 2) {
+            throw new IOException("Integer data type is expected to be"
+                    + "unsigned 16 bit!");
+        }
+
 	    // Some constants
 		int nParams = numParameters();
 		int nEvents = numEvents();
-		String datatype = datatype();
 
 		int step;
 		// If all values must be read, the step is 1.
@@ -391,32 +400,21 @@ public final class FCSReader extends AbstractReader {
 		// Pre-calculate the positions to extract
 		int[] positions = new int[nValues];
 
-		// The number of bytes per value depends on the datatype
-		int unitSize;
-        if (datatype.equals("F")) {
-            unitSize = 4;
-        } else if (datatype.equals("I")) {
-            unitSize = 2;
-        } else if (datatype.equals("D")) {
-            unitSize = 8;
-        } else if (datatype.equals("A")) {
-            unitSize = 1;
-        } else {
-            throw new IOException("Unknown data type!");
-        }
-
         int c = 0; // Global measurement counter
+        int cBytes = 0; // Global measurement counter in bytes
         int n = 0; // Row counter
         int t = 0; // Accepted value counter
         while (t < nValues) {
             // If we are at the right column, we store it
             if (c % nParams == columnIndex) {
                 if (n % step == 0) {
-                    positions[t] = c * unitSize;
+                    // We use the correct data width per column
+                    positions[t] = cBytes;
                     t++;
                 }
                 n++;
             }
+            cBytes += bytesPerParameter[c % nParams];
             c++;
         }
 
@@ -815,6 +813,13 @@ public final class FCSReader extends AbstractReader {
 			return false;
 		}
 
+		// We store the number of bytes that are used to store each of the
+		// parameter values
+		bytesPerParameter = new int[numParameters];
+
+		// Keep track of the datatype
+		String datatype = datatype();
+
 		// Now go over the parameters and extract all info.
 		// Mind that parameter count starts at 1.
 		String key = "";
@@ -848,9 +853,22 @@ public final class FCSReader extends AbstractReader {
 			key = "P" + i + "B";
 			String bits = TEXTMapStandard.get("$" + key);
 			if (bits == null) {
-				bits = "NaN";
+			    if (datatype == "D") {
+			        bits = "64";  
+			    } else if (datatype == "F") {
+                    bits = "32";  
+                } else if (datatype == "I") {
+                    bits = "16";  
+                } else if (datatype == "A") {
+                    bits = "8";
+                } else {
+                    bits = "32";
+                }
 			}
 			parametersAttr.put(key, bits);
+
+			// Store the value for later use
+			bytesPerParameter[i - 1] = Integer.parseInt(bits) / 8;
 
 			// Linear or logarithmic amplifiers?
 			float log = 0.0f;
