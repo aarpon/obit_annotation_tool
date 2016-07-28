@@ -20,16 +20,25 @@ import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
 import ch.ethz.scu.obit.processors.data.validator.GenericValidator;
 
 /**
- * BDFACSDIVAXMLProcessor parses folder structures created by the 
- * "BD BioSciences FACSDiva" software when "exporting as FCS".
- * 
- * 
- * Please notice that DIVA FCS files generated in this mode are different
- * from files accompanying the XML file generated when exporting as an 
- * experiment.
- * 
- * Datasets exported as XML are flagged as invalid and are not processed.
- * 
+ * BDFACSDIVAFCSProcessor parses folder structures created by the following
+ * software and hardware combination:
+ *
+ * 1. BD FACSDiva software (6.1, 7.0, 8.0) on BD LSRFortessa and BD FACSAriaIII
+ *
+ * 2. BD FACS™ Sortware (1.2) on BD Influx Cell Sorter
+ *
+ * Please notice that when exporting data from the FACSDiva software, there are
+ * two options:
+ *
+ * 1) export as FCS files (supported)
+ * 2) export as experiment (not supported)
+ *
+ * When exporting as experiment, the experiment metadata is written to an
+ * additional XML file and not correctly stored in the FCS files. These FCS
+ * files can not correctly be processed by flow analysis software like FlowJo.
+ * For this reason, data exported as experiment from FACSDiva (i.e. with the
+ * accompanying XML file) are flagged as invalid and are not processed.
+ *
  * @author Aaron Ponti
  */
 public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
@@ -44,19 +53,22 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
     static
     {
     	knownHardwareStrings = new HashMap<String, String>();
-    	
+
     	// BD LSR Fortessa
     	knownHardwareStrings.put("LSRII", "BD LSR Fortessa");
     	knownHardwareStrings.put("BD LSR Fortessa SORP (LSRII)", "BD LSR Fortessa");
     	knownHardwareStrings.put("LSRFortessa", "BD LSR Fortessa");
-    	
+
     	// FD FACSAria III
     	knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
+
+    	// BD Influx
+    	knownHardwareStrings.put("BD Influx System (USB)", "BD Influx");
     }
-    
+
 	/**
 	 *  A folder descriptor.
-	 */  
+	 */
 	public UserFolder folderDescriptor = null;
 
 	/**
@@ -111,11 +123,11 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			System.err.println(errorMessage);
 			return false;
 		}
-		
+
 		// Success
 		this.errorMessage = "";
 		return true;
-		
+
 	}
 
 	/**
@@ -133,42 +145,42 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	@Override
 	public String getType() {
 		return "BDFACSDIVAFCS";
-	}	
-	
+	}
+
 	/**
 	 * Descriptor that represents a the user top folder. 
 	 * @author Aaron Ponti
 	 */
 	public class UserFolder extends RootDescriptor {
-		
+
 		/**
 		 * Hash map of experiments.
 		 */ 
 		public Map<String, Experiment> experiments = 
 				new LinkedHashMap<String, Experiment>();
-		
+
 		/**
 		 * Constructor
 		 * @param fullFolder Full path to the global users folder path.
 		 * @param userRootDataPath Full path to current user folder.
 		 */
 		public UserFolder(File fullFolder, File userRootDataPath) {
-			
+
 			// Invoke parent constructor
 			super(fullFolder, userRootDataPath);
-			
+
 			// Set the descriptor name
 			this.setName(fullFolder.getName());
 
 		}
-		
+
 		@Override
 		public String getType() {
 			return "Folder";
 		}
 
 	}
-	
+
 	/**
 	 * Descriptor representing an experiment obtained from the FCS file.
 	 * @author Aaron Ponti
@@ -191,12 +203,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
          *  Experiment description
          */
 		public String description = "";
-		
+
 		/**
 		 *  Experiment tags (comma-separated list)
 		 */
 		public String tags = "";
-		
+
 		/**
 		 * ArrayList of Tray's
 		 */
@@ -208,7 +220,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		public Map<String, Specimen> specimens = 
 				new LinkedHashMap<String, Specimen>();
-		
+
 		/**
 		 * Constructor
 		 * @param fullPath Full path to the experiment folder.
@@ -218,7 +230,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 			super(fullPath, userRootDataPath);
 			this.setName(fullPath.getName());
-			
+
 			// Set the attribute relative path. Since this will be 
 			// used by the openBIS dropboxes running on a Unix machine, 
 			// we make sure to use forward slashes for path separators 
@@ -238,7 +250,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 			super(fullPath, userRootDataPath);
 			this.setName(name);
-			
+
 			// Set the attribute relative path. Since this will be 
 			// used by the openBIS dropboxes running on a Unix machine, 
 			// we make sure to use forward slashes for path separators 
@@ -247,7 +259,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					this.relativePath.replace("\\", "/"));
 
 		}
-		
+
 		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
@@ -256,7 +268,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String getType() {
 			return "Experiment";
 		}
-		
+
 	} 
 
 
@@ -312,7 +324,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 
 	}
-	
+
 	/**
 	 * Descriptor representing all parameters associated to an FCS File.
 	 * An FCSFileParameterList is always a child of a FCS File.
@@ -355,32 +367,32 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 
 	}
-		
+
 	/**
 	 * Descriptor representing a specimen obtained from the FCS file.
 	 * A Specimen can be a child of a Tray or directly of an Experiment.
 	 * @author Aaron Ponti
 	 */
 	public class Specimen extends SampleDescriptor {
-	
+
 		/* Public instance variables */
-	
+
 		/**
 		 * ArrayList of Tube's
 		 */			
 		public Map<String, Tube> tubes =
 				new LinkedHashMap<String, Tube>();
-	
+
 		/**
 		 * Constructor.
 		 * @param name Name of the specimen
 		 */
 		public Specimen(String name) {
-	
+
 			this.setName(name);
-	
+
 		}
-	
+
 		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplidied class name.
@@ -403,30 +415,30 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		public final List<String> supportedTrayGeometries =
 				Arrays.asList("96_WELLS_8X12", "384_WELLS_16x24");
-	
+
 		/**
 		 * ArrayList of Specimen's
 		 */
 		public Map<String, Specimen> specimens = 
 				new LinkedHashMap<String, Specimen>();
-	
+
 		/**
 		 * Geometry associated to the plate
 		 */
 		public String geometry;
-		
+
 		/**
 		 * Constructor
 		 * @param name name of the Tray.
 		 */
 		public Tray(String name) {
-	
+
 			this.setName(name);
 
 			// Initialize geometry
 			this.geometry = this.supportedTrayGeometries.get(0);
 		}
-	
+
 		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
@@ -445,12 +457,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 */
 	public class Tube extends SampleDescriptor {
-		
+
 		/**
 		 * An FCS file processor.
 		 */
 		public FCSFile fcsFile;
-		
+
 		/**
 		 * Constructor.
 		 * @param name Name of the Tube.
@@ -460,14 +472,14 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		public Tube(String name, File fcsFullFileName) 
 				throws IOException {
-	
+
 			this.setName(name);
 
 			// Associate the FCS file to the Tube
 			fcsFile = new FCSFile(fcsFullFileName);
 
 		}
-	
+
 		/**
 		 * Return a String representation of the extracted Tube node.
 		 * @return String representation of the Tube node.
@@ -476,7 +488,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		public String toString() {
 			return getName();
 		}
-	
+
 		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
@@ -495,7 +507,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @author Aaron Ponti
 	 */
 	public class Well extends Tube {
-		
+
 		/**
 		 * Constructor.
 		 * @param name Name of the Well.
@@ -505,12 +517,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		 */
 		public Well(String name, File fcsFullFileName) 
 				throws IOException {
-			
+
 			// Call base constructor
 			super(name, fcsFullFileName);
 
 		}
-	
+
 		/**
 		 * Return a simplified class name to use in XML.
 		 * @return simplified class name.
@@ -528,11 +540,11 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @throws IOException Thrown if a FCS file could not be processed
 	 */
 	private void recursiveDir(File dir) throws IOException {
-	
+
 		// To make things simple and robust, we make sure that the first
 		// thing we process at any sub-folder level is an FCS file.
 		String [] files = getSimplySortedList(dir);
-		
+
 		// Empty subfolders are not accepted
 		if (files.length == 0 && !dir.equals(this.userFolder)) {
 			validator.isValid = false;
@@ -543,15 +555,15 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		// Go over the files and folders
 		for (String f : files) {
-			
+
 			File file = new File(dir + File.separator + f);
-	
+
 			// Is it a directory? Recurse into it
 			if (file.isDirectory()) {
-				
+
 				// Recurse into the subfolder
 				recursiveDir(file);
-	
+
 				// Move on to the next file
 				continue;
 			}
@@ -563,7 +575,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 						file, "Files must be in sub-folders.");
 				return;
 			}
-			
+
 			// Delete some known garbage
 			if (deleteIfKnownUselessFile(file)) {
 				continue;
@@ -610,8 +622,8 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				}
 
 				continue;
-			}			
-			
+			}
+
 			// Check whether we find a data_structure.ois file. This 
 			// means that the whole folder has apparently been annotated
 			// already, but for some unknown reason it has not been
@@ -642,7 +654,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 						file, "Unsupported file format");
 				continue;
 			}
-	
+
 			// Is it an FCS file? Scan it and extract the information
 			FCSReader processor = new FCSReader(file, false);
 			if (!processor.parse()) {
@@ -674,13 +686,13 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				expDesc.addAttributes(getExperimentAttributes(processor));
 				folderDescriptor.experiments.put(experimentPath, expDesc);
 			}
-            
+
             // Keep track of current experiment
             currentExperiment = expDesc;
 
 			// Is the container a Tray or Specimen?
 			if (identifyContainerType(processor).equals("TRAY")) {
-				
+
 				// Create a new TrayDescriptor or reuse an existing one
 				Tray trayDesc;
 				String trayName = getTrayName(processor);
@@ -695,7 +707,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the experiment descriptor
 					expDesc.trays.put(trayKey, trayDesc);
 				}
-				
+
 				// Create a new Specimen or reuse an existing one
 				Specimen specDesc;
 				String specName = getSpecimenName(processor);
@@ -710,7 +722,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the tray descriptor
 					trayDesc.specimens.put(specKey, specDesc);
 				}
-	
+
 				// Create a new Well descriptor or reuse an existing one
 				Well wellDesc;
 				String wellName = getTubeOrWellName(processor);
@@ -726,11 +738,11 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 									processor.numParameters(),
 									processor.parametersAttr);
 					// Store it in the specimen descriptor
-					specDesc.tubes.put(wellKey, wellDesc);				
+					specDesc.tubes.put(wellKey, wellDesc);
 				}
-	
+
 			} else {
-	
+
 				// Create a new Specimen or reuse an existing one
 				Specimen specDesc;
 				String specName = getSpecimenName(processor);
@@ -738,14 +750,13 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 				if (expDesc.specimens.containsKey(specKey)) {
 					specDesc = expDesc.specimens.get(specKey);
 				} else {
-					specDesc = 
-							new Specimen(specName);	
+					specDesc = new Specimen(specName);	
 					// Store attributes
 					specDesc.addAttributes(getSpecimenAttributes(processor));
 					// Store it in the experiment descriptor
 					expDesc.specimens.put(specKey, specDesc);
 				}
-	
+
 				// Create a new Tube descriptor or reuse an existing one
 				Tube tubeDesc;
 				String tubeName = getTubeOrWellName(processor);
@@ -763,9 +774,9 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 					// Store it in the specimen descriptor
 					specDesc.tubes.put(tubeKey, tubeDesc);
 				}
-	
+
 			}
-	
+
 		}
 
 	}
@@ -777,7 +788,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * @return String[] moderately sorted files.
 	 */
 	private String[] getSimplySortedList(File dir) {
-		
+
 		// Go over the list, the first FCS file we find we put it in front of
 		// the list and return.
 		String [] files = dir.list();
@@ -809,10 +820,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	/**
 	 * Return the tube name stored in the FCS file
 	 * @param processor with already scanned file
-	 * @return name of the tube
+	 * @return name of the tube or well
 	 */
 	private String getTubeOrWellName(FCSReader processor) {
-		
+
+	    // FACS DIVA software
+	    //
 		// We discriminate here since there is a formatting
 		// difference in the value stored in the "TUBE NAME"
 		// keyword (which is always found in the file, no 
@@ -820,11 +833,22 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		// Tray) and the one stored in the "WELL ID" (which 
 		// is found only in Trays). A "TUBE NAME" value like 
 		// A1 becomes a WELL ID like A01.
+	    //
+	    // FACS SORTWARE software
+	    //
+	    // The FACS SORTWARE software does not contain either WELL ID nor
+	    // TUBE NAME. We return the name of the file without path and 
+	    // without extension.
+
 		String name;
 		if (identifyContainerType(processor).equals("TRAY")) {
 			name = processor.getCustomKeyword("WELL ID");
+		} else if (identifyContainerType(processor).equals("SPECIMEN")) {
+		    name = processor.getCustomKeyword("TUBE NAME");
 		} else {
-			name = processor.getCustomKeyword("TUBE NAME");
+		    String fcsFileName = processor.getFile().getName(); 
+		    name = fcsFileName.substring(0,
+		            fcsFileName.toLowerCase().lastIndexOf(".fcs"));
 		}
 		return name;
 	}
@@ -853,10 +877,11 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		String experimentName = getExperimentName(processor);
 		String experimentPath = "";
+
 		while (fcsFilePath != null) {
-			
+
 			String expNameFromPath = fcsFilePath.getName();
-			
+
 			if (experimentName.equals(expNameFromPath)) {
 				try {
 					experimentPath = fcsFilePath.getCanonicalPath();
@@ -870,35 +895,57 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 			}
 
 		}
-		
+
 		return experimentPath;
 	}
-	
+
 	/**
-	 * Return the experiment name stored in the FCS file
+	 * Return the experiment name stored in the FCS file.
+	 *
+	 * If the FCS file does not contain an experiment name, the name of the 
+	 * folder containing the FCS file is returned as experiment name.
+	 * 
 	 * @param processor with already scanned file
 	 * @return name of the experiment
 	 */
 	private String getExperimentName(FCSReader processor) {
 		String experimentName = processor.getCustomKeyword("EXPERIMENT NAME");
 		if (experimentName.isEmpty()) {
-			experimentName = "UNKNOWN";
+		    // As experiment name, return the name of the containing folder
+		    File fcsFile = processor.getFile();
+		    experimentName = fcsFile.getParentFile().getName().toString();
 		}
 		return experimentName;
 	}
 
 	/**
 	 * Return the specimen name stored in the FCS file.
-	 * 
+	 *
 	 * Before you query for the specimen name, make sure to
 	 * correctly identifyContainerType().
+	 *
+	 * Some hardware does not specify a specimen name for the FCS file.
+	 * In this case (and only in this case!), as a used convention, we 
+	 * extract a date in the form 20160801 from the experiment name and
+	 * return it. If no date can be found, we return "UNKNOWN".
+	 * 
 	 * @param processor with already scanned file
 	 * @return name of the specimen
 	 */
 	private String getSpecimenName(FCSReader processor) {
 		String specimenName = processor.getStandardKeyword("$SRC");
 		if (specimenName.isEmpty()) {
-			specimenName = "UNKNOWN";
+
+		    // Extract date information from the experiment name if it
+		    // exists or return UNKNOWN
+		    String expName = getExperimentName(processor);
+		    Pattern p = Pattern.compile("(\\d{8})");
+		    Matcher m = p.matcher(expName);
+		    if (m.find()) {
+		      specimenName = m.group(1);
+		    } else {
+		        specimenName = "UNKNOWN";
+		    }
 		}
 		return specimenName;
 	}
@@ -918,16 +965,24 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 		}
 		return trayName;
 	}
-	
+
 	/**
-	 * Identifies the container type of the file (Specimen or Plate)
+	 * Identifies the container type of the file (Specimen or Plate or none).
+	 *
+	 * If the file comes from hardware that does not assign a container to an
+	 * FCS file (e.g. the BD Influx), the container type is set to "".
+	 *
 	 * @param processor FCSProcessor with already scanned file
 	 * @return one of "SPECIMEN" or "TRAY"
 	 */
 	private String identifyContainerType(FCSReader processor) {
 
 		if (processor.getCustomKeyword("PLATE NAME").isEmpty()) {
-			return "SPECIMEN";
+		    if (! processor.getStandardKeyword("$SRC").isEmpty()) {
+		        return "SPECIMEN";
+		    } else {
+		        return "";
+		    }
 		} else {
 			return "TRAY";
 		}
@@ -959,12 +1014,10 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 
 		// Software string
 		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
-		if (!acqSoftwareString.contains("BD FACSDiva Software")) {
-			validator.isValid = false;
-			validator.invalidFilesOrFolders.put(
-					processor.getFile(),
-					"Wrong software string: " + acqSoftwareString);
-		} else {
+		if (acqSoftwareString.isEmpty()) {
+		    acqSoftwareString = processor.getCustomKeyword("APPLICATION");
+		}
+		if (acqSoftwareString.contains("BD FACSDiva Software")) {
 			// Check major and minor version (we ignore the patch)
 			Pattern p = Pattern.compile(
 					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
@@ -998,14 +1051,52 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 							"Unknown software version.");
 				}
 			}
+		} else if (acqSoftwareString.contains("BD FACS™ Sortware")) {
+            // Check major and minor version (we ignore the patch)
+            Pattern p = Pattern.compile(
+                    "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,4})(\\.\\d{1,4})?");
+            Matcher m = p.matcher(acqSoftwareString);
+            if (!m.matches()) {
+                validator.isValid = false;
+                validator.invalidFilesOrFolders.put(
+                        processor.getFile(),
+                        "Unknown software version.");
+            } else {
+                int major;
+                int minor;
+                try {
+                    major = Integer.parseInt(m.group(2));
+                    minor = Integer.parseInt(m.group(3));
+                    // Known valid version is 1.2
+                    if (!(major == 1 && minor == 2)) {
+                        validator.isValid = false;
+                        validator.invalidFilesOrFolders.put(
+                                processor.getFile(),
+                                "Unsupported software version: " + 
+                                m.group(2) + "." +
+                                m.group(3));
+                    }
+                } catch (NumberFormatException n) {
+                    validator.isValid = false;
+                    validator.invalidFilesOrFolders.put(
+                            processor.getFile(),
+                            "Unknown software version.");
+                }
+            }
+		} else {
+            validator.isValid = false;
+            validator.invalidFilesOrFolders.put(
+                    processor.getFile(),
+                    "Wrong software string: " + acqSoftwareString);
+
 		}
-		
+
 		// Acquisition software
 		attributes.put("acq_software", acqSoftwareString);
-		
+
 		// Acquisition date
 		attributes.put("date", processor.getStandardKeyword("$DATE"));
-		
+
 		return attributes;
 	}
 
@@ -1018,7 +1109,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
         // Nothing
 		return new HashMap<String, String>();
 	}
-	
+
 	/**
 	 * Extract and store the Specimen attributes
 	 * @param processor FCSProcessor with already scanned file
@@ -1028,7 +1119,7 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
         // Nothing
 		return new HashMap<String, String>();
 	}
-	
+
 	/**
 	 * Extract and store the Tube attributes
 	 * @param processor FCSProcessor with already scanned file

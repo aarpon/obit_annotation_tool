@@ -34,6 +34,7 @@ public final class FCSReader extends AbstractReader {
 	private int OTHERbegin = 0;
 	private char DELIMITER;
 	private boolean isFileParsed = false;
+	private boolean isDataLoaded = false;
 
 	/* Public instance variables */
 
@@ -54,11 +55,9 @@ public final class FCSReader extends AbstractReader {
 	public Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
 
 	/**
-	 * DATA segment (linear array), one of IntBuffer, FloatBuffer, DoubleBuffer,
-	 * CharBuffer TODO Reformat in a more useful way (in a matrix [events x
-	 * parameters], and correct type)
+	 * DATA segment (linear array of bytes)
 	 */
-	public Buffer DATA = null;
+	public ByteBuffer DATA = null;
 
 	/**
 	 * Constructor
@@ -96,7 +95,7 @@ public final class FCSReader extends AbstractReader {
 	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
-		return "Data File Standard for Flow Cytometry, " + "Version FCS3.0 and FCS3.1.";
+		return "Data File Standard for Flow Cytometry, Version FCS3.0 and FCS3.1.";
 	}
 
 	/**
@@ -358,12 +357,17 @@ public final class FCSReader extends AbstractReader {
 	 *                throughout the total number of rows, false if the first 
 	 *                nValues rows must simply be returned. 
 	 * @return array of measurements.
-	 * @throws IOException if the data type is invalid.
+	 * @throws IOException If the datatype is not recognized.
 	 */
 	public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
 			boolean sampled) throws IOException {
 
-		// Some constants
+	    // Make sure that he data was loaded
+        if (!isDataLoaded) {
+            return new double[0];
+        }
+
+	    // Some constants
 		int nParams = numParameters();
 		int nEvents = numEvents();
 		String datatype = datatype();
@@ -383,45 +387,71 @@ public final class FCSReader extends AbstractReader {
 				step = 1;
 			}
 		}
-				
+
+		// Pre-calculate the positions to extract
+		int[] positions = new int[nValues];
+
+		// The number of bytes per value depends on the datatype
+		int unitSize;
+        if (datatype.equals("F")) {
+            unitSize = 4;
+        } else if (datatype.equals("I")) {
+            unitSize = 2;
+        } else if (datatype.equals("D")) {
+            unitSize = 8;
+        } else if (datatype.equals("A")) {
+            unitSize = 1;
+        } else {
+            throw new IOException("Unknown data type!");
+        }
+
+        int c = 0; // Global measurement counter
+        int n = 0; // Row counter
+        int t = 0; // Accepted value counter
+        while (t < nValues) {
+            // If we are at the right column, we store it
+            if (c % nParams == columnIndex) {
+                if (n % step == 0) {
+                    positions[t] = c * unitSize;
+                    t++;
+                }
+                n++;
+            }
+            c++;
+        }
+
 		// Allocate space for the events
 		double[] m = new double[nValues];
-		
-		// Go through the buffer and return the values for the requested column
+
+		// Go through the buffer and return the values at the pre-calculate
+		// positions (i.e. for the requested column with given stride and 
+		// requested total number)
 		DATA.rewind();
-		int c = 0; // Global measurement counter
-		int n = 0; // Row counter
-		int t = 0; // Accepted value counter
-		while (DATA.hasRemaining()) {
-		
+
+		for (int i = 0; i < positions.length; i++) {
+
+		    // Jump to position
+		    DATA.position(positions[i]);
+
 			// Get the value, convert it to double
 			double tmp;
 			if (datatype.equals("F")) {
-				tmp = (double) ((FloatBuffer) DATA).get();
+				tmp = (double) DATA.getFloat();
 			} else if (datatype.equals("I")) {
-				tmp = (double) ((IntBuffer) DATA).get();
+			    // The integer format is 2 bytes only and unsigned!
+			    tmp = (double) ((short) (DATA.getShort()) & 0xffff);
 			} else if (datatype.equals("D")) {
-				tmp = (double) ((DoubleBuffer) DATA).get();
+			    tmp = (double) DATA.getDouble();
 			} else if (datatype.equals("A")) {
-				tmp = (double) ((CharBuffer) DATA).get();
+			    tmp = (double) DATA.get();
 			} else {
 				throw new IOException("Unknown data type!");
 			}
 
-			// If we are at the right column, we store it
-			if (c % nParams == columnIndex) {
-				if (n % step == 0) {
-					m[t] = tmp;
-					t++;
-
-					// Are we done?
-					if (t >= nValues) {
-						break;
-					}
-				}
-				n++;
-			}
-			c++;
+	        // TODO Apply transformations
+			
+			// Store the value
+			m[i] = tmp;
 
 		}
 
@@ -437,6 +467,11 @@ public final class FCSReader extends AbstractReader {
 	 * @return true if the CSV file could be saved, false otherwise.
 	 */
 	public boolean exportDataToCSV(File csvFile) {
+
+	    // Make sure that he data was loaded
+        if (!isDataLoaded) {
+            return false;
+        }
 
 		FileWriter fw;
 		try {
@@ -478,20 +513,23 @@ public final class FCSReader extends AbstractReader {
 		int numParameters = numParameters();
 		String datatype = datatype();
 
+		// Make sure to rewind the buffer
+		DATA.rewind();
+
 		// Write the values
 		int nParameter = 0;
 		while (DATA.hasRemaining()) {
 			try {
 				if (datatype.equals("F")) {
-					writer.write(((FloatBuffer) DATA).get() + ",");
+					writer.write((float) DATA.getFloat() + ",");
 				} else if (datatype.equals("I")) {
-					writer.write(((IntBuffer) DATA).get() + ",");
+				    // The integer format is 2 bytes only and unsigned!
+					writer.write(((short) (DATA.getShort()) & 0xffff) + ",");
 				} else if (datatype.equals("D")) {
-					writer.write(((DoubleBuffer) DATA).get() + ",");
+					writer.write((double) DATA.getDouble() + ",");
 				} else if (datatype.equals("A")) {
-					System.out.println("Data is stored with ASCII-encoded integer value."
-							+ "Additional processing is required which is not implemented yet!");
-					writer.write(((CharBuffer) DATA).get() + ",");
+				    // Get a single byte
+					writer.write((char) DATA.get() + ",");
 				} else {
 					throw new IOException("Unknown data type!");
 				}
@@ -741,10 +779,8 @@ public final class FCSReader extends AbstractReader {
 			String value = segment.substring(interIndex + 1, endIndex).trim();
 
 			// If the key starts with a $ sign, we found a standard FCS keyword
-			// and
-			// we store it in the TEXTMapStandard map; otherwise, we have a
-			// custom
-			// keyword we store it in the TEXTMapCustom map
+			// and we store it in the TEXTMapStandard map; otherwise, we have a
+			// custom keyword we store it in the TEXTMapCustom map
 			if (key.charAt(0) == '$') {
 				TEXTMapStandard.put(key, value);
 			} else {
@@ -856,7 +892,7 @@ public final class FCSReader extends AbstractReader {
 				voltage = "NaN";
 			}
 			parametersAttr.put(key, voltage);
-			
+
 			// Log or linear
 			key = "P" + i + "DISPLAY";
 			String display = TEXTMapCustom.get(key);
@@ -939,10 +975,10 @@ public final class FCSReader extends AbstractReader {
 	 */
 	private boolean readDataBlock() {
 
-		// To read the data in the correct format we need to know the
-		// number of parameters, the number of events, the datatype and
-		// the endianity.
-		String datatype = datatype();
+	    // Reset the isDataLoaded flag
+        isDataLoaded = false;
+
+		// To read the data in the correct format we need to know the endianity.
 		String endianity = endianity();
 
 		// Endianity
@@ -953,7 +989,7 @@ public final class FCSReader extends AbstractReader {
 			endian = ByteOrder.BIG_ENDIAN;
 		} else {
 			errorMessage = "Unknown endianity!";
-			System.out.println(errorMessage);
+			System.err.println(errorMessage);
 			return false;
 		}
 
@@ -963,8 +999,8 @@ public final class FCSReader extends AbstractReader {
 
 		// Create a ByteBuffer wrapped around the byte array that
 		// reads with the desired endianity
-		ByteBuffer record = ByteBuffer.wrap(recordBuffer);
-		record.order(endian);
+		DATA = ByteBuffer.wrap(recordBuffer);
+		DATA.order(endian);
 
 		// Read
 		try {
@@ -975,30 +1011,14 @@ public final class FCSReader extends AbstractReader {
 			return false;
 		}
 
-		// Read the data with the correct endianity and data type
-		// TODO In particular for datatype = 'A', additional handling
-		// will be necessary
-		if (datatype.equals("I")) {
-			DATA = record.asIntBuffer();
-		} else if (datatype.equals("F")) {
-			DATA = record.asFloatBuffer();
-		} else if (datatype.equals("D")) {
-			DATA = record.asDoubleBuffer();
-		} else if (datatype.equals("A")) {
-			System.out.println("Data is stored with ASCII-encoded integer value."
-					+ "Additional processing is required which is not implemented yet!");
-			DATA = record.asCharBuffer();
-		} else {
-			errorMessage = "Unknown data type!";
-			System.out.println(errorMessage);
-			return false;
-		}
-
 		// Make sure to be at the beginning of the buffer
 		DATA.rewind();
 
 		// Reset error message
 		errorMessage = "";
+
+		// Set the isDataLoaded flag
+		isDataLoaded = true;
 
 		// Return success
 		return true;
