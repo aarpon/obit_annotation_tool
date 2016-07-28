@@ -419,6 +419,33 @@ public class TestFlowReaders {
             assertEquals(d,  true);
         }
 
+        // Retrieve the Time column (index = 13) this time with stride
+        double[] timeColumnStride = {};
+        try {
+            timeColumnStride = reader.getDataPerColumnIndex(13, 10, true);
+        } catch (IOException e) {
+            // Keep the array empty
+        }
+
+        // Test that we could retrieve the following 10 entries
+        double[] expectedTimeEntriesStride = {
+                73.19999694824219,
+                415.70001220703125, 
+                970.5,
+                1400.199951171875,
+                2015.5999755859375,
+                2429.39990234375,
+                2589.10009765625,
+                2810.199951171875, 
+                3161.60009765625, 
+                3307.39990234375
+        };
+
+        for (int i = 0; i < timeColumnStride.length; i++) {
+            boolean d = Math.abs(timeColumnStride[i] - expectedTimeEntriesStride[i]) < 1e-6;
+            assertEquals(d,  true);
+        }
+
         // Make sure that the FCS-A column has index 0
         assertEquals(parameters.get(0), "FSC-A");
 
@@ -446,6 +473,33 @@ public class TestFlowReaders {
 
         for (int i = 0; i < fscaColumn.length; i++) {
             boolean d = Math.abs(fscaColumn[i] - expectedFSCAEntries[i]) < 1e-6;
+            assertEquals(d,  true);
+        }
+
+        // Retrieve the FCS-A column (index = 0) this time with stride
+        double[] fscaColumnStride = {};
+        try {
+            fscaColumnStride = reader.getDataPerColumnIndex(0, 10, true);
+        } catch (IOException e) {
+            // Keep the array empty
+        }
+
+        // Test that we could retrieve the following 10 entries
+        double[] expectedFSCAEntriesStride = {
+                154763.5625, 
+                168190.546875,
+                127917.4453125, 
+                128499.5625, 
+                162044.96875, 
+                136284.6875, 
+                179875.078125, 
+                124424.71875, 
+                143032.96875, 
+                154391.15625
+        };
+
+        for (int i = 0; i < fscaColumnStride.length; i++) {
+            boolean d = Math.abs(fscaColumnStride[i] - expectedFSCAEntriesStride[i]) < 1e-6;
             assertEquals(d,  true);
         }
 
@@ -538,6 +592,63 @@ public class TestFlowReaders {
             assertEquals(d,  true);
         }
 
+        // Retrieve the 'Time 1' column (index = 1) but this time with stride
+        double[] timeColumnStride = {};
+        try {
+            timeColumnStride = reader.getDataPerColumnIndex(1, 10, true);
+        } catch (IOException e) {
+            // Keep the array empty
+        }
+        assertEquals(timeColumnStride.length, 10);
+
+        // Test that we could retrieve the following 10 entries
+        double[] expectedTimeEntriesStride = {
+                54247.0,
+                6232.0,
+                35285.0,
+                61128.0,
+                9950.0,
+                17728.0,
+                59488.0,
+                13606.0,
+                19809.0,
+                1427.0
+        };
+
+        for (int i = 0; i < timeColumnStride.length; i++) {
+            boolean d = Math.abs(timeColumnStride[i] - expectedTimeEntriesStride[i]) < 1e-6;
+            assertEquals(d,  true);
+        }
+
+        // Make sure that the 'FCSPerf' column has index 12
+        assertEquals(parameters.get(12), "FSCPerp");
+
+        // Retrieve the FCSPerf column (index = 12) but this time with stride
+        double[] fscPerfStride = {};
+        try {
+            fscPerfStride = reader.getDataPerColumnIndex(12, 10, true);
+        } catch (IOException e) {
+            // Keep the array empty
+        }
+
+        // Test that we could retrieve the following 10 entries
+        double[] expectedFSCPerfEntriesStride = {
+                18344.0,
+                40636.0,
+                59914.0,
+                22230.0,
+                19951.0,
+                16363.0,
+                18653.0,
+                3531.0,
+                4900.0,
+                4152.0
+        };
+
+        for (int i = 0; i < fscPerfStride.length; i++) {
+            boolean d = Math.abs(fscPerfStride[i] - expectedFSCPerfEntriesStride[i]) < 1e-6;
+            assertEquals(d,  true);
+        }
     }
 
     /**
