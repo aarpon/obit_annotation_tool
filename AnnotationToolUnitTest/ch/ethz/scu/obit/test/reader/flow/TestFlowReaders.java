@@ -395,7 +395,7 @@ public class TestFlowReaders {
         // Retrieve the Time column (index = 13)
         double[] timeColumn = {};
         try {
-            timeColumn = reader.getDataPerColumnIndex(13, 10, false);
+            timeColumn = reader.getRawDataPerColumnIndex(13, 10, false);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -422,7 +422,7 @@ public class TestFlowReaders {
         // Retrieve the Time column (index = 13) this time with stride
         double[] timeColumnStride = {};
         try {
-            timeColumnStride = reader.getDataPerColumnIndex(13, 10, true);
+            timeColumnStride = reader.getRawDataPerColumnIndex(13, 10, true);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -452,7 +452,7 @@ public class TestFlowReaders {
         // Retrieve the FCS-A column (index = 0)
         double[] fscaColumn = {};
         try {
-            fscaColumn = reader.getDataPerColumnIndex(0, 10, false);
+            fscaColumn = reader.getRawDataPerColumnIndex(0, 10, false);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -479,7 +479,7 @@ public class TestFlowReaders {
         // Retrieve the FCS-A column (index = 0) this time with stride
         double[] fscaColumnStride = {};
         try {
-            fscaColumnStride = reader.getDataPerColumnIndex(0, 10, true);
+            fscaColumnStride = reader.getRawDataPerColumnIndex(0, 10, true);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -537,7 +537,7 @@ public class TestFlowReaders {
         // Retrieve the 'Time 1' column (index = 1)
         double[] timeColumn = {};
         try {
-            timeColumn = reader.getDataPerColumnIndex(1, 10, false);
+            timeColumn = reader.getRawDataPerColumnIndex(1, 10, false);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -568,7 +568,7 @@ public class TestFlowReaders {
         // Retrieve the FCSPerf column (index = 12)
         double[] fscPerf = {};
         try {
-            fscPerf = reader.getDataPerColumnIndex(12, 10, false);
+            fscPerf = reader.getRawDataPerColumnIndex(12, 10, false);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -595,7 +595,7 @@ public class TestFlowReaders {
         // Retrieve the 'Time 1' column (index = 1) but this time with stride
         double[] timeColumnStride = {};
         try {
-            timeColumnStride = reader.getDataPerColumnIndex(1, 10, true);
+            timeColumnStride = reader.getRawDataPerColumnIndex(1, 10, true);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -626,7 +626,7 @@ public class TestFlowReaders {
         // Retrieve the FCSPerf column (index = 12) but this time with stride
         double[] fscPerfStride = {};
         try {
-            fscPerfStride = reader.getDataPerColumnIndex(12, 10, true);
+            fscPerfStride = reader.getRawDataPerColumnIndex(12, 10, true);
         } catch (IOException e) {
             // Keep the array empty
         }
@@ -649,6 +649,34 @@ public class TestFlowReaders {
             boolean d = Math.abs(fscPerfStride[i] - expectedFSCPerfEntriesStride[i]) < 1e-6;
             assertEquals(d,  true);
         }
+
+        // Retrieve the FCSPerf column (index = 12) but this time with scaling
+        double[] fscPerfScaling = {};
+        try {
+            fscPerfScaling = reader.getDataPerColumnIndex(12, 10, false);
+        } catch (IOException e) {
+            // Keep the array empty
+        }
+
+        // Test that we could retrieve the following 10 entries
+        double[] expectedFSCPerfEntriesScaling = {
+                13.1713080232362,
+                1.5114101144560,
+                31.5606186622380,
+                244.7213585880166,
+                3.0651391505494,
+                53.0780000816564,
+                5.0324819579118,
+                8.0222626178512,
+                7.7714656129383,
+                2.5529567476997
+        };
+
+        for (int i = 0; i < fscPerfScaling.length; i++) {
+            boolean d = Math.abs(fscPerfScaling[i] - expectedFSCPerfEntriesScaling[i]) < 1e-6;
+            assertEquals(d,  true);
+        }
+
     }
 
     /**

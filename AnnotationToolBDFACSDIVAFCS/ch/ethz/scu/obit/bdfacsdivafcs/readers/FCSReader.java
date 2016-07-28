@@ -36,6 +36,11 @@ public final class FCSReader extends AbstractReader {
 	private boolean isFileParsed = false;
 	private boolean isDataLoaded = false;
 	private int[] bytesPerParameter;
+	private float[] parameterDecades;
+	private float[] parameterLogs;
+	private float[] parameterLogZeros;
+	private float[] parameterRanges;
+	private float[] parameterGains;
 	
 	/* Public instance variables */
 
@@ -351,7 +356,8 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Return subset of measurements with optional stride for parameter with 
-	 * given column index in double precision.
+	 * given column index in double precision. The measurements are returned
+	 * as is without any scaling.
 	 * @param columnIndex Index of the measurement column.
 	 * @param nValues number of values to be read. Set to 0 to read them all.
 	 * @param sampled True if the nValues must be sampled with constant stride
@@ -360,7 +366,7 @@ public final class FCSReader extends AbstractReader {
 	 * @return array of measurements.
 	 * @throws IOException If something unexpected with the datatype is found. 
 	 */
-	public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
+	public double[] getRawDataPerColumnIndex(int columnIndex, int nValues, 
 			boolean sampled) throws IOException {
 
 	    // Make sure that he data was loaded
@@ -446,8 +452,6 @@ public final class FCSReader extends AbstractReader {
 				throw new IOException("Unknown data type!");
 			}
 
-	        // TODO Apply transformations
-			
 			// Store the value
 			m[i] = tmp;
 
@@ -457,11 +461,59 @@ public final class FCSReader extends AbstractReader {
 		return m;
 	}
 
+    /**
+     * Return subset of measurements with optional stride for parameter with 
+     * given column index in double precision. The measurements are scaled as
+     * instructed in the FCS file (parameters 'PnR', 'PnE', 'PnG').
+     * @param columnIndex Index of the measurement column.
+     * @param nValues number of values to be read. Set to 0 to read them all.
+     * @param sampled True if the nValues must be sampled with constant stride
+     *                throughout the total number of rows, false if the first 
+     *                nValues rows must simply be returned. 
+     * @return array of measurements.
+     * @throws IOException If something unexpected with the datatype is found. 
+     */
+    public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
+            boolean sampled) throws IOException {
+
+        // Make sure that he data was loaded
+        if (!isDataLoaded) {
+            return new double[0];
+        }
+
+        // Get the unscaled parameters
+        double[] m = getRawDataPerColumnIndex(columnIndex, nValues, sampled);
+
+        // Allocate space for the scaled parameters
+        double[] n = new double[m.length];
+
+        // Apply transformations
+        double decade = (double) parameterDecades[columnIndex];
+        double range = (double) parameterRanges[columnIndex];
+        double log = (double) parameterLogs[columnIndex] ;
+        double logz = (double) parameterLogZeros[columnIndex];
+        double gain = (double) parameterGains[columnIndex];
+
+        for (int i = 0; i < m.length; i++) {
+
+            if (gain != 1.0) {
+                n[i] = m[i] / gain;
+            } else if (log != 0.0) {
+                n[i] = logz * Math.pow(10, m[i] / range * decade);
+            } else {
+                // No transformation
+                n[i] = m[i];
+            }
+        }
+
+        // Return the transformed data
+        return n;
+    }
+
 	/**
-	 * Export the read data to a CSV file
-	 * 
-	 * @param csvFile
-	 *            Full path of the CSV file
+	 * Export the full data (not scaled!) to a CSV file.
+	 *
+	 * @param csvFile  Full path of the CSV file
 	 * @return true if the CSV file could be saved, false otherwise.
 	 */
 	public boolean exportDataToCSV(File csvFile) {
@@ -817,6 +869,13 @@ public final class FCSReader extends AbstractReader {
 		// parameter values
 		bytesPerParameter = new int[numParameters];
 
+		// We also store gain and transformation details
+		parameterDecades = new float[numParameters];
+		parameterLogs = new float[numParameters];
+		parameterLogZeros = new float[numParameters];
+		parameterRanges = new float[numParameters];
+		parameterGains = new float[numParameters];
+
 		// Keep track of the datatype
 		String datatype = datatype();
 
@@ -845,9 +904,10 @@ public final class FCSReader extends AbstractReader {
 			key = "P" + i + "R";
 			String range = TEXTMapStandard.get("$" + key);
 			if (range == null) {
-				range = "NaN";
+				range = "262144";
 			}
 			parametersAttr.put(key, range);
+			parameterRanges[i - 1] = Integer.parseInt(range);
 
 			// Bits
 			key = "P" + i + "B";
@@ -875,9 +935,10 @@ public final class FCSReader extends AbstractReader {
 			float log_zero = 0.0f;
 			key = "P" + i + "E";
 			String decade = TEXTMapStandard.get("$" + key);
+			float f_decade = 0.0f;
 			if (decade != null) {
 				String decadeParts[] = decade.split(",");
-				float f_decade = Float.parseFloat(decadeParts[0]);
+				f_decade = Float.parseFloat(decadeParts[0]);
 				float f_value = Float.parseFloat(decadeParts[1]);
 				if (f_decade == 0.0) {
 					// Amplification is linear or undefined
@@ -894,14 +955,18 @@ public final class FCSReader extends AbstractReader {
 			}
 			parametersAttr.put(key + "_LOG", Float.toString(log));
 			parametersAttr.put(key + "_LOGZERO", Float.toString(log_zero));
+			parameterDecades[i - 1] = f_decade;
+			parameterLogs[i - 1] = log;
+			parameterLogZeros[i - 1] = log_zero;
 
 			// Gain
 			key = "P" + i + "G";
 			String gain = TEXTMapStandard.get("$" + key);
 			if (gain == null) {
-				gain = "NaN";
+				gain = "1.0";
 			}
 			parametersAttr.put(key, gain);
+			parameterGains[i - 1] = Float.parseFloat(gain);
 
 			// Voltage
 			key = "P" + i + "V";
