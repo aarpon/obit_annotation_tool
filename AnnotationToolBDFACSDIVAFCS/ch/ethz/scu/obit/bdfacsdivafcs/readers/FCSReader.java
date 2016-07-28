@@ -388,16 +388,50 @@ public final class FCSReader extends AbstractReader {
 			}
 		}
 
+		// Pre-calculate the positions to extract
+		int[] positions = new int[nValues];
+
+		// The number of bytes per value depends on the datatype
+		int unitSize;
+        if (datatype.equals("F")) {
+            unitSize = 4;
+        } else if (datatype.equals("I")) {
+            unitSize = 2;
+        } else if (datatype.equals("D")) {
+            unitSize = 8;
+        } else if (datatype.equals("A")) {
+            unitSize = 1;
+        } else {
+            throw new IOException("Unknown data type!");
+        }
+
+        int c = 0; // Global measurement counter
+        int n = 0; // Row counter
+        int t = 0; // Accepted value counter
+        while (t < nValues) {
+            // If we are at the right column, we store it
+            if (c % nParams == columnIndex) {
+                if (n % step == 0) {
+                    positions[t] = c * unitSize;
+                    t++;
+                }
+                n++;
+            }
+            c++;
+        }
+
 		// Allocate space for the events
 		double[] m = new double[nValues];
 
-		// Go through the buffer and return the values for the requested column
+		// Go through the buffer and return the values at the pre-calculate
+		// positions (i.e. for the requested column with given stride and 
+		// requested total number)
 		DATA.rewind();
 
-		int c = 0; // Global measurement counter
-		int n = 0; // Row counter
-		int t = 0; // Accepted value counter
-		while (DATA.hasRemaining()) {
+		for (int i = 0; i < positions.length; i++) {
+
+		    // Jump to position
+		    DATA.position(positions[i]);
 
 			// Get the value, convert it to double
 			double tmp;
@@ -414,20 +448,10 @@ public final class FCSReader extends AbstractReader {
 				throw new IOException("Unknown data type!");
 			}
 
-			// If we are at the right column, we store it
-			if (c % nParams == columnIndex) {
-				if (n % step == 0) {
-					m[t] = tmp;
-					t++;
-
-					// Are we done?
-					if (t >= nValues) {
-						break;
-					}
-				}
-				n++;
-			}
-			c++;
+	        // TODO Apply transformations
+			
+			// Store the value
+			m[i] = tmp;
 
 		}
 
