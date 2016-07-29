@@ -29,7 +29,30 @@ import ch.ethz.scu.obit.bdfacsdivafcs.readers.FCSReader;
  */
 public class TestFlowReaders {
 
+    /** 
+     * Entry point
+     * @param args Ignored.
+     */   
+    public static void main(String[] args) {
+
+        Result result = JUnitCore.runClasses(TestFlowReaders.class);
+        for (Failure failure : result.getFailures()) {
+            System.out.println(failure.toString());
+        }
+
+    }
+
     String dataFolder = "";
+
+    /**
+     * Constructor.
+     */
+    public TestFlowReaders() {
+
+        // Store data folder
+        dataFolder = this.getClass().getResource("data").getFile();
+
+    }
 
     /**
      * Test reading an FACSAriaIII DIVA experiment.
@@ -282,88 +305,6 @@ public class TestFlowReaders {
     }
 
     /**
-     * Test reading a single FCS 3.0 file from Influx (FACS Sortware 1.2).
-     */
-    @Test
-    public void testSingleInflux1FileRead() {
-
-        // Test an FCS 3.0 file from Influx (FACS Sortware 1.2)
-        File fcsFile = new File(dataFolder + 
-                "/influx/1/sort_20160427/Kash_J63.fcs");
-
-        // Open the file (with data scan)
-        FCSReader reader = new FCSReader(fcsFile, true);
-
-        // Scan the file
-        boolean success;
-        try {
-            success = reader.parse();
-        } catch (IOException e) {
-            success = false;
-        }
-        assertEquals(success, true);
-
-        // Test several keywords
-        assertEquals(reader.getFCSVersion(), "FCS3.0");
-        assertEquals(reader.getStandardKeyword("$CYT"), "BD Influx System (USB)");
-        assertEquals(reader.getStandardKeyword("$DATATYPE"), "I");
-
-        // Warning: the APPLICATION key is called CREATOR in FCS files coming
-        // from Aria or Fortessa! Moreover, the string says "soRtware"...
-        assertEquals(reader.getCustomKeyword("APPLICATION"),
-                "BD FACS™ Sortware 1.2.0.142");
-
-        // Warning: the $FIL key contains the ABSOLUTE path to the file!
-        // In the case of Aria and Fortessa, only the file name is stored!
-        String fileName = new File(reader.getStandardKeyword("$FIL")).getName();
-        assertEquals(fileName, "Kash_J63.fcs");
-
-        // Warning there is no EXPERIMENT NAME key!
-
-        // Warning there is no TUBE NAME key!
-
-        // Test data
-        assertEquals(reader.numEvents(), 50000);
-        assertEquals(reader.numParameters(), 27);
-    }
-
-    /**
-     * Test reading a single FCS 3.1 file from FACSAriaIII (DIVA 8.0.1).
-     */
-    @Test
-    public void testSingleAria8FileRead() {
-
-        // Test an FCS 3.1 file from FACSAriaIII (DIVA 8.0.1)
-        File fcsFile = new File(dataFolder + 
-                "/aria/8/150115KK YVI - Exp1/BM YVI male_test sort_002.fcs");
-
-        // Open the file (with data scan)
-        FCSReader reader = new FCSReader(fcsFile, true);
-
-        // Scan the file
-        boolean success;
-        try {
-            success = reader.parse();
-        } catch (IOException e) {
-            success = false;
-        }
-        assertEquals(success, true);
-
-        // Test several keywords
-        assertEquals(reader.getFCSVersion(), "FCS3.1");
-        assertEquals(reader.getStandardKeyword("$CYT"), "FACSAriaIII");
-        assertEquals(reader.getStandardKeyword("$DATATYPE"), "F");
-        assertEquals(reader.getStandardKeyword("$FIL"), "BM YVI male_test sort_002.fcs");
-        assertEquals(reader.getCustomKeyword("CREATOR"), "BD FACSDiva Software Version 8.0.1");
-        assertEquals(reader.getCustomKeyword("EXPERIMENT NAME"), "150115KK YVI - Exp1");
-        assertEquals(reader.getCustomKeyword("TUBE NAME"), "test sort");
-
-        // Test data
-        assertEquals(reader.numEvents(), 87);
-        assertEquals(reader.numParameters(), 14);
-    }
-
-    /**
      * Test parsing the measurement data from a single FCS 3.1 file from
      * FACSAriaIII (DIVA 8.0.1).
      */
@@ -503,6 +444,42 @@ public class TestFlowReaders {
             assertEquals(d,  true);
         }
 
+    }
+
+    /**
+     * Test reading a single FCS 3.1 file from FACSAriaIII (DIVA 8.0.1).
+     */
+    @Test
+    public void testSingleAria8FileRead() {
+
+        // Test an FCS 3.1 file from FACSAriaIII (DIVA 8.0.1)
+        File fcsFile = new File(dataFolder + 
+                "/aria/8/150115KK YVI - Exp1/BM YVI male_test sort_002.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+
+        // Test several keywords
+        assertEquals(reader.getFCSVersion(), "FCS3.1");
+        assertEquals(reader.getStandardKeyword("$CYT"), "FACSAriaIII");
+        assertEquals(reader.getStandardKeyword("$DATATYPE"), "F");
+        assertEquals(reader.getStandardKeyword("$FIL"), "BM YVI male_test sort_002.fcs");
+        assertEquals(reader.getCustomKeyword("CREATOR"), "BD FACSDiva Software Version 8.0.1");
+        assertEquals(reader.getCustomKeyword("EXPERIMENT NAME"), "150115KK YVI - Exp1");
+        assertEquals(reader.getCustomKeyword("TUBE NAME"), "test sort");
+
+        // Test data
+        assertEquals(reader.numEvents(), 87);
+        assertEquals(reader.numParameters(), 14);
     }
 
     /**
@@ -678,14 +655,61 @@ public class TestFlowReaders {
         }
 
     }
-    
+
+
+    /**
+     * Test reading a single FCS 3.0 file from Influx (FACS Sortware 1.2).
+     */
+    @Test
+    public void testSingleInflux1FileRead() {
+
+        // Test an FCS 3.0 file from Influx (FACS Sortware 1.2)
+        File fcsFile = new File(dataFolder + 
+                "/influx/1/sort_20160427/Kash_J63.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+
+        // Test several keywords
+        assertEquals(reader.getFCSVersion(), "FCS3.0");
+        assertEquals(reader.getStandardKeyword("$CYT"), "BD Influx System (USB)");
+        assertEquals(reader.getStandardKeyword("$DATATYPE"), "I");
+
+        // Warning: the APPLICATION key is called CREATOR in FCS files coming
+        // from Aria or Fortessa! Moreover, the string says "soRtware"...
+        assertEquals(reader.getCustomKeyword("APPLICATION"),
+                "BD FACS™ Sortware 1.2.0.142");
+
+        // Warning: the $FIL key contains the ABSOLUTE path to the file!
+        // In the case of Aria and Fortessa, only the file name is stored!
+        String fileName = new File(reader.getStandardKeyword("$FIL")).getName();
+        assertEquals(fileName, "Kash_J63.fcs");
+
+        // Warning there is no EXPERIMENT NAME key!
+
+        // Warning there is no TUBE NAME key!
+
+        // Test data
+        assertEquals(reader.numEvents(), 50000);
+        assertEquals(reader.numParameters(), 27);
+    }
+
     /**
      * Test parsing the measurement data from a single FCS 3.0 file from
      * Influx (FACS Sortware 1.2) and saving them as CSV file
      */
     @Test
     public void testSingleInflux1FileStoreAsCSV() {
-        
+
         // Parses measurements from an FCS 3.0 file from Influx (FACS Sortware 1.2)
         File fcsFile = new File(dataFolder + 
                 "/influx/1/sort_20160427/Kash_J63.fcs");
@@ -701,45 +725,21 @@ public class TestFlowReaders {
             success = false;
         }
         assertEquals(success, true);
-        
+
         // Save as CSV file
         File csvFile = new File("test_influx.csv");
-        
+
         try {
             success = reader.exportDataToCSV(csvFile);
         } catch (IOException e) {
             System.err.println(e.getMessage());
             success = false;
         }
-        
+
         assertEquals(success, true);
-        
+
         // Delete file
         csvFile.delete();
-    }
-    
-
-    /**
-     * Constructor.
-     */
-    public TestFlowReaders() {
-
-        // Store data folder
-        dataFolder = this.getClass().getResource("data").getFile();
-
-    }
-
-    /** 
-     * Entry point
-     * @param args Ignored.
-     */   
-    public static void main(String[] args) {
-
-        Result result = JUnitCore.runClasses(TestFlowReaders.class);
-        for (Failure failure : result.getFailures()) {
-            System.out.println(failure.toString());
-        }
-
     }
 
 }
