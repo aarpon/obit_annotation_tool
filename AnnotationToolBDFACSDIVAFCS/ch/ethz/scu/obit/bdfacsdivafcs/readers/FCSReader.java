@@ -515,12 +515,24 @@ public final class FCSReader extends AbstractReader {
 	 *
 	 * @param csvFile  Full path of the CSV file
 	 * @return true if the CSV file could be saved, false otherwise.
+	 * @throws IOException  If something unexpected with the datatype is found. 
 	 */
-	public boolean exportDataToCSV(File csvFile) {
+	public boolean exportDataToCSV(File csvFile) throws IOException {
 
 	    // Make sure that he data was loaded
         if (!isDataLoaded) {
             return false;
+        }
+
+        // Datatype
+        String datatype = datatype();
+
+        // If the datatype is INTEGER, we currently only support 16 bit
+        for (int i = 0; i < bytesPerParameter.hashCode(); i++) {
+            if (datatype == "I" && bytesPerParameter[i] != 2) {
+                throw new IOException("Integer data type is expected to be"
+                        + "unsigned 16 bit!");
+            }
         }
 
 		FileWriter fw;
@@ -561,7 +573,6 @@ public final class FCSReader extends AbstractReader {
 
 		// Store some constants
 		int numParameters = numParameters();
-		String datatype = datatype();
 
 		// Make sure to rewind the buffer
 		DATA.rewind();

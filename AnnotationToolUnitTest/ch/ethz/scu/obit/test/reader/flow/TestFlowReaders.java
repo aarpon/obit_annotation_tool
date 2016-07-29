@@ -512,7 +512,7 @@ public class TestFlowReaders {
     @Test
     public void testSingleInflux1FileMeasurementParsing() {
 
-        // Parses measurements from an FCS 3.1 file from FACSAriaIII (DIVA 8.0.1)
+        // Parses measurements from an FCS 3.0 file from Influx (FACS Sortware 1.2)
         File fcsFile = new File(dataFolder + 
                 "/influx/1/sort_20160427/Kash_J63.fcs");
 
@@ -678,6 +678,46 @@ public class TestFlowReaders {
         }
 
     }
+    
+    /**
+     * Test parsing the measurement data from a single FCS 3.0 file from
+     * Influx (FACS Sortware 1.2) and saving them as CSV file
+     */
+    @Test
+    public void testSingleInflux1FileStoreAsCSV() {
+        
+        // Parses measurements from an FCS 3.0 file from Influx (FACS Sortware 1.2)
+        File fcsFile = new File(dataFolder + 
+                "/influx/1/sort_20160427/Kash_J63.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+        
+        // Save as CSV file
+        File csvFile = new File("test_influx.csv");
+        
+        try {
+            success = reader.exportDataToCSV(csvFile);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            success = false;
+        }
+        
+        assertEquals(success, true);
+        
+        // Delete file
+        csvFile.delete();
+    }
+    
 
     /**
      * Constructor.
