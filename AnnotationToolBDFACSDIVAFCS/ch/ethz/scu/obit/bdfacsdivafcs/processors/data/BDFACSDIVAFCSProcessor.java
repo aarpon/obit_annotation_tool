@@ -1051,7 +1051,12 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 							"Unknown software version.");
 				}
 			}
-		} else if (acqSoftwareString.contains("BD FACS™ Sortware")) {
+		} else if (acqSoftwareString.contains("BD FACS") &&
+		        (acqSoftwareString.contains("Sortware"))) {
+		    // The software string is BD FACS™ Sortware, but the
+		    // trademark sign fails to be recognized on some machines
+		    // (different encoding?); so we skip it.
+
             // Check major and minor version (we ignore the patch)
             Pattern p = Pattern.compile(
                     "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,4})(\\.\\d{1,4})?");
