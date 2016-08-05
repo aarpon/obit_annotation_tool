@@ -15,7 +15,8 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	 *  List of accepted attachment file extensions
 	 */
 	protected final static String[] validAttachmentExtensions = 
-		{".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"};
+		{".pdf", ".doc", ".docx", ".xls", ".xlsx",
+		        ".ppt", ".pptx", ".csv", ".tsv"};
 
 	/** 
 	 * Constructor
@@ -50,18 +51,18 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	 * @return true if the attachment could be added; false otherwise.
 	 */
 	public boolean addAttachment(File attachment) {
-		
+
 		// Create attachment string
 		String attachmentAttr = "";
-		
+
 		// Get current attachments
 		if (attributes.containsKey("attachments")) {
 			attachmentAttr = attributes.get("attachments");
 		}
-		
+
 		// Build the attachment string
 		if (attachment.getAbsolutePath().startsWith(fullPath.getAbsolutePath())) {
-			
+
 			// Check that the attachment is contained in the Experiment
 			String filePath = attachment.getAbsolutePath().replace("\\", "/");
 			int indx = filePath.lastIndexOf(
@@ -69,7 +70,7 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 			if (indx == -1) {
 				return false;
 			}
-				
+
 			// Append the relative attachment path to the semicolon-
 			// separated path string
 			String relAttachmentPath = filePath.substring(indx); 
@@ -78,16 +79,16 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 			} else {
 				attachmentAttr += ";" + relAttachmentPath; 
 			}
-				
+
 		}
-		
+
 		// Store the attachments as attributes
 		attributes.put("attachments", attachmentAttr);
-		
+
 		// Return success
 		return true;
 	}
-	
+
 	/**
 	 * Checks whether the passed file can be attached.
 	 * @param file File to be checked.
