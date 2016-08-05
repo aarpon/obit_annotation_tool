@@ -996,6 +996,15 @@ public final class FCSReader extends AbstractReader {
 				display = "LIN";
 			}
 			parametersAttr.put(key, display);
+
+			// If present (for instance in files from the BD Influx
+			// Cell Sorter), we also store the CHANNELTYPE
+			key = "P" + i + "CHANNELTYPE";
+            String channelType = TEXTMapCustom.get(key);
+            if (channelType != null) {
+                parametersAttr.put(key, channelType);
+            }
+
 		}
 
 		return true;
