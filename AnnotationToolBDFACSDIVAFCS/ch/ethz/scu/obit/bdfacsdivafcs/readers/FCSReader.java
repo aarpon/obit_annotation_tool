@@ -731,8 +731,10 @@ public final class FCSReader extends AbstractReader {
 		// Get the delimiter character
 		DELIMITER = (char) bText[0];
 
-		// Get the keyword-value pairs and store them in the hash map
-		storeKeyValuePairs(new String(bText));
+		// Get the keyword-value pairs and store them in the hash map.
+		// All values are UTF-8-encoded, the keywords are strictly ASCII
+		// (but can be parsed as UTF-8).
+		storeKeyValuePairs(new String(bText, "UTF-8"));
 
 		return true;
 	}
