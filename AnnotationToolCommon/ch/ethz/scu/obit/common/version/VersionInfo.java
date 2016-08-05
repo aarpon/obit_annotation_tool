@@ -10,11 +10,11 @@ public class VersionInfo {
 	 * Program version
 	 */
 	public static final String version = "0.9.0";
-	
+
 	/**
 	 * Version status: "alpha", "beta", or "" for a stable release
 	 */
-	public static final String status = "alpha";
+	public static final String status = "alpha 3";
 
 	/**
 	 *  Copyright string
@@ -45,7 +45,7 @@ public class VersionInfo {
 	 * @return version integer like 
 	 */
 	public static int versionStringToInteger(String version) {
-		
+
 		// Extract the various parts
 		String[] parts = version.split("\\.");
 		if (parts.length < 2 || parts.length > 3) {
@@ -57,19 +57,19 @@ public class VersionInfo {
 		if (parts.length == 3) {
 			patch = Integer.parseInt(parts[2]);
 		}
-		
+
 		// Return the integer representation of the version string
 		int versionInt = 1000000 * major + 10000 * minor + 100 * patch;
 		return versionInt;
 	}
-	
+
 	/**
 	 * Convert the version from integer to string 
 	 * @param version string like 
 	 * @return version integer like "0.8.4"
 	 */
 	public static String versionIntegerToString(int version) {
-		
+
 		// Process the integer version
         int major = version / 1000000;
         version = version - major * 1000000;
