@@ -1088,6 +1088,16 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
                             "Unknown software version.");
                 }
             }
+
+            // Remove the ™ character, that might give problems on some systems
+            acqSoftwareString = "BD FACS Sortware " + m.group(2) +
+                    "." + m.group(3);
+            if (m.groupCount() >= 4) {
+                acqSoftwareString = acqSoftwareString + m.group(4);
+            }
+            if (m.groupCount() >= 5) {
+                acqSoftwareString = acqSoftwareString + m.group(5);
+            }
 		} else {
             validator.isValid = false;
             validator.invalidFilesOrFolders.put(
