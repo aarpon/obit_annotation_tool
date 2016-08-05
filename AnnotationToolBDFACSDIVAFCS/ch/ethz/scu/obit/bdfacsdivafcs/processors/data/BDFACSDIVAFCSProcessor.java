@@ -860,9 +860,20 @@ public final class BDFACSDIVAFCSProcessor extends AbstractProcessor {
 	 * otherwise 
 	 */
 	private boolean isIndexSort(FCSReader processor) {
+
+	    // BD FACSAria
 		String indexSortLocationCount = processor.getCustomKeyword(
 				"INDEX SORTING SORTED LOCATION COUNT");
-		return (!indexSortLocationCount.isEmpty());
+
+		// BD Influx Cell Sorter
+		String indexSortPositions = processor.getCustomKeyword(
+		        "INDEXSORTPOSITIONS");
+
+		// If any one of indexSortLocationCount and indexSortPositions is not
+		// empty, we have an index sort
+		return (!indexSortLocationCount.isEmpty() || 
+		        !indexSortPositions.isEmpty());
+
 	}
 
 	/**
