@@ -27,8 +27,8 @@ public class TestQueryOS {
 		boolean found;
 
 		try {
-			String hostname = QueryOS.getHostName();
-			System.out.println("Retrieved hostname: " + hostname);
+			@SuppressWarnings("unused")
+            String hostname = QueryOS.getHostName();
 			found = true;
 		} catch (UnknownHostException e) {
 			found = false;

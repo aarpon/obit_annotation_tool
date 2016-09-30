@@ -34,7 +34,14 @@ public final class FCSReader extends AbstractReader {
 	private int OTHERbegin = 0;
 	private char DELIMITER;
 	private boolean isFileParsed = false;
-
+	private boolean isDataLoaded = false;
+	private int[] bytesPerParameter;
+	private float[] parameterDecades;
+	private float[] parameterLogs;
+	private float[] parameterLogZeros;
+	private float[] parameterRanges;
+	private float[] parameterGains;
+	
 	/* Public instance variables */
 
 	/**
@@ -54,11 +61,9 @@ public final class FCSReader extends AbstractReader {
 	public Map<String, String> TEXTMapCustom = new LinkedHashMap<String, String>();
 
 	/**
-	 * DATA segment (linear array), one of IntBuffer, FloatBuffer, DoubleBuffer,
-	 * CharBuffer TODO Reformat in a more useful way (in a matrix [events x
-	 * parameters], and correct type)
+	 * DATA segment (linear array of bytes)
 	 */
-	public Buffer DATA = null;
+	public ByteBuffer DATA = null;
 
 	/**
 	 * Constructor
@@ -96,7 +101,7 @@ public final class FCSReader extends AbstractReader {
 	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
-		return "Data File Standard for Flow Cytometry, " + "Version FCS3.0 and FCS3.1.";
+		return "Data File Standard for Flow Cytometry, Version FCS3.0 and FCS3.1.";
 	}
 
 	/**
@@ -351,22 +356,36 @@ public final class FCSReader extends AbstractReader {
 
 	/**
 	 * Return subset of measurements with optional stride for parameter with 
-	 * given column index in double precision.
+	 * given column index in double precision. The measurements are returned
+	 * as is without any scaling.
 	 * @param columnIndex Index of the measurement column.
 	 * @param nValues number of values to be read. Set to 0 to read them all.
 	 * @param sampled True if the nValues must be sampled with constant stride
 	 *                throughout the total number of rows, false if the first 
 	 *                nValues rows must simply be returned. 
 	 * @return array of measurements.
-	 * @throws IOException if the data type is invalid.
+	 * @throws IOException If something unexpected with the datatype is found. 
 	 */
-	public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
+	public double[] getRawDataPerColumnIndex(int columnIndex, int nValues, 
 			boolean sampled) throws IOException {
 
-		// Some constants
+	    // Make sure that he data was loaded
+        if (!isDataLoaded) {
+            return new double[0];
+        }
+
+        // Datatype
+        String datatype = datatype();
+
+        // If the datatype is INTEGER, we currently only support 16 bit
+        if (datatype == "I" && bytesPerParameter[columnIndex] != 2) {
+            throw new IOException("Integer data type is expected to be"
+                    + "unsigned 16 bit!");
+        }
+
+	    // Some constants
 		int nParams = numParameters();
 		int nEvents = numEvents();
-		String datatype = datatype();
 
 		int step;
 		// If all values must be read, the step is 1.
@@ -383,45 +402,58 @@ public final class FCSReader extends AbstractReader {
 				step = 1;
 			}
 		}
-				
+
+		// Pre-calculate the positions to extract
+		int[] positions = new int[nValues];
+
+        int c = 0; // Global measurement counter
+        int cBytes = 0; // Global measurement counter in bytes
+        int n = 0; // Row counter
+        int t = 0; // Accepted value counter
+        while (t < nValues) {
+            // If we are at the right column, we store it
+            if (c % nParams == columnIndex) {
+                if (n % step == 0) {
+                    // We use the correct data width per column
+                    positions[t] = cBytes;
+                    t++;
+                }
+                n++;
+            }
+            cBytes += bytesPerParameter[c % nParams];
+            c++;
+        }
+
 		// Allocate space for the events
 		double[] m = new double[nValues];
-		
-		// Go through the buffer and return the values for the requested column
+
+		// Go through the buffer and return the values at the pre-calculate
+		// positions (i.e. for the requested column with given stride and 
+		// requested total number)
 		DATA.rewind();
-		int c = 0; // Global measurement counter
-		int n = 0; // Row counter
-		int t = 0; // Accepted value counter
-		while (DATA.hasRemaining()) {
-		
+
+		for (int i = 0; i < positions.length; i++) {
+
+		    // Jump to position
+		    DATA.position(positions[i]);
+
 			// Get the value, convert it to double
 			double tmp;
 			if (datatype.equals("F")) {
-				tmp = (double) ((FloatBuffer) DATA).get();
+				tmp = (double) DATA.getFloat();
 			} else if (datatype.equals("I")) {
-				tmp = (double) ((IntBuffer) DATA).get();
+			    // The integer format is 2 bytes only and unsigned!
+			    tmp = (double) ((short) (DATA.getShort()) & 0xffff);
 			} else if (datatype.equals("D")) {
-				tmp = (double) ((DoubleBuffer) DATA).get();
+			    tmp = (double) DATA.getDouble();
 			} else if (datatype.equals("A")) {
-				tmp = (double) ((CharBuffer) DATA).get();
+			    tmp = (double) DATA.get();
 			} else {
 				throw new IOException("Unknown data type!");
 			}
 
-			// If we are at the right column, we store it
-			if (c % nParams == columnIndex) {
-				if (n % step == 0) {
-					m[t] = tmp;
-					t++;
-
-					// Are we done?
-					if (t >= nValues) {
-						break;
-					}
-				}
-				n++;
-			}
-			c++;
+			// Store the value
+			m[i] = tmp;
 
 		}
 
@@ -429,14 +461,79 @@ public final class FCSReader extends AbstractReader {
 		return m;
 	}
 
+    /**
+     * Return subset of measurements with optional stride for parameter with 
+     * given column index in double precision. The measurements are scaled as
+     * instructed in the FCS file (parameters 'PnR', 'PnE', 'PnG').
+     * @param columnIndex Index of the measurement column.
+     * @param nValues number of values to be read. Set to 0 to read them all.
+     * @param sampled True if the nValues must be sampled with constant stride
+     *                throughout the total number of rows, false if the first 
+     *                nValues rows must simply be returned. 
+     * @return array of measurements.
+     * @throws IOException If something unexpected with the datatype is found. 
+     */
+    public double[] getDataPerColumnIndex(int columnIndex, int nValues, 
+            boolean sampled) throws IOException {
+
+        // Make sure that he data was loaded
+        if (!isDataLoaded) {
+            return new double[0];
+        }
+
+        // Get the unscaled parameters
+        double[] m = getRawDataPerColumnIndex(columnIndex, nValues, sampled);
+
+        // Allocate space for the scaled parameters
+        double[] n = new double[m.length];
+
+        // Apply transformations
+        double decade = (double) parameterDecades[columnIndex];
+        double range = (double) parameterRanges[columnIndex];
+        double log = (double) parameterLogs[columnIndex] ;
+        double logz = (double) parameterLogZeros[columnIndex];
+        double gain = (double) parameterGains[columnIndex];
+
+        for (int i = 0; i < m.length; i++) {
+
+            if (gain != 1.0) {
+                n[i] = m[i] / gain;
+            } else if (log != 0.0) {
+                n[i] = logz * Math.pow(10, m[i] / range * decade);
+            } else {
+                // No transformation
+                n[i] = m[i];
+            }
+        }
+
+        // Return the transformed data
+        return n;
+    }
+
 	/**
-	 * Export the read data to a CSV file
-	 * 
-	 * @param csvFile
-	 *            Full path of the CSV file
+	 * Export the full data (not scaled!) to a CSV file.
+	 *
+	 * @param csvFile  Full path of the CSV file
 	 * @return true if the CSV file could be saved, false otherwise.
+	 * @throws IOException  If something unexpected with the datatype is found. 
 	 */
-	public boolean exportDataToCSV(File csvFile) {
+	public boolean exportDataToCSV(File csvFile) throws IOException {
+
+	    // Make sure that he data was loaded
+        if (!isDataLoaded) {
+            return false;
+        }
+
+        // Datatype
+        String datatype = datatype();
+
+        // If the datatype is INTEGER, we currently only support 16 bit
+        for (int i = 0; i < bytesPerParameter.hashCode(); i++) {
+            if (datatype == "I" && bytesPerParameter[i] != 2) {
+                throw new IOException("Integer data type is expected to be"
+                        + "unsigned 16 bit!");
+            }
+        }
 
 		FileWriter fw;
 		try {
@@ -476,22 +573,24 @@ public final class FCSReader extends AbstractReader {
 
 		// Store some constants
 		int numParameters = numParameters();
-		String datatype = datatype();
+
+		// Make sure to rewind the buffer
+		DATA.rewind();
 
 		// Write the values
 		int nParameter = 0;
 		while (DATA.hasRemaining()) {
 			try {
 				if (datatype.equals("F")) {
-					writer.write(((FloatBuffer) DATA).get() + ",");
+					writer.write((float) DATA.getFloat() + ",");
 				} else if (datatype.equals("I")) {
-					writer.write(((IntBuffer) DATA).get() + ",");
+				    // The integer format is 2 bytes only and unsigned!
+					writer.write(((short) (DATA.getShort()) & 0xffff) + ",");
 				} else if (datatype.equals("D")) {
-					writer.write(((DoubleBuffer) DATA).get() + ",");
+					writer.write((double) DATA.getDouble() + ",");
 				} else if (datatype.equals("A")) {
-					System.out.println("Data is stored with ASCII-encoded integer value."
-							+ "Additional processing is required which is not implemented yet!");
-					writer.write(((CharBuffer) DATA).get() + ",");
+				    // Get a single byte
+					writer.write((char) DATA.get() + ",");
 				} else {
 					throw new IOException("Unknown data type!");
 				}
@@ -632,8 +731,10 @@ public final class FCSReader extends AbstractReader {
 		// Get the delimiter character
 		DELIMITER = (char) bText[0];
 
-		// Get the keyword-value pairs and store them in the hash map
-		storeKeyValuePairs(new String(bText));
+		// Get the keyword-value pairs and store them in the hash map.
+		// All values are UTF-8-encoded, the keywords are strictly ASCII
+		// (but can be parsed as UTF-8).
+		storeKeyValuePairs(new String(bText, "UTF-8"));
 
 		return true;
 	}
@@ -741,10 +842,8 @@ public final class FCSReader extends AbstractReader {
 			String value = segment.substring(interIndex + 1, endIndex).trim();
 
 			// If the key starts with a $ sign, we found a standard FCS keyword
-			// and
-			// we store it in the TEXTMapStandard map; otherwise, we have a
-			// custom
-			// keyword we store it in the TEXTMapCustom map
+			// and we store it in the TEXTMapStandard map; otherwise, we have a
+			// custom keyword we store it in the TEXTMapCustom map
 			if (key.charAt(0) == '$') {
 				TEXTMapStandard.put(key, value);
 			} else {
@@ -779,6 +878,20 @@ public final class FCSReader extends AbstractReader {
 			return false;
 		}
 
+		// We store the number of bytes that are used to store each of the
+		// parameter values
+		bytesPerParameter = new int[numParameters];
+
+		// We also store gain and transformation details
+		parameterDecades = new float[numParameters];
+		parameterLogs = new float[numParameters];
+		parameterLogZeros = new float[numParameters];
+		parameterRanges = new float[numParameters];
+		parameterGains = new float[numParameters];
+
+		// Keep track of the datatype
+		String datatype = datatype();
+
 		// Now go over the parameters and extract all info.
 		// Mind that parameter count starts at 1.
 		String key = "";
@@ -804,26 +917,41 @@ public final class FCSReader extends AbstractReader {
 			key = "P" + i + "R";
 			String range = TEXTMapStandard.get("$" + key);
 			if (range == null) {
-				range = "NaN";
+				range = "262144";
 			}
 			parametersAttr.put(key, range);
+			parameterRanges[i - 1] = Integer.parseInt(range);
 
 			// Bits
 			key = "P" + i + "B";
 			String bits = TEXTMapStandard.get("$" + key);
 			if (bits == null) {
-				bits = "NaN";
+			    if (datatype == "D") {
+			        bits = "64";  
+			    } else if (datatype == "F") {
+                    bits = "32";  
+                } else if (datatype == "I") {
+                    bits = "16";  
+                } else if (datatype == "A") {
+                    bits = "8";
+                } else {
+                    bits = "32";
+                }
 			}
 			parametersAttr.put(key, bits);
+
+			// Store the value for later use
+			bytesPerParameter[i - 1] = Integer.parseInt(bits) / 8;
 
 			// Linear or logarithmic amplifiers?
 			float log = 0.0f;
 			float log_zero = 0.0f;
 			key = "P" + i + "E";
 			String decade = TEXTMapStandard.get("$" + key);
+			float f_decade = 0.0f;
 			if (decade != null) {
 				String decadeParts[] = decade.split(",");
-				float f_decade = Float.parseFloat(decadeParts[0]);
+				f_decade = Float.parseFloat(decadeParts[0]);
 				float f_value = Float.parseFloat(decadeParts[1]);
 				if (f_decade == 0.0) {
 					// Amplification is linear or undefined
@@ -840,14 +968,18 @@ public final class FCSReader extends AbstractReader {
 			}
 			parametersAttr.put(key + "_LOG", Float.toString(log));
 			parametersAttr.put(key + "_LOGZERO", Float.toString(log_zero));
+			parameterDecades[i - 1] = f_decade;
+			parameterLogs[i - 1] = log;
+			parameterLogZeros[i - 1] = log_zero;
 
 			// Gain
 			key = "P" + i + "G";
 			String gain = TEXTMapStandard.get("$" + key);
 			if (gain == null) {
-				gain = "NaN";
+				gain = "1.0";
 			}
 			parametersAttr.put(key, gain);
+			parameterGains[i - 1] = Float.parseFloat(gain);
 
 			// Voltage
 			key = "P" + i + "V";
@@ -856,7 +988,7 @@ public final class FCSReader extends AbstractReader {
 				voltage = "NaN";
 			}
 			parametersAttr.put(key, voltage);
-			
+
 			// Log or linear
 			key = "P" + i + "DISPLAY";
 			String display = TEXTMapCustom.get(key);
@@ -864,6 +996,15 @@ public final class FCSReader extends AbstractReader {
 				display = "LIN";
 			}
 			parametersAttr.put(key, display);
+
+			// If present (for instance in files from the BD Influx
+			// Cell Sorter), we also store the CHANNELTYPE
+			key = "P" + i + "CHANNELTYPE";
+            String channelType = TEXTMapCustom.get(key);
+            if (channelType != null) {
+                parametersAttr.put(key, channelType);
+            }
+
 		}
 
 		return true;
@@ -939,10 +1080,10 @@ public final class FCSReader extends AbstractReader {
 	 */
 	private boolean readDataBlock() {
 
-		// To read the data in the correct format we need to know the
-		// number of parameters, the number of events, the datatype and
-		// the endianity.
-		String datatype = datatype();
+	    // Reset the isDataLoaded flag
+        isDataLoaded = false;
+
+		// To read the data in the correct format we need to know the endianity.
 		String endianity = endianity();
 
 		// Endianity
@@ -953,7 +1094,7 @@ public final class FCSReader extends AbstractReader {
 			endian = ByteOrder.BIG_ENDIAN;
 		} else {
 			errorMessage = "Unknown endianity!";
-			System.out.println(errorMessage);
+			System.err.println(errorMessage);
 			return false;
 		}
 
@@ -963,8 +1104,8 @@ public final class FCSReader extends AbstractReader {
 
 		// Create a ByteBuffer wrapped around the byte array that
 		// reads with the desired endianity
-		ByteBuffer record = ByteBuffer.wrap(recordBuffer);
-		record.order(endian);
+		DATA = ByteBuffer.wrap(recordBuffer);
+		DATA.order(endian);
 
 		// Read
 		try {
@@ -975,30 +1116,14 @@ public final class FCSReader extends AbstractReader {
 			return false;
 		}
 
-		// Read the data with the correct endianity and data type
-		// TODO In particular for datatype = 'A', additional handling
-		// will be necessary
-		if (datatype.equals("I")) {
-			DATA = record.asIntBuffer();
-		} else if (datatype.equals("F")) {
-			DATA = record.asFloatBuffer();
-		} else if (datatype.equals("D")) {
-			DATA = record.asDoubleBuffer();
-		} else if (datatype.equals("A")) {
-			System.out.println("Data is stored with ASCII-encoded integer value."
-					+ "Additional processing is required which is not implemented yet!");
-			DATA = record.asCharBuffer();
-		} else {
-			errorMessage = "Unknown data type!";
-			System.out.println(errorMessage);
-			return false;
-		}
-
 		// Make sure to be at the beginning of the buffer
 		DATA.rewind();
 
 		// Reset error message
 		errorMessage = "";
+
+		// Set the isDataLoaded flag
+		isDataLoaded = true;
 
 		// Return success
 		return true;
