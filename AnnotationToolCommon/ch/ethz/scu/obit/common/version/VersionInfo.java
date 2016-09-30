@@ -14,7 +14,7 @@ public class VersionInfo {
 	/**
 	 * Version status: "alpha", "beta", or "" for a stable release
 	 */
-	public static final String status = "alpha 3";
+	public static final String status = "";
 
 	/**
 	 *  Copyright string
