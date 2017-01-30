@@ -296,7 +296,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
 	/**
 	 * Update the invalid dataset table.
-	 * @param invalidFilesOrFolders Map<File, String> of invalid folders from
+	 * @param invalidFilesOrFolders {@code Map<File, String>} of invalid folders from
 	 * the MicroscopyProcessor
 	 */
 	protected void updateInvalidDatasetTable(Map<File, String> invalidFilesOrFolders) {

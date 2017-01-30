@@ -744,6 +744,7 @@ public class OpenBISViewer extends Observable
 
 	/**
 	 * Create a popup menu with actions for a space node
+	 * @param node OpenBIS Space node to which the popup menu is associated. 
 	 * @return a JPopupMenu for the passed item
 	 */
 	private JPopupMenu createSpacePopup(final OpenBISSpaceNode node) {
@@ -772,6 +773,7 @@ public class OpenBISViewer extends Observable
 
 	/**
 	 * Create a popup menu with actions for a project node
+	 * @param node OpenBIS Project node to which the popup menu is associated. 
 	 * @return a JPopupMenu for the passed item
 	 */
 	private JPopupMenu createProjectPopup(final OpenBISProjectNode node) {
@@ -861,7 +863,6 @@ public class OpenBISViewer extends Observable
 	/**
 	 * Asks the user to give a project name and will then try to create
 	 * it as a child of the passed OpenBISSpaceNode
-	 * @param node An OpenBISSpaceNode
 	 * @return true if creation was successfull, false otherwise.
 	 */
 	private boolean createNewMetaProject() {
@@ -951,6 +952,7 @@ public class OpenBISViewer extends Observable
 	/**
 	 * Set the project with given identifier as the default target.
 	 * @param projectId The openBIS project identifier.
+	 * @return bool True if the default project could be set successfully, false otherwise.
 	 */
 	private boolean setAsDefaultProject(final String projectId) {
 		return globalSettingsManager.setDefaultProject(projectId);

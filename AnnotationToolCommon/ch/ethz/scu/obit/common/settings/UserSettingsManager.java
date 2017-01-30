@@ -67,6 +67,7 @@ class UserSettingsManager {
 	
 	/**
 	 * Initialize application settings with default values.
+	 * @param configuredServers List of configured openBIS server URLs.
 	 */
 	private void initialize(ArrayList<String> configuredServers) {
 		listUserSettings = new ArrayList<UserSettings>();

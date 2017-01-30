@@ -88,7 +88,8 @@ implements ActionListener, Observer {
 	}
 	
 	/**
-	 * Resets the metadata mapping
+	 * Resets the metadata mapping.
+	 * @param p Action parameters for the Observer. 
 	 */
 	abstract protected void resetMetadata(ObserverActionParameters p);
 	
@@ -226,20 +227,22 @@ implements ActionListener, Observer {
 	 * Creates a list of MetadataMappers used to map data entities to
 	 * openBIS entities (with optionally additional metadata information
 	 * the user will provide through UI elements in the editor).
-	 * @throws Exception 
-	 * 
+	 * @throws Exception if initialization of metadata failed. 
+	 * @return bool True if the initialization was successful, false otherwise.
 	 * @see AbstractMetadataMapper
 	 */
 	abstract protected boolean initMetadata() throws Exception;
 
 	/**
 	 * Renders all widgets on the panel
+	 * @param params Action parameters for the Observer.
 	 * @throws Exception if some openBIS identifiers cannot be computed
 	 */
 	abstract protected void createUIElements(ObserverActionParameters params) throws Exception;
 
 	/**
 	 * Updates all widgets on the panel
+	 * @param params Action parameters for the Observer.
 	 */
 	abstract protected void updateUIElements(ObserverActionParameters params);
 	
@@ -261,7 +264,7 @@ implements ActionListener, Observer {
 	
 	/**
 	 * Clean a comma-separated list of tags and remove duplicates.
-	 * @param tagList
+	 * @param tagList List of tags to be processed.
 	 * @return comma-separated list of tags.
 	 */
 	protected String cleanTagList(String tagList) {

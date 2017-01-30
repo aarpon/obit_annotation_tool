@@ -76,6 +76,7 @@ public class MicroscopyReader extends AbstractReader {
 
 	/**
 	 * Initialize the reader and sets up the OMEXML metadata store
+	 * @return bool True if the initialization was successful, false otherwise.
 	 */
 	protected boolean init() {
 

@@ -202,7 +202,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 
 	/**
 	 * Map the data and openBIS models
-	 * @throws Exception 
+	 * @throws Exception it the metadata could not be initialized.
 	 */
 	@Override
 	protected boolean initMetadata() throws Exception {
@@ -902,6 +902,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 	 * file name and description
 	 * @param fileName Name of the selected file
 	 * @param description Description for the selected file.
+	 * @param className Name of the class to use to filter the UI elements to show.
 	 */
 	protected void showFileEditUIElements(String fileName, String description,
 			String className) {

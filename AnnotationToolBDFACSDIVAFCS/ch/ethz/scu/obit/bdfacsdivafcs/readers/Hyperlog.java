@@ -4,27 +4,27 @@ package ch.ethz.scu.obit.bdfacsdivafcs.readers;
  * Hyperlog transform and inverse transform for flow cytometry data.
  * 
  * @author Aaron Ponti
- * 
+ * <p>
  * Original author Rachel Finck (C++)
+ * <p>
+ * See also:
  * 
- * @see "http://www.mathworks.com/matlabcentral/fileexchange/45034-hyperlog-transformation"
- * @see "http://flowcyt.sourceforge.net/gating/latest.pdf (chapter 6.6)"
- * 
+ * <a href="http://www.mathworks.com/matlabcentral/fileexchange/45034-hyperlog-transformation">http://www.mathworks.com/matlabcentral/fileexchange/45034-hyperlog-transformation</a>
+ * <a href="http://flowcyt.sourceforge.net/gating/latest.pdf">http://flowcyt.sourceforge.net/gating/latest.pdf (chapter 6.6)</a>
+ * <p>
  * Parameters:
- * 
- * T: T ∈ R, T > 0 is the "top of scale" value.
- * 
- * W: W ∈ R, 0 < W ≤ M/2 is the number of decades in the approximately linear 
+ * <p>
+ * {@code T: T ∈ R, T > 0} is the "top of scale" value.
+ * <p>
+ * {@code W: W ∈ R, 0 < W ≤ M/2} is the number of decades in the approximately linear 
  *    region.
- * 
- * M: M ∈ R, M > 0 is the number of decades that the true logarithmic scale 
+ * <p>
+ * {@code M: M ∈ R, M > 0} is the number of decades that the true logarithmic scale 
  *    approached at the high end of the Hyperlog scale would cover in the plot
- *    range.
- *    If omitted, M has a default value of 4.5.
- * 
- * A: A ∈ R, −W ≤ A ≤ M − 2W is the number of additional decades of negative
- *    data values to be included.
- *    If omitted, A has a default value of 0.0.
+ *    range. If omitted, M has a default value of 4.5.
+ * <p>
+ * {@code A: A ∈ R, −W ≤ A ≤ M − 2W} is the number of additional decades of negative
+ *    data values to be included. If omitted, A has a default value of 0.0.
  */
 public class Hyperlog {
 
@@ -274,8 +274,8 @@ public class Hyperlog {
 
 	/**
 	 * Scale
-	 * @param value
-	 * @return scaled value
+	 * @param value Raw value to be scaled. 
+	 * @return scaled value.
 	 * @throws Exception if no convergence.
 	 */
 	private double scale(double value) throws Exception {

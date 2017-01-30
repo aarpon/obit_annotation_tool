@@ -142,8 +142,9 @@ public class DataViewerTreeToXML {
 
 	/**
 	 * Add a all children of JTree node as nodes to the XML document 
-	 * @param parentNode		The XML parent node to which to append
-	 * @param treeNode		The JTree node to append
+	 * @param document  XML document to which the node has to be added.
+	 * @param parentNode The XML parent node to which to append
+	 * @param treeNode The JTree node to append
 	 */
 	protected void addNodeChildren(Document document, Element parentNode,
 			AbstractNode treeNode) {
@@ -161,6 +162,7 @@ public class DataViewerTreeToXML {
 
 	/**
 	 * Create an XML node from a JTree node
+	 * @param document XML document to which the node has to be added.
 	 * @param node JTree node from which an XML node is to be created  
 	 * @return an XML node
 	 */

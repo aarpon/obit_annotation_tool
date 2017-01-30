@@ -382,6 +382,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/**
 	 * Scans the MetadataFolder and stores all relevant information.
+	 * @return bool True if the metadata folder could be scanned successfully, false otherwise.
 	 */
 	private boolean scanMetadataFolder() {
 
