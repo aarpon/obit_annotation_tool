@@ -298,7 +298,7 @@ public final class BDFACSDIVAFCSEditor extends AbstractEditor {
 
 	/**
 	 * Map the data and openBIS models
-	 * @throws Exception 
+	 * @throws Exception It the initialization of metadata failed. 
 	 */
 	protected boolean initMetadata() throws Exception {
 		

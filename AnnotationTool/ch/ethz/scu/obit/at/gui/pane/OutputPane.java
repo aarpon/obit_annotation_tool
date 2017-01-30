@@ -174,6 +174,7 @@ public final class OutputPane extends JScrollPane {
 	/**
 	 * Build the full text String
 	 * @param text The text to be displayed in the pane
+	 * @param type The type of the log.
 	 * @return full text String (with time stamp and line break)
 	 */
 	private String buildFullString(String text, Type type) {

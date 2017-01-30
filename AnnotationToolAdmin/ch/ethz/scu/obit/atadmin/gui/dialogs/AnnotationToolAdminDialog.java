@@ -822,6 +822,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 	/**
 	 * Asks the user to pick a directory
+	 * @param dialogTitle Title for the directory chooser dialog.
 	 * @return the absolute path of the selected directory
 	 */
 	private String pickDir(String dialogTitle) {

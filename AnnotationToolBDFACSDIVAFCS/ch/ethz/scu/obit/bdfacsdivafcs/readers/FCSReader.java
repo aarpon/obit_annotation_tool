@@ -628,7 +628,7 @@ public final class FCSReader extends AbstractReader {
 	 * 
 	 * @return true if the file header could be parsed successfully, false
 	 *         otherwise.
-	 * @throws IOException
+	 * @throws IOException if the file could not be parsed.
 	 */
 	private boolean parseHeader() throws IOException {
 
@@ -718,7 +718,7 @@ public final class FCSReader extends AbstractReader {
 	 * Parse the TEXT segment.
 	 * 
 	 * @return true if parsing was successful, false otherwise.
-	 * @throws IOException
+	 * @throws IOException if the TEXT segment could not be parsed.
 	 */
 	private boolean parseText() throws IOException {
 		// Read the TEXT segment

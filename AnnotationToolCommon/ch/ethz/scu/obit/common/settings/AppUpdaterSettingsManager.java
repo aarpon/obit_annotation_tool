@@ -321,11 +321,11 @@ public class AppUpdaterSettingsManager {
 	/**
 	 * Return all options for a given property.
 	 * 
-	 * This function is guaranteed to return an ArrayList<String> with at least
+	 * This function is guaranteed to return an {@code ArrayList<String>} with at least
 	 * one element.
 	 * @param name Name of the setting.
 	 * 
-	 * @return an ArrayList<String> with all options for a given property name
+	 * @return an {@code ArrayList<String>} with all options for a given property name
 	 */		
 	public ArrayList<String> possibleValuesForSetting(String name) {
 		return AppSettings.possibleValuesForSetting(name);

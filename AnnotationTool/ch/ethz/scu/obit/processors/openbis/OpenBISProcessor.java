@@ -409,7 +409,8 @@ public class OpenBISProcessor {
 	 * @return a QueryTableModel with one row containing "success" and "message"
 	 * column. You can query the content of the QueryTableModel as follows:
 	 * 
-	 *  {code}
+	 *  <pre>
+     *  {@code
 	 *  String success= "";
 	 *	String message = "";
 	 *	List<Serializable[]> rows = tableModel.getRows();
@@ -422,6 +423,8 @@ public class OpenBISProcessor {
 	 *		}
 	 *	}
 	 *	System.err.println(message);
+	 *  }
+	 #  </pre>
 	 */
 	public QueryTableModel createProject(String spaceCode, String projectCode) {
 		
@@ -444,19 +447,22 @@ public class OpenBISProcessor {
 	 * @return a QueryTableModel with one row containing "success" and "message"
 	 * column. You can query the content of the QueryTableModel as follows:
 	 * 
-	 *  {code}
-	 *  String success= "";
-	 *	String message = "";
-	 *	List<Serializable[]> rows = tableModel.getRows();
-	 *	for (Serializable[] row : rows) {
-	 *		success = (String)row[0];
-	 *		message = (String)row[1];
-	 *		if (success.equals("true")) {
-	 *			System.out.println(message);
-	 *			return true;
-	 *		}
+	 * <pre>
+	 * {@code
+	 *String success= "";
+	 *String message = "";
+	 *List<Serializable[]> rows = tableModel.getRows();
+	 *for (Serializable[] row : rows) {
+	 *	success = (String)row[0];
+	 *	message = (String)row[1];
+	 *	if (success.equals("true")) {
+	 *		System.out.println(message);
+	 *		return true;
 	 *	}
-	 *	System.err.println(message);
+	 *}
+	 *System.err.println(message);
+	 *}
+	 * </pre>
 	 */
 	public QueryTableModel createMetaProject(String metaprojectCode,
 			String metaprojectDescr) {

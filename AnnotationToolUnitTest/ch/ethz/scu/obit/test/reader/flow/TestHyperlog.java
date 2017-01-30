@@ -27,6 +27,7 @@ public class TestHyperlog {
      * @param testName name of the test
      * @param tol tolerance of the test
      * @throws Exception if the Hyperlog parameters are not valid.
+     * @return bool True if the test passed, false otherwise.
      */
     private static boolean test(double[] x, double[] y_exp, double T, double W, 
             double M, double A, String testName, double tol) throws Exception {

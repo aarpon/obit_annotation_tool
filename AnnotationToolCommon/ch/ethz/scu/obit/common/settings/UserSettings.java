@@ -77,7 +77,7 @@ class UserSettings {
 
 	/**
 	 * Return all known settings 
-	 * @return an ArrayList<String> with all known setting names
+	 * @return an {@code ArrayList<String>} with all known setting names
 	 */
 	public static ArrayList<String> getSettingsNames() {
 		

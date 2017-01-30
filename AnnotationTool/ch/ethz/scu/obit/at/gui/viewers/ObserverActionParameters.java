@@ -22,21 +22,13 @@ public class ObserverActionParameters {
         /**
          * Action for the observers.
          */
-        ABOUT_TO_RESCAN,             /** About to start a rescan of data or
-                                         openBIS -> metadata must be reset */
-        SCAN_COMPLETE,               /** Scan of the data folder or the openBIS
-                                         space is complete */
-        EXPERIMENT_CHANGED,          /** The user selected a new experiment (or
-                                         one of its children) in the data 
-                                         viewer */
-        FILE_CHANGED,                /** The user selected another file in the
-                                         data viewer */
-        ABOUT_TO_SCAN_INCREMENTALLY, /** Some data node is being expanded 
-                                         (lazy loading) -> metadata does not
-                                         need to be reset */
+        ABOUT_TO_RESCAN,             /** About to start a rescan of data or openBIS: metadata must be reset */
+        SCAN_COMPLETE,               /** Scan of the data folder or the openBIS space is complete */
+        EXPERIMENT_CHANGED,          /** The user selected a new experiment (or one of its children) in the data viewer */
+        FILE_CHANGED,                /** The user selected another file in the data viewer */
+        ABOUT_TO_SCAN_INCREMENTALLY, /** Some data node is being expanded  (lazy loading): metadata does not need to be reset */
         INCREMENTAL_SCAN_COMPLETE,   /** Incremental scan is complete. */
-        READY_TO_SEND                /** The data is ready to be sent to
-                                         openBIS. */   
+        READY_TO_SEND                /** The data is ready to be sent to openBIS. */   
     }
 
 	/**

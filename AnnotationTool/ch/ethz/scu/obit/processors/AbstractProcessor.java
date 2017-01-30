@@ -68,6 +68,7 @@ abstract public class AbstractProcessor {
 	
 	/**
 	 * Deletes safely-to-remove files like .DS_Store, Thumbs.db, ...
+	 * @param file File to be checked.
 	 * @return true if the file was recognized as a useless hidden
 	 * file and deleted, false if the file is a relevant file to be 
 	 * processed. 
