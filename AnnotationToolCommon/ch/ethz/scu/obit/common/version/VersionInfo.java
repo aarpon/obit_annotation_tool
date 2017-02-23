@@ -9,7 +9,7 @@ public class VersionInfo {
 	/**
 	 * Program version
 	 */
-	public static final String version = "0.9.0";
+	public static final String version = "1.0.0";
 
 	/**
 	 * Version status: "alpha", "beta", or "" for a stable release
@@ -21,7 +21,7 @@ public class VersionInfo {
 	 */
 	public static final String copyright = "Copyright " +
 			Character.toString('\u00A9') + 
-			" 2012 - 2016, Single Cell Unit, " +
+			" 2012 - 2017, Single Cell Unit, " +
 			"D-BSSE, ETH Zurich (Basel)";
 
 	/**
@@ -41,7 +41,7 @@ public class VersionInfo {
 
 	/**
 	 * Convert the version from string to integer
-	 * @param version string like "0.8.4"
+	 * @param version string like "1.0.0"
 	 * @return version integer like 
 	 */
 	public static int versionStringToInteger(String version) {
@@ -66,7 +66,7 @@ public class VersionInfo {
 	/**
 	 * Convert the version from integer to string 
 	 * @param version string like 
-	 * @return version integer like "0.8.4"
+	 * @return version integer like "1.0.0"
 	 */
 	public static String versionIntegerToString(int version) {
 
