@@ -8,18 +8,18 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessor;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Experiment;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.FCSFile;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Specimen;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tray;
-import ch.ethz.scu.obit.bdfacsdivafcs.processors.data.BDFACSDIVAFCSProcessor.Tube;
-import ch.ethz.scu.obit.bdfacsdivafcs.readers.FCSReader;
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.FCSFile;
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Specimen;
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tray;
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tube;
+import ch.ethz.scu.obit.flow.readers.FCSReader;
 
 
 /**
@@ -64,7 +64,7 @@ public class TestFlowReaders {
         String userFolder = dataFolder + "/fortessa/6";
 
         // Initialize the processor
-        BDFACSDIVAFCSProcessor processor = new BDFACSDIVAFCSProcessor(userFolder);
+        FlowProcessor processor = new FlowProcessor(userFolder);
 
         // Scan the project
         boolean success = processor.parse();
@@ -213,7 +213,7 @@ public class TestFlowReaders {
         String userFolder = dataFolder + "/influx/1";
 
         // Initialize the processor
-        BDFACSDIVAFCSProcessor processor = new BDFACSDIVAFCSProcessor(userFolder);
+        FlowProcessor processor = new FlowProcessor(userFolder);
 
         // Scan the project
         boolean success = processor.parse();

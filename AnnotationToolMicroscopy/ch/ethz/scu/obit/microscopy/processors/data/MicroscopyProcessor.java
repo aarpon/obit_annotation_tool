@@ -81,9 +81,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 	/**
 	 * Constructor
-	 */
-	/**
-	 * Constructor
 	 * 
 	 * @param fullFolderName
 	 *            Full path of the folder containing the exported experiment.
