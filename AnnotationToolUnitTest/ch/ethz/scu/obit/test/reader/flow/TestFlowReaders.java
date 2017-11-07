@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-import ch.ethz.scu.obit.flow.processors.data.BDFACSDIVAFlowProcessor;
+import ch.ethz.scu.obit.flow.processors.data.BDLSRFortessaFlowProcessor;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -64,7 +64,7 @@ public class TestFlowReaders {
         String userFolder = dataFolder + "/fortessa/6";
 
         // Initialize the processor
-        BDFACSDIVAFlowProcessor processor = new BDFACSDIVAFlowProcessor(userFolder);
+        BDLSRFortessaFlowProcessor processor = new BDLSRFortessaFlowProcessor(userFolder);
 
         // Scan the project
         boolean success = processor.parse();
@@ -213,7 +213,7 @@ public class TestFlowReaders {
         String userFolder = dataFolder + "/influx/1";
 
         // Initialize the processor
-        BDFACSDIVAFlowProcessor processor = new BDFACSDIVAFlowProcessor(userFolder);
+        BDLSRFortessaFlowProcessor processor = new BDLSRFortessaFlowProcessor(userFolder);
 
         // Scan the project
         boolean success = processor.parse();

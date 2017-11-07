@@ -10,35 +10,19 @@ import java.util.regex.Pattern;
 import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
 import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
 import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
-import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.flow.processors.data.model.Tube;
-import ch.ethz.scu.obit.flow.processors.data.model.Well;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
 /**
- * BDFACSDIVAFlowProcessor parses folder structures created by the following
+ * BDInfluxFlowProcessor parses folder structures created by the following
  * software and hardware combination:
  *
- * 1. BD FACSDiva software (6.1, 7.0, 8.0) on BD LSRFortessa and BD FACSAriaIII
- *
- * 2. BD FACS™ Sortware (1.2) on BD Influx Cell Sorter
- * 
- * Please notice that when exporting data from the FACSDiva software, there are
- * two options:
- *
- * 1) export as FCS files (supported)
- * 2) export as experiment (not supported)
- *
- * When exporting as experiment, the experiment metadata is written to an
- * additional XML file and not correctly stored in the FCS files. These FCS
- * files can not correctly be processed by flow analysis software like FlowJo.
- * For this reason, data exported as experiment from FACSDiva (i.e. with the
- * accompanying XML file) are flagged as invalid and are not processed.
+ * 1. BD FACS™ Sortware (1.2) on BD Influx Cell Sorter
  *
  * @author Aaron Ponti
  */
-public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
+public final class BDInfluxFlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
@@ -46,26 +30,15 @@ public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
     {
     	knownHardwareStrings = new HashMap<String, String>();
 
-    	// BD LSR Fortessa
-    	knownHardwareStrings.put("LSRII", "BD LSR Fortessa");
-    	knownHardwareStrings.put("BD LSR Fortessa SORP (LSRII)", "BD LSR Fortessa");
-    	knownHardwareStrings.put("LSRFortessa", "BD LSR Fortessa");
-
-    	// FD FACSAria III
-    	knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
-
     	// BD Influx
     	knownHardwareStrings.put("BD Influx System (USB)", "BD Influx");
-    	
-    	// S3
-    	knownHardwareStrings.put("S3", "S3e");
     }
 
 	/**
 	 * Constructor
 	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
 	 */
-	public BDFACSDIVAFlowProcessor(String fullUserFolderName) {
+	public BDInfluxFlowProcessor(String fullUserFolderName) {
 
 		// Call base constructor
 		super(fullUserFolderName);
@@ -105,8 +78,8 @@ public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
 	}
 
 	/**
-	 * Return a String representation of the BDFACSDIVAFlowProcessor.
-	 * @return String containing a description of the BDFACSDIVAFlowProcessor.
+	 * Return a String representation of the BDInfluxFlowProcessor.
+	 * @return String containing a description of the BDInfluxFlowProcessor.
 	 */
 	public String toString() {
 		return userFolder.getName();
@@ -130,7 +103,7 @@ public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
 		Map<String, String> attributes = new HashMap<String, String>();
 
 		// Owner name
-		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
+		attributes.put("owner_name", "Unknown");
 
 		// Hardware string
 		String acqHardwareString = processor.getStandardKeyword("$CYT");
@@ -150,41 +123,7 @@ public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
 		if (acqSoftwareString.isEmpty()) {
 		    acqSoftwareString = processor.getCustomKeyword("APPLICATION");
 		}
-		if (acqSoftwareString.contains("BD FACSDiva Software")) {
-			// Check major and minor version (we ignore the patch)
-			Pattern p = Pattern.compile(
-					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
-			Matcher m = p.matcher(acqSoftwareString);
-			if (!m.matches()) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						processor.getFile(),
-						"Unknown software version.");
-			} else {
-				int major;
-				int minor;
-				try {
-					major = Integer.parseInt(m.group(2));
-					minor = Integer.parseInt(m.group(3));
-					// Known valid versions are 6.1 and 7.0
-					if (!((major == 6 && minor == 1) ||
-							(major == 7 && minor == 0) || 
-							(major == 8 && minor == 0))) {
-						validator.isValid = false;
-						validator.invalidFilesOrFolders.put(
-								processor.getFile(),
-								"Unsupported software version: " + 
-								m.group(2) + "." +
-								m.group(3));
-					}
-				} catch (NumberFormatException n) {
-					validator.isValid = false;
-					validator.invalidFilesOrFolders.put(
-							processor.getFile(),
-							"Unknown software version.");
-				}
-			}
-		} else if (acqSoftwareString.contains("BD FACS") &&
+		if (acqSoftwareString.contains("BD FACS") &&
 		        (acqSoftwareString.contains("Sortware"))) {
 		    // The software string is BD FACS™ Sortware, but the
 		    // trademark sign fails to be recognized on some machines
@@ -231,15 +170,6 @@ public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
             if (m.groupCount() >= 5) {
                 acqSoftwareString = acqSoftwareString + m.group(5);
             }
-		} else {
-			if (acqHardwareString.equals("S3e")) {
-				acqSoftwareString = "ProSort";
-			} else {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						processor.getFile(),
-						"Wrong software string: " + acqSoftwareString);
-			}
 		}
 
 		// Acquisition software
@@ -407,95 +337,58 @@ public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
             // Keep track of current experiment
             currentExperiment = expDesc;
 
-			// Is the container a Tray or Specimen?
-			if (identifyContainerType(processor).equals("TRAY")) {
-
-				// Create a new TrayDescriptor or reuse an existing one
-				Tray trayDesc;
-				String trayName = getTrayName(processor);
-				String trayKey = experimentName + "_" + trayName;
-				if (expDesc.trays.containsKey(trayKey)) {
-					trayDesc = expDesc.trays.get(trayKey);
-				} else {
-					trayDesc = 
-							new Tray(trayName);
-					// Store attributes
-					trayDesc.addAttributes(getTrayAttributes(processor));
-					// Store it in the experiment descriptor
-					expDesc.trays.put(trayKey, trayDesc);
-				}
-
-				// Create a new Specimen or reuse an existing one
-				Specimen specDesc;
-				String specName = getSpecimenName(processor);
-				String specKey = trayKey + "_" + specName;
-				if (trayDesc.specimens.containsKey(specKey)) {
-					specDesc = trayDesc.specimens.get(specKey);
-				} else {
-					specDesc = 
-							new Specimen(specName);
-					// Store attributes
-					specDesc.addAttributes(getSpecimenAttributes(processor));
-					// Store it in the tray descriptor
-					trayDesc.specimens.put(specKey, specDesc);
-				}
-
-				// Create a new Well descriptor or reuse an existing one
-				Well wellDesc;
-				String wellName = getTubeOrWellName(processor);
-				String wellKey = specKey + "_" + wellName;
-				if (! specDesc.tubes.containsKey(wellKey)) {
-					wellDesc = new Well(wellName, file, userRootFolder);
-					// Store attributes
-					wellDesc.addAttributes(getTubeOrWellAttributes(processor));
-					// Store events and parameter attributes
-					wellDesc.fcsFile.parameterList = 
-							new FCSFileParameterList(
-									processor.numEvents(),
-									processor.numParameters(),
-									processor.parametersAttr);
-					// Store it in the specimen descriptor
-					specDesc.tubes.put(wellKey, wellDesc);
-				}
-
+			// BDInflux does not have plates (TRAYs)
+			// Create a new Specimen or reuse an existing one
+			Specimen specDesc;
+			String specName = getSpecimenName(processor);
+			String specKey = experimentName + "_" + specName;
+			if (expDesc.specimens.containsKey(specKey)) {
+				specDesc = expDesc.specimens.get(specKey);
 			} else {
+				specDesc = new Specimen(specName);	
+				// Store attributes
+				specDesc.addAttributes(getSpecimenAttributes(processor));
+				// Store it in the experiment descriptor
+				expDesc.specimens.put(specKey, specDesc);
+			}
 
-				// Create a new Specimen or reuse an existing one
-				Specimen specDesc;
-				String specName = getSpecimenName(processor);
-				String specKey = experimentName + "_" + specName;
-				if (expDesc.specimens.containsKey(specKey)) {
-					specDesc = expDesc.specimens.get(specKey);
-				} else {
-					specDesc = new Specimen(specName);	
-					// Store attributes
-					specDesc.addAttributes(getSpecimenAttributes(processor));
-					// Store it in the experiment descriptor
-					expDesc.specimens.put(specKey, specDesc);
-				}
-
-				// Create a new Tube descriptor or reuse an existing one
-				Tube tubeDesc;
-				String tubeName = getTubeOrWellName(processor);
-				String tubeKey = specKey + "_" + tubeName;
-				if (! specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName, file, userRootFolder);	
-					// Store attributes
-					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
-					// Store events and parameter attributes
-					tubeDesc.fcsFile.parameterList = 
-							new FCSFileParameterList(
-									processor.numEvents(),
-									processor.numParameters(),
-									processor.parametersAttr);
-					// Store it in the specimen descriptor
-					specDesc.tubes.put(tubeKey, tubeDesc);
-				}
-
+			// Create a new Tube descriptor or reuse an existing one
+			Tube tubeDesc;
+			String tubeName = getTubeOrWellName(processor);
+			String tubeKey = specKey + "_" + tubeName;
+			if (! specDesc.tubes.containsKey(tubeKey)) {
+				tubeDesc = new Tube(tubeName, file, userRootFolder);	
+				// Store attributes
+				tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
+				// Store events and parameter attributes
+				tubeDesc.fcsFile.parameterList = 
+						new FCSFileParameterList(
+								processor.numEvents(),
+								processor.numParameters(),
+								processor.parametersAttr);
+				// Store it in the specimen descriptor
+				specDesc.tubes.put(tubeKey, tubeDesc);
 			}
 
 		}
 
+	}
+
+	/**
+	 * Return the experiment name stored in the FCS file.
+	 *
+	 * If the FCS file does not contain an experiment name, the name of the 
+	 * folder containing the FCS file is returned as experiment name.
+	 * 
+	 * @param processor with already scanned file
+	 * @return name of the experiment
+	 */
+	protected String getExperimentName(FCSReader processor) {
+		
+		// The Sortware software does not store the experiment name in the FCS file.
+		// Therefore, we return the name of the containing folder
+		File fcsFile = processor.getFile();
+		return fcsFile.getParentFile().getName().toString();
 	}
 
 }
