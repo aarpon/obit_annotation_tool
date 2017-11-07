@@ -1,7 +1,4 @@
-package ch.ethz.scu.obit.flow.processors.data.model;
-
-import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
-
+package ch.ethz.scu.obit.processors.data.model;
 
 /**
  * @author Aaron Ponti

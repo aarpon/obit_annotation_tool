@@ -38,13 +38,13 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.flow.gui.editors.data.model.FlowMetadataMapper;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Experiment;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tray;
-import ch.ethz.scu.obit.flow.processors.data.model.SampleDescriptor;
+import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
+import ch.ethz.scu.obit.processors.data.model.SampleDescriptor;
 
 /**
  * Metadata editor panel.

@@ -1,7 +1,7 @@
 package ch.ethz.scu.obit.flow.gui.viewers.data.model;
 
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.FCSFileParameterList;
+import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
 
 /**
  * Customized Node to be used in a JTree allowing different icons for different

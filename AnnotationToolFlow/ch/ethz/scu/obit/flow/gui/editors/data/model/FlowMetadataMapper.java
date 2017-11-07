@@ -7,8 +7,8 @@ import java.util.Map;
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Experiment;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tray;
+import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 
 /**
  * Collects all relevant metadata to allow the registration of an

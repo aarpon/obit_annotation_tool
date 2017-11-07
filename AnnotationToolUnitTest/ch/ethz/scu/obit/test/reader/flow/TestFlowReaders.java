@@ -14,11 +14,11 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Experiment;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.FCSFile;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Specimen;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tray;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tube;
+import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.model.FCSFile;
+import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
+import ch.ethz.scu.obit.flow.processors.data.model.Tray;
+import ch.ethz.scu.obit.flow.processors.data.model.Tube;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
 
 

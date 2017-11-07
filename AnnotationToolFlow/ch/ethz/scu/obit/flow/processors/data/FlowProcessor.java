@@ -2,22 +2,19 @@ package ch.ethz.scu.obit.flow.processors.data;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.ethz.scu.obit.flow.processors.data.model.SampleDescriptor;
+import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
+import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
+import ch.ethz.scu.obit.flow.processors.data.model.Tray;
+import ch.ethz.scu.obit.flow.processors.data.model.Tube;
+import ch.ethz.scu.obit.flow.processors.data.model.Well;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
-import ch.ethz.scu.obit.processors.AbstractProcessor;
-import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
-import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
-import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
-import ch.ethz.scu.obit.processors.data.validator.GenericValidator;
 
 /**
  * FlowProcessor parses folder structures created by the following
@@ -41,12 +38,7 @@ import ch.ethz.scu.obit.processors.data.validator.GenericValidator;
  *
  * @author Aaron Ponti
  */
-public final class FlowProcessor extends AbstractProcessor {
-
-	/* Private instance variables */
-	private File userFolder;
-	private File userRootFolder;
-	private Experiment currentExperiment;
+public final class FlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
@@ -70,35 +62,14 @@ public final class FlowProcessor extends AbstractProcessor {
     }
 
 	/**
-	 *  A folder descriptor.
-	 */
-	public UserFolder folderDescriptor = null;
-
-	/**
 	 * Constructor
 	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
 	 */
 	public FlowProcessor(String fullUserFolderName) {
 
-		// Instantiate the validator
-		validator = new GenericValidator();
-
-		// fullFolderName MUST be a folder! If it is not, there is 
-		// a major problem with the software setup!
-		File folder = new File(fullUserFolderName);
-		if (!folder.isDirectory()) {
-			// TODO Proper handling of this case.
-			System.err.println("Expected user folder, found file!");
-			System.exit(1);
-		}
-
-		// Set the root folder
-		this.userFolder = folder;
-		this.userRootFolder = folder.getParentFile();
-
-		// Create a descriptor for the user folder
-		folderDescriptor = new UserFolder(folder, userRootFolder); 
-
+		// Call base constructor
+		super(fullUserFolderName);
+		
 	}
 
 	/**
@@ -151,390 +122,133 @@ public final class FlowProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Descriptor that represents a the user top folder. 
-	 * @author Aaron Ponti
+	 * Extract and store the Experiment attributes
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
 	 */
-	public class UserFolder extends RootDescriptor {
+	protected Map<String, String> getExperimentAttributes(FCSReader processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
 
-		/**
-		 * Hash map of experiments.
-		 */ 
-		public Map<String, Experiment> experiments = 
-				new LinkedHashMap<String, Experiment>();
+		// Owner name
+		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
 
-		/**
-		 * Constructor
-		 * @param fullFolder Full path to the global users folder path.
-		 * @param userRootDataPath Full path to current user folder.
-		 */
-		public UserFolder(File fullFolder, File userRootDataPath) {
+		// Hardware string
+		String acqHardwareString = processor.getStandardKeyword("$CYT");
+		if (knownHardwareStrings.containsKey(acqHardwareString)) {
+			// Standardize the hardware string
+			acqHardwareString = knownHardwareStrings.get(acqHardwareString);
+		} else {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(
+					processor.getFile(),
+					"Wrong hardware string: " + acqHardwareString);
+		}
+		attributes.put("acq_hardware", acqHardwareString);
 
-			// Invoke parent constructor
-			super(fullFolder, userRootDataPath);
+		// Software string
+		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
+		if (acqSoftwareString.isEmpty()) {
+		    acqSoftwareString = processor.getCustomKeyword("APPLICATION");
+		}
+		if (acqSoftwareString.contains("BD FACSDiva Software")) {
+			// Check major and minor version (we ignore the patch)
+			Pattern p = Pattern.compile(
+					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
+			Matcher m = p.matcher(acqSoftwareString);
+			if (!m.matches()) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						processor.getFile(),
+						"Unknown software version.");
+			} else {
+				int major;
+				int minor;
+				try {
+					major = Integer.parseInt(m.group(2));
+					minor = Integer.parseInt(m.group(3));
+					// Known valid versions are 6.1 and 7.0
+					if (!((major == 6 && minor == 1) ||
+							(major == 7 && minor == 0) || 
+							(major == 8 && minor == 0))) {
+						validator.isValid = false;
+						validator.invalidFilesOrFolders.put(
+								processor.getFile(),
+								"Unsupported software version: " + 
+								m.group(2) + "." +
+								m.group(3));
+					}
+				} catch (NumberFormatException n) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(
+							processor.getFile(),
+							"Unknown software version.");
+				}
+			}
+		} else if (acqSoftwareString.contains("BD FACS") &&
+		        (acqSoftwareString.contains("Sortware"))) {
+		    // The software string is BD FACS™ Sortware, but the
+		    // trademark sign fails to be recognized on some machines
+		    // (different encoding?); so we skip it.
 
-			// Set the descriptor name
-			this.setName(fullFolder.getName());
+            // Check major and minor version (we ignore the patch)
+            Pattern p = Pattern.compile(
+                    "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,4})(\\.\\d{1,4})?");
+            Matcher m = p.matcher(acqSoftwareString);
+            if (!m.matches()) {
+                validator.isValid = false;
+                validator.invalidFilesOrFolders.put(
+                        processor.getFile(),
+                        "Unknown software version.");
+            } else {
+                int major;
+                int minor;
+                try {
+                    major = Integer.parseInt(m.group(2));
+                    minor = Integer.parseInt(m.group(3));
+                    // Known valid version is 1.2
+                    if (!(major == 1 && minor == 2)) {
+                        validator.isValid = false;
+                        validator.invalidFilesOrFolders.put(
+                                processor.getFile(),
+                                "Unsupported software version: " + 
+                                m.group(2) + "." +
+                                m.group(3));
+                    }
+                } catch (NumberFormatException n) {
+                    validator.isValid = false;
+                    validator.invalidFilesOrFolders.put(
+                            processor.getFile(),
+                            "Unknown software version.");
+                }
+            }
 
+            // Remove the ™ character, that might give problems on some systems
+            acqSoftwareString = "BD FACS Sortware " + m.group(2) +
+                    "." + m.group(3);
+            if (m.groupCount() >= 4) {
+                acqSoftwareString = acqSoftwareString + m.group(4);
+            }
+            if (m.groupCount() >= 5) {
+                acqSoftwareString = acqSoftwareString + m.group(5);
+            }
+		} else {
+			if (acqHardwareString.equals("S3e")) {
+				acqSoftwareString = "ProSort";
+			} else {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(
+						processor.getFile(),
+						"Wrong software string: " + acqSoftwareString);
+			}
 		}
 
-		@Override
-		public String getType() {
-			return "Folder";
-		}
+		// Acquisition software
+		attributes.put("acq_software", acqSoftwareString);
 
-	}
+		// Acquisition date
+		attributes.put("date", processor.getStandardKeyword("$DATE"));
 
-	/**
-	 * Descriptor representing an experiment obtained from the FCS file.
-	 * @author Aaron Ponti
-	 */
-	public class Experiment extends ExperimentDescriptor {
-
-		// An Experiment can contain TRAYS that in turn contain SPECIMENs 
-		// which contain TUBEs, or directly SPECIMENs containing TUBEs.
-
-        /**
-         *  Experiment version
-         *  
-         *  This is used to keep track of the structure of the experiment so that
-         *  older versions of Experiments stored in openBIS are recognized and
-         *  can potentially be upgraded.
-         */
-        public final String version = "1";
-
-        /**
-         *  Experiment description
-         */
-		public String description = "";
-
-		/**
-		 *  Experiment tags (comma-separated list)
-		 */
-		public String tags = "";
-
-		/**
-		 * ArrayList of Tray's
-		 */
-		public Map<String, Tray> trays = 
-				new LinkedHashMap<String, Tray>();
-
-		/**
-		 * ArrayList of Specimen's
-		 */
-		public Map<String, Specimen> specimens = 
-				new LinkedHashMap<String, Specimen>();
-
-		/**
-		 * Constructor
-		 * @param fullPath Full path to the experiment folder.
-		 * @param userRootDataPath Full path to current user folder.
-		 */
-		public Experiment(File fullPath, File userRootDataPath) {
-
-			super(fullPath, userRootDataPath);
-			this.setName(fullPath.getName());
-
-			// Set the attribute relative path. Since this will be 
-			// used by the openBIS dropboxes running on a Unix machine, 
-			// we make sure to use forward slashes for path separators 
-			// when we set it as an attribute.
-			attributes.put("relativePath",
-					this.relativePath.replace("\\", "/"));
-
-		}
-
-		/**
-		 * Alternative constructor
-		 * @param fullPath Full path of the experiment.
-		 * @param name Name of the experiment.
-		 * @param userRootDataPath Full path to current user folder.
-		 */
-		public Experiment(File fullPath, String name, File userRootDataPath) {
-
-			super(fullPath, userRootDataPath);
-			this.setName(name);
-
-			// Set the attribute relative path. Since this will be 
-			// used by the openBIS dropboxes running on a Unix machine, 
-			// we make sure to use forward slashes for path separators 
-			// when we set it as an attribute.
-			attributes.put("relativePath",
-					this.relativePath.replace("\\", "/"));
-
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override		
-		public String getType() {
-			return "Experiment";
-		}
-
-	} 
-
-
-	/**
-	 * Descriptor representing an FCS file associated to a Tube.
-	 * An FCS File is always a child of a Tube.
-	 * @author Aaron Ponti
-	 */
-	public class FCSFile extends DatasetDescriptor {
-
-		/**
-		 * List of parameters with their attributes
-		 */
-		public FCSFileParameterList parameterList = null;
-
-		/**
-		 * Constructor.
-		 * @param fcsFileName FCS file name with full path
-		 * @throws IOException If parsing the file failed.
-		 */
-		public FCSFile(File fcsFileName) throws IOException {
-
-			// Call base constructor
-			super(fcsFileName, userRootFolder);
-
-			// Store the file name
-			this.setName(fcsFileName.getName());
-
-			// Set the attribute relative file name. Since this will be 
-			// used by the openBIS dropboxes running on a Unix machine, 
-			// we make sure to use forward slashes for path separators 
-			// when we set it as an attribute.
-			attributes.put("relativeFileName",
-					this.relativePath.replace("\\", "/"));
-		}
-
-		/**
-		 * Return a String representation of the extracted FCS file.
-		 * @return String representation of the FCS file.
-		 */
-		@Override
-		public String toString() {
-			return getName();
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override		
-		public String getType() {
-			return "FCSFile";
-		}
-
-	}
-
-	/**
-	 * Descriptor representing all parameters associated to an FCS File.
-	 * An FCSFileParameterList is always a child of a FCS File.
-	 * @author Aaron Ponti
-	 */
-	public class FCSFileParameterList extends AbstractDescriptor {
-
-		/**
-		 * Constructor
-		 * @param numEvents Number of events.
-		 * @param numParameters Number of parameters.
-		 * @param parameterAttrib List of Parameter attributes.
-		 */
-		public FCSFileParameterList(int numEvents, int numParameters, 
-				Map<String, String> parameterAttrib) {
-
-			// Set the parameter number and lists and the associated event 
-			// number.
-			attributes.put("numEvents", Integer.toString(numEvents));
-			attributes.put("numParameters", Integer.toString(numParameters));
-			attributes.putAll(parameterAttrib);
-		}
-
-		/**
-		 * Return a String representation of the extracted FCS file.
-		 * @return String representation of the FCS file.
-		 */
-		@Override
-		public String toString() {
-			return "Parameters";
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override		
-		public String getType() {
-			return "FCSFileParamList";
-		}
-
-	}
-
-	/**
-	 * Descriptor representing a specimen obtained from the FCS file.
-	 * A Specimen can be a child of a Tray or directly of an Experiment.
-	 * @author Aaron Ponti
-	 */
-	public class Specimen extends SampleDescriptor {
-
-		/* Public instance variables */
-
-		/**
-		 * ArrayList of Tube's
-		 */			
-		public Map<String, Tube> tubes =
-				new LinkedHashMap<String, Tube>();
-
-		/**
-		 * Constructor.
-		 * @param name Name of the specimen
-		 */
-		public Specimen(String name) {
-
-			this.setName(name);
-
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplidied class name.
-		 */
-		@Override		
-		public String getType() {
-			return "Specimen";
-		}
-
-	}
-
-	/**
-	 * Descriptor representing a tray obtained from the FCS file.
-	 * @author Aaron Ponti
-	 */
-	public class Tray extends SampleDescriptor {
-
-		/**
-		 *  Define the supported tray geometries as a static list
-		 */
-		public final List<String> supportedTrayGeometries =
-				Arrays.asList("96_WELLS_8X12", "384_WELLS_16x24");
-
-		/**
-		 * ArrayList of Specimen's
-		 */
-		public Map<String, Specimen> specimens = 
-				new LinkedHashMap<String, Specimen>();
-
-		/**
-		 * Geometry associated to the plate
-		 */
-		public String geometry;
-
-		/**
-		 * Constructor
-		 * @param name name of the Tray.
-		 */
-		public Tray(String name) {
-
-			this.setName(name);
-
-			// Initialize geometry
-			this.geometry = this.supportedTrayGeometries.get(0);
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override		
-		public String getType() {
-			return "Tray";
-		}
-
-	}
-
-	/**
-	 * Descriptor representing a tube obtained from the FCS file.
-	 * A Tube is always a child of a Specimen.
-     *
-	 * @author Aaron Ponti
-	 */
-	public class Tube extends SampleDescriptor {
-
-		/**
-		 * An FCS file processor.
-		 */
-		public FCSFile fcsFile;
-
-		/**
-		 * Constructor.
-		 * @param name Name of the Tube.
-		 * @param fcsFullFileName Full file name of the FCS file associated
-		 * with the Tube.
-		 * @throws IOException If parsing the FCS file failed.
-		 */
-		public Tube(String name, File fcsFullFileName) 
-				throws IOException {
-
-			this.setName(name);
-
-			// Associate the FCS file to the Tube
-			fcsFile = new FCSFile(fcsFullFileName);
-
-		}
-
-		/**
-		 * Return a String representation of the extracted Tube node.
-		 * @return String representation of the Tube node.
-		 */
-		@Override
-		public String toString() {
-			return getName();
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override
-		public String getType() {
-			return "Tube";
-		}
-
-	}
-
-	/**
-	 * Descriptor representing a well obtained from the FCS file.
-	 * A Well is always a child of a Specimen.
-     *
-	 * @author Aaron Ponti
-	 */
-	public class Well extends Tube {
-
-		/**
-		 * Constructor.
-		 * @param name Name of the Well.
-		 * @param fcsFullFileName Full file name of the FCS file associated
-		 * with the Well.
-		 * @throws IOException if parsing the FCS file failed.
-		 */
-		public Well(String name, File fcsFullFileName) 
-				throws IOException {
-
-			// Call base constructor
-			super(name, fcsFullFileName);
-
-		}
-
-		/**
-		 * Return a simplified class name to use in XML.
-		 * @return simplified class name.
-		 */
-		@Override
-		public String getType() {
-			return "Well";
-		}
-
+		return attributes;
 	}
 
 	/**
@@ -542,7 +256,7 @@ public final class FlowProcessor extends AbstractProcessor {
 	 * @param dir Full path to the directory to scan
 	 * @throws IOException Thrown if a FCS file could not be processed
 	 */
-	private void recursiveDir(File dir) throws IOException {
+	protected void recursiveDir(File dir) throws IOException {
 
 		// To make things simple and robust, we make sure that the first
 		// thing we process at any sub-folder level is an FCS file.
@@ -731,7 +445,7 @@ public final class FlowProcessor extends AbstractProcessor {
 				String wellName = getTubeOrWellName(processor);
 				String wellKey = specKey + "_" + wellName;
 				if (! specDesc.tubes.containsKey(wellKey)) {
-					wellDesc = new Well(wellName, file);
+					wellDesc = new Well(wellName, file, userRootFolder);
 					// Store attributes
 					wellDesc.addAttributes(getTubeOrWellAttributes(processor));
 					// Store events and parameter attributes
@@ -765,7 +479,7 @@ public final class FlowProcessor extends AbstractProcessor {
 				String tubeName = getTubeOrWellName(processor);
 				String tubeKey = specKey + "_" + tubeName;
 				if (! specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName, file);	
+					tubeDesc = new Tube(tubeName, file, userRootFolder);	
 					// Store attributes
 					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
 					// Store events and parameter attributes
@@ -782,386 +496,6 @@ public final class FlowProcessor extends AbstractProcessor {
 
 		}
 
-	}
-
-	/**
-	 * Make sure that the first entry in the file list is an FCS file,
-	 * if there is at least one. 
-	 * @param dir	Current directory
-	 * @return String[] moderately sorted files.
-	 */
-	private String[] getSimplySortedList(File dir) {
-
-		// Go over the list, the first FCS file we find we put it in front of
-		// the list and return.
-		String [] files = dir.list();
-		if (files == null) {
-			return new String[0];
-		}
-		int foundIndx = -1;
-		for (int i = 0; i < files.length; i++) {
-			String fileName = files[i];
-			int indx = fileName.lastIndexOf(".");
-			if (indx == -1) {
-				continue;
-			}
-			String ext = fileName.substring(indx).toLowerCase();
-			if (ext.equals(".fcs")) {
-				foundIndx = i;
-				break;
-			}
-		}
-		// Swap the first entry with this one.
-		if (foundIndx > 0) {
-			String tmp = files[foundIndx];
-			files[foundIndx] = files[0];
-			files[0] = tmp;
-		}
-		return files;
-	}
-
-	/**
-	 * Return the tube name stored in the FCS file
-	 * @param processor with already scanned file
-	 * @return name of the tube or well
-	 */
-	private String getTubeOrWellName(FCSReader processor) {
-
-	    // FACS DIVA software
-	    //
-		// We discriminate here since there is a formatting
-		// difference in the value stored in the "TUBE NAME"
-		// keyword (which is always found in the file, no 
-		// matter whether the container is a Specimen or a
-		// Tray) and the one stored in the "WELL ID" (which 
-		// is found only in Trays). A "TUBE NAME" value like 
-		// A1 becomes a WELL ID like A01.
-	    //
-	    // FACS SORTWARE software
-	    //
-	    // The FACS SORTWARE software does not contain either WELL ID nor
-	    // TUBE NAME. We return the name of the file without path and 
-	    // without extension.
-
-		String name;
-		if (identifyContainerType(processor).equals("TRAY")) {
-			name = processor.getCustomKeyword("WELL ID");
-		} else if (identifyContainerType(processor).equals("SPECIMEN")) {
-		    name = processor.getCustomKeyword("TUBE NAME");
-		} else {
-		    String fcsFileName = processor.getFile().getName(); 
-		    name = fcsFileName.substring(0,
-		            fcsFileName.toLowerCase().lastIndexOf(".fcs"));
-		}
-		return name;
-	}
-
-	/**
-	 * Return true if the experiment was an indexed sort
-	 * @param processor with already scanned file
-	 * @return true if the experiment was an indexed sort, false 
-	 * otherwise 
-	 */
-	private boolean isIndexSort(FCSReader processor) {
-
-	    // BD FACSAria
-		String indexSortLocationCount = processor.getCustomKeyword(
-				"INDEX SORTING SORTED LOCATION COUNT");
-
-		// BD Influx Cell Sorter
-		String indexSortPositions = processor.getCustomKeyword(
-		        "INDEXSORTPOSITIONS");
-
-		// If any one of indexSortLocationCount and indexSortPositions is not
-		// empty, we have an index sort
-		return (!indexSortLocationCount.isEmpty() || 
-		        !indexSortPositions.isEmpty());
-
-	}
-
-	/**
-	 * Return the experiment path the folder name matches the experiment
-	 * name stored in the FCS file
-	 * @param processor with already scanned file
-	 * @param fcsFilePath full file path of the FCS file
-	 * @return experiment path
-	 */
-	private String getExperimentPath(FCSReader processor, 
-			File fcsFilePath) {
-
-		String experimentName = getExperimentName(processor);
-		String experimentPath = "";
-
-		while (fcsFilePath != null) {
-
-			String expNameFromPath = fcsFilePath.getName();
-
-			if (experimentName.equals(expNameFromPath)) {
-				try {
-					experimentPath = fcsFilePath.getCanonicalPath();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				fcsFilePath = null;
-			} else {
-				fcsFilePath = fcsFilePath.getParentFile();
-			}
-
-		}
-
-		return experimentPath;
-	}
-
-	/**
-	 * Return the experiment name stored in the FCS file.
-	 *
-	 * If the FCS file does not contain an experiment name, the name of the 
-	 * folder containing the FCS file is returned as experiment name.
-	 * 
-	 * @param processor with already scanned file
-	 * @return name of the experiment
-	 */
-	private String getExperimentName(FCSReader processor) {
-		String experimentName = processor.getCustomKeyword("EXPERIMENT NAME");
-		if (experimentName.isEmpty()) {
-		    // As experiment name, return the name of the containing folder
-		    File fcsFile = processor.getFile();
-		    experimentName = fcsFile.getParentFile().getName().toString();
-		}
-		return experimentName;
-	}
-
-	/**
-	 * Return the specimen name stored in the FCS file.
-	 *
-	 * Before you query for the specimen name, make sure to
-	 * correctly identifyContainerType().
-	 *
-	 * Some hardware does not specify a specimen name for the FCS file.
-	 * In this case (and only in this case!), as a used convention, we 
-	 * extract a date in the form 20160801 from the experiment name and
-	 * return it. If no date can be found, we return "UNKNOWN".
-	 * 
-	 * @param processor with already scanned file
-	 * @return name of the specimen
-	 */
-	private String getSpecimenName(FCSReader processor) {
-		String specimenName = processor.getStandardKeyword("$SRC");
-		if (specimenName.isEmpty()) {
-
-		    // Extract date information from the experiment name if it
-		    // exists or return UNKNOWN
-		    String expName = getExperimentName(processor);
-		    Pattern p = Pattern.compile("(\\d{8})");
-		    Matcher m = p.matcher(expName);
-		    if (m.find()) {
-		      specimenName = m.group(1);
-		    } else {
-		        specimenName = "UNKNOWN";
-		    }
-		}
-		return specimenName;
-	}
-
-	/**
-	 * Return the tray (plate) name stored in the FCS file.
-	 * 
-	 * Before you query for the tray (plate) name, make sure to
-	 * correctly identifyContainerType().
-	 * @param processor with already scanned file
-	 * @return name of the experiment
-	 */
-	private String getTrayName(FCSReader processor) {
-		String trayName = processor.getCustomKeyword("PLATE NAME");
-		if (trayName.isEmpty()) {
-			trayName = "UNKNOWN";
-		}
-		return trayName;
-	}
-
-	/**
-	 * Identifies the container type of the file (Specimen or Plate or none).
-	 *
-	 * If the file comes from hardware that does not assign a container to an
-	 * FCS file (e.g. the BD Influx), the container type is set to "".
-	 *
-	 * @param processor FCSProcessor with already scanned file
-	 * @return one of "SPECIMEN" or "TRAY"
-	 */
-	private String identifyContainerType(FCSReader processor) {
-
-		if (processor.getCustomKeyword("PLATE NAME").isEmpty()) {
-		    if (! processor.getStandardKeyword("$SRC").isEmpty()) {
-		        return "SPECIMEN";
-		    } else {
-		        return "";
-		    }
-		} else {
-			return "TRAY";
-		}
-	}
-
-	/**
-	 * Extract and store the Experiment attributes
-	 * @param processor FCSProcessor with already scanned file
-	 * @return a key-value map of attributes
-	 */
-	private Map<String, String> getExperimentAttributes(FCSReader processor) {
-		Map<String, String> attributes = new HashMap<String, String>();
-
-		// Owner name
-		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
-
-		// Hardware string
-		String acqHardwareString = processor.getStandardKeyword("$CYT");
-		if (knownHardwareStrings.containsKey(acqHardwareString)) {
-			// Standardize the hardware string
-			acqHardwareString = knownHardwareStrings.get(acqHardwareString);
-		} else {
-			validator.isValid = false;
-			validator.invalidFilesOrFolders.put(
-					processor.getFile(),
-					"Wrong hardware string: " + acqHardwareString);
-		}
-		attributes.put("acq_hardware", acqHardwareString);
-
-		// Software string
-		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
-		if (acqSoftwareString.isEmpty()) {
-		    acqSoftwareString = processor.getCustomKeyword("APPLICATION");
-		}
-		if (acqSoftwareString.contains("BD FACSDiva Software")) {
-			// Check major and minor version (we ignore the patch)
-			Pattern p = Pattern.compile(
-					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
-			Matcher m = p.matcher(acqSoftwareString);
-			if (!m.matches()) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						processor.getFile(),
-						"Unknown software version.");
-			} else {
-				int major;
-				int minor;
-				try {
-					major = Integer.parseInt(m.group(2));
-					minor = Integer.parseInt(m.group(3));
-					// Known valid versions are 6.1 and 7.0
-					if (!((major == 6 && minor == 1) ||
-							(major == 7 && minor == 0) || 
-							(major == 8 && minor == 0))) {
-						validator.isValid = false;
-						validator.invalidFilesOrFolders.put(
-								processor.getFile(),
-								"Unsupported software version: " + 
-								m.group(2) + "." +
-								m.group(3));
-					}
-				} catch (NumberFormatException n) {
-					validator.isValid = false;
-					validator.invalidFilesOrFolders.put(
-							processor.getFile(),
-							"Unknown software version.");
-				}
-			}
-		} else if (acqSoftwareString.contains("BD FACS") &&
-		        (acqSoftwareString.contains("Sortware"))) {
-		    // The software string is BD FACS™ Sortware, but the
-		    // trademark sign fails to be recognized on some machines
-		    // (different encoding?); so we skip it.
-
-            // Check major and minor version (we ignore the patch)
-            Pattern p = Pattern.compile(
-                    "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,4})(\\.\\d{1,4})?");
-            Matcher m = p.matcher(acqSoftwareString);
-            if (!m.matches()) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        processor.getFile(),
-                        "Unknown software version.");
-            } else {
-                int major;
-                int minor;
-                try {
-                    major = Integer.parseInt(m.group(2));
-                    minor = Integer.parseInt(m.group(3));
-                    // Known valid version is 1.2
-                    if (!(major == 1 && minor == 2)) {
-                        validator.isValid = false;
-                        validator.invalidFilesOrFolders.put(
-                                processor.getFile(),
-                                "Unsupported software version: " + 
-                                m.group(2) + "." +
-                                m.group(3));
-                    }
-                } catch (NumberFormatException n) {
-                    validator.isValid = false;
-                    validator.invalidFilesOrFolders.put(
-                            processor.getFile(),
-                            "Unknown software version.");
-                }
-            }
-
-            // Remove the ™ character, that might give problems on some systems
-            acqSoftwareString = "BD FACS Sortware " + m.group(2) +
-                    "." + m.group(3);
-            if (m.groupCount() >= 4) {
-                acqSoftwareString = acqSoftwareString + m.group(4);
-            }
-            if (m.groupCount() >= 5) {
-                acqSoftwareString = acqSoftwareString + m.group(5);
-            }
-		} else {
-			if (acqHardwareString.equals("S3e")) {
-				acqSoftwareString = "ProSort";
-			} else {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						processor.getFile(),
-						"Wrong software string: " + acqSoftwareString);
-			}
-		}
-
-		// Acquisition software
-		attributes.put("acq_software", acqSoftwareString);
-
-		// Acquisition date
-		attributes.put("date", processor.getStandardKeyword("$DATE"));
-
-		return attributes;
-	}
-
-	/**
-	 * Extract and store the Tray attributes
-	 * @param processor FCSProcessor with already scanned file
-	 * @return a key-value map of attributes
-	 */
-	private Map<String, String> getTrayAttributes(FCSReader processor) {
-        // Nothing
-		return new HashMap<String, String>();
-	}
-
-	/**
-	 * Extract and store the Specimen attributes
-	 * @param processor FCSProcessor with already scanned file
-	 * @return a key-value map of attributes
-	 */
-	private Map<String, String> getSpecimenAttributes(FCSReader processor) {
-        // Nothing
-		return new HashMap<String, String>();
-	}
-
-	/**
-	 * Extract and store the Tube attributes
-	 * @param processor FCSProcessor with already scanned file
-	 * @return a key-value map of attributes
-	 */
-	private Map<String, String> getTubeOrWellAttributes(FCSReader processor) {
-		Map<String, String> attributes = new HashMap<String, String>();
-		attributes.put("dataFilename", processor.getStandardKeyword("$FIL"));
-		attributes.put("indexSort", isIndexSort(processor) ? "true" : "false");
-		return attributes;
 	}
 
 }

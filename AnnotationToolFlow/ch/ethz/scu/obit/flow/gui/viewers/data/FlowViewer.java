@@ -11,12 +11,16 @@ import ch.ethz.scu.obit.flow.gui.viewers.data.model.SpecimenNode;
 import ch.ethz.scu.obit.flow.gui.viewers.data.model.TrayNode;
 import ch.ethz.scu.obit.flow.gui.viewers.data.model.TubeNode;
 import ch.ethz.scu.obit.flow.gui.viewers.data.model.WellNode;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Experiment;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Specimen;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tray;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Tube;
-import ch.ethz.scu.obit.flow.processors.data.FlowProcessor.Well;
+import ch.ethz.scu.obit.flow.processors.data.AbstractFlowProcessor;
+import ch.ethz.scu.obit.flow.processors.data.FlowProcessorFactory;
+import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.model.FCSFile;
+import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
+import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
+import ch.ethz.scu.obit.flow.processors.data.model.Tray;
+import ch.ethz.scu.obit.flow.processors.data.model.Tube;
+import ch.ethz.scu.obit.flow.processors.data.model.UserFolder;
+import ch.ethz.scu.obit.flow.processors.data.model.Well;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
@@ -49,9 +53,9 @@ public final class FlowViewer extends AbstractViewer {
 	public boolean parse(File userFolder) {
 
 		// Process the user folder
-		FlowProcessor divafcsprocessor;
+		AbstractFlowProcessor divafcsprocessor;
 		try {
-			divafcsprocessor = new FlowProcessor(
+			divafcsprocessor = FlowProcessorFactory.createProcessor(
 					userFolder.getCanonicalPath());
 		} catch (IOException e) {
 			outputPane.err("Could not parse the folder " + userFolder + "!");
@@ -133,32 +137,31 @@ public final class FlowViewer extends AbstractViewer {
 		} else if (className.equals("Experiment")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-                    ((FlowProcessor.Experiment)
+                    ((Experiment)
                             nodeInfo).getAttributes());
 		} else if (className.equals("Tray")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((FlowProcessor.Tray)
+					((Tray)
 							nodeInfo).getAttributes());
 		} else if (className.equals("Specimen")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((FlowProcessor.Specimen)
+					((Specimen)
 							nodeInfo).getAttributes());
 		} else if (className.equals("Tube")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((FlowProcessor.Tube)
+					((Tube)
 							nodeInfo).getAttributes());
 		} else if (className.equals("Well")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((FlowProcessor.Well)
+					((Well)
 							nodeInfo).getAttributes());
 		} else if (className.equals("FCSFile")) {
 			// Cast
-			FlowProcessor.FCSFile fcsFile =
-					(FlowProcessor.FCSFile) nodeInfo;
+			FCSFile fcsFile = (FCSFile) nodeInfo;
 			FCSReader fcs = new FCSReader(
 					new File(fcsFile.getFullPath()), false);
 			try {
@@ -171,7 +174,7 @@ public final class FlowViewer extends AbstractViewer {
 		} else if (className.equals("FCSFileParameterList")) {
 			clearMetadataTable();
 			addAttributesToMetadataTable(
-					((FlowProcessor.FCSFileParameterList)
+					((FCSFileParameterList)
 							nodeInfo).getAttributes());
 		} else {
 			clearMetadataTable();
@@ -199,8 +202,7 @@ public final class FlowViewer extends AbstractViewer {
          * @param top Root node for the tree
          * @param folderDescriptor A folder descriptor object.
          */
-	protected void createNodes(RootNode top,
-			FlowProcessor.UserFolder folderDescriptor) {
+	protected void createNodes(RootNode top, UserFolder folderDescriptor) {
 		
 		ExperimentNode experiment;
 		TrayNode tray;
