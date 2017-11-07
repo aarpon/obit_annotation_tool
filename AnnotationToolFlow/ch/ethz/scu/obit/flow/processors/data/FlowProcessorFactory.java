@@ -17,7 +17,7 @@ public class FlowProcessorFactory {
 	 */
 	public static AbstractFlowProcessor createProcessor(String folder) {
 
-		return new FlowProcessor(folder);
+		return new BDFACSDIVAFlowProcessor(folder);
 
 	}
 

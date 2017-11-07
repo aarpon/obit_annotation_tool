@@ -14,25 +14,9 @@ import ch.ethz.scu.obit.processors.AbstractProcessor;
 import ch.ethz.scu.obit.processors.data.validator.GenericValidator;
 
 /**
- * FlowProcessor parses folder structures created by the following
- * software and hardware combination:
- *
- * 1. BD FACSDiva software (6.1, 7.0, 8.0) on BD LSRFortessa and BD FACSAriaIII
- *
- * 2. BD FACS™ Sortware (1.2) on BD Influx Cell Sorter
+ * AbstractFlowProcessor provides an abstract implementation for concrete
+ * processors for specific hardware/software configurations.
  * 
- * Please notice that when exporting data from the FACSDiva software, there are
- * two options:
- *
- * 1) export as FCS files (supported)
- * 2) export as experiment (not supported)
- *
- * When exporting as experiment, the experiment metadata is written to an
- * additional XML file and not correctly stored in the FCS files. These FCS
- * files can not correctly be processed by flow analysis software like FlowJo.
- * For this reason, data exported as experiment from FACSDiva (i.e. with the
- * accompanying XML file) are flagged as invalid and are not processed.
- *
  * @author Aaron Ponti
  */
 public abstract class AbstractFlowProcessor extends AbstractProcessor {
@@ -90,8 +74,8 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	public abstract boolean parse();
 
 	/**
-	 * Return a String representation of the FlowProcessor.
-	 * @return String containing a description of the FlowProcessor.
+	 * Return a String representation of the AbstractFlowProcessor.
+	 * @return String containing a description of the AbstractFlowProcessor.
 	 */
 	public String toString() {
 		return userFolder.getName();

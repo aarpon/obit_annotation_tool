@@ -17,7 +17,7 @@ import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
 /**
- * FlowProcessor parses folder structures created by the following
+ * BDFACSDIVAFlowProcessor parses folder structures created by the following
  * software and hardware combination:
  *
  * 1. BD FACSDiva software (6.1, 7.0, 8.0) on BD LSRFortessa and BD FACSAriaIII
@@ -38,7 +38,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  *
  * @author Aaron Ponti
  */
-public final class FlowProcessor extends AbstractFlowProcessor {
+public final class BDFACSDIVAFlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
@@ -65,7 +65,7 @@ public final class FlowProcessor extends AbstractFlowProcessor {
 	 * Constructor
 	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
 	 */
-	public FlowProcessor(String fullUserFolderName) {
+	public BDFACSDIVAFlowProcessor(String fullUserFolderName) {
 
 		// Call base constructor
 		super(fullUserFolderName);
@@ -105,8 +105,8 @@ public final class FlowProcessor extends AbstractFlowProcessor {
 	}
 
 	/**
-	 * Return a String representation of the FlowProcessor.
-	 * @return String containing a description of the FlowProcessor.
+	 * Return a String representation of the BDFACSDIVAFlowProcessor.
+	 * @return String containing a description of the BDFACSDIVAFlowProcessor.
 	 */
 	public String toString() {
 		return userFolder.getName();

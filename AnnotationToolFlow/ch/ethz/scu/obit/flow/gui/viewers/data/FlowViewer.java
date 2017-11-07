@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Simple graphical viewer for the FlowProcessor
+ * Simple graphical viewer for the AbstractFlowProcessor
  * @author Aaron Ponti
  */
 public final class FlowViewer extends AbstractViewer {
