@@ -53,9 +53,9 @@ public final class FlowViewer extends AbstractViewer {
 	public boolean parse(File userFolder) {
 
 		// Process the user folder
-		AbstractFlowProcessor divafcsprocessor;
+		AbstractFlowProcessor flowprocessor;
 		try {
-			divafcsprocessor = FlowProcessorFactory.createProcessor(
+			flowprocessor = FlowProcessorFactory.createProcessor(
 					userFolder.getCanonicalPath());
 		} catch (IOException e) {
 			outputPane.err("Could not parse the folder " + userFolder + "!");
@@ -63,17 +63,17 @@ public final class FlowViewer extends AbstractViewer {
 		}
 
 		// We parse. If parsing fails, we just return (the dataset is invalid).
-		if (!divafcsprocessor.parse()) {
+		if (!flowprocessor.parse()) {
 			outputPane.err("Could not parse the folder " + userFolder + "!");
-			divafcsprocessor = null;
+			flowprocessor = null;
 			return false;
 		}
 
 		// Make sure we have a valid dataset
-		if (!divafcsprocessor.validator.isValid) {
+		if (!flowprocessor.validator.isValid) {
 			DefaultTableModel model = 
 					(DefaultTableModel) invalidDatasetsTable.getModel();
-			for (File file : divafcsprocessor.validator.invalidFilesOrFolders.keySet()) {
+			for (File file : flowprocessor.validator.invalidFilesOrFolders.keySet()) {
 				String filePath;
 				try {
 					filePath = file.getCanonicalPath();
@@ -87,13 +87,13 @@ public final class FlowViewer extends AbstractViewer {
 					filePath = "Unknown";
 				}
 				model.addRow(new Object[] {filePath,
-						divafcsprocessor.validator.invalidFilesOrFolders.get(file)});
+						flowprocessor.validator.invalidFilesOrFolders.get(file)});
 			}
 			return false;
 		}
 
 		// We will append the experiment nodes directly to the root node
-		createNodes((RootNode)rootNode, divafcsprocessor.folderDescriptor);
+		createNodes((RootNode)rootNode, flowprocessor.folderDescriptor);
 		
 		return true;
 	}

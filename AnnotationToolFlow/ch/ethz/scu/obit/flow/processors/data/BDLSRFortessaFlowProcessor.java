@@ -20,10 +20,8 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  * BDLSRFortessaFlowProcessor parses folder structures created by the following
  * software and hardware combination:
  *
- * 1. BD FACSDiva software (6.1, 7.0, 8.0) on BD LSRFortessa and BD FACSAriaIII
+ * BD FACSDiva software (6.1, 7.0, 8.0) on BD LSR Fortessa
  *
- * 2. BD FACS™ Sortware (1.2) on BD Influx Cell Sorter
- * 
  * Please notice that when exporting data from the FACSDiva software, there are
  * two options:
  *
@@ -141,95 +139,38 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 		if (acqSoftwareString.isEmpty()) {
 		    acqSoftwareString = processor.getCustomKeyword("APPLICATION");
 		}
-		if (acqSoftwareString.contains("BD FACSDiva Software")) {
-			// Check major and minor version (we ignore the patch)
-			Pattern p = Pattern.compile(
-					"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
-			Matcher m = p.matcher(acqSoftwareString);
-			if (!m.matches()) {
+		
+		// Check major and minor version (we ignore the patch)
+		Pattern p = Pattern.compile(
+				"(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
+		Matcher m = p.matcher(acqSoftwareString);
+		if (!m.matches()) {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(
+					processor.getFile(),
+					"Unknown software version.");
+		} else {
+			int major;
+			int minor;
+			try {
+				major = Integer.parseInt(m.group(2));
+				minor = Integer.parseInt(m.group(3));
+				// Known valid versions are 6.1 and 7.0
+				if (!((major == 6 && minor == 1) ||
+						(major == 7 && minor == 0) ||
+						(major == 8 && minor == 0))) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(
+							processor.getFile(),
+							"Unsupported software version: " +
+							m.group(2) + "." +
+							m.group(3));
+				}
+			} catch (NumberFormatException n) {
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(
 						processor.getFile(),
 						"Unknown software version.");
-			} else {
-				int major;
-				int minor;
-				try {
-					major = Integer.parseInt(m.group(2));
-					minor = Integer.parseInt(m.group(3));
-					// Known valid versions are 6.1 and 7.0
-					if (!((major == 6 && minor == 1) ||
-							(major == 7 && minor == 0) || 
-							(major == 8 && minor == 0))) {
-						validator.isValid = false;
-						validator.invalidFilesOrFolders.put(
-								processor.getFile(),
-								"Unsupported software version: " + 
-								m.group(2) + "." +
-								m.group(3));
-					}
-				} catch (NumberFormatException n) {
-					validator.isValid = false;
-					validator.invalidFilesOrFolders.put(
-							processor.getFile(),
-							"Unknown software version.");
-				}
-			}
-		} else if (acqSoftwareString.contains("BD FACS") &&
-		        (acqSoftwareString.contains("Sortware"))) {
-		    // The software string is BD FACS™ Sortware, but the
-		    // trademark sign fails to be recognized on some machines
-		    // (different encoding?); so we skip it.
-
-            // Check major and minor version (we ignore the patch)
-            Pattern p = Pattern.compile(
-                    "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,4})(\\.\\d{1,4})?");
-            Matcher m = p.matcher(acqSoftwareString);
-            if (!m.matches()) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        processor.getFile(),
-                        "Unknown software version.");
-            } else {
-                int major;
-                int minor;
-                try {
-                    major = Integer.parseInt(m.group(2));
-                    minor = Integer.parseInt(m.group(3));
-                    // Known valid version is 1.2
-                    if (!(major == 1 && minor == 2)) {
-                        validator.isValid = false;
-                        validator.invalidFilesOrFolders.put(
-                                processor.getFile(),
-                                "Unsupported software version: " + 
-                                m.group(2) + "." +
-                                m.group(3));
-                    }
-                } catch (NumberFormatException n) {
-                    validator.isValid = false;
-                    validator.invalidFilesOrFolders.put(
-                            processor.getFile(),
-                            "Unknown software version.");
-                }
-            }
-
-            // Remove the ™ character, that might give problems on some systems
-            acqSoftwareString = "BD FACS Sortware " + m.group(2) +
-                    "." + m.group(3);
-            if (m.groupCount() >= 4) {
-                acqSoftwareString = acqSoftwareString + m.group(4);
-            }
-            if (m.groupCount() >= 5) {
-                acqSoftwareString = acqSoftwareString + m.group(5);
-            }
-		} else {
-			if (acqHardwareString.equals("S3e")) {
-				acqSoftwareString = "ProSort";
-			} else {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						processor.getFile(),
-						"Wrong software string: " + acqSoftwareString);
 			}
 		}
 

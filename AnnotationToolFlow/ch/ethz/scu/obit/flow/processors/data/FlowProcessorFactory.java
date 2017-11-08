@@ -3,14 +3,7 @@ package ch.ethz.scu.obit.flow.processors.data;
 import java.io.File;
 import java.io.IOException;
 
-import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
-import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
-import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
-import ch.ethz.scu.obit.flow.processors.data.model.Tray;
-import ch.ethz.scu.obit.flow.processors.data.model.Tube;
-import ch.ethz.scu.obit.flow.processors.data.model.Well;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
-import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
 /**
  * The Composite Microscopy Reader factory returns the AbstractCompositeMicroscopyReader
@@ -108,7 +101,6 @@ public class FlowProcessorFactory {
 				processor.parse();
 
 				// Return the hardware string
-				String tmp = processor.getStandardKeyword("$CYT");
 				return processor.getStandardKeyword("$CYT"); 
 
 
