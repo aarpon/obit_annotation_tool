@@ -38,7 +38,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  *
  * @author Aaron Ponti
  */
-public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
+public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
@@ -46,17 +46,15 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
     {
     	knownHardwareStrings = new HashMap<String, String>();
 
-    	// BD LSR Fortessa
-    	knownHardwareStrings.put("LSRII", "BD LSR Fortessa");
-    	knownHardwareStrings.put("BD LSR Fortessa SORP (LSRII)", "BD LSR Fortessa");
-    	knownHardwareStrings.put("LSRFortessa", "BD LSR Fortessa");
+    	// S3
+    	knownHardwareStrings.put("S3", "S3e");
     }
 
 	/**
 	 * Constructor
 	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
 	 */
-	public BDLSRFortessaFlowProcessor(String fullUserFolderName) {
+	public BIORADS3eFlowProcessor(String fullUserFolderName) {
 
 		// Call base constructor
 		super(fullUserFolderName);

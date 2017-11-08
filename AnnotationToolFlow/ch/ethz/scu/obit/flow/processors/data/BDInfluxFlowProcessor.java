@@ -391,4 +391,15 @@ public final class BDInfluxFlowProcessor extends AbstractFlowProcessor {
 		return fcsFile.getParentFile().getName().toString();
 	}
 
+	/**
+	 * Returns true if the passed hardware string (from an FCS file) is a recognized
+	 * hardware string for the BD Influx.
+	 * @param hardwareString Hardware string.
+	 * @return true if the string is a valid hardware string for the BD Influx, false otherwise.
+	 */
+	public static boolean isValidHardwareString(String hardwareString) {
+
+		return knownHardwareStrings.containsKey(hardwareString);
+	}
+
 }

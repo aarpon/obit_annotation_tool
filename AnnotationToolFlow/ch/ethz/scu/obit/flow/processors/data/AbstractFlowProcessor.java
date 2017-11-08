@@ -337,5 +337,13 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 		attributes.put("indexSort", isIndexSort(processor) ? "true" : "false");
 		return attributes;
 	}
+	
+	/**
+	 * Returns true if the passed hardware string (from an FCS file) is a recognized
+	 * hardware string for the processor.
+	 * @param hardwareString Hardware string.
+	 * @return true if the string is a valid hardware string for the procesdor, false otherwise.
+	 */	
+	public static boolean isValidHardwareString(String hardwareString) { return false; }
 
 }

@@ -1,5 +1,17 @@
 package ch.ethz.scu.obit.flow.processors.data;
 
+import java.io.File;
+import java.io.IOException;
+
+import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
+import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
+import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
+import ch.ethz.scu.obit.flow.processors.data.model.Tray;
+import ch.ethz.scu.obit.flow.processors.data.model.Tube;
+import ch.ethz.scu.obit.flow.processors.data.model.Well;
+import ch.ethz.scu.obit.flow.readers.FCSReader;
+import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
+
 /**
  * The Composite Microscopy Reader factory returns the AbstractCompositeMicroscopyReader
  * that announces to be able to read and interpret the content of the input
@@ -9,15 +21,105 @@ package ch.ethz.scu.obit.flow.processors.data;
  */
 public class FlowProcessorFactory {
 
+	private static String hardwareString = "";
+
 	/**
 	 * Creates a composite microscope reader viewer depending on the
 	 * answer of their canRead() method.
 	 * @param folder Folder to be processed.
 	 * @return a concrete implementation of an AbstractCompositeMicroscopyReader
+	 * @throws IOException if the hardware class could not be defined.
 	 */
-	public static AbstractFlowProcessor createProcessor(String folder) {
+	public static AbstractFlowProcessor createProcessor(String folder) throws IOException {
 
-		return new BDLSRFortessaFlowProcessor(folder);
+		hardwareString = "";
+
+		hardwareString = FlowProcessorFactory.recursiveDir(new File(folder));
+
+		if (BDLSRFortessaFlowProcessor.isValidHardwareString(hardwareString) == true) {
+			return new BDLSRFortessaFlowProcessor(folder);
+		} else if (BDFACSAriaFlowProcessor.isValidHardwareString(hardwareString) == true) {
+			return new BDFACSAriaFlowProcessor(folder);
+		} else if (BDInfluxFlowProcessor.isValidHardwareString(hardwareString) == true) {
+			return new BDInfluxFlowProcessor(folder);
+		} else if (BIORADS3eFlowProcessor.isValidHardwareString(hardwareString) == true) {
+			return new BIORADS3eFlowProcessor(folder);
+		} else {
+			throw new IOException("Unknown hardware type!");
+		}
+			
+	}
+	
+	private static String recursiveDir(File dir) {
+
+		// Since this function is recursive, we check whether we
+		// already found the value.
+		if (! hardwareString.equals("")) {
+			
+			// We found the string, we can return
+			return hardwareString;
+		}
+
+		// Get the list of files
+		String [] files = dir.list();
+
+		// Empty subfolders are not accepted
+		if (files.length == 0) {
+			return "";
+		}
+
+		// Go over the files and folders
+		for (String f : files) {
+
+			File file = new File(dir + File.separator + f);
+
+			// Is it a directory? Recurse into it
+			if (file.isDirectory()) {
+
+				// Recurse into the subfolder
+				hardwareString = recursiveDir(file);
+				
+				if (! hardwareString.equals("")) {
+					
+					// We found the string, we can return
+					return hardwareString;
+				}
+
+				// Move on to the next file
+				continue;
+			}
+
+			// Is it an FCS file?
+			String fileName = file.getName();
+			int indx = fileName.lastIndexOf(".");
+			if (indx == -1) {
+				continue;
+			}
+			String ext = fileName.substring(indx);
+			if (! ext.equalsIgnoreCase(".fcs")) {
+				continue;
+			}
+
+			// Is it an FCS file? Scan it and extract the information
+			FCSReader processor = new FCSReader(file, false);
+			try {
+				
+				// Parse the file
+				processor.parse();
+
+				// Return the hardware string
+				String tmp = processor.getStandardKeyword("$CYT");
+				return processor.getStandardKeyword("$CYT"); 
+
+
+			} catch (IOException e) {
+				continue;
+			}
+
+		}
+		
+		// We haven't found any FCS file!
+		return "";
 
 	}
 

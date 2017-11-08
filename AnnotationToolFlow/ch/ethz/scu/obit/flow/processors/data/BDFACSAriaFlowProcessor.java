@@ -44,4 +44,16 @@ public final class BDFACSAriaFlowProcessor extends BDLSRFortessaFlowProcessor {
 	public BDFACSAriaFlowProcessor(String fullUserFolderName) {
 		super(fullUserFolderName);
 	}
+	
+	/**
+	 * Returns true if the passed hardware string (from an FCS file) is a recognized
+	 * hardware string for the BD FACS Aria.
+	 * @param hardwareString Hardware string.
+	 * @return true if the string is a valid hardware string for the BD FACS Aria, false otherwise.
+	 */
+	public static boolean isValidHardwareString(String hardwareString) {
+
+		return knownHardwareStrings.containsKey(hardwareString);
+	}
+
 }
