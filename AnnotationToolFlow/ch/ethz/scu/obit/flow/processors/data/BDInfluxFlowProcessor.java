@@ -228,24 +228,13 @@ public final class BDInfluxFlowProcessor extends AbstractFlowProcessor {
 				continue;
 			}
 
-			// The DIVA software can export FCS files in two modes: FCS export
-			// creates valid FCS 3.0-compliant files. Experiment export creates 
-			// files that cannot be used in subsequent analysis in third-party
-			// software like FlowJo. In case of Experiment exports, an XML file
-			// is saved along with the series of FCS files. We use the presence
-			// of the XML file to discriminate between the two export modes.
+			// Get the file extension.
 			String fileName = file.getName();
 			int indx = fileName.lastIndexOf(".");
 			if (indx == -1) {
 				continue;
 			}
 			String ext = fileName.substring(indx);
-			if (ext.equalsIgnoreCase(".xml")) {
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(
-						file, "Experiment export");
-				continue;
-			}
 
 			// Check whether the file is a valid attachment
 			if (ExperimentDescriptor.isValidAttachment(file)) {

@@ -1,5 +1,6 @@
 package ch.ethz.scu.obit.test.reader.flow;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -240,7 +241,7 @@ public class TestFlowReaders {
             // Check
             assertEquals(name, "sort_20160427");
             assertEquals(code, "sort_20160427");
-            assertEquals(attributes.get("acq_hardware"), "BD Influx");
+            assertEquals(attributes.get("acq_hardware"), "BD Influx System (USB)");
             assertEquals(attributes.get("acq_software"), "BD FACS™ Sortware 1.2.0.142");
             assertEquals(attributes.get("owner_name"), "");
 
@@ -728,6 +729,140 @@ public class TestFlowReaders {
 
         // Save as CSV file
         File csvFile = new File("test_influx.csv");
+
+        try {
+            success = reader.exportDataToCSV(csvFile);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            success = false;
+        }
+
+        assertEquals(success, true);
+
+        // Delete file
+        csvFile.delete();
+    }
+
+    /**
+     * Test reading a single FCS 3.0 file from Influx (FACS Sortware 1.2).
+     */
+    @Test
+    public void testSingleS35FileRead() {
+
+        // Test an FCS 3.1 file from BIORAD S3 (ProSort)
+        File fcsFile = new File(dataFolder + 
+                "/s3/5/s3/unstained.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+
+        // Test several keywords
+        assertEquals(reader.getFCSVersion(), "FCS3.1");
+        assertEquals(reader.getStandardKeyword("$CYT"), "S3");
+        assertEquals(reader.getStandardKeyword("$DATATYPE"), "I");
+
+        // The files do not contain ANY custom keyword; moreover, the standard
+        // keywords lack entries such as $FIL. The files also do not store the
+        // name of the acquiring software.
+        // Also there is no EXPERIMENT NAME key, nor any TUBE NAME keys!
+
+        // Test data
+        assertEquals(reader.numEvents(), 102013);
+        assertEquals(reader.numParameters(), 21);
+        
+        // Get the column names
+        ArrayList<String> parameters = reader.getParameterNames();
+        
+        // Test the parameter names
+        assertEquals(parameters.get(0), "TIME_MSW");
+        assertEquals(parameters.get(1), "TIME_LSW");
+        assertEquals(parameters.get(2), "FSC-HEIGHT");
+        assertEquals(parameters.get(3), "FSC-AREA");
+        assertEquals(parameters.get(4), "FSC-WIDTH");
+        assertEquals(parameters.get(5), "SSC-HEIGHT");
+        assertEquals(parameters.get(6), "SSC-AREA");
+        assertEquals(parameters.get(7), "SSC-WIDTH");
+        assertEquals(parameters.get(8), "FL1-HEIGHT");
+        assertEquals(parameters.get(9), "FL1-AREA");
+        assertEquals(parameters.get(10), "FL1-WIDTH");      
+        assertEquals(parameters.get(11), "FL2-HEIGHT");
+        assertEquals(parameters.get(12), "FL2-AREA");
+        assertEquals(parameters.get(13), "FL2-WIDTH");
+        assertEquals(parameters.get(14), "FL3-HEIGHT");
+        assertEquals(parameters.get(15), "FL3-AREA");
+        assertEquals(parameters.get(16), "FL3-WIDTH");
+        assertEquals(parameters.get(17), "FL4-HEIGHT");
+        assertEquals(parameters.get(18), "FL4-AREA");
+        assertEquals(parameters.get(19), "FL4-WIDTH");       
+        assertEquals(parameters.get(20), "SORT");
+       
+        // Check the data
+        double[] time_msw = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        double[] expected_time_msw = {0.0, 0.0, 0.0, 0.0, 0.0};
+        try {
+        	// Read the first 5 values from "FSC-HEIGHT"
+        	time_msw = reader.getRawDataPerColumnIndex(0, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+        assertArrayEquals(time_msw, expected_time_msw, 1e-6);
+
+        double[] time_lsw = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        double[] expected_time_lsw = {25670700.0, 25682387.0, 25686935.0, 25795356.0, 25824042.0};
+        try {
+        	// Read the first 5 values from "FSC-HEIGHT"
+        	time_lsw = reader.getRawDataPerColumnIndex(1, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+        assertArrayEquals(time_lsw, expected_time_lsw, 1e-6);
+
+        double[] fsc_height = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        double[] expected_fsc_height = {112555.0, 118798.0, 124441.0, 128270.0, 118261.0};
+        try {
+        	// Read the first 5 values from "FSC-HEIGHT"
+			fsc_height = reader.getRawDataPerColumnIndex(2, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+        assertArrayEquals(fsc_height, expected_fsc_height, 1e-6);
+        
+    }
+    
+    /**
+     * Test parsing the measurement data from a single FCS 3.0 file from
+     * Influx (FACS Sortware 1.2) and saving them as CSV file
+     */
+    @Test
+    public void testSingleS35FileStoreAsCSV() {
+
+        // Test an FCS 3.1 file from BIORAD S3 (ProSort)
+        File fcsFile = new File(dataFolder + 
+                "/s3/5/s3/unstained.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+
+        // Save as CSV file
+        File csvFile = new File("test_s3.csv");
 
         try {
             success = reader.exportDataToCSV(csvFile);
