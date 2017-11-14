@@ -27,7 +27,15 @@ public class FlowProcessorFactory {
 
 		hardwareString = "";
 
-		hardwareString = FlowProcessorFactory.recursiveDir(new File(folder));
+		// Is there something in the folder?
+		File folderToScan = new File(folder);
+
+		if (folderToScan.list().length == 0) {
+			// Default processor
+			return new BDLSRFortessaFlowProcessor(folder);
+		}
+
+		hardwareString = FlowProcessorFactory.recursiveDir(folderToScan);
 
 		if (BDLSRFortessaFlowProcessor.isValidHardwareString(hardwareString) == true) {
 			return new BDLSRFortessaFlowProcessor(folder);
