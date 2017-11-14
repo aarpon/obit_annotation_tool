@@ -386,12 +386,6 @@ public final class FCSReader extends AbstractReader {
         // Datatype
         String datatype = datatype();
 
-        // If the datatype is INTEGER, we currently only support 16 bit
-        if (datatype == "I" && bytesPerParameter[columnIndex] != 2) {
-            throw new IOException("Integer data type is expected to be"
-                    + "unsigned 16 bit!");
-        }
-
 	    // Some constants
 		int nParams = numParameters();
 		int nEvents = numEvents();
@@ -451,8 +445,17 @@ public final class FCSReader extends AbstractReader {
 			if (datatype.equals("F")) {
 				tmp = (double) DATA.getFloat();
 			} else if (datatype.equals("I")) {
-			    // The integer format is 2 bytes only and unsigned!
-			    tmp = (double) ((short) (DATA.getShort()) & 0xffff);
+			    // How many bytes are needed to encode the integer?
+				if (bytesPerParameter[columnIndex] == 1) {
+					tmp = (double) ((byte) (DATA.getChar()) & 0xffL);
+				} else if (bytesPerParameter[columnIndex] == 2) {
+					tmp = (double) ((short) (DATA.getShort()) & 0xffffL);
+				} else if (bytesPerParameter[columnIndex] == 4) {
+					tmp = (double) ((int) (DATA.getInt()) & 0x00000000ffffffffL);
+				} else {
+			        // Unsupported number of bytes
+					throw new IOException("1, 2 or 4 bytes per integer value expected!");
+				}				
 			} else if (datatype.equals("D")) {
 			    tmp = (double) DATA.getDouble();
 			} else if (datatype.equals("A")) {
@@ -536,14 +539,6 @@ public final class FCSReader extends AbstractReader {
         // Datatype
         String datatype = datatype();
 
-        // If the datatype is INTEGER, we currently only support 16 bit
-        for (int i = 0; i < bytesPerParameter.hashCode(); i++) {
-            if (datatype == "I" && bytesPerParameter[i] != 2) {
-                throw new IOException("Integer data type is expected to be"
-                        + "unsigned 16 bit!");
-            }
-        }
-
 		FileWriter fw;
 		try {
 			fw = new FileWriter(csvFile);
@@ -593,8 +588,17 @@ public final class FCSReader extends AbstractReader {
 				if (datatype.equals("F")) {
 					writer.write((float) DATA.getFloat() + ",");
 				} else if (datatype.equals("I")) {
-				    // The integer format is 2 bytes only and unsigned!
-					writer.write(((short) (DATA.getShort()) & 0xffff) + ",");
+				    // How many bytes are needed to encode the integer?
+					if (bytesPerParameter[nParameter] == 1) {
+						writer.write(((byte) (DATA.getChar()) & 0xffL) + ",");
+					} else if (bytesPerParameter[nParameter] == 2) {
+						writer.write(((short) (DATA.getShort()) & 0xffffL) + ",");
+					} else if (bytesPerParameter[nParameter] == 4) {
+						writer.write(((int) (DATA.getInt()) & 0x00000000ffffffffL) + ",");
+					} else {
+				        // Unsupported number of bytes
+						throw new IOException("1, 2 or 4 bytes per integer value expected!");
+					}	
 				} else if (datatype.equals("D")) {
 					writer.write((double) DATA.getDouble() + ",");
 				} else if (datatype.equals("A")) {
@@ -940,7 +944,7 @@ public final class FCSReader extends AbstractReader {
 			    } else if (datatype == "F") {
                     bits = "32";  
                 } else if (datatype == "I") {
-                    bits = "16";  
+                    bits = "32";  
                 } else if (datatype == "A") {
                     bits = "8";
                 } else {
@@ -1066,6 +1070,8 @@ public final class FCSReader extends AbstractReader {
 	 * histograms: there can be more than one univariate histogram per data set.
 	 * N: not defined.
 	 * 
+	 * The modes "C" and "U" are deprecated in FCS 3.1.
+	 * 
 	 * @return acquisition mode of the data ("C", "L", "U"), or "N" if not
 	 *         defined.
 	 */
@@ -1137,4 +1143,5 @@ public final class FCSReader extends AbstractReader {
 		// Return success
 		return true;
 	}
+
 }
