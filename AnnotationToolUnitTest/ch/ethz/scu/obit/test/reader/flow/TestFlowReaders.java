@@ -21,6 +21,7 @@ import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
 import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.flow.processors.data.model.Tube;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
+import ch.ethz.scu.obit.flow.readers.Hyperlog;
 
 
 /**
@@ -809,7 +810,7 @@ public class TestFlowReaders {
         double[] time_msw = {-1.0, -1.0, -1.0, -1.0, -1.0};
         double[] expected_time_msw = {0.0, 0.0, 0.0, 0.0, 0.0};
         try {
-        	// Read the first 5 values from "FSC-HEIGHT"
+        	// Read the first 5 values from "TIME_MSW"
         	time_msw = reader.getRawDataPerColumnIndex(0, 5, false);
 		} catch (IOException e) {
 			// The next test will fail
@@ -819,7 +820,7 @@ public class TestFlowReaders {
         double[] time_lsw = {-1.0, -1.0, -1.0, -1.0, -1.0};
         double[] expected_time_lsw = {25670700.0, 25682387.0, 25686935.0, 25795356.0, 25824042.0};
         try {
-        	// Read the first 5 values from "FSC-HEIGHT"
+        	// Read the first 5 values from "TIME_LSW"
         	time_lsw = reader.getRawDataPerColumnIndex(1, 5, false);
 		} catch (IOException e) {
 			// The next test will fail
@@ -838,6 +839,75 @@ public class TestFlowReaders {
         
     }
     
+    /**
+     * Test reading a single FCS 3.0 file from Influx (FACS Sortware 1.2).
+     */
+    @Test
+    public void testSingleS35FileReadAndHyperLogTransform() {
+
+        // Test an FCS 3.1 file from BIORAD S3 (ProSort)
+        File fcsFile = new File(dataFolder + 
+                "/s3/5/s3/unstained.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+      
+        // Load column TIME_LSW
+        double[] time_lsw = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        try {
+        	// Read the first 5 values from "TIME_LSW"
+        	time_lsw = reader.getRawDataPerColumnIndex(1, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+
+        double[] fsc_height = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        try {
+        	// Read the first 5 values from "FSC-HEIGHT"
+			fsc_height = reader.getRawDataPerColumnIndex(2, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+
+        // Transform TIME_LSW
+        double[] params = Hyperlog.estimateParamHeuristic(time_lsw);
+        Hyperlog Hx = null;
+		try {
+			Hx = new Hyperlog(params[0], params[1], params[2], params[3]);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        time_lsw = Hx.transform(time_lsw);
+        time_lsw = Hyperlog.arrayMult(time_lsw, params[0]);
+        double[] expected_time_lsw = {25815030.3268203, 25815719.04638348, 25815986.977124725, 25822360.24391964, 25824042.0};
+        assertArrayEquals(time_lsw, expected_time_lsw, 1e-6);
+
+        // Transform FSC_HEIGHT
+        params = Hyperlog.estimateParamHeuristic(fsc_height);
+        Hyperlog Hy = null;
+		try {
+			Hy = new Hyperlog(params[0], params[1], params[2], params[3]);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        fsc_height = Hy.transform(fsc_height);
+        fsc_height = Hyperlog.arrayMult(fsc_height, params[0]);
+        double[] expected_fsc_height = {126843.72226283934, 127432.84732392649, 127939.28410071139, 128270.0, 127383.40535720732};
+        assertArrayEquals(expected_fsc_height, expected_fsc_height, 1e-6);
+        
+    }
+
     /**
      * Test parsing the measurement data from a single FCS 3.0 file from
      * Influx (FACS Sortware 1.2) and saving them as CSV file
