@@ -1,8 +1,5 @@
 /**
- * 
- */
-/**
- * @author pontia
+ * @author Aaron Ponti
  *
  */
 package ch.ethz.scu.obit.common.version;
