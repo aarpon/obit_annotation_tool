@@ -132,7 +132,7 @@ public class OpenBISViewer extends Observable
 		// Create a splitpane
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				openBISViewerPanel(), tagsPanel());
-		splitPane.setDividerLocation(0.75);
+		splitPane.setResizeWeight(0.75);
         splitPane.setBorder(null);
 
 		// Add the split panel to the layout
