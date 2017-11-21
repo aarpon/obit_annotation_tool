@@ -1,0 +1,1104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="2201c537-a262-4b5f-b71e-653791027fea" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/openbis/OpenBISViewer.java" afterPath="$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/openbis/OpenBISViewer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/obit_annotation_tool.iml" afterPath="$PROJECT_DIR$/obit_annotation_tool.iml" />
+    </list>
+    <ignored path="$PROJECT_DIR$/bin/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="MicroscopyProcessor.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/processors/data/MicroscopyProcessor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="656" column="17" lean-forward="false" selection-start-line="656" selection-start-column="17" selection-end-line="656" selection-end-column="17" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <marker date="1511182805671" expanded="true" signature="18172:21230" ph="{...}" />
+                <marker date="1511182805671" expanded="false" signature="18271:18280" ph="&lt;~&gt;" />
+                <marker date="1511182805671" expanded="false" signature="20562:20592" ph="&lt;~&gt;" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ViewerFactory.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/ViewerFactory.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="34">
+              <caret line="2" column="46" lean-forward="false" selection-start-line="2" selection-start-column="46" selection-end-line="2" selection-end-column="46" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OpenBISViewer.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/openbis/OpenBISViewer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="554">
+              <caret line="136" column="0" lean-forward="true" selection-start-line="136" selection-start-column="0" selection-end-line="136" selection-end-column="0" />
+              <folding>
+                <element signature="e#5237#5238#0" expanded="true" />
+                <element signature="e#5267#5268#0" expanded="true" />
+                <element signature="e#6010#6011#0" expanded="true" />
+                <element signature="e#6039#6040#0" expanded="true" />
+                <element signature="e#10832#10833#0" expanded="true" />
+                <element signature="e#10851#10852#0" expanded="true" />
+                <element signature="e#12240#12248#0" expanded="true" />
+                <element signature="e#13175#13187#0" expanded="true" />
+                <element signature="e#14109#14117#0" expanded="true" />
+                <element signature="e#15630#15638#0" expanded="true" />
+                <element signature="e#18050#18202#0" expanded="true" />
+                <element signature="e#18201#18202#0" expanded="true" />
+                <element signature="e#18733#19073#0" expanded="true" />
+                <element signature="e#19072#19073#0" expanded="true" />
+                <element signature="e#23947#23948#0" expanded="true" />
+                <element signature="e#24002#24003#0" expanded="true" />
+                <element signature="e#25992#26084#0" expanded="true" />
+                <element signature="e#26083#26084#0" expanded="true" />
+                <element signature="e#27532#27640#0" expanded="true" />
+                <element signature="e#27639#27640#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MicroscopyViewer.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/gui/viewers/data/MicroscopyViewer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="391">
+              <caret line="23" column="77" lean-forward="false" selection-start-line="23" selection-start-column="58" selection-end-line="23" selection-end-column="77" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MicroscopyCompositeFileNode.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/gui/viewers/data/model/MicroscopyCompositeFileNode.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="153">
+              <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractCompositeMicroscopyReader.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/AbstractCompositeMicroscopyReader.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="765">
+              <caret line="53" column="23" lean-forward="false" selection-start-line="53" selection-start-column="23" selection-end-line="53" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="LeicaTIFFSeriesReader.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/LeicaTIFFSeriesReader.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1649">
+              <caret line="121" column="19" lean-forward="false" selection-start-line="121" selection-start-column="19" selection-end-line="121" selection-end-column="19" />
+              <folding>
+                <element signature="e#3330#3331#0" expanded="true" />
+                <element signature="e#3351#3352#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FlowEditor.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationToolFlow/ch/ethz/scu/obit/flow/gui/editors/data/FlowEditor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="833">
+              <caret line="93" column="62" lean-forward="false" selection-start-line="93" selection-start-column="62" selection-end-line="93" selection-end-column="62" />
+              <folding>
+                <marker date="1511182806077" expanded="true" signature="1919:1975" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="2649:2807" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="2972:3210" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="3213:3318" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="3363:3367" ph="{}" />
+                <marker date="1511182806077" expanded="true" signature="3371:3567" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="3613:9922" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="8594:8685" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="9353:9397" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="9926:10045" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="10109:10352" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="10355:10464" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="10516:11585" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="10746:10815" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="10934:11059" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="11135:11234" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="11589:11703" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="11787:24824" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="12057:12163" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="14379:14675" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="14437:14527" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="14585:14671" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="14770:16640" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="14932:15187" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="15298:16630" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="18080:18374" ph="{...}" />
+                <marker date="1511182806077" expanded="false" signature="18140:18147" ph=" { " />
+                <marker date="1511182806077" expanded="false" signature="18170:18175" ph=" }" />
+                <marker date="1511182806077" expanded="false" signature="18234:18241" ph=" { " />
+                <marker date="1511182806077" expanded="false" signature="18264:18269" ph=" }" />
+                <marker date="1511182806077" expanded="false" signature="18329:18336" ph=" { " />
+                <marker date="1511182806077" expanded="false" signature="18359:18364" ph=" }" />
+                <marker date="1511182806077" expanded="true" signature="19485:19574" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="20373:20465" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="20511:20909" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="20561:20903" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="22529:22620" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="22679:24265" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="22761:24261" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="23459:23550" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="24827:24884" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="24918:25515" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="25518:25626" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="25666:25904" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="25907:25950" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="25983:27128" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="26245:26329" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="26860:26936" ph="//..." />
+                <marker date="1511182806077" expanded="true" signature="27132:27237" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="27311:27500" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="27503:27590" ph="/**...*/" />
+                <marker date="1511182806077" expanded="true" signature="27648:28369" ph="{...}" />
+                <marker date="1511182806077" expanded="true" signature="28093:28238" ph="{...}" />
+                <marker date="1511182806077" expanded="false" signature="28159:28195" ph=" { " />
+                <marker date="1511182806077" expanded="false" signature="28215:28224" ph=" }" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractProcessor.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/processors/AbstractProcessor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="153">
+              <caret line="11" column="32" lean-forward="false" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="39" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>FACSDIVA</find>
+      <find>FACS</find>
+      <find>AbstractProcessor</find>
+      <find>MicroscopyProcessor</find>
+      <find>microscopyProcessor</find>
+      <find>MicroscopyCompositeProcessor</find>
+      <find>MicroscopyCompositeFile</find>
+      <find>FlowViewer</find>
+    </findStrings>
+    <dirStrings>
+      <dir>C:\Users\pontia\Devel\oBIT\client\obit_annotation_tool</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/processors/data/MicroscopyProcessor.java" />
+        <option value="$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/ViewerFactory.java" />
+        <option value="$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/openBISDesignViewer.form" />
+        <option value="$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/openbis/OpenBISViewer.java" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="580" />
+    <option name="y" value="200" />
+    <option name="width" value="1400" />
+    <option name="height" value="1000" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationTool" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationTool" type="462c0819:PsiDirectoryNode" />
+              <item name="obit" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationTool" type="462c0819:PsiDirectoryNode" />
+              <item name="obit" type="462c0819:PsiDirectoryNode" />
+              <item name="at" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationTool" type="462c0819:PsiDirectoryNode" />
+              <item name="obit" type="462c0819:PsiDirectoryNode" />
+              <item name="at" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationTool" type="462c0819:PsiDirectoryNode" />
+              <item name="obit" type="462c0819:PsiDirectoryNode" />
+              <item name="at" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+              <item name="viewers" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationTool" type="462c0819:PsiDirectoryNode" />
+              <item name="obit" type="462c0819:PsiDirectoryNode" />
+              <item name="at" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+              <item name="viewers" type="462c0819:PsiDirectoryNode" />
+              <item name="openbis" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationToolAdmin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationToolAdmin" type="462c0819:PsiDirectoryNode" />
+              <item name="atadmin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationToolFlow" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationToolFlow" type="462c0819:PsiDirectoryNode" />
+              <item name="flow" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationToolFlow" type="462c0819:PsiDirectoryNode" />
+              <item name="flow" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="obit_annotation_tool" type="b2602c69:ProjectViewProjectNode" />
+              <item name="obit_annotation_tool" type="462c0819:PsiDirectoryNode" />
+              <item name="AnnotationToolFlow" type="462c0819:PsiDirectoryNode" />
+              <item name="flow" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.AnnotationTool">
+    <configuration name="AnnotationTool" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="ch.ethz.scu.obit.at.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="ch.ethz.scu.obit.at.AnnotationTool" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="obit_annotation_tool" />
+      <envs />
+    </configuration>
+    <configuration name="AnnotationToolAdmin" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" value="ch.ethz.scu.obit.atadmin.AnnotationToolAdmin" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="obit_annotation_tool" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <module />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+    </configuration>
+    <configuration name="&lt;template&gt;" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" default="true" selected="false">
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Application.AnnotationToolAdmin" />
+      <item index="1" class="java.lang.String" itemvalue="Application.AnnotationTool" />
+    </list>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Application.AnnotationTool" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2201c537-a262-4b5f-b71e-653791027fea" name="Default" comment="" />
+      <created>1509371697772</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1509371697772</updated>
+      <workItem from="1509371704720" duration="79000" />
+      <workItem from="1509371795914" duration="1146000" />
+      <workItem from="1509373631029" duration="1037000" />
+      <workItem from="1509698114898" duration="861000" />
+      <workItem from="1511188439120" duration="3368000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="6491000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="2576" height="1416" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32943013" sideWeight="0.49841017" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.327454" sideWeight="0.4859375" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32822084" sideWeight="0.50625" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32822084" sideWeight="0.49375" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Spring" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32943013" sideWeight="0.49841017" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16015625" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32943013" sideWeight="0.49682036" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3297546" sideWeight="0.4890625" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/processors/data/MicroscopyProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10540">
+          <caret line="656" column="17" lean-forward="false" selection-start-line="656" selection-start-column="17" selection-end-line="656" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <marker date="1511182805671" expanded="true" signature="18172:21230" ph="{...}" />
+            <marker date="1511182805671" expanded="false" signature="18271:18280" ph="&lt;~&gt;" />
+            <marker date="1511182805671" expanded="false" signature="20562:20592" ph="&lt;~&gt;" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/gui/viewers/data/MicroscopyViewer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="23" column="77" lean-forward="false" selection-start-line="23" selection-start-column="58" selection-end-line="23" selection-end-column="77" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/gui/viewers/data/model/MicroscopyCompositeFileNode.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/AbstractCompositeMicroscopyReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="53" column="23" lean-forward="false" selection-start-line="53" selection-start-column="23" selection-end-line="53" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/LeicaTIFFSeriesReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1649">
+          <caret line="121" column="19" lean-forward="false" selection-start-line="121" selection-start-column="19" selection-end-line="121" selection-end-column="19" />
+          <folding>
+            <element signature="e#3330#3331#0" expanded="true" />
+            <element signature="e#3351#3352#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolFlow/ch/ethz/scu/obit/flow/gui/editors/data/FlowEditor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="833">
+          <caret line="93" column="62" lean-forward="false" selection-start-line="93" selection-start-column="62" selection-end-line="93" selection-end-column="62" />
+          <folding>
+            <marker date="1511182806077" expanded="true" signature="1919:1975" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="2649:2807" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="2972:3210" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="3213:3318" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="3363:3367" ph="{}" />
+            <marker date="1511182806077" expanded="true" signature="3371:3567" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="3613:9922" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="8594:8685" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="9353:9397" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="9926:10045" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="10109:10352" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="10355:10464" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="10516:11585" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="10746:10815" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="10934:11059" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="11135:11234" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="11589:11703" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="11787:24824" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="12057:12163" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="14379:14675" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14437:14527" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14585:14671" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14770:16640" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14932:15187" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="15298:16630" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="18080:18374" ph="{...}" />
+            <marker date="1511182806077" expanded="false" signature="18140:18147" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18170:18175" ph=" }" />
+            <marker date="1511182806077" expanded="false" signature="18234:18241" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18264:18269" ph=" }" />
+            <marker date="1511182806077" expanded="false" signature="18329:18336" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18359:18364" ph=" }" />
+            <marker date="1511182806077" expanded="true" signature="19485:19574" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="20373:20465" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="20511:20909" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="20561:20903" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="22529:22620" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="22679:24265" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="22761:24261" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="23459:23550" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="24827:24884" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="24918:25515" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="25518:25626" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="25666:25904" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="25907:25950" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="25983:27128" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="26245:26329" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="26860:26936" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="27132:27237" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="27311:27500" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="27503:27590" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="27648:28369" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="28093:28238" ph="{...}" />
+            <marker date="1511182806077" expanded="false" signature="28159:28195" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="28215:28224" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/processors/AbstractProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="32" lean-forward="true" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/ViewerFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="46" lean-forward="false" selection-start-line="2" selection-start-column="46" selection-end-line="2" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/processors/data/MicroscopyProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5219">
+          <caret line="331" column="29" lean-forward="false" selection-start-line="331" selection-start-column="29" selection-end-line="331" selection-end-column="29" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <marker date="1511182805671" expanded="true" signature="18172:21230" ph="{...}" />
+            <marker date="1511182805671" expanded="false" signature="18271:18280" ph="&lt;~&gt;" />
+            <marker date="1511182805671" expanded="false" signature="20562:20592" ph="&lt;~&gt;" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/AbstractCompositeMicroscopyReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="53" column="23" lean-forward="false" selection-start-line="53" selection-start-column="23" selection-end-line="53" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/LeicaTIFFSeriesReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1649">
+          <caret line="121" column="19" lean-forward="false" selection-start-line="121" selection-start-column="19" selection-end-line="121" selection-end-column="19" />
+          <folding>
+            <element signature="e#3330#3331#0" expanded="true" />
+            <element signature="e#3351#3352#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolFlow/ch/ethz/scu/obit/flow/gui/editors/data/FlowEditor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="833">
+          <caret line="93" column="62" lean-forward="false" selection-start-line="93" selection-start-column="62" selection-end-line="93" selection-end-column="62" />
+          <folding>
+            <marker date="1511182806077" expanded="true" signature="1919:1975" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="2649:2807" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="2972:3210" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="3213:3318" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="3363:3367" ph="{}" />
+            <marker date="1511182806077" expanded="true" signature="3371:3567" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="3613:9922" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="8594:8685" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="9353:9397" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="9926:10045" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="10109:10352" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="10355:10464" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="10516:11585" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="10746:10815" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="10934:11059" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="11135:11234" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="11589:11703" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="11787:24824" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="12057:12163" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="14379:14675" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14437:14527" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14585:14671" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14770:16640" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14932:15187" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="15298:16630" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="18080:18374" ph="{...}" />
+            <marker date="1511182806077" expanded="false" signature="18140:18147" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18170:18175" ph=" }" />
+            <marker date="1511182806077" expanded="false" signature="18234:18241" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18264:18269" ph=" }" />
+            <marker date="1511182806077" expanded="false" signature="18329:18336" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18359:18364" ph=" }" />
+            <marker date="1511182806077" expanded="true" signature="19485:19574" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="20373:20465" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="20511:20909" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="20561:20903" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="22529:22620" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="22679:24265" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="22761:24261" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="23459:23550" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="24827:24884" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="24918:25515" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="25518:25626" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="25666:25904" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="25907:25950" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="25983:27128" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="26245:26329" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="26860:26936" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="27132:27237" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="27311:27500" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="27503:27590" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="27648:28369" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="28093:28238" ph="{...}" />
+            <marker date="1511182806077" expanded="false" signature="28159:28195" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="28215:28224" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/processors/data/MicroscopyProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5559">
+          <caret line="331" column="29" lean-forward="false" selection-start-line="331" selection-start-column="29" selection-end-line="331" selection-end-column="29" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <marker date="1511182805671" expanded="true" signature="18172:21230" ph="{...}" />
+            <marker date="1511182805671" expanded="false" signature="18271:18280" ph="&lt;~&gt;" />
+            <marker date="1511182805671" expanded="false" signature="20562:20592" ph="&lt;~&gt;" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/AbstractCompositeMicroscopyReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="53" column="23" lean-forward="false" selection-start-line="53" selection-start-column="23" selection-end-line="53" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/LeicaTIFFSeriesReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1649">
+          <caret line="121" column="19" lean-forward="false" selection-start-line="121" selection-start-column="19" selection-end-line="121" selection-end-column="19" />
+          <folding>
+            <element signature="e#3330#3331#0" expanded="true" />
+            <element signature="e#3351#3352#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/log4j.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/AbstractCompositeMicroscopyReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="53" column="23" lean-forward="false" selection-start-line="53" selection-start-column="23" selection-end-line="53" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/readers/composite/LeicaTIFFSeriesReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1649">
+          <caret line="121" column="19" lean-forward="false" selection-start-line="121" selection-start-column="19" selection-end-line="121" selection-end-column="19" />
+          <folding>
+            <element signature="e#3330#3331#0" expanded="true" />
+            <element signature="e#3351#3352#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/doc/private/ch/ethz/scu/obit/at/gui/viewers/package-use.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="94" column="50" lean-forward="false" selection-start-line="94" selection-start-column="50" selection-end-line="94" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolFlow/ch/ethz/scu/obit/flow/gui/editors/data/FlowEditor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="833">
+          <caret line="93" column="62" lean-forward="false" selection-start-line="93" selection-start-column="62" selection-end-line="93" selection-end-column="62" />
+          <folding>
+            <marker date="1511182806077" expanded="true" signature="1919:1975" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="2649:2807" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="2972:3210" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="3213:3318" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="3363:3367" ph="{}" />
+            <marker date="1511182806077" expanded="true" signature="3371:3567" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="3613:9922" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="8594:8685" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="9353:9397" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="9926:10045" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="10109:10352" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="10355:10464" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="10516:11585" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="10746:10815" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="10934:11059" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="11135:11234" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="11589:11703" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="11787:24824" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="12057:12163" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="14379:14675" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14437:14527" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14585:14671" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14770:16640" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="14932:15187" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="15298:16630" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="18080:18374" ph="{...}" />
+            <marker date="1511182806077" expanded="false" signature="18140:18147" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18170:18175" ph=" }" />
+            <marker date="1511182806077" expanded="false" signature="18234:18241" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18264:18269" ph=" }" />
+            <marker date="1511182806077" expanded="false" signature="18329:18336" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="18359:18364" ph=" }" />
+            <marker date="1511182806077" expanded="true" signature="19485:19574" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="20373:20465" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="20511:20909" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="20561:20903" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="22529:22620" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="22679:24265" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="22761:24261" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="23459:23550" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="24827:24884" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="24918:25515" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="25518:25626" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="25666:25904" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="25907:25950" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="25983:27128" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="26245:26329" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="26860:26936" ph="//..." />
+            <marker date="1511182806077" expanded="true" signature="27132:27237" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="27311:27500" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="27503:27590" ph="/**...*/" />
+            <marker date="1511182806077" expanded="true" signature="27648:28369" ph="{...}" />
+            <marker date="1511182806077" expanded="true" signature="28093:28238" ph="{...}" />
+            <marker date="1511182806077" expanded="false" signature="28159:28195" ph=" { " />
+            <marker date="1511182806077" expanded="false" signature="28215:28224" ph=" }" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/processors/AbstractProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="32" lean-forward="false" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/gui/viewers/data/MicroscopyViewer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="23" column="77" lean-forward="false" selection-start-line="23" selection-start-column="58" selection-end-line="23" selection-end-column="77" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/gui/viewers/data/model/MicroscopyCompositeFileNode.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationToolMicroscopy/ch/ethz/scu/obit/microscopy/processors/data/MicroscopyProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="656" column="17" lean-forward="false" selection-start-line="656" selection-start-column="17" selection-end-line="656" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <marker date="1511182805671" expanded="true" signature="18172:21230" ph="{...}" />
+            <marker date="1511182805671" expanded="false" signature="18271:18280" ph="&lt;~&gt;" />
+            <marker date="1511182805671" expanded="false" signature="20562:20592" ph="&lt;~&gt;" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/openBISDesignViewer.form">
+      <provider selected="true" editor-type-id="ui-designer">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/openBISDesignViewer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="21" column="6" lean-forward="true" selection-start-line="21" selection-start-column="6" selection-end-line="21" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/data/ViewerFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="46" lean-forward="false" selection-start-line="2" selection-start-column="46" selection-end-line="2" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AnnotationTool/ch/ethz/scu/obit/at/gui/viewers/openbis/OpenBISViewer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="554">
+          <caret line="136" column="0" lean-forward="true" selection-start-line="136" selection-start-column="0" selection-end-line="136" selection-end-column="0" />
+          <folding>
+            <element signature="e#5237#5238#0" expanded="true" />
+            <element signature="e#5267#5268#0" expanded="true" />
+            <element signature="e#6010#6011#0" expanded="true" />
+            <element signature="e#6039#6040#0" expanded="true" />
+            <element signature="e#10832#10833#0" expanded="true" />
+            <element signature="e#10851#10852#0" expanded="true" />
+            <element signature="e#12240#12248#0" expanded="true" />
+            <element signature="e#13175#13187#0" expanded="true" />
+            <element signature="e#14109#14117#0" expanded="true" />
+            <element signature="e#15630#15638#0" expanded="true" />
+            <element signature="e#18050#18202#0" expanded="true" />
+            <element signature="e#18201#18202#0" expanded="true" />
+            <element signature="e#18733#19073#0" expanded="true" />
+            <element signature="e#19072#19073#0" expanded="true" />
+            <element signature="e#23947#23948#0" expanded="true" />
+            <element signature="e#24002#24003#0" expanded="true" />
+            <element signature="e#25992#26084#0" expanded="true" />
+            <element signature="e#26083#26084#0" expanded="true" />
+            <element signature="e#27532#27640#0" expanded="true" />
+            <element signature="e#27639#27640#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>No facets are configured</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>obit_annotation_tool</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+                <option value="0.6" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

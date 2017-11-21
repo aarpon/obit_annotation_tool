@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inheritJdk="true">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$">
+		<testFolder url="file://$MODULE_DIR$/AnnotationToolUnitTest"/>
+	</contentEntry>
+	<lib name="cglib-nodep.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/cglib-nodep.jar!/"/>
+	</lib>
+	<lib name="cisd-args4j.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/cisd-args4j.jar!/"/>
+	</lib>
+	<lib name="commons-codec.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/commons-codec.jar!/"/>
+	</lib>
+	<lib name="commons-io.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/commons-io.jar!/"/>
+	</lib>
+	<lib name="commons-lang.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/commons-lang.jar!/"/>
+	</lib>
+	<lib name="commons-logging.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/commons-logging.jar!/"/>
+	</lib>
+	<lib name="dom4j-1.6.1.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/dom4j-1.6.1.jar!/"/>
+	</lib>
+	<lib name="dss_client.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/dss_client.jar!/"/>
+	</lib>
+	<lib name="geronimo-stax-api_1.0_spec-1.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/geronimo-stax-api_1.0_spec-1.0.jar!/"/>
+	</lib>
+	<lib name="ij.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/ij.jar!/"/>
+	</lib>
+	<lib name="jline.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/jline.jar!/"/>
+	</lib>
+	<lib name="jython.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/jython.jar!/"/>
+	</lib>
+	<lib name="log4j.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/log4j.jar!/"/>
+	</lib>
+	<lib name="poi-ooxml-schemas.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/poi-ooxml-schemas.jar!/"/>
+	</lib>
+	<lib name="poi-ooxml.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/poi-ooxml.jar!/"/>
+	</lib>
+	<lib name="poi.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/poi.jar!/"/>
+	</lib>
+	<lib name="stream-supporting-httpinvoker.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/stream-supporting-httpinvoker.jar!/"/>
+	</lib>
+	<lib name="swing-layout.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/swing-layout.jar!/"/>
+	</lib>
+	<lib name="xmlbeans-2.3.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/xmlbeans-2.3.0.jar!/"/>
+	</lib>
+	<lib name="sis-base-14.12.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/query_api/sis-base-14.12.0.jar!/"/>
+	</lib>
+	<lib name="bioformats_package-5.1.8.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/bioformats_package-5.1.8.jar!/"/>
+	</lib>
+	<lib name="spring-aop.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-aop.jar!/"/>
+	</lib>
+	<lib name="spring-beans.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-beans.jar!/"/>
+	</lib>
+	<lib name="spring-context.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-context.jar!/"/>
+	</lib>
+	<lib name="spring-core.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-core.jar!/"/>
+	</lib>
+	<lib name="spring-expression.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-expression.jar!/"/>
+	</lib>
+	<lib name="spring-web.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-web.jar!/"/>
+	</lib>
+	<lib name="spring-webmvc.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring-webmvc.jar!/"/>
+	</lib>
+	<lib name="spring.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/spring.jar!/"/>
+	</lib>
+	<lib name="stax-api.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/stax-api.jar!/"/>
+	</lib>
+	<lib name="aopalliance.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/aopalliance.jar!/"/>
+	</lib>
+	<lib name="aspectjweaver.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/aspectjweaver.jar!/"/>
+	</lib>
+	<lib name="commons-httpclient.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/commons-httpclient.jar!/"/>
+	</lib>
+	<lib name="httpclient.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/httpclient.jar!/"/>
+	</lib>
+	<lib name="httpcore.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/httpcore.jar!/"/>
+	</lib>
+	<lib name="image-viewer.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/dss_client/image-viewer.jar!/"/>
+	</lib>
+	<lib name="hamcrest-core-1.3.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/test/hamcrest-core-1.3.jar!/"/>
+	</lib>
+	<lib name="marathon-spring-util-1.2.5.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/query_api/marathon-spring-util-1.2.5.jar!/"/>
+	</lib>
+	<lib name="junit-4.12.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/test/junit-4.12.jar!/"/>
+	</lib>
+	<lib name="openBIS-query-API-16.05.3-r37798.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/query_api/openBIS-query-API-16.05.3-r37798.jar!/"/>
+	</lib>
+</component>
