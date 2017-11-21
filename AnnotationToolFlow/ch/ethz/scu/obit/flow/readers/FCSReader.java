@@ -508,7 +508,7 @@ public final class FCSReader extends AbstractReader {
 
         for (int i = 0; i < m.length; i++) {
 
-            if (gain != 1.0) {
+            if (gain != 1.0 && gain != 0.0) {
                 n[i] = m[i] / gain;
             } else if (log != 0.0) {
                 n[i] = logz * Math.pow(10, m[i] / range * decade);
