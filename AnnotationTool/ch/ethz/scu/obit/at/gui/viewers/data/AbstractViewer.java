@@ -175,9 +175,6 @@ abstract public class AbstractViewer extends Observable
 		panel.setMinimumSize(new Dimension(400, 700));
 		panel.setPreferredSize(new Dimension(400, 700));
 
-		System.out.println(splitPaneOne.getDividerLocation());
-        System.out.println(splitPaneTwo.getDividerLocation());
-
 	}
 
 	/**
