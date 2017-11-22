@@ -24,6 +24,9 @@ import ch.ethz.scu.obit.readers.AbstractReader;
  */
 public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 
+	/* Protected instance variables */
+	protected File folder;
+
 	/** 
 	 * Total composite dataset file in bytes
 	 */

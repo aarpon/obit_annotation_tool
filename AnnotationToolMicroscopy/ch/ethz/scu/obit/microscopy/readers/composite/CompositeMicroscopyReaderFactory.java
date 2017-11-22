@@ -22,7 +22,9 @@ public class CompositeMicroscopyReaderFactory {
 
 		// The first concrete reader to announce it can parse the folder is
 		// accepted and returned.
-		if (LeicaTIFFSeriesReader.canRead(folder)) {
+		if (YouScopeReader.canRead(folder)) {
+			return new YouScopeReader(folder);
+		} else if (LeicaTIFFSeriesReader.canRead(folder)) {
 			return new LeicaTIFFSeriesReader(folder);
 		} else {
 			return null;

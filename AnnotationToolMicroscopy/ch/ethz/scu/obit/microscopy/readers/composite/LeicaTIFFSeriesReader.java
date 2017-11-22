@@ -35,7 +35,6 @@ import loci.plugins.util.LociPrefs;
 public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
-	private File folder;
 	private final static String REGEX =
 			"^(.*?)" +                    // Series basename: group 1
 			"((_Series|_s)(\\d.*?))?" +   // Series number (optional): group 4
@@ -44,6 +43,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		    "_ch(\\d.*?)" +               // Channel number: group 8
 		    "\\.tif{1,2}$";               // File extension
 
+	/* Private instance variables */
 	private static Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
 
 	private File metadataFolder; 

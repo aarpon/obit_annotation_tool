@@ -9,7 +9,7 @@ public class VersionInfo {
 	/**
 	 * Program version
 	 */
-	public static final String version = "1.0.0";
+	public static final String version = "1.1.0";
 
 	/**
 	 * Version status: "alpha", "beta", or "" for a stable release
@@ -21,7 +21,7 @@ public class VersionInfo {
 	 */
 	public static final String copyright = "Copyright " +
 			Character.toString('\u00A9') + 
-			" 2012 - 2017, Single Cell Unit, " +
+			" 2012 - 2018, Single Cell Unit, " +
 			"D-BSSE, ETH Zurich (Basel)";
 
 	/**
