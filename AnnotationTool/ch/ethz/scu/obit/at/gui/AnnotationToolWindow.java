@@ -9,17 +9,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
@@ -185,9 +179,22 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 	        }
 	    });
 
+		// Wrap the output pane to allow for constraints
+		JPanel outputPaneWrapper = new JPanel();
+		outputPaneWrapper.setLayout(new GridBagLayout());
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridwidth = 3;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		outputPaneWrapper.add(outputPane, constraints);
+
 		// Create a splitpane
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				mainPanel, outputPane);
+				mainPanel, outputPaneWrapper);
 		splitPane.setResizeWeight(0.75);
         splitPane.setBorder(null);
         add(splitPane);
