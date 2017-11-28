@@ -51,7 +51,6 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	private boolean isValid = false;
 
-	private ImageProcessorReader reader = null;
 
 	// Constructor
 	/**
@@ -222,7 +221,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					// Create a new SeriesMetadata object 
 					metadata = new HashMap<String, String>();
 
-					// And add it to the arribute map
+					// And add it to the attribute map
 					attr.put(key, metadata);
 
 					// Read the file
@@ -632,52 +631,4 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		return true;
 	}
 
-	/**
-	 * Return current value for given metadata entry, or zero if not in the map.
-	 * @param metadata Map of string - string key:value pairs.
-	 * @param key Name of the metadata value to query.
-	 * @return the value for the requested metadata value, or zero if
-	 * it is not in the map.
-	 */
-	private int getMetadataValueOrZero(Map<String, String> metadata, String key) {
-		int value = 0;
-		if (metadata.containsKey(key)) {
-			value = Integer.parseInt(metadata.get(key));
-		}
-		return value;
-	}
-
-	/**
-	 * Return the data type
-	 * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
-	 */
-	public String getDataType() {
-
-		// Get and store the dataset type
-		String datatype;
-		switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
-			case 1:
-				datatype = "uint8";
-				break;
-			case 2:
-				datatype = "uint16";
-				break;
-			case 4:
-				datatype = "float";
-				break;
-			default:
-				datatype = "unsupported";
-				break;
-		}
-
-		return datatype;
-	}
-
-	/**
-	 * Returns the last error message.
-	 * @return String containing the last error message.
-	 */
-	public String getLastError() {
-		return errorMessage;
-	}
 }
