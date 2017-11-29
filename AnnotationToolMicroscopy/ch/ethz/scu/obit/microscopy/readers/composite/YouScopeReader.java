@@ -29,16 +29,17 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 	private boolean isValid = false;
 
 	HashMap<Integer, String[]> csvTable = null;
+	HashMap<String, String> seriesNamesMapper = null;
 
-    // Constructor
     /**
+     * Constructor
      * @param folder Folder to be scanned.
      */
     public YouScopeReader(File folder) {
 
     	// Store the root folder
         this.folder = folder;
-        
+
         // Reset the total file size in bytes
         totalDatasetSizeInBytes = 0;
     }
@@ -55,19 +56,16 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     @Override
     public List<Integer> getSeriesIndices() {
-    	// TODO Implement me!
     	List<Integer> indices = new ArrayList<Integer>();
-    	int i = 0;
-    	for (String key: attr.keySet()) {
+    	for (int i = 0; i < attr.size(); i++) {
     		indices.add(i);
-    		i++;
     	}
         return indices;
     }
 
-    
+
     public boolean parse() throws Exception {
-    	
+
         // Parse the images.csv file
     	Map<Integer, String[]> csvTable = new HashMap<Integer, String[]>();
     	csvTable = buildImagesCSVTable(this.folder + "/images.csv"); 
@@ -87,24 +85,26 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 							LociPrefs.makeImageReader()));
 		}
 
+		// Initialize the series name mapper
+		seriesNamesMapper = new HashMap<String, String>();
+
     	// Now extract series and build metadata
     	for (Map.Entry<Integer, String[]> entry : csvTable.entrySet()) {
 
     		// Get current row
     		String[] row = entry.getValue();
-    		
+
     		// Build series ID from row as
     		// (if present, use path information to build a unique id)
     		String seriesID = row[7] + "_" + row[4] + "_" +
     				row[0] + "_" + pathInfoAsID(row[6]);
-    		
+
     		// Parse the position column
-    		System.out.println(row[5]);
     		int tileX = 0;
     		int tileY = 0;
     		int planeNum = 0;
     		int timeNum = 0;
-    		
+
 			//
 			// Extract index information from the file name structure
 			//
@@ -114,41 +114,47 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 				// Extract the position components
 				if (m.group(1) != null) {
-					
+
 					// The first group encodes the position as XXYYZZ(Z)
 					tileX = Integer.parseInt(m.group(1).substring(0, 1));
 					tileY = Integer.parseInt(m.group(1).substring(2, 3));
 					planeNum = Integer.parseInt(m.group(1).substring(4, m.group(1).length()));
-					
+
 					System.out.println("Filename: " + row[6] + "; Position = " + m.group(1) + ": X = " + tileX + "; Y = " + tileY + "; Z = " + planeNum);
-					
+
 				}
-	
+
 				// Extract the time index
 				if (m.group(2) != null) {
 					timeNum = Integer.parseInt(m.group(2));
 				}
-	
+
 			}
-				
+
 			// Store the series index if not yet present
-			
+
 			// Current series metadata
 			HashMap<String, String> metadata;
 
 			// Store the series index if not yet present
-			if (attr.containsKey(seriesID)) {
+			if (seriesNamesMapper.containsKey(seriesID)) {
+
+				// Get the attr key name
+				String key = seriesNamesMapper.get(seriesID);
 
 				// Get the metadata
-				metadata = attr.get(seriesID);
+				metadata = attr.get(key);
 
 			} else {
 
 				// Create a new SeriesMetadata object 
 				metadata = new HashMap<String, String>();
-				
+
 				// And add it to the attribute map
-				attr.put(seriesID, metadata);
+				int numSeries = seriesNamesMapper.size();
+				String attrKey = "series_" + numSeries;
+				seriesNamesMapper.put(seriesID, attrKey);
+				attr.put(attrKey, metadata);
 
 				// Build full file name
 				File file = new File(this.folder + "/" + row[6]);
@@ -159,7 +165,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 		    		// Try to open the first image file of the series
 		    		try {
-		    			
+
 		    			// Open the file
 		    			reader.setId(file.getCanonicalPath());
 
@@ -178,7 +184,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 		    			return isValid;
 
 		    		}
-					
+
 					// Store width and height
 					int width = 0;
 					int heigth = 0;
@@ -212,41 +218,38 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 					// Store default values. These should be replaced
 					// with information extracted from the properties XML
 					// file in the Metadata folder.
-					metadata.put("voxelX", "1.0");
-					metadata.put("voxelY", "1.0");
-					metadata.put("voxelZ", "1.0");
+					metadata.put("voxelX", "NaN");
+					metadata.put("voxelY", "NaN");
+					metadata.put("voxelZ", "NaN");
 
 					// TODO: Get wavelengths from metadata
 
 					// TODO: Get acquisition time from metadata
-					metadata.put("acquisitionDate", "NaN");
-		    		
+					metadata.put("acquisitionDate", row[3]);
+
 				}
-	    		
+
 				// Add the the file size to the total size of the composite dataset.
 				totalDatasetSizeInBytes += file.length();
 
 			}
-			
+
 			// Update the metadata object
+
+			// Number of planes (notice: 0-based!)
 			int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
 			if ((planeNum + 1) > numPlanes) {
 				metadata.put("sizeZ", Integer.toString(planeNum + 1));
 			}
 
-//			int numChannels = getMetadataValueOrZero(metadata, "sizeC");
-//			if ((channelNum + 1) > numChannels) {
-//				metadata.put("sizeC", Integer.toString(channelNum + 1));
-//			}
+            // Number of channels
 			metadata.put("sizeC", "1");
 
+			// Number of timepoints (notice: 1-based!)
 			int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
-			if ((timeNum + 1) > numTimepoints) {
-				metadata.put("sizeT", Integer.toString(timeNum + 1));
+			if ((timeNum) > numTimepoints) {
+				metadata.put("sizeT", Integer.toString(timeNum));
 			}
-
-			// And add it to the attribute map
-			attr.put(seriesID, metadata);
 
     	}
 
@@ -255,7 +258,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 		errorMessage = "";
 		return isValid;
     }
-    
+
     @Override
     public String info() {
         return "YouScope (composite) file format.";
@@ -286,15 +289,15 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     	boolean foundConfigurationCSB = false;
     	boolean foundImagesCSV = false;
     	boolean foundYSConfigMicroscopeCFG = false;
-    	
+
         // Get a list of all files
         File[] allFiles = folder.listFiles();
 		if (allFiles == null) {
 			return false;
 		}
-        
+
         for (File file : allFiles) {
-        	
+
         	if (file.getAbsolutePath().toLowerCase().endsWith("configuration.csb")) {
         		foundConfigurationCSB = true;
         	} else if (file.getAbsolutePath().toLowerCase().endsWith("images.csv")) {
@@ -305,26 +308,26 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         		continue;
         	}
         }
-        
+
         return foundConfigurationCSB & foundImagesCSV & foundYSConfigMicroscopeCFG;
     }
-  
+
     /**
      * Parse the images.csv file and return a table.
      * @param fileName Full path to the images.csv file.
      * @return 2D array of strings with the content of the images.csv file.
      */
     private HashMap<Integer, String[]> buildImagesCSVTable(String fileName) {
-    	
+
     	// Initialize the table
     	csvTable = new HashMap<Integer, String[]>();
-    	
+
        	// Header
     	boolean isHeader = true;
 
     	// Row number
     	int rowNumber = 0;
-    	
+
     	// Read the CSV file
     	try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 
@@ -335,32 +338,32 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     		while (line != null) {
 
     			if (isHeader == true) {
-    				
+
     				// We are past the header
     				isHeader = false;
-    				
+
         			// Read next line 
         			line = br.readLine();
-        			
+
     				continue;
     			}
-    			
+
     			// Get all values for current row
     			String[] row = line.split(";");
-    			
+
     			// Remove '"' and '\' characters if needed
     			for (int i = 0; i < row.length; i++) {
     				row[i] = row[i].replace("\"", "");
     				row[i] = row[i].replace("\\\\", "\\");
     				row[i] = row[i].replace("\\", "/");
     			}
-    			
+
     			// Add the row
     			csvTable.put(rowNumber, row);
 
     			// Read next line 
     			line = br.readLine();
-    			
+
     			// Update row number
     			rowNumber++;
 
@@ -371,19 +374,19 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 			return new HashMap<Integer, String[]>();
 		}
     	return csvTable;
-    	
+
     }
-    
+
     /**
      * Return an ID built from the path information of the file
      * @param file Image file with (relative) path as obtained from images.csv
      * @return ID built from the path information of the file.
      */
 	private String pathInfoAsID(String filename) {
-		
+
 		// Initialize output
 		String pathInfo = "";
-		
+
 		// We work with a relative path
 		filename = filename.replace("\\\\", "\\");
 		filename = filename.replace("\\", "/");
@@ -394,8 +397,8 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 		} else {
 			pathInfo = ".";
 		}
-		
+
 		return pathInfo;
 	}
-	
+
 }
