@@ -21,7 +21,7 @@ import loci.plugins.util.LociPrefs;
 public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
-	private final static String REGEX = "^.*?_position(\\d{6,7})_time(\\d.*?)\\.tif{1,2}$";
+	private final static String REGEX = "^.*?_position(\\d{6,})_time(\\d.*?)\\.tif{1,2}$";
 
 	/* Private instance variables */
 	private static Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
@@ -94,34 +94,22 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     		// Get current row
     		String[] row = entry.getValue();
 
-    		// Build series ID from row as
-    		// (if present, use path information to build a unique id)
-    		String seriesID = row[7] + "_" + row[4] + "_" +
-    				row[0] + "_" + pathInfoAsID(row[6]);
-
-    		// Parse the position column
+    		// The file name contains information about the position that is important 
+    		// when building the series ID
     		int tileX = 0;
     		int tileY = 0;
     		int planeNum = 0;
     		int timeNum = 0;
-
-			//
-			// Extract index information from the file name structure
-			//
-			// Extract the information
-			Matcher m = p.matcher(new File(row[6]).getAbsolutePath());
+    		Matcher m = p.matcher(new File(row[6]).getAbsolutePath());
 			if (m.find()) {
 
 				// Extract the position components
 				if (m.group(1) != null) {
 
 					// The first group encodes the position as XXYYZZ(Z)
-					tileX = Integer.parseInt(m.group(1).substring(0, 1));
-					tileY = Integer.parseInt(m.group(1).substring(2, 3));
+					tileX = Integer.parseInt(m.group(1).substring(0, 2));
+					tileY = Integer.parseInt(m.group(1).substring(2, 4));
 					planeNum = Integer.parseInt(m.group(1).substring(4, m.group(1).length()));
-
-					System.out.println("Filename: " + row[6] + "; Position = " + m.group(1) + ": X = " + tileX + "; Y = " + tileY + "; Z = " + planeNum);
-
 				}
 
 				// Extract the time index
@@ -131,7 +119,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 			}
 
-			// Store the series index if not yet present
+    		// Build series ID from row (if present, use path information to build a unique id)
+    		String seriesID = row[7] + "_" + row[4] + "_" +
+    				tileX + "_" + tileY + "_" + pathInfoAsID(row[6]);
 
 			// Current series metadata
 			HashMap<String, String> metadata;
@@ -236,18 +226,24 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 			// Update the metadata object
 
-			// Number of planes (notice: 0-based!)
+			// Number of planes
 			int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
-			if ((planeNum + 1) > numPlanes) {
-				metadata.put("sizeZ", Integer.toString(planeNum + 1));
+			if (planeNum == 0) {
+				planeNum = 1;
+			}
+			if (planeNum > numPlanes) {
+				metadata.put("sizeZ", Integer.toString(planeNum));
 			}
 
             // Number of channels
 			metadata.put("sizeC", "1");
 
-			// Number of timepoints (notice: 1-based!)
+			// Number of timepoints
 			int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
-			if ((timeNum) > numTimepoints) {
+			if (timeNum == 0) {
+				timeNum = 1;
+    		}
+			if (timeNum > numTimepoints) {
 				metadata.put("sizeT", Integer.toString(timeNum));
 			}
 
