@@ -11,16 +11,23 @@ import java.util.List;
 import java.util.Map;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
 
 
 public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
+	/* Protected instance variables */
+	private final static String REGEX = "^.*?_position(\\d{6,7})_time(\\d.*?)\\.tif{1,2}$";
+
 	/* Private instance variables */
+	private static Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
+
 	private boolean isValid = false;
 
-	HashMap<String, Series> images = null;
 	HashMap<Integer, String[]> csvTable = null;
 
     // Constructor
@@ -50,6 +57,11 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     public List<Integer> getSeriesIndices() {
     	// TODO Implement me!
     	List<Integer> indices = new ArrayList<Integer>();
+    	int i = 0;
+    	for (String key: attr.keySet()) {
+    		indices.add(i);
+    		i++;
+    	}
         return indices;
     }
 
@@ -88,10 +100,39 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     		
     		// Parse the position column
     		System.out.println(row[5]);
-    		int numPlanes = 0;
-    		int numTimePoints = 0;
-    		int numChannels = 0;
+    		int tileX = 0;
+    		int tileY = 0;
+    		int planeNum = 0;
+    		int timeNum = 0;
     		
+			//
+			// Extract index information from the file name structure
+			//
+			// Extract the information
+			Matcher m = p.matcher(new File(row[6]).getAbsolutePath());
+			if (m.find()) {
+
+				// Extract the position components
+				if (m.group(1) != null) {
+					
+					// The first group encodes the position as XXYYZZ(Z)
+					tileX = Integer.parseInt(m.group(1).substring(0, 1));
+					tileY = Integer.parseInt(m.group(1).substring(2, 3));
+					planeNum = Integer.parseInt(m.group(1).substring(4, m.group(1).length()));
+					
+					System.out.println("Filename: " + row[6] + "; Position = " + m.group(1) + ": X = " + tileX + "; Y = " + tileY + "; Z = " + planeNum);
+					
+				}
+	
+				// Extract the time index
+				if (m.group(2) != null) {
+					timeNum = Integer.parseInt(m.group(2));
+				}
+	
+			}
+				
+			// Store the series index if not yet present
+			
 			// Current series metadata
 			HashMap<String, String> metadata;
 
@@ -105,6 +146,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 				// Create a new SeriesMetadata object 
 				metadata = new HashMap<String, String>();
+				
+				// And add it to the attribute map
+				attr.put(seriesID, metadata);
 
 				// Build full file name
 				File file = new File(this.folder + "/" + row[6]);
@@ -181,11 +225,28 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 	    		
 				// Add the the file size to the total size of the composite dataset.
 				totalDatasetSizeInBytes += file.length();
-				
-				// And add it to the attribute map
-				attr.put(seriesID, metadata);
 
 			}
+			
+			// Update the metadata object
+			int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
+			if ((planeNum + 1) > numPlanes) {
+				metadata.put("sizeZ", Integer.toString(planeNum + 1));
+			}
+
+//			int numChannels = getMetadataValueOrZero(metadata, "sizeC");
+//			if ((channelNum + 1) > numChannels) {
+//				metadata.put("sizeC", Integer.toString(channelNum + 1));
+//			}
+			metadata.put("sizeC", "1");
+
+			int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
+			if ((timeNum + 1) > numTimepoints) {
+				metadata.put("sizeT", Integer.toString(timeNum + 1));
+			}
+
+			// And add it to the attribute map
+			attr.put(seriesID, metadata);
 
     	}
 
@@ -195,60 +256,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 		return isValid;
     }
     
-    public boolean parse_old() throws Exception {
-
-        // Parse the images.csv file
-    	if (! parseImagesCSV(this.folder + "/images.csv")) {
-
-    		// Mark failure
-			isValid = false;
-			errorMessage = "Could not find and/or process 'images.csv' file.";
-			return isValid;
-    	}
-    	
-    	// Build the metadata information
-    	for (Map.Entry<String, Series> entry : images.entrySet()) {
-    	    
-    		String seriesID = entry.getKey();
-    		Series series = entry.getValue();
-    		
-    		// Read the first file in the series to collect metadata information
-    		if (reader == null) {
-
-    			// Initialize the reader
-    			reader = new ImageProcessorReader(
-    					new ChannelSeparator(
-    							LociPrefs.makeImageReader()));
-    		}
-
-    		// Try to open the first image file of the series
-    		try {
-    			
-    			// Open the file
-    			reader.setId(series.getFirstFileInSeries().getCanonicalPath());
-
-    		} catch (FormatException e) {
-
-    			// Mark failure
-    			isValid = false;
-    			errorMessage = "Could not open file '" + series.getFirstFileInSeries() + "'.";
-    			return isValid;
-
-    		} catch (IOException e) {
-
-    			// Mark failure
-    			isValid = false;
-    			errorMessage = "Could not open file '" + series.getFirstFileInSeries() + "'.";
-    			return isValid;
-
-    		}
-    	}
-
-    	// Return success
-    	isValid = true;
-        return isValid;
-    }
-
     @Override
     public String info() {
         return "YouScope (composite) file format.";
@@ -368,77 +375,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     }
     
     /**
-     * Parse the images.csv file
-     * @param fileName Full path to the images.csv file.
-     * @return True if the file could be processed successfully, false otherwise.
-     */
-    private boolean parseImagesCSV(String fileName) {
-    	
-    	// Instantiate map
-    	images = new HashMap<String, Series>();
-    	
-    	// Header
-    	boolean isHeader = true;
-
-    	// Read the CSV file
-    	try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-
-    		// read the first line from the text file 
-    		String line = br.readLine();
-
-    		// loop until all lines are read 
-    		while (line != null) {
-
-    			if (isHeader == true) {
-    				
-    				// We are past the header
-    				isHeader = false;
-    				
-        			// Read next line 
-        			line = br.readLine();
-        			
-    				continue;
-    			}
-    			
-    			// Get all values for current row
-    			String[] row = line.split(";");
-    			
-    			// Remove " characters if needed
-    			for (int i = 0; i < row.length; i++) {
-    				row[i] = row[i].replace("\"", "");
-    			}
-    			
-    			// Build a unique (hopefully) series if
-    			String seriesID = row[0] + "_" + row[4] + "_" + row[7];
-    			
-    			// Store them
-    			Series series;
-    			if (images.containsKey(seriesID)) {
-    				series = images.get(seriesID);
-    			} else {
-    				System.out.println("Found on new Series: " + seriesID);
-    				series = new Series(this.folder);
-    			}
-    			
-    			// Append the file
-				series.addFileName(row[6]);
-				
-				// Store the updated image
-				images.put(seriesID, series);
-				
-    			// Read next line 
-    			line = br.readLine();
-
-    		} 
-    	} catch (FileNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
-    	return true;
-    }
-    
-    /**
      * Return an ID built from the path information of the file
      * @param file Image file with (relative) path as obtained from images.csv
      * @return ID built from the path information of the file.
@@ -461,54 +397,5 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 		
 		return pathInfo;
 	}
-
-
-    private class Series {
-    	
-    	private File folder;
-    	private List<String> filenames;
-
-    	/**
-    	 * Constructor
-    	 * @param rootFolder Full path to the root folder of the dataset.
-    	 */
-    	public Series(File rootFolder) {
-    		
-    		// Store the root folder
-    		this.folder = rootFolder;
-    		
-    		// Initialize the list of filenames
-    		filenames = new ArrayList<String>();
-		}
-    	
-    	/**
-    	 * Add filename to current series and updates to global 
-    	 * total size in bytes of the dataset.
-    	 * 
-    	 * @param filename File name with full path.
-    	 */
-    	public void addFileName(String filename) {
-    		
-    		// Add the filename
-    		filenames.add(filename);
-    		
-    		// Update the total file size (in the container class)
-    		File file = new File(this.folder + "/" + filename);
-    		totalDatasetSizeInBytes += file.length();
-    	}
-    	
-    	/**
-    	 * Get the first file name of the series.
-    	 * @return First File ine the series.
-    	 */
-    	public File getFirstFileInSeries() {
-    		if (filenames.isEmpty()) {
-    			return new File("");
-    		} else {
-    			return new File(this.folder + "/" + filenames.get(0));
-    		}
-    	}
-   	
-    }
-    	
+	
 }

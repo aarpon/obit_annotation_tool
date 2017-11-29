@@ -197,9 +197,9 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				}
 
 				// The time number is not always defined
-				int TimeNum = 0;
+				int timeNum = 0;
 				if (m.group(5) != null) {
-					TimeNum = Integer.parseInt(m.group(6));
+					timeNum = Integer.parseInt(m.group(6));
 				}
 
 				// Plane number (z)
@@ -299,8 +299,8 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				}
 
 				int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
-				if ((TimeNum + 1) > numTimepoints) {
-					metadata.put("sizeT", Integer.toString(TimeNum + 1));
+				if ((timeNum + 1) > numTimepoints) {
+					metadata.put("sizeT", Integer.toString(timeNum + 1));
 				}
 
 			} else {
