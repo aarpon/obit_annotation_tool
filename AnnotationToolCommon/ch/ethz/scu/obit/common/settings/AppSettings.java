@@ -105,8 +105,8 @@ class AppSettings {
 			options.add("no");
 			options.add("yes");
 		} else if (name.equals("AcquisitionStation")) {
-			options.add("BD Biosciences Cell Analyzers and Sorters");
-			options.add("Generic light microscopes");
+			options.add("Flow cytometry");
+			options.add("Microscopy");
 		} else if (name.equals("HumanFriendlyHostName")) {
 			try {
 				options.add(QueryOS.getHostName());
@@ -131,11 +131,11 @@ class AppSettings {
 	 */
 	static public String getAcqStationDescription(String name) {
 		
-		if (name.equals("BD Biosciences Cell Analyzers and Sorters")) {
-			return "BD LSRFortessa and FACSAria III "
-					+ "(FCS 3.0/3.1 exports from BD FACSDiva™ Software 6/7/8)";
-		} else if (name.equals("Generic light microscopes")) {
-			return "Generic light microscopes (LOCI bio-formats compatible)";
+		if (name.equals("Flow cytometry")) {
+			return "Cell analyzers and sorters "
+					+ "(FCS 3.0/3.1)";
+		} else if (name.equals("Microscopy")) {
+			return "Light microscopes (LOCI bio-formats compatible)";
 		} else {
 			throw (new IllegalArgumentException("Unknown acquisition station."));
 		}

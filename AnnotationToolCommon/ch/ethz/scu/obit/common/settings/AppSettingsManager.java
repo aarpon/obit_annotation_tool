@@ -382,10 +382,18 @@ public class AppSettingsManager {
 		// Check that the file version is current.
 		if (fileVersion != VersionInfo.applicationSettingsVersion) {
 			
-			// The change between version 4, 5 and 6 is cosmetic, and we can 
-			// just re-save the settings.
-			if (fileVersion == 4 || fileVersion == 5) {
+			// The change between version 6 and 7 require an upgrade of the settings file.
+			if (fileVersion == 6) {
 				
+				// We update the 
+				AppSettings settings = loadedAppSettings.get(0);
+				String acqStation = settings.getSettingValue("AcquisitionStation");
+				if (acqStation.equals("Generic light microscopes")) {
+					settings.setSettingValue("AcquisitionStation", "Microscopy");
+				} else {
+					settings.setSettingValue("AcquisitionStation", "Flow cytometry");
+				}
+
 				// Save a new file at version.
 				save();
 				

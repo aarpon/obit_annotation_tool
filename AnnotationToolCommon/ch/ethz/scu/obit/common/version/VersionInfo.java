@@ -27,7 +27,7 @@ public class VersionInfo {
 	/**
 	 *  Application settings (XML) file version
 	 */
-	public static final int applicationSettingsVersion = 6;
+	public static final int applicationSettingsVersion = 7;
 
     /**
      *  Application updater settings (XML) file version
