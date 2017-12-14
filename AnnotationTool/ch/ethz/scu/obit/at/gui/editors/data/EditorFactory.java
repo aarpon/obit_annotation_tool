@@ -29,14 +29,14 @@ public class EditorFactory {
 
 		// Create the concrete editor
 		String acqStation = globalSettingsManager.getAcquisitionStation();	
-		if (acqStation.equals("BD Biosciences Cell Analyzers and Sorters")) {
+		if (acqStation.equals("Flow cytometry")) {
 			metadataEditor = new FlowEditor(
 					dataViewer, openBISViewer, globalSettingsManager);
-		} else if (acqStation.equals("Generic light microscopes")) {
+		} else if (acqStation.equals("Microscopy")) {
 			metadataEditor = new MicroscopyEditor(
 					dataViewer, openBISViewer, globalSettingsManager);
 		} else {
-			System.err.println("Unknown acquisition station! Aborting.");
+			System.err.println("Unknown acquisition station type! Aborting.");
 			System.exit(1);
 		}
 		
