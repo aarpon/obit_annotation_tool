@@ -7,10 +7,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
+import loci.formats.in.MetadataOptions;
+import loci.formats.meta.MetadataStore;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -119,14 +122,27 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
 			}
 
+    		// Channel name
+    		String channelName;
+    		if (row[9].equals("") && row[10].equals("")) {
+    			channelName = "undefined";
+    		} else if (! row[9].equals("") && row[10].equals("")) {
+    			channelName = row[9];
+    		} else if (row[9].equals("") && ! row[10].equals("")) {
+    			channelName = row[10];
+    		} else {
+    			channelName = row[9] + "_" + row[10];
+    		}
+
     		// Build series ID from row (if present, use path information to build a unique id)
-    		String seriesID = row[7] + "_" + row[4] + "_" +
-    				tileX + "_" + tileY + "_" + pathInfoAsID(row[6]);
+    		String seriesID = "ID_" + row[7] + "_Well_" + row[4] + 
+    				"_Pos_" + tileX + "_" + tileY + "_Path_" + pathInfoAsID(row[6]) +
+    				"_Ch_" + channelName;
 
 			// Current series metadata
 			HashMap<String, String> metadata;
 
-			// Store the series index if not yet present
+			// Store the series index if not yet present	
 			if (seriesNamesMapper.containsKey(seriesID)) {
 
 				// Get the attr key name
@@ -140,11 +156,18 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 				// Create a new SeriesMetadata object 
 				metadata = new HashMap<String, String>();
 
+				// Add the unique series ID
+				metadata.put("uniqueSeriesID", seriesID);
+
+				// Add the channel name
+				metadata.put("channelName", channelName);
+
 				// And add it to the attribute map
 				int numSeries = seriesNamesMapper.size();
 				String attrKey = "series_" + numSeries;
 				seriesNamesMapper.put(seriesID, attrKey);
 				attr.put(attrKey, metadata);
+
 
 				// Build full file name
 				File file = new File(this.folder + "/" + row[6]);
@@ -206,8 +229,8 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 					metadata.put("datatype", datatype);
 
 					// Store default values. These should be replaced
-					// with information extracted from the properties XML
-					// file in the Metadata folder.
+					// with information extracted from the external
+					// metadata information.
 					metadata.put("voxelX", "NaN");
 					metadata.put("voxelY", "NaN");
 					metadata.put("voxelZ", "NaN");
