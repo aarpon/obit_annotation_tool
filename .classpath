@@ -9,17 +9,12 @@
 	<classpathentry kind="src" path="AnnotationToolUpdater"/>
 	<classpathentry kind="lib" path="lib/dss_client/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cisd-args4j.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/commons-codec.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/commons-io.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/commons-lang.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/dss_client.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/geronimo-stax-api_1.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/ij.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/jline.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/jython.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml-schemas.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi-ooxml.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/poi.jar"/>
@@ -28,26 +23,31 @@
 	<classpathentry kind="lib" path="lib/dss_client/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/query_api/sis-base-14.12.0.jar"/>
 	<classpathentry kind="lib" path="lib/bioformats_package-5.1.8.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-aop.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-beans.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-context.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-core.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-expression.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-web.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring-webmvc.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/spring.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/stax-api.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/aopalliance.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/commons-httpclient.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/httpclient.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/httpcore.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/image-viewer.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/query_api/marathon-spring-util-1.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/test/junit-4.12.jar"/>
-	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-16.05.3-r37798.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/aopalliance-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/aspectjweaver-1.8.4.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/httpclient-4.3.6.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/httpcore-4.3.3.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/sis-base.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-aop-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-beans-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-context-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-core-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-expression-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-web-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/dss_client/spring-webmvc-4.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-16.05.6-r39019.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
