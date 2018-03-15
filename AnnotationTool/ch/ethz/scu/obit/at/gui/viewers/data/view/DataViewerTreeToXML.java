@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javax.swing.tree.TreeNode;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -151,9 +152,9 @@ public class DataViewerTreeToXML {
 		// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
 		// This causes a warning in Java > 5.
 		@SuppressWarnings("unchecked")
-		Enumeration<AbstractNode> children = treeNode.children();
+		Enumeration<TreeNode> children = treeNode.children();
 		while (children.hasMoreElements()) {
-			final AbstractNode node = children.nextElement();
+			final AbstractNode node = (AbstractNode) children.nextElement();
 			final Element element = createElement(document, node);
 			parentNode.appendChild(element);
 			addNodeChildren(document, element, node);

@@ -32,6 +32,7 @@ public class AnnotationTool {
 		// Open the main window and run the scan in the background
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			
+			@Override
 			public void run() {
 
 				// Create the Window and scan user's data folder and
