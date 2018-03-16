@@ -54,6 +54,11 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 
 		// Create attachment string
 		String attachmentAttr = "";
+		
+		// openBIS only supports attachments with file name of 100 characters or less
+		if (attachment.getName().length() >= 100) {
+			return false;
+		}
 
 		// Get current attachments
 		if (attributes.containsKey("attachments")) {

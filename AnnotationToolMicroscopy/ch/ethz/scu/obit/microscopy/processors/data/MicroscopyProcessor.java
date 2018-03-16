@@ -314,7 +314,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				if (! expDesc.addAttachment(file)) {
 					validator.isValid = false;
 					validator.invalidFilesOrFolders.put(file,
-							"Could not assign attachments to esperiment!");
+							"Could not assign attachment to esperiment!");
 				}
 
 				// Move on to the next file
