@@ -26,7 +26,6 @@
 	<classpathentry kind="lib" path="lib/dss_client/stax-api.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/image-viewer.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/dss_client/cisd-base.jar"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
