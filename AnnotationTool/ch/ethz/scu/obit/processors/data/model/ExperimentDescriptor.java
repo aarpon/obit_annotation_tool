@@ -16,7 +16,7 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 	 */
 	protected final static String[] validAttachmentExtensions = 
 		{".pdf", ".doc", ".docx", ".xls", ".xlsx",
-		        ".ppt", ".pptx", ".csv", ".tsv"};
+				".ppt", ".pptx", ".csv", ".tsv", ".xps"};
 
 	/** 
 	 * Constructor

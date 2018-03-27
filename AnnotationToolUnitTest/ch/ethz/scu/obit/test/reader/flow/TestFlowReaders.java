@@ -779,10 +779,10 @@ public class TestFlowReaders {
         // Test data
         assertEquals(reader.numEvents(), 102013);
         assertEquals(reader.numParameters(), 21);
-        
+
         // Get the column names
         ArrayList<String> parameters = reader.getParameterNames();
-        
+
         // Test the parameter names
         assertEquals(parameters.get(0), "TIME_MSW");
         assertEquals(parameters.get(1), "TIME_LSW");
@@ -805,7 +805,7 @@ public class TestFlowReaders {
         assertEquals(parameters.get(18), "FL4-AREA");
         assertEquals(parameters.get(19), "FL4-WIDTH");       
         assertEquals(parameters.get(20), "SORT");
-       
+
         // Check the data
         double[] time_msw = {-1.0, -1.0, -1.0, -1.0, -1.0};
         double[] expected_time_msw = {0.0, 0.0, 0.0, 0.0, 0.0};
@@ -836,11 +836,85 @@ public class TestFlowReaders {
 			// The next test will fail
 		}
         assertArrayEquals(fsc_height, expected_fsc_height, 1e-6);
-        
+
     }
-    
+
     /**
-     * Test reading a single FCS 3.0 file from Influx (FACS Sortware 1.2).
+     * Test reading a single FCS 3.0 file from Beckman Coulter MoFlo DXP (Summit 5).
+     */
+    @Test
+    public void testSingleXDP7FileRead() {
+
+        // Test an FCS 3.0 file from Beckman Coulter MoFlo DXP (Summit 5)
+        File fcsFile = new File(dataFolder + 
+                "/xdp/7/20170411/20170411_C2.fcs");
+
+        // Open the file (with data scan)
+        FCSReader reader = new FCSReader(fcsFile, true);
+
+        // Scan the file
+        boolean success;
+        try {
+            success = reader.parse();
+        } catch (IOException e) {
+            success = false;
+        }
+        assertEquals(success, true);
+
+        // Test several keywords
+        assertEquals(reader.getFCSVersion(), "FCS3.0");
+        assertEquals(reader.getStandardKeyword("$CYT"), "MoFlo XDP");
+        assertEquals(reader.getStandardKeyword("$DATATYPE"), "I");
+
+        // The files do not contain ANY custom keyword; moreover, the standard
+        // keywords lack entries such as $FIL. The files also do not store the
+        // name of the acquiring software.
+        // Also there is no EXPERIMENT NAME key, nor any TUBE NAME keys!
+
+        // Test data
+        assertEquals(reader.numEvents(), 23369);
+        assertEquals(reader.numParameters(), 11);
+        
+        // Get the column names
+        ArrayList<String> parameters = reader.getParameterNames();
+        
+        // Test the parameter names
+        assertEquals(parameters.get(0), "TIME");
+        assertEquals(parameters.get(1), "TIME2");
+        assertEquals(parameters.get(2), "FSC-Height");
+        assertEquals(parameters.get(3), "FSC-Area");
+        assertEquals(parameters.get(4), "FSC-Width");
+        assertEquals(parameters.get(5), "SSC-Height");
+        assertEquals(parameters.get(6), "SSC-Area");
+        assertEquals(parameters.get(7), "SSC-Width");
+        assertEquals(parameters.get(8), "FL1-Log_Height");
+        assertEquals(parameters.get(9), "FL7-Log_Height");
+        assertEquals(parameters.get(10), "FL8-Log_Height");      
+
+        // Check the data
+        double[] time = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        double[] expected_time = {69828128.0, 70526441.0, 70532791.0, 71150660.0, 71229443.0};
+        try {
+        	// Read the first 5 values from "TIME_MSW"
+        	time = reader.getRawDataPerColumnIndex(0, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+        assertArrayEquals(time, expected_time, 1e-6);
+
+        double[] fsc_height = {-1.0, -1.0, -1.0, -1.0, -1.0};
+        double[] expected_fsc_height = {1136644224.0, 1215843917.0, 1364197504.0, 604860748.0, 1295596954.0};
+        try {
+        	// Read the first 5 values from "FSC-HEIGHT"
+			fsc_height = reader.getRawDataPerColumnIndex(2, 5, false);
+		} catch (IOException e) {
+			// The next test will fail
+		}
+        assertArrayEquals(fsc_height, expected_fsc_height, 1e-6);       
+    }
+   
+    /**
+     * Test reading a single FCS 3.0 file from BIORAD S3 (ProSort).
      */
     @Test
     public void testSingleS35FileReadAndHyperLogTransform() {
@@ -860,7 +934,7 @@ public class TestFlowReaders {
             success = false;
         }
         assertEquals(success, true);
-      
+
         // Load column TIME_LSW
         double[] time_lsw = {-1.0, -1.0, -1.0, -1.0, -1.0};
         try {
@@ -905,7 +979,7 @@ public class TestFlowReaders {
         fsc_height = Hyperlog.arrayMult(fsc_height, params[0]);
         double[] expected_fsc_height = {126843.72226283934, 127432.84732392649, 127939.28410071139, 128270.0, 127383.40535720732};
         assertArrayEquals(expected_fsc_height, expected_fsc_height, 1e-6);
-        
+
     }
 
     /**
