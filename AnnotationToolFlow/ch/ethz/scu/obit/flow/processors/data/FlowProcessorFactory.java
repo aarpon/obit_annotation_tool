@@ -43,6 +43,8 @@ public class FlowProcessorFactory {
 			return new BDFACSAriaFlowProcessor(folder);
 		} else if (BDInfluxFlowProcessor.isValidHardwareString(hardwareString) == true) {
 			return new BDInfluxFlowProcessor(folder);
+		} else if (BCMoFloXDPFlowProcessor.isValidHardwareString(hardwareString) == true) {
+			return new BCMoFloXDPFlowProcessor(folder);
 		} else if (BIORADS3eFlowProcessor.isValidHardwareString(hardwareString) == true) {
 			return new BIORADS3eFlowProcessor(folder);
 		} else {
