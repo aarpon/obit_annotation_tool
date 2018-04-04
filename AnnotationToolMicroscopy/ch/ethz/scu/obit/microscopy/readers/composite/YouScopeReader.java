@@ -21,19 +21,21 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /* Protected instance variables */
     private final static String REGEX_POS = "(y-tile: (?<y>\\d+)*(, )?)*(x-tile: (?<x>\\d+)*(, )?)*(z-stack: (?<z>\\d+))*";
-    private final static String REGEX_TIME = ".*_time(?<time>\\d*)\\.tif{1,2}$";
+    private final static String REGEX_TIME_NAME = ".*_time(?<time>\\d*)\\.tif{1,2}$";
+    private final static String REGEX_TIME_FB = ".*_time_(.*)_\\(number_(?<time>\\d*)\\)\\.tif{1,2}$";
     private final static String REGEX_POS_NAME = ".*position(?<pos>\\d*)_time.*\\.tif{1,2}$";
     private final static String REGEX_POS_NAME_FB = ".*\\(pos_(?<pos>\\d*)\\).*$";
 
     /* Private instance variables */
     private static Pattern p_pos = Pattern.compile(REGEX_POS, Pattern.CASE_INSENSITIVE);
-    private static Pattern p_time = Pattern.compile(REGEX_TIME, Pattern.CASE_INSENSITIVE);
+    private static Pattern p_time = Pattern.compile(REGEX_TIME_NAME, Pattern.CASE_INSENSITIVE);
+    private static Pattern p_time_fb = Pattern.compile(REGEX_TIME_FB, Pattern.CASE_INSENSITIVE);
     private static Pattern p_pos_name = Pattern.compile(REGEX_POS_NAME, Pattern.CASE_INSENSITIVE);
     private static Pattern p_pos_name_fb = Pattern.compile(REGEX_POS_NAME_FB, Pattern.CASE_INSENSITIVE);
 
     private boolean isValid = false;
 
-    HashMap<Integer, String[]> csvTable = null;
+    HashMap<String, String[]> csvTable = null;
     HashMap<String, String> seriesNamesMapper = null;
 
     /**
@@ -73,7 +75,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     public boolean parse() throws Exception {
 
         // Parse the images.csv file
-        Map<Integer, String[]> csvTable = new HashMap<Integer, String[]>();
+        Map<String, String[]> csvTable = new HashMap<String, String[]>();
         csvTable = buildImagesCSVTable(this.folder + "/images.csv");
         if (csvTable.isEmpty()) {
             // Mark failure
@@ -93,7 +95,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         seriesNamesMapper = new HashMap<String, String>();
 
         // Now extract series and build metadata
-        for (Map.Entry<Integer, String[]> entry : csvTable.entrySet()) {
+        for (Map.Entry<String, String[]> entry : csvTable.entrySet()) {
 
             // Get current row
             String[] row = entry.getValue();
@@ -127,7 +129,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // If the positional information could not be extracted from the corresponding
             // column, try to get it from the file name
-            Matcher m_pos_name = p_pos_name.matcher(new File(row[6]).getAbsolutePath());
+            Matcher m_pos_name = p_pos_name.matcher(row[6]);
             if (m_pos_name.find()) {
                 if (m_pos_name.group("pos") != null) {
                     Map<String, String> map = processPosFromFileName(m_pos_name.group("pos"));
@@ -144,33 +146,41 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                         well = map.get("well");
                     }
                 }
-            }
-
-            // Try the fallback option
-            Matcher m_pos_name_fb = p_pos_name_fb.matcher(new File(row[6]).getAbsolutePath());
-            if (m_pos_name_fb.find()) {
-                if (m_pos_name_fb.group("pos") != null) {
-                    Map<String, String> map = processPosFromFileName(m_pos_name_fb.group("pos"));
-                    if (tileX == -1 && map.get("tileX") != "") {
-                        tileX = Integer.parseInt(map.get("tileX"));
-                    }
-                    if (tileY == -1 && map.get("tileY") != "") {
-                        tileY = Integer.parseInt(map.get("tileY"));
-                    }
-                    if (planeNum == -1 && map.get("planeNum") != "") {
-                        planeNum = Integer.parseInt(map.get("planeNum"));
-                    }
-                    if (well == "" && map.get("well") != "") {
-                        well = map.get("well");
+            } else {
+                // Try the fallback option
+                Matcher m_pos_name_fb = p_pos_name_fb.matcher(row[6]);
+                if (m_pos_name_fb.find()) {
+                    if (m_pos_name_fb.group("pos") != null) {
+                        Map<String, String> map = processPosFromFileName(m_pos_name_fb.group("pos"));
+                        if (tileX == -1 && map.get("tileX") != "") {
+                            tileX = Integer.parseInt(map.get("tileX"));
+                        }
+                        if (tileY == -1 && map.get("tileY") != "") {
+                            tileY = Integer.parseInt(map.get("tileY"));
+                        }
+                        if (planeNum == -1 && map.get("planeNum") != "") {
+                            planeNum = Integer.parseInt(map.get("planeNum"));
+                        }
+                        if (well == "" && map.get("well") != "") {
+                            well = map.get("well");
+                        }
                     }
                 }
             }
 
             // Then, get time information
-            Matcher m_time = p_time.matcher(new File(row[6]).getAbsolutePath());
+            Matcher m_time = p_time.matcher(row[6]);
             if (m_time.find()) {
                 if (m_time.group("time") != null) {
                     timeNum = Integer.parseInt(m_time.group("time"));
+                }
+            } else {
+                // Try the fallback option
+                Matcher m_time_fb = p_time_fb.matcher(row[6]);
+                if (m_time_fb.find()) {
+                    if (m_time_fb.group("time") != null) {
+                        timeNum = Integer.parseInt(m_time_fb.group("time"));
+                    }
                 }
             }
 
@@ -405,16 +415,13 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
      *            Full path to the images.csv file.
      * @return 2D array of strings with the content of the images.csv file.
      */
-    private HashMap<Integer, String[]> buildImagesCSVTable(String fileName) {
+    private HashMap<String, String[]> buildImagesCSVTable(String fileName) {
 
         // Initialize the table
-        csvTable = new HashMap<Integer, String[]>();
+        csvTable = new HashMap<String, String[]>();
 
         // Header
         boolean isHeader = true;
-
-        // Row number
-        int rowNumber = 0;
 
         // Read the CSV file
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
@@ -446,20 +453,17 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     row[i] = row[i].replace("\\", "/");
                 }
 
-                // Add the row
-                csvTable.put(rowNumber, row);
+                // Add the row with the file name as key
+                csvTable.put(row[6], row);
 
                 // Read next line
                 line = br.readLine();
 
-                // Update row number
-                rowNumber++;
-
             }
         } catch (FileNotFoundException e) {
-            return new HashMap<Integer, String[]>();
+            return new HashMap<String, String[]>();
         } catch (IOException e) {
-            return new HashMap<Integer, String[]>();
+            return new HashMap<String, String[]>();
         }
         return csvTable;
 
