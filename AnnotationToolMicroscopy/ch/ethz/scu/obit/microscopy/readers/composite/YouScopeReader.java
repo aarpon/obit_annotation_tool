@@ -209,14 +209,19 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             } else {
                 channelName = row[9] + "_" + row[10];
             }
+            if (!id.equals("")) {
+                channelName = id + "_" + channelName;
+            }
 
-            // Build series ID from row (if present, use path information to build a unique
-            // id)
-            String seriesID = "ID_" + id + "_Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_"
-                    + pathInfoAsID(row[6]) + "_Ch_" + channelName;
+            // Build series ID from row (if present, use path information to build a unique id)
+            String seriesID = "Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_"
+                    + pathInfoAsID(row[6]);
 
             // Current series metadata
             HashMap<String, String> metadata;
+
+            // Channel number
+            int channelNum = 0;
 
             // Store the series index if not yet present
             if (seriesNamesMapper.containsKey(seriesID)) {
@@ -234,9 +239,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
                 // Add the unique series ID
                 metadata.put("uniqueSeriesID", seriesID);
-
-                // Add the channel name
-                metadata.put("channelName", channelName);
 
                 // And add it to the attribute map
                 int numSeries = seriesNamesMapper.size();
@@ -333,8 +335,13 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 metadata.put("sizeZ", Integer.toString(planeNum));
             }
 
-            // Number of channels
-            metadata.put("sizeC", "1");
+            // Get the channel index
+            channelNum = getChannelIndex(metadata, channelName);
+            metadata.put("channelName" + channelNum, channelName);            
+            int numChannels = getMetadataValueOrZero(metadata, "sizeC");
+            if ((channelNum + 1) > numChannels) {
+                metadata.put("sizeC", Integer.toString(channelNum + 1));
+            }
 
             // Number of timepoints
             int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
@@ -446,6 +453,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 // Get all values for current row
                 String[] row = line.split(";");
 
+                // Make parsing robust against empty lines
+                if (row.length == 0) {
+
+                    // Read next line
+                    line = br.readLine();
+                    continue;
+                }
+
                 // Remove '"' and '\' characters if needed
                 for (int i = 0; i < row.length; i++) {
                     row[i] = row[i].replace("\"", "");
@@ -463,6 +478,8 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         } catch (FileNotFoundException e) {
             return new HashMap<String, String[]>();
         } catch (IOException e) {
+            return new HashMap<String, String[]>();
+        } catch (Exception e) {
             return new HashMap<String, String[]>();
         }
         return csvTable;
@@ -553,4 +570,33 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         return map;
     }
 
+    /**
+     * Return the index of the channel from the metadata map. If the channel does not exist, current
+     * channel number is increased.
+     * @param metadata Map of string - string key:value pairs.
+     * @param channelName Name of the channel to search for in the metadata map.
+     * @return the index of the channel that has given name; if not found, return max channel index + 1.
+     */
+    private int getChannelIndex(Map<String, String> metadata, String channelName) {
+
+        // Initialize channels
+        int channels = 0;
+
+        // Are there channels already?
+        if (metadata.containsKey("sizeC")) {
+            channels = Integer.parseInt(metadata.get("sizeC"));
+        } else {
+            return channels;
+        }
+
+        // Is current channel 
+        for (int i = 0; i < channels; i++) {
+            if (metadata.get("channelName" + i).equals(channelName)) {
+                return i;
+            }
+        }
+
+        // We add a new channel
+        return channels;
+    }
 }
