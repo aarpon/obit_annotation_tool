@@ -217,6 +217,12 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             String seriesID = "Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_"
                     + pathInfoAsID(row[6]);
 
+            // Build full file name
+            File file = new File(this.folder + "/" + row[6]);
+
+            // Add the the file size to the total size of the composite dataset.
+            totalDatasetSizeInBytes += file.length();
+
             // Current series metadata
             HashMap<String, String> metadata;
 
@@ -245,9 +251,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 String attrKey = "series_" + numSeries;
                 seriesNamesMapper.put(seriesID, attrKey);
                 attr.put(attrKey, metadata);
-
-                // Build full file name
-                File file = new File(this.folder + "/" + row[6]);
 
                 // Does the metadata already contain information that can only
                 // be obtained by opening at least one file from the series?
@@ -318,9 +321,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     metadata.put("acquisitionDate", row[3]);
 
                 }
-
-                // Add the the file size to the total size of the composite dataset.
-                totalDatasetSizeInBytes += file.length();
 
             }
 
