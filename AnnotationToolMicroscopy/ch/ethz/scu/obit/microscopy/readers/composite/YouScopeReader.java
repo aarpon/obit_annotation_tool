@@ -568,27 +568,21 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             map.put("tileX", "" + Integer.parseInt(pos.substring(0, 2)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(2, 4)));
         } else if (len == 6 || len == 7) {
-            // Note: currently, it is assumed that 26 letters are enough to cover
-            // all positions. I think, if there are more than 26 positions, the
-            // letters will repeat: i.e., AA, ...
+            // Note: the number of digits that encode the well are
+            // hard-coded to 4. They do not have to be; unfortunately,
+            // it is not possible to know how to break down the pos
+            // string in its components. Usually, the well information
+            // is stored in the well column of image.csv, and therefore
+            // this information is not used.
             // No tiles and no Z information (2D acquisition)
-            int r = Integer.parseInt(pos.substring(0, 2)) - 1;
-            int c = Integer.parseInt(pos.substring(2, 4));
-            String row = r >= 0 && r < 26 ? String.valueOf((char) (r + 65)) : "";
-            map.put("well", row + c);
+            map.put("well", wellFromPosition(pos.substring(0,4)));
             map.put("planeNum", "" + Integer.parseInt(pos.substring(4)));
         } else if (len == 8) {
-            int r = Integer.parseInt(pos.substring(0, 2)) - 1;
-            int c = Integer.parseInt(pos.substring(2, 4));
-            String row = r >= 0 && r < 26 ? String.valueOf((char) (r + 65)) : "";
-            map.put("well", row + c);
+            map.put("well", wellFromPosition(pos.substring(0,4)));
             map.put("tileX", "" + Integer.parseInt(pos.substring(4, 6)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(6, 8)));
         } else if (len == 10 || len == 11) {
-            int r = Integer.parseInt(pos.substring(0, 2)) - 1;
-            int c = Integer.parseInt(pos.substring(2, 4));
-            String row = r >= 0 && r < 26 ? String.valueOf((char) (r + 65)) : "";
-            map.put("well", row + c);
+            map.put("well", wellFromPosition(pos.substring(0,4)));
             map.put("tileX", "" + Integer.parseInt(pos.substring(4, 6)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(6, 8)));
             map.put("planeNum", "" + Integer.parseInt(pos.substring(8)));
@@ -626,5 +620,67 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
         // We add a new channel
         return channels;
+    }
+
+    /**
+     * Maps a position to a well.
+     * 
+     * The position is a n-digit string, such as '0202' that maps to well B2. 
+     * The number of digits must be even, and the function will divide them in 
+     * two n/2 subsets.
+     * 
+     * The row is given by one or more letters, the column by an integer: 
+     * e.g. 2712 maps to AA12. 
+     * @param pos n-digit string that encodes the well (e.g. '0202').
+     * @return string representing the well (e.g. 'B2')
+     */
+    private String wellFromPosition(String pos) {
+
+        // Number of digits
+        int len_pos = pos.length();
+        int sub_len = len_pos / 2;
+
+        // Extract the 'row' part
+        int row = Integer.parseInt(pos.substring(0, sub_len));
+        if (row == 0) {
+            return "";
+        }
+
+        // Extract the 'column' part
+        int col = Integer.parseInt(pos.substring(sub_len, len_pos));
+
+        // Row string
+        String R = "";
+
+        if (row <= 26) {
+            R = (row - 1) >= 0 && (row - 1) < 26 ? String.valueOf((char) ((row - 1) + 65)) : "";
+            return R + col;
+        }
+
+        // The row part of the well name if a made
+        // of multiple letters
+
+        // Number of digits
+        double n_digits = Math.log(row) / Math.log(26);
+
+        while (n_digits > 0) {
+
+            // Step
+            int step = (int)Math.pow(26, (int)n_digits);
+
+            // Right-most letter
+            int r = row / step;
+
+            // Append the letter
+            String R_tmp = (r - 1) >= 0 && (r - 1) < 26 ? String.valueOf((char) ((r - 1) + 65)) : "";
+            R = R + R_tmp;
+
+            // Now go to the next letter
+            row = row - step;
+            n_digits = n_digits - 1;
+        }
+
+        return R + col;
+
     }
 }
