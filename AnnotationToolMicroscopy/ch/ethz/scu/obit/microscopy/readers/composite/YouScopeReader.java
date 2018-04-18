@@ -78,9 +78,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         Map<String, String[]> csvTable = new HashMap<String, String[]>();
         csvTable = buildImagesCSVTable(this.folder + "/images.csv");
         if (csvTable.isEmpty()) {
-            // Mark failure
-            isValid = false;
-            errorMessage = "Could not find and/or process 'images.csv' file.";
+            // The buildImagesCSVTable() function already set the
+            // isValid flag and the errorMessage string.
+            assert(isValid == false);
             return isValid;
         }
 
@@ -219,6 +219,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // Build full file name
             File file = new File(this.folder + "/" + row[6]);
+
+            // Make sure that the file exists
+            if (! file.exists()) {
+                // Mark failure
+                isValid = false;
+                errorMessage = "File '" + file + "' referenced in 'images.csv' does not exist!";
+                return isValid;
+            }
 
             // Add the the file size to the total size of the composite dataset.
             totalDatasetSizeInBytes += file.length();
@@ -416,11 +424,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     }
 
     /**
-     * Parse the images.csv file and return a table.
+     * Parse the images.csv file and return a map of the content. Each row is stored with the
+     * file name (with relative path) as its key.
      * 
-     * @param fileName
-     *            Full path to the images.csv file.
-     * @return 2D array of strings with the content of the images.csv file.
+     * If something goes wrong while processing the file, this function will set the 'isValid'
+     * flag to false, set the 'errorMessage' accordingly and return an empty map.
+     * 
+     * @param fileName Full path to the images.csv file.
+     * @return Hash map of strings with file name as key and array of string for each row.
      */
     private HashMap<String, String[]> buildImagesCSVTable(String fileName) {
 
@@ -468,6 +479,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     row[i] = row[i].replace("\\", "/");
                 }
 
+                // Check that the file was not erroneously added twice to the images.csv file
+                if (csvTable.containsKey(row[6])) {
+                    // Mark failure
+                    isValid = false;
+                    errorMessage = "File '" + row[6] + "' referenced more than once in 'images.csv'!";
+                    return new HashMap<String, String[]>();
+                }
+
                 // Add the row with the file name as key
                 csvTable.put(row[6], row);
 
@@ -476,10 +495,19 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             }
         } catch (FileNotFoundException e) {
+            // Mark failure
+            isValid = false;
+            errorMessage = "File 'images.csv' not found!";
             return new HashMap<String, String[]>();
         } catch (IOException e) {
+            // Mark failure
+            isValid = false;
+            errorMessage = "Could not read file 'images.csv'!";
             return new HashMap<String, String[]>();
         } catch (Exception e) {
+            // Mark failure
+            isValid = false;
+            errorMessage = "Could not read file 'images.csv'! The error was: " + e.getMessage();
             return new HashMap<String, String[]>();
         }
         return csvTable;
