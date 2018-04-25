@@ -145,7 +145,7 @@ public class OpenBISViewer extends Observable
 		panel.add(splitPane, constraints);
 
 		// Set sizes
-		panel.setMinimumSize(new Dimension(400, 700));
+		panel.setMinimumSize(new Dimension(400, 500));
 		panel.setPreferredSize(new Dimension(400, 700));
 	}
 

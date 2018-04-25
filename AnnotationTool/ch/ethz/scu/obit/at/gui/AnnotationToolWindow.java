@@ -209,7 +209,7 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 		add(splitPane, constraints);
 
 		// Set up the frame and center on screen
-		setMinimumSize(new Dimension(1200, 900));
+		setMinimumSize(new Dimension(1200, 700));
 		setPreferredSize(new Dimension(1200, 900));
 		pack();
 		setLocationRelativeTo(null);

@@ -172,7 +172,7 @@ abstract public class AbstractViewer extends Observable
         panel.add(splitPaneOne, constraints);
 
 		// Set the preferred and minimum size
-		panel.setMinimumSize(new Dimension(400, 700));
+		panel.setMinimumSize(new Dimension(400, 500));
 		panel.setPreferredSize(new Dimension(400, 700));
 
 	}

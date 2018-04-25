@@ -94,7 +94,7 @@ public class EditorContainer extends JPanel implements ActionListener, Observer 
 		add(sendToOpenBISButton, constraints);
 		
 		// Set the preferred and minimum size
-		this.setMinimumSize(new Dimension(400, 700));
+		this.setMinimumSize(new Dimension(400, 500));
 		this.setPreferredSize(new Dimension(400, 700));
 		
 
