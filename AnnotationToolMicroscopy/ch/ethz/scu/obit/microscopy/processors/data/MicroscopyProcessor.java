@@ -269,7 +269,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				// mind that at this stage we do not know WHICH experiment
 				// was annotated. We just react to the fact that at least
 				// one has been annotated, somewhere.
-				if (fileName.contains("_properties.oix")) {
+				if (fileName.toLowerCase().contains("_properties.oix")) {
 					validator.isValid = false;
 					validator.invalidFilesOrFolders.put(file,
 							"Experiment already annotated");
@@ -287,15 +287,35 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				// Do we have an unknown file (i.e. neither a supported dataset 
 				// format nor a valid attachment)? If we do, we add it to the 
 				// list of invalid files and move on to the next.
-				if (!supportedFormats.contains(ext) &&
+				if (!supportedFormats.contains(ext.toLowerCase()) &&
 						!ExperimentDescriptor.isValidAttachment(file)) {
 					validator.isValid = false;
 					validator.invalidFilesOrFolders.put(file,
 							"Invalid file type.");
 					continue;
 				}
+
+	            // Failed Nikon acquisitions are known to create a 4096-byte header 
+	            // only file that the bio-formats library will fail reading. We
+	            // check for such a case to prevent that the registration
+	            // will fail on the DataStore Server.
+	            if (ext.toLowerCase().equals(".nd2") && file.length() <= 4096) {
+	                // We try opening the file -- if it fails, we flag it as corrupted.
+	                try {
+	                    MicroscopyReader microscopyReader = new MicroscopyReader(file);
+	                    if (!microscopyReader.parse()) {
+	                        throw new Exception("Parsing the file " + file.getName() + " failed!");
+	                    }
+	                    microscopyReader.close();
+	                } catch (Exception e) {
+	                    validator.isValid = false;
+	                    validator.invalidFilesOrFolders.put(file,
+	                            "The file seems to be corrupted.");
+	                    continue;
+	                }
+	            }
 			}
-			
+
 			// Create a new ExperimentDescriptor or reuse an existing one
 			// The name of the experiment is the name of the folder that
 			// contains current file
@@ -310,7 +330,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 			// If the file is an attachment, add it and move on
 			if (ExperimentDescriptor.isValidAttachment(file)) {
-				
+
 				if (! expDesc.addAttachment(file)) {
 					validator.isValid = false;
 					validator.invalidFilesOrFolders.put(file,
@@ -319,8 +339,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 				// Move on to the next file
 				continue;
-				
+
 			}
+
 			// Now add the dataset to the tree
 			if (isCompositeDataset) {
 
@@ -362,10 +383,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 						microscopyFileDesc);
 
 			}
-			
+
 			// This should not happen!
 			if (folderLevel > DATASET_LEVEL) {
-				
+
 				// Do we have an unknown file? If we do, we move on to the next.
 				validator.isValid = false;
 				validator.invalidFilesOrFolders.put(file,
@@ -657,9 +678,9 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 	public class MicroscopyCompositeFile extends DatasetDescriptor {
 
 		private AbstractCompositeMicroscopyReader reader;
-		
+
 		private List<Integer> seriesIndices = new ArrayList<Integer>();
-		
+
 		/**
 		 * Constructor.
 		 * @param reader An AbstractCompositeMicroscopyReader object: in reality,
@@ -682,23 +703,23 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
 			// Store the type of the composite reader
 			attributes.put("compositeFileType", reader.getType());
-			
+
 			// Store the series indices
 			seriesIndices = reader.getSeriesIndices();
 			String seriesIndicesStr = StringUtils.join(seriesIndices, ',');
 			attributes.put("seriesIndices", seriesIndicesStr);
-			
+
 			// Append the attibute file size.
 			long s = reader.totalDatasetSizeInBytes();
 			attributes.put("datasetSize", String.format("%d", s));
-			
+
 			// Append the attribute relative folder. Since this
 			// will be used by the openBIS dropboxes running on a Unix
 			// machine, we make sure to use forward slashes for path
 			// separators when we set it as an attribute.
 			attributes.put("relativeFolder",
 					this.relativePath.replace("\\", "/"));
-			
+
 		}
 
 		/**
@@ -737,23 +758,23 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 		 * @return String, MicroscopyFileSeries map
 		 */
 		public Map<String, MicroscopyFileSeries> getSeries() {
-			
+
 			// Initialize the series map
 			Map<String, MicroscopyFileSeries> series =
 					new LinkedHashMap<String, MicroscopyFileSeries>();
-			
+
 			// Get the series attributes
 			Map<String, HashMap<String, String>> seriesAttr =
 					reader.getAttributes();
-			
+
 			// Get the series indices
-			
+
 			// Process all series
 			for (int i = 0; i < seriesAttr.size(); i++) {
 
 				// Series index
 				int index = seriesIndices.get(i);
-				
+
 				// Series key
 				String keySeries = "series_" + index;
 
@@ -764,11 +785,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 				// Append it to the MicroscopyFile descriptor
 				series.put(keySeries, fileSeries);
 			}
-			
+
 			return series;
 		}
 	}
-	
+
 	/**
 	 * Descriptor representing a microscopy file series.
 	 * 
