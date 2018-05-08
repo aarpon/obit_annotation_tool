@@ -10,7 +10,6 @@ import java.util.Map;
 
 
 import ch.ethz.scu.obit.readers.AbstractReader;
-import loci.plugins.util.ImageProcessorReader;
 
 /**
  * An abstract reader that should be specialized to manage composite datasets;
@@ -25,9 +24,6 @@ import loci.plugins.util.ImageProcessorReader;
  */
 public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 
-	/* Protected instance variables */
-	protected File folder;
-
 	/** 
 	 * Total composite dataset file in bytes
 	 */
@@ -38,11 +34,6 @@ public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 	 */
 	protected final Map<String, HashMap<String, String>> attr =
 			new HashMap<String, HashMap<String, String>>();
-
-	/**
-	 * Bio-formats ImageProcessorReader
-	 */
-	protected ImageProcessorReader reader = null;
 
 	/**
 	 * Return true if the specialized can read and process the dataset
@@ -98,52 +89,4 @@ public abstract class AbstractCompositeMicroscopyReader extends AbstractReader {
 		return attr;
 	}
 
-	/**
-	 * Return current value for given metadata entry, or zero if not in the map.
-	 * @param metadata Map of string - string key:value pairs.
-	 * @param key Name of the metadata value to query.
-	 * @return the value for the requested metadata value, or zero if
-	 * it is not in the map.
-	 */
-	protected int getMetadataValueOrZero(Map<String, String> metadata, String key) {
-		int value = 0;
-		if (metadata.containsKey(key)) {
-			value = Integer.parseInt(metadata.get(key));
-		}
-		return value;
-	}
-
-	/**
-	 * Return the data type
-	 * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
-	 */
-	public String getDataType() {
-
-		// Get and store the dataset type
-		String datatype;
-		switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
-			case 1:
-				datatype = "uint8";
-				break;
-			case 2:
-				datatype = "uint16";
-				break;
-			case 4:
-				datatype = "float";
-				break;
-			default:
-				datatype = "unsupported";
-				break;
-		}
-
-		return datatype;
-	}
-
-	/**
-	 * Returns the last error message.
-	 * @return String containing the last error message.
-	 */
-	public String getLastError() {
-		return errorMessage;
-	}
 }
