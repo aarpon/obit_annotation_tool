@@ -4,8 +4,8 @@ REM OBIT LIBS PATH
 SET OBIT_LIBS_PATH=%CD%\..
 
 REM SET THE PATH OF THE CORE-TECHNOLOGIES
-SET FLOW_PATH=%OBIT_LIBS_PATH%\..\..\..\obit_flow_core_technology
-SET MICROSCOPY_PATH=%OBIT_LIBS_PATH%\..\..\..\obit_microscopy_core_technology
+SET FLOW_PATH=%OBIT_LIBS_PATH%\..\..\..\..\server\obit_flow_core_technology
+SET MICROSCOPY_PATH=%OBIT_LIBS_PATH%\..\..\..\..\server\obit_microscopy_core_technology
     
 REM ---------
 REM FCSREADER
