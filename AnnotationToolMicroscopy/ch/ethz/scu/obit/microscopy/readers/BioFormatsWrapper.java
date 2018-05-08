@@ -407,7 +407,7 @@ public class BioFormatsWrapper {
      */
     public int getSizeX() {
         if (reader == null) {
-            return 1;
+            return -1;
         } else {
             return reader.getSizeX();
         }
