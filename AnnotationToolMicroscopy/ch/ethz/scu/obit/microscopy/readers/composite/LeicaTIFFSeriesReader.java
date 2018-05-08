@@ -35,7 +35,6 @@ import loci.plugins.util.LociPrefs;
 public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	/* Protected instance variables */
-	private File folder;
 	private final static String REGEX =
 			"^(.*?)" +                    // Series basename: group 1
 			"((_Series|_s)(\\d.*?))?" +   // Series number (optional): group 4
@@ -44,6 +43,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		    "_ch(\\d.*?)" +               // Channel number: group 8
 		    "\\.tif{1,2}$";               // File extension
 
+	/* Private instance variables */
 	private static Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
 
 	private File metadataFolder; 
@@ -51,7 +51,6 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 
 	private boolean isValid = false;
 
-	private ImageProcessorReader reader = null;
 
 	// Constructor
 	/**
@@ -198,9 +197,9 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				}
 
 				// The time number is not always defined
-				int TimeNum = 0;
+				int timeNum = 0;
 				if (m.group(5) != null) {
-					TimeNum = Integer.parseInt(m.group(6));
+					timeNum = Integer.parseInt(m.group(6));
 				}
 
 				// Plane number (z)
@@ -222,7 +221,7 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 					// Create a new SeriesMetadata object 
 					metadata = new HashMap<String, String>();
 
-					// And add it to the arribute map
+					// And add it to the attribute map
 					attr.put(key, metadata);
 
 					// Read the file
@@ -300,8 +299,8 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 				}
 
 				int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
-				if ((TimeNum + 1) > numTimepoints) {
-					metadata.put("sizeT", Integer.toString(TimeNum + 1));
+				if ((timeNum + 1) > numTimepoints) {
+					metadata.put("sizeT", Integer.toString(timeNum + 1));
 				}
 
 			} else {
@@ -632,52 +631,4 @@ public class LeicaTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
 		return true;
 	}
 
-	/**
-	 * Return current value for given metadata entry, or zero if not in the map.
-	 * @param metadata Map of string - string key:value pairs.
-	 * @param key Name of the metadata value to query.
-	 * @return the value for the requested metadata value, or zero if
-	 * it is not in the map.
-	 */
-	private int getMetadataValueOrZero(Map<String, String> metadata, String key) {
-		int value = 0;
-		if (metadata.containsKey(key)) {
-			value = Integer.parseInt(metadata.get(key));
-		}
-		return value;
-	}
-
-	/**
-	 * Return the data type
-	 * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
-	 */
-	public String getDataType() {
-
-		// Get and store the dataset type
-		String datatype;
-		switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
-			case 1:
-				datatype = "uint8";
-				break;
-			case 2:
-				datatype = "uint16";
-				break;
-			case 4:
-				datatype = "float";
-				break;
-			default:
-				datatype = "unsupported";
-				break;
-		}
-
-		return datatype;
-	}
-
-	/**
-	 * Returns the last error message.
-	 * @return String containing the last error message.
-	 */
-	public String getLastError() {
-		return errorMessage;
-	}
 }
