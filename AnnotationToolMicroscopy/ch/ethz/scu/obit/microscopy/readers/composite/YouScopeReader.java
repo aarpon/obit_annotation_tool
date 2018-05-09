@@ -9,17 +9,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import loci.formats.ChannelSeparator;
-import loci.formats.FormatException;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import loci.plugins.util.ImageProcessorReader;
-import loci.plugins.util.LociPrefs;
+
+import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 
 public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /* Protected instance variables */
+    private BioFormatsWrapper bioformatsWrapper = null;
+    private File folder;
     private final static String REGEX_POS = "(y-tile: (?<y>\\d+)*(, )?)*(x-tile: (?<x>\\d+)*(, )?)*(z-stack: (?<z>\\d+))*";
     private final static String REGEX_TIME_NAME = ".*_time(?<time>\\d*)\\.tif{1,2}$";
     private final static String REGEX_TIME_FB = ".*_time_(.*)_\\(number_(?<time>\\d*)\\)\\.tif{1,2}$";
@@ -40,7 +39,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Constructor
-     * 
+     *
      * @param folder
      *            Folder to be scanned.
      */
@@ -72,6 +71,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         return indices;
     }
 
+    @Override
     public boolean parse() throws Exception {
 
         // Parse the images.csv file
@@ -82,13 +82,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // isValid flag and the errorMessage string.
             assert(isValid == false);
             return isValid;
-        }
-
-        // Now process the files
-        if (reader == null) {
-
-            // Initialize the reader
-            reader = new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
         }
 
         // Initialize the series name mapper
@@ -267,61 +260,66 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     // Try to open the first image file of the series
                     try {
 
-                        // Open the file
-                        reader.setId(file.getCanonicalPath());
+                        // Initialize the BioFormatsWrapper
+                        bioformatsWrapper = new BioFormatsWrapper(file, false);
+                        bioformatsWrapper.parse();
 
-                    } catch (FormatException e) {
-
-                        // Mark failure
-                        isValid = false;
-                        errorMessage = "Could not open file '" + file + "'.";
-                        return isValid;
-
-                    } catch (IOException e) {
+                    } catch (Exception e) {
 
                         // Mark failure
                         isValid = false;
-                        errorMessage = "Could not open file '" + file + "'.";
+                        errorMessage = e.getMessage();
                         return isValid;
 
                     }
 
                     // Store width and height
-                    int width = 0;
-                    int heigth = 0;
+                    String width = "";
+                    String heigth = "";
                     String datatype = "Unknown";
-                    if (reader != null) {
+                    String voxelX = "NaN";
+                    String voxelY = "NaN";
+                    String voxelZ = "NaN";
+                    if (bioformatsWrapper != null) {
+
+                        // Get the attributes for current file
+                        Map<String, HashMap<String, String>> currAttrs = bioformatsWrapper.getAttributes();
+
+                        // Assertion: only one series in the file!
+                        assert(bioformatsWrapper.getNumberOfSeries() == 1);
+
+                        HashMap<String, String> seriesOneAttrs = currAttrs.get("series_0");
 
                         // Get width
-                        width = reader.getSizeX();
+                        width = seriesOneAttrs.get("sizeX");
 
                         // Get heigth
-                        heigth = reader.getSizeY();
+                        heigth = seriesOneAttrs.get("sizeY");
 
                         // Get datatype
-                        datatype = getDataType();
+                        datatype = bioformatsWrapper.getDataType();
+
+                        // Get voxel size
+                        voxelX = seriesOneAttrs.get("voxelX");
+                        voxelY = seriesOneAttrs.get("voxelY");
+                        voxelZ = seriesOneAttrs.get("voxelZ");
 
                         // Now close the file
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            // Report
-                            System.err.println("Could not close file!");
-                        }
+                        bioformatsWrapper.close();
 
                     }
 
                     // Store the extracted values
-                    metadata.put("sizeX", Integer.toString(width));
-                    metadata.put("sizeY", Integer.toString(heigth));
+                    metadata.put("sizeX", width);
+                    metadata.put("sizeY", heigth);
                     metadata.put("datatype", datatype);
 
                     // Store default values. These should be replaced
                     // with information extracted from the external
                     // metadata information.
-                    metadata.put("voxelX", "NaN");
-                    metadata.put("voxelY", "NaN");
-                    metadata.put("voxelZ", "NaN");
+                    metadata.put("voxelX", voxelX);
+                    metadata.put("voxelY", voxelY);
+                    metadata.put("voxelZ", voxelZ);
 
                     // TODO: Get wavelengths from metadata
 
@@ -345,7 +343,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // Get the channel index
             channelNum = getChannelIndex(metadata, channelName);
-            metadata.put("channelName" + channelNum, channelName);            
+            metadata.put("channelName" + channelNum, channelName);
             int numChannels = getMetadataValueOrZero(metadata, "sizeC");
             if ((channelNum + 1) > numChannels) {
                 metadata.put("sizeC", Integer.toString(channelNum + 1));
@@ -380,17 +378,18 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Return true if the composite microscopy dataset could be parsed successfully.
-     * 
+     *
      * @return true if the composite microscopy dataset could be parsed
      *         successfully, false otherwise.
      */
+    @Override
     public boolean isParsed() {
         return isValid;
     }
 
     /**
      * Return true if the reader can parse the passed folder
-     * 
+     *
      * @param folder
      *            Folder to be parsed.
      * @return true if the folder can be parsed, false otherwise.
@@ -426,10 +425,10 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     /**
      * Parse the images.csv file and return a map of the content. Each row is stored with the
      * file name (with relative path) as its key.
-     * 
+     *
      * If something goes wrong while processing the file, this function will set the 'isValid'
      * flag to false, set the 'errorMessage' accordingly and return an empty map.
-     * 
+     *
      * @param fileName Full path to the images.csv file.
      * @return Hash map of strings with file name as key and array of string for each row.
      */
@@ -516,7 +515,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Return an ID built from the path information of the file
-     * 
+     *
      * @param file
      *            Image file with (relative) path as obtained from images.csv
      * @return ID built from the path information of the file.
@@ -542,7 +541,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Process the position string extracted from the file name.
-     * 
+     *
      * @param pos
      *            A numeric string of the form '010101' (not strictly 6-character
      *            long).
@@ -611,7 +610,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             return channels;
         }
 
-        // Is current channel 
+        // Is current channel
         for (int i = 0; i < channels; i++) {
             if (metadata.get("channelName" + i).equals(channelName)) {
                 return i;
@@ -624,13 +623,13 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Maps a position to a well.
-     * 
-     * The position is a n-digit string, such as '0202' that maps to well B2. 
-     * The number of digits must be even, and the function will divide them in 
+     *
+     * The position is a n-digit string, such as '0202' that maps to well B2.
+     * The number of digits must be even, and the function will divide them in
      * two n/2 subsets.
-     * 
-     * The row is given by one or more letters, the column by an integer: 
-     * e.g. 2712 maps to AA12. 
+     *
+     * The row is given by one or more letters, the column by an integer:
+     * e.g. 2712 maps to AA12.
      * @param pos n-digit string that encodes the well (e.g. '0202').
      * @return string representing the well (e.g. 'B2')
      */
@@ -683,4 +682,20 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         return R + col;
 
     }
+
+    /**
+     * Return current value for given metadata entry, or zero if not in the map.
+     * @param metadata Map of string - string key:value pairs.
+     * @param key Name of the metadata value to query.
+     * @return the value for the requested metadata value, or zero if
+     * it is not in the map.
+     */
+    protected int getMetadataValueOrZero(Map<String, String> metadata, String key) {
+        int value = 0;
+        if (metadata.containsKey(key)) {
+            value = Integer.parseInt(metadata.get(key));
+        }
+        return value;
+    }
+
 }
