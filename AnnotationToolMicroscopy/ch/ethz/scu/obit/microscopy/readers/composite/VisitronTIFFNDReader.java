@@ -264,12 +264,12 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
         // Store the list of files references in the ND file
         referencedTIFFFiles = bioformatsWrapperForNDFile.getReferencedFiles();
 
-        // Close the reader
-        bioformatsWrapperForNDFile.close();
-
         // Store the attributes and the file series indices
         combinedAttr = bioformatsWrapperForNDFile.getAttributes();
         combinedSeriesIndices = bioformatsWrapperForNDFile.getSeriesIndices();
+
+        // Close the reader
+        bioformatsWrapperForNDFile.close();
 
         // Return success
         return true;

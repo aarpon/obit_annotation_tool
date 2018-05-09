@@ -262,6 +262,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
                         // Initialize the BioFormatsWrapper
                         bioformatsWrapper = new BioFormatsWrapper(file, false);
+                        bioformatsWrapper.parse();
 
                     } catch (Exception e) {
 
@@ -273,19 +274,35 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     }
 
                     // Store width and height
-                    int width = 0;
-                    int heigth = 0;
+                    String width = "";
+                    String heigth = "";
                     String datatype = "Unknown";
+                    String voxelX = "NaN";
+                    String voxelY = "NaN";
+                    String voxelZ = "NaN";
                     if (bioformatsWrapper != null) {
 
+                        // Get the attributes for current file
+                        Map<String, HashMap<String, String>> currAttrs = bioformatsWrapper.getAttributes();
+
+                        // Assertion: only one series in the file!
+                        assert(bioformatsWrapper.getNumberOfSeries() == 1);
+
+                        HashMap<String, String> seriesOneAttrs = currAttrs.get("series_0");
+
                         // Get width
-                        width = bioformatsWrapper.getSizeX();
+                        width = seriesOneAttrs.get("sizeX");
 
                         // Get heigth
-                        heigth = bioformatsWrapper.getSizeY();
+                        heigth = seriesOneAttrs.get("sizeY");
 
                         // Get datatype
                         datatype = bioformatsWrapper.getDataType();
+
+                        // Get voxel size
+                        voxelX = seriesOneAttrs.get("voxelX");
+                        voxelY = seriesOneAttrs.get("voxelY");
+                        voxelZ = seriesOneAttrs.get("voxelZ");
 
                         // Now close the file
                         bioformatsWrapper.close();
@@ -293,16 +310,16 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     }
 
                     // Store the extracted values
-                    metadata.put("sizeX", Integer.toString(width));
-                    metadata.put("sizeY", Integer.toString(heigth));
+                    metadata.put("sizeX", width);
+                    metadata.put("sizeY", heigth);
                     metadata.put("datatype", datatype);
 
                     // Store default values. These should be replaced
                     // with information extracted from the external
                     // metadata information.
-                    metadata.put("voxelX", "NaN");
-                    metadata.put("voxelY", "NaN");
-                    metadata.put("voxelZ", "NaN");
+                    metadata.put("voxelX", voxelX);
+                    metadata.put("voxelY", voxelY);
+                    metadata.put("voxelZ", voxelZ);
 
                     // TODO: Get wavelengths from metadata
 

@@ -31,13 +31,14 @@ public class BioFormatsWrapper {
 
     /* Private instance variables */
     private File filename;
-    private ImageProcessorReader reader;
+    private ImageProcessorReader reader = null;
     private ServiceFactory factory;
     private OMEXMLService service;
     private IMetadata omexmlMeta;
     private String errorMessage = "";
     private List<String> referencedFiles;
     private int numberOfSeries = 0;
+
     private final static double[][] defaultChannelColors = {
             {255.0,   0.0,   0.0, 255.0},
             {  0.0, 255.0,   0.0, 255.0},
@@ -166,6 +167,9 @@ public class BioFormatsWrapper {
             return false;
         }
 
+        // Set the reader to null
+        reader = null;
+
         // Return success
         return true;
     }
@@ -226,6 +230,11 @@ public class BioFormatsWrapper {
      */
     public boolean parse(int firstSeriesIndex) {
 
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
+
         // If we have already scanned the file we just return true
         if (attr.size() > 0) {
             return true;
@@ -240,7 +249,7 @@ public class BioFormatsWrapper {
         // Now process the file
         try {
 
-            // Number of series
+            // We cache the number of series
             numberOfSeries = reader.getSeriesCount();
 
             // Get and store all series
@@ -398,67 +407,8 @@ public class BioFormatsWrapper {
      * @return the number of series.
      */
     public int getNumberOfSeries() {
+        // This value is cached after parsing.
         return numberOfSeries;
-    }
-
-    /**
-     * Return the sizeX attribute of the file.
-     * @return the size X of the file or -1 if the file is not open.
-     */
-    public int getSizeX() {
-        if (reader == null) {
-            return -1;
-        } else {
-            return reader.getSizeX();
-        }
-    }
-
-    /**
-     * Return the sizeY attribute of the file.
-     * @return the size Y of the file or -1 if the file is not open.
-     */
-    public int getSizeY() {
-        if (reader == null) {
-            return -1;
-        } else {
-            return reader.getSizeY();
-        }
-    }
-
-    /**
-     * Return the sizeZ attribute of the file.
-     * @return the size Z of the file or -1 if the file is not open.
-     */
-    public int getSizeZ() {
-        if (reader == null) {
-            return -1;
-        } else {
-            return reader.getSizeZ();
-        }
-    }
-
-    /**
-     * Return the sizeC attribute of the file.
-     * @return the size C of the file or -1 if the file is not open.
-     */
-    public int getSizeC() {
-        if (reader == null) {
-            return -1;
-        } else {
-            return reader.getSizeC();
-        }
-    }
-
-    /**
-     * Return the sizeT attribute of the file.
-     * @return the size T of the file or -1 if the file is not open.
-     */
-    public int getSizeT() {
-        if (reader == null) {
-            return -1;
-        } else {
-            return reader.getSizeT();
-        }
     }
 
     /**
@@ -474,6 +424,11 @@ public class BioFormatsWrapper {
      * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
      */
     public String getDataType() {
+
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
 
         // Get and store the dataset type
         String datatype;
@@ -503,6 +458,10 @@ public class BioFormatsWrapper {
      */
     private double[] getExcitationWavelengths(int seriesNum) {
 
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
         // Allocate space to store the channel names
         int nChannels = reader.getSizeC();
         double[] exWavelengths = new double[nChannels];
@@ -534,6 +493,11 @@ public class BioFormatsWrapper {
      */
     private double[] getEmissionWavelengths(int seriesNum) {
 
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
+
         // Allocate space to store the channel names
         int nChannels = reader.getSizeC();
         double[] emWavelengths = new double[nChannels];
@@ -563,6 +527,11 @@ public class BioFormatsWrapper {
      * Values that could not be retrieved will be replaced by Double.NaN.
      */
     private double [] getNAs() {
+
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
 
         // Number of instruments (usually one per series)
         int nInstr = omexmlMeta.getInstrumentCount();
@@ -601,6 +570,11 @@ public class BioFormatsWrapper {
      * Values that could not be retrieved will be replaced by Double.NaN.
      */
     private double[] getStagePosition() {
+
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
 
         // Allocate memory to store the stage position
         double[] stagePosition = new double[2];
@@ -641,6 +615,11 @@ public class BioFormatsWrapper {
      * Values that could not be retrieved will be replaced by Double.NaN.
      */
     private double[][] getChannelColors(int seriesNum) {
+
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
 
         // Allocate space to store the channel names
         int nChannels = reader.getSizeC();
@@ -685,6 +664,11 @@ public class BioFormatsWrapper {
      */
     private String getAcquisitionDate(int seriesNum) {
 
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
+
         Timestamp timestamp = omexmlMeta.getImageAcquisitionDate(seriesNum);
         String acqDate;
         if (timestamp == null) {
@@ -703,6 +687,11 @@ public class BioFormatsWrapper {
      * Values that could not be retrieved will be replaced by Double.NaN.
      */
     private double[] getVoxelSizes(int seriesNum) {
+
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
 
         Length pVoxelX;
         Length pVoxelY;
@@ -751,6 +740,11 @@ public class BioFormatsWrapper {
      * @return array of channel names
      */
     private String[] getChannelNames(int seriesNum) {
+
+        // Make sure the reader is open
+        if (reader == null) {
+            throw new RuntimeException("File not opened yet!.");
+        }
 
         // Allocate space to store the channel names
         int nChannels = reader.getSizeC();
