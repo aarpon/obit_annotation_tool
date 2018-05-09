@@ -321,6 +321,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     metadata.put("voxelY", voxelY);
                     metadata.put("voxelZ", voxelZ);
 
+                    // Store the well
+                    metadata.put("well", well);
+
                     // TODO: Get wavelengths from metadata
 
                     // Get acquisition time from metadata
