@@ -329,6 +329,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     // Get acquisition time from metadata
                     metadata.put("acquisitionDate", row[3]);
 
+                    // Give a more useful name to the series
+                    String name = "";
+                    if (!well.equals("")) {
+                        name = attrKey + " (" + well + ")";
+                    } else {
+                        name = attrKey;
+                    }
+                    metadata.put("name", name);
                 }
 
             }
