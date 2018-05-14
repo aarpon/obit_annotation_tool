@@ -17,12 +17,12 @@ import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 
 
 /**
- * A composite reader for Visitron TIFF + ND files.
+ * A composite reader for Visitron ND files (STK or TIFFs).
  *
  * @author Aaron Ponti
  *
  */
-public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
+public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
     private final static String FILENAME_REGEX =
             "^(?<basename>.*?)" +                            // Series basename: group 1
@@ -30,7 +30,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
                     "(conf(?<wavelength>\\d.*?))?" +         // Wavelength
                     "(_s(?<series>\\d.*?))?" +               // Series number (optional)
                     "(_t(?<timepoint>\\d.*?))?" +            // Time index (optional)
-                    "\\.tif{1,2}$";                          // File extension
+                    "(\\.tif{1,2}|\\.stk)$";                 // File extension
 
     private final static String ATTR_REGEX =
             "^(?<key>.*?)((?<channel>\\d*?))?$";             // Name of the attribute followed by an optional channel number
@@ -42,8 +42,8 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
     private File folder;
     private String basename = "";
     private boolean isValid = false;
-    private List<String> foundTIFFFiles;
-    private List<String> referencedTIFFFiles;
+    private List<String> foundFiles;
+    private List<String> referencedFiles;
 
     BioFormatsWrapper bioformatsWrapperForNDFile =  null;
     Map<String, HashMap<String, String>> combinedAttr;
@@ -83,7 +83,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
     /**
      * @param folder Folder to be scanned.
      */
-    public VisitronTIFFNDReader(File folder) {
+    public VisitronNDReader(File folder) {
 
         this.folder = folder;
 
@@ -100,7 +100,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
     static public boolean canRead(File folder) {
 
         boolean NDFileFound = false;
-        boolean TIFFFilesFound = false;
+        boolean dataFilesFound = false;
 
         // Get a list of all files
         File[] allFiles = folder.listFiles();
@@ -108,7 +108,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
         for (File file : allFiles) {
 
             // If we have found the ND and STK files we return
-            if (NDFileFound == true && TIFFFilesFound == true) {
+            if (NDFileFound == true && dataFilesFound == true) {
                 return true;
             }
 
@@ -121,8 +121,10 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
                 continue;
             }
 
-            if (name.toUpperCase().endsWith(".TIF") || name.toUpperCase().endsWith(".TIFF")) {
-                TIFFFilesFound = true;
+            if (name.toUpperCase().endsWith(".TIF") ||
+                    name.toUpperCase().endsWith(".TIFF") ||
+                    name.toUpperCase().endsWith(".STK")) {
+                dataFilesFound = true;
                 continue;
             }
 
@@ -154,8 +156,8 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
     public boolean parse() throws Exception {
 
         // Initialize the list of found and referenced files
-        foundTIFFFiles = new ArrayList<String>();
-        referencedTIFFFiles = new ArrayList<String>();
+        foundFiles = new ArrayList<String>();
+        referencedFiles = new ArrayList<String>();
 
         // Make sure there is only one ND file in the folder
         Boolean NDFileAlreadyFound = false;
@@ -177,14 +179,16 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
             // Get the file name
             String name = file.getName();
 
-            // STK files are expected
-            if (name.toUpperCase().endsWith(".TIF") || name.toUpperCase().endsWith(".TIFF")) {
+            // TIF|TIFF or STK files are expected
+            if (name.toUpperCase().endsWith(".TIF") ||
+                    name.toUpperCase().endsWith(".TIFF") ||
+                    name.toUpperCase().endsWith(".STK")) {
 
                 // Add the file size to the total
                 totalDatasetSizeInBytes += file.length();
 
-                // Add the file to the list of found TIFF files
-                foundTIFFFiles.add(file.getAbsolutePath());
+                // Add the file to the list of found binary files
+                foundFiles.add(file.getAbsolutePath());
 
                 // Continue to the next file
                 continue;
@@ -233,23 +237,23 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
         }
 
         // Check that the number of reference files and the number of found files match
-        if (referencedTIFFFiles.size() == 0) {
+        if (referencedFiles.size() == 0) {
             // Mark failure
             isValid = false;
-            errorMessage = "The ND file does not reference any TIFF file!";
+            errorMessage = "The ND file does not reference any image file!";
             return isValid;
         }
 
-        if (foundTIFFFiles.size() == 0) {
+        if (foundFiles.size() == 0) {
             // Mark failure
             isValid = false;
-            errorMessage = "Could not find any TIFF files in the folder!";
+            errorMessage = "Could not find any image files in the folder!";
             return isValid;
         }
 
-        if (foundTIFFFiles.size() != referencedTIFFFiles.size()) {
+        if (foundFiles.size() != referencedFiles.size()) {
 
-            // Extract the found TIFF files that are not referenced in the ND file
+            // Extract the found image files that are not referenced in the ND file
             List<String> diffFiles = new ArrayList<String>();
             try {
                 diffFiles = TIFFFilesFoundButNotReferenced();
@@ -260,7 +264,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
                 return isValid;
             }
 
-            // Process the TIFF files
+            // Process the image files
             int firstSeriesIndex = bioformatsWrapperForNDFile.getNumberOfSeries();
 
             // Break down the files into series
@@ -330,7 +334,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
         }
 
         // Store the list of files references in the ND file
-        referencedTIFFFiles = bioformatsWrapperForNDFile.getReferencedFiles();
+        referencedFiles = bioformatsWrapperForNDFile.getReferencedFiles();
 
         // Store the attributes and the file series indices
         combinedAttr = bioformatsWrapperForNDFile.getAttributes();
@@ -349,7 +353,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
      */
     @Override
     public String info() {
-        return "Visitron ND + TIFF (composite) file format.";
+        return "Visitron ND (composite) file format.";
     }
 
     /**
@@ -358,7 +362,7 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
      */
     @Override
     public String getType() {
-        return "Visitron ND + TIFF";
+        return "Visitron ND";
     }
 
     /**
@@ -408,19 +412,19 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
     }
 
     /**
-     * Return the list of TIFF files that were found in the folder but not referenced in the ND file
-     * @return list of TIFF files that were found in the folder but not referenced in the ND file
+     * Return the list of image files that were found in the folder but not referenced in the ND file
+     * @return list of image files that were found in the folder but not referenced in the ND file
      * @throws Exception
      */
     private List<String> TIFFFilesFoundButNotReferenced() throws Exception {
 
         // If all found files are referenced, we do not need to do anything else
-        if (foundTIFFFiles.size() == referencedTIFFFiles.size()) {
+        if (foundFiles.size() == referencedFiles.size()) {
             return new ArrayList<String>();
         }
 
         // If there are more referenced files that we found in the folder, the dataset is incomplete
-        if (foundTIFFFiles.size() < referencedTIFFFiles.size()) {
+        if (foundFiles.size() < referencedFiles.size()) {
             throw new Exception("The ND files references more files than there are in the folder!");
         }
 
@@ -429,12 +433,12 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
         // equalize them before passing them to the HashSet constructor. Since we need to be
         // still Java-7 compatible, we do not use lambda functions.
         List<String> normFoundTIFFFiles = new ArrayList<String>();
-        for (int i = 0; i < foundTIFFFiles.size(); i++) {
-            normFoundTIFFFiles.add(foundTIFFFiles.get(i).toLowerCase());
+        for (int i = 0; i < foundFiles.size(); i++) {
+            normFoundTIFFFiles.add(foundFiles.get(i).toLowerCase());
         }
         List<String> normReferencedTIFFFiles = new ArrayList<String>();
-        for (int i = 0; i < referencedTIFFFiles.size(); i++) {
-            normReferencedTIFFFiles.add(referencedTIFFFiles.get(i).toLowerCase());
+        for (int i = 0; i < referencedFiles.size(); i++) {
+            normReferencedTIFFFiles.add(referencedFiles.get(i).toLowerCase());
         }
 
         // Calculate the difference of the two sets of file names
