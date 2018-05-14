@@ -273,7 +273,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
                     }
 
-                    // Store width and height
+                    // Store some metadata
                     String width = "";
                     String heigth = "";
                     String datatype = "Unknown";
@@ -306,6 +306,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
                         // Now close the file
                         bioformatsWrapper.close();
+                        bioformatsWrapper = null;
 
                     }
 
