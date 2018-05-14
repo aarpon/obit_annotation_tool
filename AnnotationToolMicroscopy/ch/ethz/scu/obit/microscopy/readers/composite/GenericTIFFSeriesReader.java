@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.plugins.util.ImageProcessorReader;
@@ -255,20 +256,26 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
                     // TODO: Get acquisition time from metadata
                     metadata.put("acquisitionDate", "NaN");
 
-
                 }
 
-                // Update the metadata object
+                // Store default color for channel
+                metadata.put("channelColor" + channelNum,
+                        implode(BioFormatsWrapper.getDefaultChannelColor(channelNum)));
+
+
+                // Update the number of planes
                 int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
                 if ((planeNum + 1) > numPlanes) {
                     metadata.put("sizeZ", Integer.toString(planeNum + 1));
                 }
 
+                // Update the number of channels
                 int numChannels = getMetadataValueOrZero(metadata, "sizeC");
                 if ((channelNum + 1) > numChannels) {
                     metadata.put("sizeC", Integer.toString(channelNum + 1));
                 }
 
+                // Update the number of timepoints
                 int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
                 if ((TimeNum + 1) > numTimepoints) {
                     metadata.put("sizeT", Integer.toString(TimeNum + 1));
@@ -390,5 +397,23 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
      */
     public String getLastError() {
         return errorMessage;
+    }
+
+    /**
+     * Implement an 'implode' function as in PHP.
+     * @param values Array of doubles
+     * @return Comma-separated list of values as string.
+     */
+    private String implode(double [] values) {
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            sb.append(values[i]);
+            if (i != values.length - 1) {
+                sb.append(", ");
+            }
+        }
+        String joined = sb.toString();
+        return joined;
     }
 }
