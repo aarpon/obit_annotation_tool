@@ -26,6 +26,8 @@ public class CompositeMicroscopyReaderFactory {
             return new VisitronNDReader(folder);
         } else if (YouScopeReader.canRead(folder)) {
             return new YouScopeReader(folder);
+        } else if (GenericTIFFSeriesReader.canRead(folder)) {
+            return new GenericTIFFSeriesReader(folder);
         } else if (LeicaTIFFSeriesReader.canRead(folder)) {
             return new LeicaTIFFSeriesReader(folder);
         } else {
