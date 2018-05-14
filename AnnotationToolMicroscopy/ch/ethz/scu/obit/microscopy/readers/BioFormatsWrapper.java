@@ -262,10 +262,14 @@ public class BioFormatsWrapper {
                 HashMap<String, String> seriesAttr = new HashMap<String, String>();
 
                 // Series number
-                seriesAttr.put("numSeries", Integer.toString(i));
+                seriesAttr.put("numSeries", Integer.toString(i + firstSeriesIndex));
 
                 // Image name
                 seriesAttr.put("name", omexmlMeta.getImageName(i));
+                if (seriesAttr.get("name").equals("")) {
+                    // If the name is empty, fall back to series_{numSeries}
+                    seriesAttr.put("name", "series_" + seriesAttr.get("numSeries"));
+                }
 
                 // Image size X
                 seriesAttr.put("sizeX", Integer.toString(reader.getSizeX()));
@@ -783,6 +787,10 @@ public class BioFormatsWrapper {
         }
         Collections.sort(indices);
         return indices;
+    }
+
+    static public double[] getDefaultChannelColor(int channelIndex) {
+        return defaultChannelColors[channelIndex % 6];
     }
 
     /**

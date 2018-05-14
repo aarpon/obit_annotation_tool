@@ -3,10 +3,14 @@ package ch.ethz.scu.obit.microscopy.readers.composite;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //import java.util.regex.Pattern;
 import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
@@ -20,6 +24,20 @@ import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
  */
 public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
 
+    private final static String FILENAME_REGEX =
+            "^(?<basename>.*?)" +                            // Series basename: group 1
+                    "(_w(?<channel>\\d.*?))?" +              // Channel number (optional)
+                    "(conf(?<wavelength>\\d.*?))?" +         // Wavelength
+                    "(_s(?<series>\\d.*?))?" +               // Series number (optional)
+                    "(_t(?<timepoint>\\d.*?))?" +            // Time index (optional)
+                    "\\.tif{1,2}$";                          // File extension
+
+    private final static String ATTR_REGEX =
+            "^(?<key>.*?)((?<channel>\\d*?))?$";             // Name of the attribute followed by an optional channel number
+
+    private static Pattern FILENAME_PATTERN = Pattern.compile(FILENAME_REGEX, Pattern.CASE_INSENSITIVE);
+    private static Pattern ATTR_PATTERN = Pattern.compile(ATTR_REGEX, Pattern.CASE_INSENSITIVE);
+
     /* Protected instance variables */
     private File folder;
     private String basename = "";
@@ -30,6 +48,36 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
     BioFormatsWrapper bioformatsWrapperForNDFile =  null;
     Map<String, HashMap<String, String>> combinedAttr;
     List<Integer> combinedSeriesIndices;
+
+    // Internal class used to collect files that do not belong
+    // to the dataset referenced by the accompanying ND file.
+    private class Series {
+
+        // Series number
+        private int seriesNumber;
+
+        // List of file names that belong to this series
+        private List<String> fileNames = new ArrayList<String>();
+
+        // List of channel numbers
+        private List<Integer> channels = new ArrayList<Integer>();
+
+        // List of timepoints
+        private List<Integer> timepoints = new ArrayList<Integer>();
+
+        // Constructor
+        private Series(int firstIndexNumber) {
+            seriesNumber = firstIndexNumber;
+        }
+
+        // Add a new file by channel
+        private void addFile(String filename, int channel, int timepoint) {
+            fileNames.add(filename);
+            channels.add(channel);
+            timepoints.add(timepoint);
+        }
+
+    }
 
     // Constructor
     /**
@@ -214,28 +262,48 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
 
             // Process the TIFF files
             int firstSeriesIndex = bioformatsWrapperForNDFile.getNumberOfSeries();
-            for (int i = 0; i < diffFiles.size(); i++) {
 
-                BioFormatsWrapper localBioformatsWrapper = new BioFormatsWrapper(
-                        new File(diffFiles.get(i)), false);
-                if (! localBioformatsWrapper.parse(firstSeriesIndex)) {
-                    // Mark failure
-                    isValid = false;
-                    errorMessage = "Could not process file " + diffFiles.get(i);
-                    return isValid;
+            // Break down the files into series
+            List<Series> seriesToProcess = arrangeFilesIntoSeries(diffFiles, firstSeriesIndex);
+
+            // Now process the Series objects
+            for (int i = 0; i < seriesToProcess.size(); i++) {
+
+                // Current series
+                Series currentSeries = seriesToProcess.get(i);
+
+                // Now process all files in the series
+                Map<String, HashMap<String, String>> allSeriesAttrs =
+                        new HashMap<String, HashMap<String, String>>();
+
+                for (int j = 0; j < currentSeries.fileNames.size(); j++) {
+
+                    // Parse the file end extract the metadata
+                    BioFormatsWrapper localBioformatsWrapper = new BioFormatsWrapper(
+                            new File(currentSeries.fileNames.get(j)), false);
+                    if (! localBioformatsWrapper.parse(currentSeries.seriesNumber)) {
+                        // Mark failure
+                        isValid = false;
+                        errorMessage = "Could not process file " + diffFiles.get(i);
+                        return isValid;
+                    }
+                    Map<String, HashMap<String, String>> localAttrs = localBioformatsWrapper.getAttributes();
+
+                    // Merge
+                    if (allSeriesAttrs.isEmpty()) {
+                        allSeriesAttrs = localAttrs;
+                    } else {
+                        allSeriesAttrs = mergeSeriesAttr(allSeriesAttrs, localAttrs, currentSeries.channels.get(j),
+                                currentSeries.timepoints.get(j));
+                    }
                 }
-                Map<String, HashMap<String, String>> localAttrs = localBioformatsWrapper.getAttributes();
-                List<Integer> localSeriesIndices = localBioformatsWrapper.getSeriesIndices();
-                localBioformatsWrapper.close();
 
-                // Append the new attributes
-                combinedAttr.putAll(localAttrs);
+                // Now store the updated series back
+                combinedAttr.putAll(allSeriesAttrs);
 
-                // Append the series indices
-                combinedSeriesIndices.addAll(localSeriesIndices);
+                // And the series number
+                combinedSeriesIndices.add(currentSeries.seriesNumber);
 
-                // Update the series count
-                firstSeriesIndex = firstSeriesIndex + localSeriesIndices.size();
             }
 
         }
@@ -381,4 +449,181 @@ public class VisitronTIFFNDReader extends AbstractCompositeMicroscopyReader {
         return diffList;
 
     }
+
+    /**
+     * Merge two series attributes.
+     * @param existingLocatAttrs First series attribute to be extended.
+     * @param localAttrs Second series attributes to be integrated.
+     * @param channel Channel number of the (second) series to be merged.
+     * @param timepoint Timepoint of the (second) series to be merged.
+     * @return Merged series attributes.
+     */
+    private Map<String, HashMap<String, String>> mergeSeriesAttr(Map<String, HashMap<String, String>> attrTarget,
+            Map<String, HashMap<String, String>> attrSource, int channel, int timepoint) {
+
+        assert(attrTarget.keySet().size() == 1);
+        assert(attrSource.keySet().size() == 1);
+
+        Iterator<Entry<String, HashMap<String, String>>> targetIt = attrTarget.entrySet().iterator();
+        Iterator<Entry<String, HashMap<String, String>>> sourceIt = attrSource.entrySet().iterator();
+        while (targetIt.hasNext()) {
+
+            // Get the series from the target
+            Entry<String, HashMap<String, String>> targetPair = targetIt.next();
+            HashMap<String, String> targetSeries = targetPair.getValue();
+
+            while (sourceIt.hasNext()) {
+
+                // Get the series from the source
+                Entry<String, HashMap<String, String>> sourcePair = sourceIt.next();
+                HashMap<String, String> sourceSeries = sourcePair.getValue();
+
+                Set<String> keySetSource = sourceSeries.keySet();
+
+                // First, get the number of channels and timepoints in the target
+                int targetNumChannels = Integer.parseInt(targetSeries.get("sizeC"));
+                int targetNumTimepoints = Integer.parseInt(targetSeries.get("sizeT"));
+
+                // Do we have a new channel to add?
+                if (channel + 1 > targetNumChannels) {
+
+                    int finalNumC = channel;
+
+                    // This is a new channel
+                    for (String key : keySetSource) {
+
+                        Matcher m = ATTR_PATTERN.matcher(key);
+                        if (m.find()) {
+                            // Add a new key to the target attributes with the value of
+                            // the source attributes
+                            if (! m.group("channel").equals("")) {
+                                String updateKey = m.group("key") + finalNumC;
+                                if (m.group("key").equals("channelColor")) {
+                                    String sourceValue = sourceSeries.get(key);
+                                    if (sourceValue.equals(targetSeries.get(key))) {
+                                        double [] defC = BioFormatsWrapper.getDefaultChannelColor(channel);
+                                        String c  = "";
+                                        for (int k = 0; k < defC.length - 1; k++) {
+                                            c += defC[k] + ", ";
+                                        }
+                                        c += defC[defC.length - 1];
+                                        targetSeries.put(updateKey, c);
+                                    } else {
+                                        targetSeries.put(updateKey, sourceSeries.get(key));
+                                    }
+                                } else {
+                                    targetSeries.put(updateKey, sourceSeries.get(key));
+                                }
+                            }
+                        }
+                    }
+
+                    // Do we have a new timepoint to add?
+                    targetSeries.put("sizeC", "" + (targetNumChannels + 1));
+                }
+
+                // Do we have a new timepoint to add?
+                if (timepoint + 1 > targetNumTimepoints) {
+                    targetSeries.put("sizeT", "" + (targetNumTimepoints + 1));
+                }
+
+            }
+
+        }
+
+        return attrTarget;
+    }
+
+    /**
+     * Organize the files not referenced by the ND file into series.
+     * @param diffFiles List of files not referenced in the ND file.
+     * @param firstSeriesIndex Index of the fist series.
+     * @return a Map of series number to file lists.
+     * @throws Exception If the file name cannot be parsed.
+     */
+    private List<Series> arrangeFilesIntoSeries(List<String> diffFiles, int firstSeriesIndex) throws Exception {
+
+        // Create a map of Series objects
+        Map<String, Series> mapSeries = new HashMap<String, Series>();
+
+        // Process all files
+        for (int i = 0; i < diffFiles.size(); i++) {
+
+            // Default series number for current file
+            int seriesNum = firstSeriesIndex;
+
+            // Default basename for current file
+            String basename = "default";
+
+            // Default channel number for current file
+            int channel = 0;
+
+            // Default timepoint for current file
+            int timepoint = 0;
+
+            // First parse the file name to extract some information
+            Matcher m = FILENAME_PATTERN.matcher(diffFiles.get(i));
+            if (m.find()) {
+
+                // Get the base name
+                if (m.group("basename") != null) {
+                    basename = m.group("basename");
+                }
+
+                // Get the series number
+                if (m.group("series") != null) {
+                    // The series number in the file name is 1-based
+                    seriesNum = Integer.parseInt(m.group("series")) - 1;
+                } else {
+                    seriesNum = firstSeriesIndex;
+                }
+
+                // Get the channel  number
+                if (m.group("channel") != null) {
+                    // The channel number in the file name is 1-based
+                    channel = Integer.parseInt(m.group("channel")) - 1;
+                } else {
+                    channel = 0;
+                }
+
+                // Get the timepoint
+                if (m.group("timepoint") != null) {
+                    // The timepoint in the file name is 1-based
+                    timepoint = Integer.parseInt(m.group("timepoint")) - 1;
+                } else {
+                    timepoint = 0;
+                }
+            } else {
+                throw new Exception("Could not parse file name for file " + diffFiles.get(i));
+            }
+
+            // Get the Series that matches this file
+            String newKey = basename + "_" + seriesNum;
+            Series existingSeries;
+            if (mapSeries.containsKey(newKey)) {
+
+                // Get the existing series
+                existingSeries = mapSeries.get(newKey);
+
+            } else {
+
+                // Create new series
+                existingSeries = new Series(seriesNum);
+
+                // Add it to the map
+                mapSeries.put(newKey, existingSeries);
+            }
+
+            // Add the new file
+            existingSeries.addFile(diffFiles.get(i), channel, timepoint);
+        }
+
+        // Return a simple list of Series
+        List<Series> listOfSeries = new ArrayList<Series>();
+        for (Entry<String, Series> entry : mapSeries.entrySet()) {
+            listOfSeries.add(entry.getValue());
+        }
+        return listOfSeries;
+    }
+
 }
