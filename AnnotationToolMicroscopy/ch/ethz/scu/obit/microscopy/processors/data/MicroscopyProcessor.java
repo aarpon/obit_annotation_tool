@@ -72,7 +72,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
      */
     private final ArrayList<String> supportedFormats = new ArrayList<String>(
             Arrays.asList(".czi", ".dv", ".ics", ".ids", ".ims", ".lei",
-                    ".lif", ".liff", ".lsm", ".nd", ".nd2", ".oib", ".oif",
+                    ".lif", ".liff", ".lsm", ".nd2", ".oib", ".oif",
                     ".ome", ".r3d", ".stk", ".tif", ".tiff", ".zvi"));
 
     /**
