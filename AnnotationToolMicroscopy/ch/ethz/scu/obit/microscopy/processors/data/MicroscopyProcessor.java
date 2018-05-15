@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 import ch.ethz.scu.obit.microscopy.readers.MicroscopyReader;
 import ch.ethz.scu.obit.microscopy.readers.composite.AbstractCompositeMicroscopyReader;
 import ch.ethz.scu.obit.microscopy.readers.composite.CompositeMicroscopyReaderFactory;
@@ -240,6 +241,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
             } else {
 
+                // Label the file as standard (non-composite) dataset
+                if (folderLevel == DATASET_LEVEL) {
+                    isCompositeDataset = false;
+                }
+
                 // Delete some known garbage
                 if (deleteIfKnownUselessFile(file)) {
                     continue;
@@ -302,11 +308,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                 if (ext.toLowerCase().equals(".nd2") && file.length() <= 4096) {
                     // We try opening the file -- if it fails, we flag it as corrupted.
                     try {
-                        MicroscopyReader microscopyReader = new MicroscopyReader(file);
-                        if (!microscopyReader.parse()) {
+                        BioFormatsWrapper wrapper = new BioFormatsWrapper(file);
+                        if (!wrapper.parse()) {
                             throw new Exception("Parsing the file " + file.getName() + " failed!");
                         }
-                        microscopyReader.close();
+                        wrapper.close();
                     } catch (Exception e) {
                         validator.isValid = false;
                         validator.invalidFilesOrFolders.put(file,
