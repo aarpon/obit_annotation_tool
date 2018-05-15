@@ -26,7 +26,8 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
     private final static String FILENAME_REGEX =
             "^(?<basename>.*?)" +                            // Series basename: group 1
-                    "(_w(?<channel>\\d.*?))?" +              // Channel number (optional)
+                    "(_w(?<channel>\\d.*?)" +                // Channel number (optional)
+                    "(?<channelname>.*?))?" +                // Channel name (optional)
                     "(conf(?<wavelength>\\d.*?))?" +         // Wavelength
                     "(_s(?<series>\\d.*?))?" +               // Series number (optional)
                     "(_t(?<timepoint>\\d.*?))?" +            // Time index (optional)
@@ -292,6 +293,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                         return isValid;
                     }
                     Map<String, HashMap<String, String>> localAttrs = localBioformatsWrapper.getAttributes();
+
+                    // Close the reader
+                    localBioformatsWrapper.close();
 
                     // Merge
                     if (allSeriesAttrs.isEmpty()) {
@@ -562,6 +566,12 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             // Default channel number for current file
             int channel = 0;
 
+            // Default channel name for current file
+            String  channelName = "";
+
+            // Default wavelength (string) for current file
+            String wavelength = "";
+
             // Default timepoint for current file
             int timepoint = 0;
 
@@ -570,12 +580,12 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             if (m.find()) {
 
                 // Get the base name
-                if (m.group("basename") != null) {
+                if (m.group("basename") != null && m.group("basename") != "") {
                     basename = m.group("basename");
                 }
 
                 // Get the series number
-                if (m.group("series") != null) {
+                if (m.group("series") != null && m.group("series") != "") {
                     // The series number in the file name is 1-based
                     seriesNum = Integer.parseInt(m.group("series")) - 1;
                 } else {
@@ -583,15 +593,31 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 }
 
                 // Get the channel  number
-                if (m.group("channel") != null) {
+                if (m.group("channel") != null && m.group("channel") != "") {
                     // The channel number in the file name is 1-based
                     channel = Integer.parseInt(m.group("channel")) - 1;
                 } else {
                     channel = 0;
                 }
 
+                // Get the channel  name
+                if (m.group("channelname") != null && m.group("channelname") != "") {
+                    // The channel number in the file name is 1-based
+                    channelName = m.group("channelname");
+                } else {
+                    channelName = "";
+                }
+
+                // Get the wavelength
+                if (m.group("wavelength") != null && m.group("wavelength") != "") {
+                    // The channel number in the file name is 1-based
+                    wavelength = m.group("wavelength");
+                } else {
+                    wavelength = "";
+                }
+
                 // Get the timepoint
-                if (m.group("timepoint") != null) {
+                if (m.group("timepoint") != null && m.group("timepoint") != "") {
                     // The timepoint in the file name is 1-based
                     timepoint = Integer.parseInt(m.group("timepoint")) - 1;
                 } else {
