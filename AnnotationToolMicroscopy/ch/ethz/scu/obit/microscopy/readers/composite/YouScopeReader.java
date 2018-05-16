@@ -684,7 +684,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         // Get the ID
         String id = row[7];
 
-        // GEt the various parts that compose the channel name
+        // Get the various parts that compose the channel name
         String channelName;
         if (row[9].equals("") && row[10].equals("")) {
             channelName = "undefined";
