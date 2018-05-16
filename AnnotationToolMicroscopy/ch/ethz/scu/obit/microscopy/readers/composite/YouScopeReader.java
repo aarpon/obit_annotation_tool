@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -34,8 +35,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     private boolean isValid = false;
 
-    HashMap<String, String[]> csvTable = null;
-    HashMap<String, String> seriesNamesMapper = null;
+    private HashMap<String, String[]> csvTable = null;
+    private HashMap<String, String> seriesNamesMapper = null;
+    private List<String> channelNames = null;
 
     /**
      * Constructor
@@ -98,7 +100,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             int planeNum = -1;
             int timeNum = -1;
             String well = "";
-            String id = "";
 
             // First, get position information
             Matcher m_pos = p_pos.matcher(row[5]);
@@ -116,9 +117,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // Get the well
             well = row[4];
-
-            // Get the ID
-            id = row[7];
 
             // If the positional information could not be extracted from the corresponding
             // column, try to get it from the file name
@@ -192,19 +190,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             }
 
             // Channel name
-            String channelName;
-            if (row[9].equals("") && row[10].equals("")) {
-                channelName = "undefined";
-            } else if (!row[9].equals("") && row[10].equals("")) {
-                channelName = row[9];
-            } else if (row[9].equals("") && !row[10].equals("")) {
-                channelName = row[10];
-            } else {
-                channelName = row[9] + "_" + row[10];
-            }
-            if (!id.equals("")) {
-                channelName = id + "_" + channelName;
-            }
+            String channelName = buildChannelName(row);
 
             // Build series ID from row (if present, use path information to build a unique id)
             String seriesID = "Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_"
@@ -226,9 +212,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // Current series metadata
             HashMap<String, String> metadata;
-
-            // Channel number
-            int channelNum = 0;
 
             // Store the series index if not yet present
             if (seriesNamesMapper.containsKey(seriesID)) {
@@ -353,8 +336,8 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 metadata.put("sizeZ", Integer.toString(planeNum));
             }
 
-            // Get the channel index
-            channelNum = getChannelIndex(metadata, channelName);
+            // Find the channel number from the list of channel names
+            int channelNum = channelNames.indexOf(channelName);
             metadata.put("channelName" + channelNum, channelName);
             int numChannels = getMetadataValueOrZero(metadata, "sizeC");
             if ((channelNum + 1) > numChannels) {
@@ -449,6 +432,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         // Initialize the table
         csvTable = new HashMap<String, String[]>();
 
+        // Initialize a linked hash set
+        LinkedHashSet<String> channelNamesSet = new LinkedHashSet<String>();
+
         // Header
         boolean isHeader = true;
 
@@ -501,6 +487,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 // Add the row with the file name as key
                 csvTable.put(row[6], row);
 
+                // Add the (composed) channel to the channelNames linked hash set
+                channelNamesSet.add(buildChannelName(row));
+
                 // Read next line
                 line = br.readLine();
 
@@ -521,6 +510,11 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             errorMessage = "Could not read file 'images.csv'! The error was: " + e.getMessage();
             return new HashMap<String, String[]>();
         }
+
+        // Change the linked hash set to a list
+        channelNames = new ArrayList<String>(channelNamesSet);
+
+        // Return the table
         return csvTable;
 
     }
@@ -604,36 +598,6 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     }
 
     /**
-     * Return the index of the channel from the metadata map. If the channel does not exist, current
-     * channel number is increased.
-     * @param metadata Map of string - string key:value pairs.
-     * @param channelName Name of the channel to search for in the metadata map.
-     * @return the index of the channel that has given name; if not found, return max channel index + 1.
-     */
-    private int getChannelIndex(Map<String, String> metadata, String channelName) {
-
-        // Initialize channels
-        int channels = 0;
-
-        // Are there channels already?
-        if (metadata.containsKey("sizeC")) {
-            channels = Integer.parseInt(metadata.get("sizeC"));
-        } else {
-            return channels;
-        }
-
-        // Is current channel
-        for (int i = 0; i < channels; i++) {
-            if (metadata.get("channelName" + i).equals(channelName)) {
-                return i;
-            }
-        }
-
-        // We add a new channel
-        return channels;
-    }
-
-    /**
      * Maps a position to a well.
      *
      * The position is a n-digit string, such as '0202' that maps to well B2.
@@ -710,4 +674,31 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         return value;
     }
 
+    /**
+     * Builds the channel name from the relevant columns in the CSV table row.
+     * @param row Current row
+     * @return channel name.
+     */
+    private String buildChannelName(String [] row) {
+
+        // Get the ID
+        String id = row[7];
+
+        // GEt the various parts that compose the channel name
+        String channelName;
+        if (row[9].equals("") && row[10].equals("")) {
+            channelName = "undefined";
+        } else if (!row[9].equals("") && row[10].equals("")) {
+            channelName = row[9];
+        } else if (row[9].equals("") && !row[10].equals("")) {
+            channelName = row[10];
+        } else {
+            channelName = row[9] + "_" + row[10];
+        }
+        if (!id.equals("")) {
+            channelName = id + "_" + channelName;
+        }
+
+        return channelName;
+    }
 }
