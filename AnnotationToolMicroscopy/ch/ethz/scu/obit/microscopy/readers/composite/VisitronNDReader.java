@@ -228,11 +228,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
             } else {
 
-                // Any other file type is not supported.
-                isValid = false;
-                errorMessage = "The file " + file.getAbsolutePath() + " is not recognized!";
-                return isValid;
-
+                // These are non-data files that we will just store in the DSS
+                // with the composite dataset folder.
+                // Nothing to do.
             }
 
         }
