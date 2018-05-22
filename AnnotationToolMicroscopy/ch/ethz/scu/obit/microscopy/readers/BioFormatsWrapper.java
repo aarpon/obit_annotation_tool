@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +15,6 @@ import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
 import loci.formats.ChannelSeparator;
-import loci.formats.FileInfo;
 import loci.formats.FormatException;
 import loci.formats.ImageReader;
 import loci.formats.meta.IMetadata;
@@ -242,9 +240,6 @@ public class BioFormatsWrapper {
 
         // Initialize file scanned to false
         isFileScanned = false;
-
-        // Store the referenced files
-        referencedFiles = processReferencedFiles();
 
         // Now process the file
         try {
@@ -793,46 +788,4 @@ public class BioFormatsWrapper {
         return defaultChannelColors[channelIndex % 6];
     }
 
-    /**
-     * Return the difference of two lists
-     * @param series1 First list
-     * @param series2 Second list
-     * @return a list that contains only the elements that are only in series 1.
-     */
-    private <T> List<T> seriesDifference(List<T> series1, List<T> series2) {
-
-        // Chabge the lists into Sets
-        Set<T> setSeries1 = new LinkedHashSet<T>(series1);
-        Set<T> setSeries2 = new LinkedHashSet<T>(series2);
-        setSeries1.removeAll(setSeries2);
-
-        // Return the file names in the difference set as list
-        List<T> diffList = new ArrayList<T>();
-        diffList.addAll(setSeries1);
-
-        return diffList;
-    }
-
-    /**
-     * Convert a FileInfo array into a List of filename Strings.
-     * @param fileInfo List of strings.
-     */
-    private List<String> FileInfoToList(FileInfo [] fileInfo) {
-        List<String> fileNames = new ArrayList<String>();
-        for (int i = 0; i < fileInfo.length; i++) {
-            fileNames.add(fileInfo[i].filename);
-        }
-        return fileNames;
-    }
-
-    /**
-     * Get the list of referenced files (without the ND file)
-     * @return list of references file names.
-     */
-    private List<String> processReferencedFiles() {
-        List<String> noPixFiles = FileInfoToList(reader.getAdvancedUsedFiles(false));
-        List<String> pixFiles = FileInfoToList(reader.getAdvancedUsedFiles(true));
-        List<String> seriesDiff = seriesDifference(noPixFiles, pixFiles);
-        return seriesDiff;
-    }
 }
