@@ -27,14 +27,21 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
     /* Protected instance variables */
     private File folder;
     private final static String REGEX =
-            "^(.*?)" +                    // Series basename: group 1
-                    "((_Series|_s)(\\d.*?))?" +   // Series number (optional): group 4
-                    "(_t(\\d.*?))?" +             // Time index (optional): group 6
-                    "_z(\\d.*?)" +                // Plane number: group 7
-                    "_ch(\\d.*?)" +               // Channel number: group 8
-                    "\\.tif{1,2}$";               // File extension
+            "^(?<basename>.*?)" +                           // Series basename
+                    "((_Series|_s)(?<series>\\d.*?))?" +    // Series number (optional)
+                    "(_t(?<timepoint>\\d.*?))?" +           // Time index (optional)
+                    "_z(?<plane>\\d.*?)" +                  // Plane number
+                    "_ch(?<channel>\\d.*?)" +               // Channel number
+                    "\\.tif{1,2}$";                         // File extension
+
+    private final static String SIMPLE_REGEX =
+            "^(?<basename>.*?)" +                           // Series basename
+                    "(?<plane>\\d+)" +                      // Plane number
+                    "\\.tif{1,2}$";
+
 
     private static Pattern p = Pattern.compile(REGEX, Pattern.CASE_INSENSITIVE);
+    private static Pattern simple_p = Pattern.compile(SIMPLE_REGEX, Pattern.CASE_INSENSITIVE);
 
     private String basename = "";
 
@@ -84,6 +91,14 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
                         expectedFiles = true;
                         continue;
 
+                    } else {
+
+                        // Try with the simple file sequence regex
+                        Matcher simple_m = simple_p.matcher(name);
+                        if (simple_m.find()) {
+                            expectedFiles = true;
+                            continue;
+                        }
                     }
                 }
             }
@@ -137,8 +152,18 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
             // Current series metadata
             HashMap<String, String> metadata;
 
+            // Information we need to extract
+            String currentBase = "";
+            int seriesNum = 0;
+            int timeNum = 0;
+            int planeNum = 0;
+            int channelNum = 0;
+
             // Extract the information
             Matcher m = p.matcher(name);
+            Matcher simple_m = simple_p.matcher(name);
+
+            // Try the more complex regex first
             if (m.find()) {
 
                 // This is an image file. We add its size to the total size of
@@ -146,7 +171,7 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
                 totalDatasetSizeInBytes += file.length();
 
                 // Get base name
-                String currentBase = m.group(1);
+                currentBase = m.group("basename");
                 if (basename.equals("")) {
                     basename = currentBase;
                 } else if (currentBase.equals(basename)) {
@@ -163,123 +188,66 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
                 //
 
                 // The series index is not always defined
-                int seriesNum = 0;
-                if (m.group(2) != null) {
-                    seriesNum = Integer.parseInt(m.group(4));
+                seriesNum = 0;
+                if (m.group("series") != null) {
+                    seriesNum = Integer.parseInt(m.group("series"));
                 }
 
                 // The time number is not always defined
-                int TimeNum = 0;
-                if (m.group(5) != null) {
-                    TimeNum = Integer.parseInt(m.group(6));
+                timeNum = 0;
+                if (m.group("timepoint") != null) {
+                    timeNum = Integer.parseInt(m.group("timepoint"));
                 }
 
                 // Plane number (z)
-                int planeNum = Integer.parseInt(m.group(7));
+                planeNum = 0;
+                if (m.group("plane") != null) {
+                    planeNum = Integer.parseInt(m.group("plane"));
+                }
 
                 // Channel number
-                int channelNum = Integer.parseInt(m.group(8));
+                channelNum = 0;
+                if (m.group("channel") != null) {
+                    channelNum = Integer.parseInt(m.group("channel"));
+                }
 
-                // Build the key
-                String key = "series_" + seriesNum;
+            } else if (simple_m.find()) {
 
-                // Store the series index if not yet present
-                if (attr.containsKey(key)) {
+                // This is an image file. We add its size to the total size of
+                // the composite dataset.
+                totalDatasetSizeInBytes += file.length();
 
-                    metadata = attr.get(key);
-
+                // Get base name
+                currentBase = simple_m.group("basename");
+                if (basename.equals("")) {
+                    basename = currentBase;
+                } else if (currentBase.equals(basename)) {
+                    // Nothing to do
                 } else {
-
-                    // Create a new SeriesMetadata object
-                    metadata = new HashMap<String, String>();
-
-                    // And add it to the arribute map
-                    attr.put(key, metadata);
-
-                    // Read the file
-                    if (reader == null) {
-
-                        // Initialize the reader
-                        reader = new ImageProcessorReader(
-                                new ChannelSeparator(
-                                        LociPrefs.makeImageReader()));
-                    }
-
-                    // Try to open the image file
-                    try {
-                        reader.setId(file.getCanonicalPath());
-                    } catch (FormatException e) {
-                        reader = null;
-                    } catch (IOException e) {
-                        reader = null;
-                    }
-
-                    // Store width and height
-                    int width = 0;
-                    int heigth = 0;
-                    String datatype = "Unknown";
-                    if (reader != null) {
-
-                        // Get width
-                        width = reader.getSizeX();
-
-                        // Get heigth
-                        heigth = reader.getSizeY();
-
-                        // Get datatype
-                        datatype = getDataType();
-
-                        // Now close the file
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            // Report
-                            System.err.println("Could not close file!");
-                        }
-
-                    }
-
-                    // Store the extracted values
-                    metadata.put("sizeX", Integer.toString(width));
-                    metadata.put("sizeY", Integer.toString(heigth));
-                    metadata.put("datatype", datatype);
-
-                    // Store default values. These should be replaced
-                    // with information extracted from the properties XML
-                    // file in the Metadata folder.
-                    metadata.put("voxelX", "1.0");
-                    metadata.put("voxelY", "1.0");
-                    metadata.put("voxelZ", "1.0");
-
-                    // TODO: Get wavelengths from metadata
-
-                    // TODO: Get acquisition time from metadata
-                    metadata.put("acquisitionDate", "NaN");
-
+                    // More than one base name. Multiple Generic TIFF series.
+                    isValid = false;
+                    errorMessage = "Multiple series per folder not supported.";
+                    return isValid;
                 }
 
-                // Store default color for channel
-                metadata.put("channelColor" + channelNum,
-                        implode(BioFormatsWrapper.getDefaultChannelColor(channelNum)));
+                //
+                // Extract index information from the file name structure
+                //
 
+                // Series index
+                seriesNum = 0;
 
-                // Update the number of planes
-                int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
-                if ((planeNum + 1) > numPlanes) {
-                    metadata.put("sizeZ", Integer.toString(planeNum + 1));
+                // Time point
+                timeNum = 0;
+
+                // Plane number (z)
+                planeNum = 0;
+                if (simple_m.group("plane") != null) {
+                    planeNum = Integer.parseInt(simple_m.group("plane"));
                 }
 
-                // Update the number of channels
-                int numChannels = getMetadataValueOrZero(metadata, "sizeC");
-                if ((channelNum + 1) > numChannels) {
-                    metadata.put("sizeC", Integer.toString(channelNum + 1));
-                }
-
-                // Update the number of timepoints
-                int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
-                if ((TimeNum + 1) > numTimepoints) {
-                    metadata.put("sizeT", Integer.toString(TimeNum + 1));
-                }
+                // Channel number
+                channelNum = 0;
 
             } else {
 
@@ -288,6 +256,107 @@ public class GenericTIFFSeriesReader extends AbstractCompositeMicroscopyReader {
                 errorMessage = "Unexpected file name found.";
                 return isValid;
 
+            }
+
+            // Build the key
+            String key = "series_" + seriesNum;
+
+            // Store the series index if not yet present
+            if (attr.containsKey(key)) {
+
+                metadata = attr.get(key);
+
+            } else {
+
+                // Create a new SeriesMetadata object
+                metadata = new HashMap<String, String>();
+
+                // And add it to the arribute map
+                attr.put(key, metadata);
+
+                // Read the file
+                if (reader == null) {
+
+                    // Initialize the reader
+                    reader = new ImageProcessorReader(
+                            new ChannelSeparator(
+                                    LociPrefs.makeImageReader()));
+                }
+
+                // Try to open the image file
+                try {
+                    reader.setId(file.getCanonicalPath());
+                } catch (FormatException e) {
+                    reader = null;
+                } catch (IOException e) {
+                    reader = null;
+                }
+
+                // Store width and height
+                int width = 0;
+                int heigth = 0;
+                String datatype = "Unknown";
+                if (reader != null) {
+
+                    // Get width
+                    width = reader.getSizeX();
+
+                    // Get heigth
+                    heigth = reader.getSizeY();
+
+                    // Get datatype
+                    datatype = getDataType();
+
+                    // Now close the file
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        // Report
+                        System.err.println("Could not close file!");
+                    }
+
+                }
+
+                // Store the extracted values
+                metadata.put("sizeX", Integer.toString(width));
+                metadata.put("sizeY", Integer.toString(heigth));
+                metadata.put("datatype", datatype);
+
+                // Store default values. These should be replaced
+                // with information extracted from the properties XML
+                // file in the Metadata folder.
+                metadata.put("voxelX", "1.0");
+                metadata.put("voxelY", "1.0");
+                metadata.put("voxelZ", "1.0");
+
+                // TODO: Get wavelengths from metadata
+
+                // TODO: Get acquisition time from metadata
+                metadata.put("acquisitionDate", "NaN");
+
+            }
+
+            // Store default color for channel
+            metadata.put("channelColor" + channelNum,
+                    implode(BioFormatsWrapper.getDefaultChannelColor(channelNum)));
+
+
+            // Update the number of planes
+            int numPlanes = getMetadataValueOrZero(metadata, "sizeZ");
+            if ((planeNum + 1) > numPlanes) {
+                metadata.put("sizeZ", Integer.toString(planeNum + 1));
+            }
+
+            // Update the number of channels
+            int numChannels = getMetadataValueOrZero(metadata, "sizeC");
+            if ((channelNum + 1) > numChannels) {
+                metadata.put("sizeC", Integer.toString(channelNum + 1));
+            }
+
+            // Update the number of timepoints
+            int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
+            if ((timeNum + 1) > numTimepoints) {
+                metadata.put("sizeT", Integer.toString(timeNum + 1));
             }
 
         }
