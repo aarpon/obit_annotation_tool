@@ -339,10 +339,10 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // Find the channel number from the list of channel names
             int channelNum = channelNames.indexOf(channelName);
             metadata.put("channelName" + channelNum, channelName);
-            int numChannels = getMetadataValueOrZero(metadata, "sizeC");
-            if ((channelNum + 1) > numChannels) {
-                metadata.put("sizeC", Integer.toString(channelNum + 1));
-            }
+
+            // Update the count of channels
+            int numChannels = countChannelsInMetadata(metadata);
+            metadata.put("sizeC", Integer.toString(numChannels));
 
             // Number of timepoints
             int numTimepoints = getMetadataValueOrZero(metadata, "sizeT");
@@ -700,5 +700,23 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         }
 
         return channelName;
+    }
+
+
+    /**
+     * Count the number of channels in the metadata.
+     *
+     * Please note that some channels might be missing. One series could have channel 0 and 2 but no 1.
+     * @param metadata Metadata map.
+     * @return number of channels in the series.
+     */
+    private int countChannelsInMetadata(Map<String, String> metadata) {
+        int numChannels = 0;
+        for (String key : metadata.keySet()) {
+            if (key.startsWith("channelName")) {
+                numChannels += 1;
+            }
+        }
+        return numChannels;
     }
 }
