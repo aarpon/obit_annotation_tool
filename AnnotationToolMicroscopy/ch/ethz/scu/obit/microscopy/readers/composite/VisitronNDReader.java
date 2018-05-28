@@ -299,6 +299,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
         Iterator<Entry<String, HashMap<String, String>>> targetIt = attrTarget.entrySet().iterator();
         Iterator<Entry<String, HashMap<String, String>>> sourceIt = attrSource.entrySet().iterator();
+
         while (targetIt.hasNext()) {
 
             // Get the series from the target
@@ -306,12 +307,19 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             String targetKey = targetPair.getKey();
             HashMap<String, String> targetSeries = targetPair.getValue();
 
+            // Number of channels in the target series
+            int numChannelsInTarget = countChannelsInMetadata(targetSeries);
+
             while (sourceIt.hasNext()) {
 
                 // Get the series from the source
                 Entry<String, HashMap<String, String>> sourcePair = sourceIt.next();
                 String sourceKey = sourcePair.getKey();
                 HashMap<String, String> sourceSeries = sourcePair.getValue();
+
+                // Number of channels in the source series. It MUST be 1.
+                int numChannelsInSource = countChannelsInMetadata(sourceSeries);
+                assert(numChannelsInSource == 1);
 
                 // Make sure we are trying to fuse attributes for the same series!
                 assert(sourceKey.equals(targetKey));
@@ -322,12 +330,14 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 String channelNameTarget = targetSeries.get("channelName0");
                 String channelNameSource = sourceSeries.get("channelName0");
 
-                // First, get the number of channels and timepoints in the target
-                int targetNumChannels = Integer.parseInt(targetSeries.get("sizeC"));
-                int targetNumTimepoints = Integer.parseInt(targetSeries.get("sizeT"));
+                // Add by channel or by time point?
+                Boolean addAsNewChannel = false;
+                if (! channelNameTarget.equals(channelNameSource)) {
+                    addAsNewChannel = true;
+                }
 
                 // Do we have a new channel to add?
-                if (! channelNameTarget.equals(channelNameSource)) {
+                if (addAsNewChannel == true) {
 
                     // Check geometry. These test should pass since the geometries per series
                     // were checked by fileGeometryInSeriesMatch().
@@ -336,9 +346,8 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                     assert(Integer.parseInt(targetSeries.get("sizeZ")) == Integer.parseInt(sourceSeries.get("sizeZ")));
                     assert(Integer.parseInt(targetSeries.get("sizeT")) == Integer.parseInt(sourceSeries.get("sizeT")));
 
-                    int finalNumC = targetNumChannels;
-
-                    int channel = finalNumC;
+                    // New channel number (for the channel to be transferred)
+                    int newChannelNum = numChannelsInTarget;
 
                     // This is a new channel
                     for (String key : keySetSource) {
@@ -348,20 +357,28 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                             // Add a new key to the target attributes with the value of
                             // the source attributes
                             if (! m.group("channel").equals("")) {
-                                String updateKey = m.group("key") + finalNumC;
+                                String updateKey = m.group("key") + newChannelNum;
+                                int currentSourceChannel = Integer.parseInt(m.group("channel"));
                                 if (m.group("key").equals("channelColor")) {
-                                    String sourceValue = sourceSeries.get(key);
-                                    if (sourceValue.equals(targetSeries.get(key))) {
-                                        double [] defC = BioFormatsWrapper.getDefaultChannelColor(channel);
-                                        String c  = "";
-                                        for (int k = 0; k < defC.length - 1; k++) {
-                                            c += defC[k] + ", ";
-                                        }
-                                        c += defC[defC.length - 1];
-                                        targetSeries.put(updateKey, c);
-                                    } else {
-                                        targetSeries.put(updateKey, sourceSeries.get(key));
+
+                                    // Source channel
+                                    double [] defC = BioFormatsWrapper.getDefaultChannelColor(currentSourceChannel);
+                                    String c  = "";
+                                    for (int k = 0; k < defC.length - 1; k++) {
+                                        c += defC[k] + ", ";
                                     }
+                                    c += defC[defC.length - 1];
+                                    targetSeries.put(key, c);
+
+                                    // Target channel
+                                    defC = BioFormatsWrapper.getDefaultChannelColor(newChannelNum);
+                                    c  = "";
+                                    for (int k = 0; k < defC.length - 1; k++) {
+                                        c += defC[k] + ", ";
+                                    }
+                                    c += defC[defC.length - 1];
+                                    targetSeries.put(updateKey, c);
+
                                 } else {
                                     targetSeries.put(updateKey, sourceSeries.get(key));
                                 }
@@ -370,11 +387,14 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                     }
 
                     // Do we have a new timepoint to add?
-                    targetSeries.put("sizeC", "" + (targetNumChannels + 1));
+                    targetSeries.put("sizeC", "" + (numChannelsInTarget + 1));
 
                 } else {
 
-                    targetSeries.put("sizeT", "" + (targetNumTimepoints + 1));
+                    // Number of timepoints in the source and target series
+                    int numTimepointsInSource = Integer.parseInt(sourceSeries.get("sizeT"));
+                    int numTimepointsInTarget = Integer.parseInt(targetSeries.get("sizeT"));
+                    targetSeries.put("sizeT", "" + (numTimepointsInTarget + numTimepointsInSource));
                 }
 
                 // Merge the filenames
@@ -613,4 +633,22 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
         return false;
     }
+
+    /**
+     * Count the number of channels in the metadata.
+     *
+     * Please note that some channels might be missing. One series could have channel 0 and 2 but no 1.
+     * @param metadata Metadata map.
+     * @return number of channels in the series.
+     */
+    private int countChannelsInMetadata(Map<String, String> metadata) {
+        int numChannels = 0;
+        for (String key : metadata.keySet()) {
+            if (key.startsWith("channelName")) {
+                numChannels += 1;
+            }
+        }
+        return numChannels;
+    }
+
 }
