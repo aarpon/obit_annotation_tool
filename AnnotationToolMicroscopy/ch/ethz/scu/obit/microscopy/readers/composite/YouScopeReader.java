@@ -522,8 +522,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     /**
      * Return an ID built from the path information of the file
      *
-     * @param file
-     *            Image file with (relative) path as obtained from images.csv
+     * @param filename Image file with (relative) path as obtained from images.csv
      * @return ID built from the path information of the file.
      */
     private String pathInfoAsID(String filename) {

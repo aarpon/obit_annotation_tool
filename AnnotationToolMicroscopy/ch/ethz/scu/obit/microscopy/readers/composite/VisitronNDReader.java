@@ -412,7 +412,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
      * Set the series number in place.
      * @param attr Current attribute series.
      * @param targetSeriesNum Number of the series to set.
-     *
+     * @return attr Updated attribute series.
      */
     private Map<String, HashMap<String, String>> setSeriesNumber(Map<String, HashMap<String, String>> attr, int targetSeriesNum) {
 
@@ -432,7 +432,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
      * @param listOfFiles List of files to process
      * @return true if the parsing of the files into series was successful, false otherwise.
      */
-    private Boolean buildSeriesFromFiles(List<String> listOfFiles) throws Exception {
+    private Boolean buildSeriesFromFiles(List<String> listOfFiles) {
 
         // Create a map of file attributes
         Map<String, Map<String, HashMap<String, String>>> fileAttributes =
@@ -598,10 +598,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
     /**
      * Check that the geometry of the file to be added to the series matches the
      * geometry of the files already assigned to it.
-     * @param seriesMap
-     * @param fileAttributes
+     * @param seriesMap Map of series numbers to list of file names.
+     * @param fileAttributes Map of file attributes.
      * @param seriesNum Number of the series
-     * @param currAttr
      * @param currAttr Attributes of the file to compare.
      * @return true if the geometry fits, false otherwise.
      */

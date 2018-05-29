@@ -75,6 +75,7 @@ public class BioFormatsWrapper {
     /**
      * Alternate constructor
      * @param filename Full path to the file to process.
+     * @param groupFiles Toggles the file grouping behavior of the reader.
      */
     public BioFormatsWrapper(File filename, Boolean groupFiles) {
 
