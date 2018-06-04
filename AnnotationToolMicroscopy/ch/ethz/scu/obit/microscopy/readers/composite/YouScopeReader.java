@@ -82,7 +82,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         if (csvTable.isEmpty()) {
             // The buildImagesCSVTable() function already set the
             // isValid flag and the errorMessage string.
-            assert(isValid == false);
+            assert (isValid == false);
             return isValid;
         }
 
@@ -192,15 +192,15 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // Channel name
             String channelName = buildChannelName(row);
 
-            // Build series ID from row (if present, use path information to build a unique id)
-            String seriesID = "Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_"
-                    + pathInfoAsID(row[6]);
+            // Build series ID from row (if present, use path information to build a unique
+            // id)
+            String seriesID = "Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_" + pathInfoAsID(row[6]);
 
             // Build full file name
             File file = new File(this.folder + "/" + row[6]);
 
             // Make sure that the file exists
-            if (! file.exists()) {
+            if (!file.exists()) {
                 // Mark failure
                 isValid = false;
                 errorMessage = "File '" + file + "' referenced in 'images.csv' does not exist!";
@@ -269,7 +269,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                         Map<String, HashMap<String, String>> currAttrs = bioformatsWrapper.getAttributes();
 
                         // Assertion: only one series in the file!
-                        assert(bioformatsWrapper.getNumberOfSeries() == 1);
+                        assert (bioformatsWrapper.getNumberOfSeries() == 1);
 
                         HashMap<String, String> seriesOneAttrs = currAttrs.get("series_0");
 
@@ -356,10 +356,10 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         }
 
         // Make sure that all files in the folder are referenced
-        if (! allFilesInTable(this.folder)) {
+        if (!allFilesInTable(this.folder)) {
             // The allFilesInTable() function already marked failure and set the
-        	// error message accordingly.
-            assert(isValid == false);
+            // error message accordingly.
+            assert (isValid == false);
             return isValid;
         }
 
@@ -426,14 +426,17 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     }
 
     /**
-     * Parse the images.csv file and return a map of the content. Each row is stored with the
-     * file name (with relative path) as its key.
+     * Parse the images.csv file and return a map of the content. Each row is stored
+     * with the file name (with relative path) as its key.
      *
-     * If something goes wrong while processing the file, this function will set the 'isValid'
-     * flag to false, set the 'errorMessage' accordingly and return an empty map.
+     * If something goes wrong while processing the file, this function will set the
+     * 'isValid' flag to false, set the 'errorMessage' accordingly and return an
+     * empty map.
      *
-     * @param fileName Full path to the images.csv file.
-     * @return Hash map of strings with file name as key and array of string for each row.
+     * @param fileName
+     *            Full path to the images.csv file.
+     * @return Hash map of strings with file name as key and array of string for
+     *         each row.
      */
     private HashMap<String, String[]> buildImagesCSVTable(String fileName) {
 
@@ -528,63 +531,70 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     }
 
     /**
-     * Make sure that all image files are referenced in the csv file. 
-     * @param allFiles List of all files with full path.
+     * Make sure that all image files are referenced in the csv file.
+     *
+     * @param allFiles
+     *            List of all files with full path.
      * @return true if all files are referenced, false otherwise.
      */
     private boolean allFilesInTable(File currentFolder) {
 
-    	// Get relative path
-    	String relativePath;
-    	if (currentFolder.equals(folder)) {
-    		relativePath = "";
-    	} else {
-    		try {
-    			int index = (int) this.folder.toString().length();
-    			relativePath = currentFolder.toString().substring(index + 1);
-    		} catch (Exception e) {
-    			relativePath = "";
-    		}
-    	}
+        // Get relative path
+        String relativePath;
+        if (currentFolder.equals(folder)) {
+            relativePath = "";
+        } else {
+            try {
+                int index = this.folder.toString().length();
+                relativePath = currentFolder.toString().substring(index + 1);
+                // Only forward slashes allowed
+                relativePath = relativePath.replace("\\\\", "\\");
+                relativePath = relativePath.replace("\\", "/");
+            } catch (Exception e) {
+                relativePath = "";
+            }
+        }
 
-    	// Initialize result
-    	boolean result = true;
+        // Initialize result
+        boolean result = true;
 
-    	// Get and check all image files, recursively
+        // Get and check all image files, recursively
         File[] fList = currentFolder.listFiles();
         for (File file : fList) {
             if (file.isFile()) {
 
-            	String filename = file.getName();
-            	String filenameForCheck = filename.toLowerCase(); 
-            	if (filenameForCheck.endsWith(".tif") || filenameForCheck.endsWith(".tiff")) {
+                String filename = file.getName();
+                String filenameForCheck = filename.toLowerCase();
+                if (filenameForCheck.endsWith(".tif") || filenameForCheck.endsWith(".tiff")) {
 
-                	// Relative path to test
-            		String relativePathToTest = "";
-                	if (relativePath.equals("")) {
-                		relativePathToTest = filename;
-                	} else {
-                		relativePathToTest = relativePath + "/" + filename;
-                	}
+                    // Relative path to test
+                    String relativePathToTest = "";
+                    if (relativePath.equals("")) {
+                        relativePathToTest = filename;
+                    } else {
+                        // Only forward slashes allowed
+                        relativePathToTest = relativePath + "/" + filename;
+                    }
 
-            		if (! csvTable.containsKey(relativePathToTest)) {
-            			// Mark as invalid
-            			isValid = false;
-            			errorMessage = "File " + relativePathToTest + " is not referenced in images.csv!";
-            			return isValid;
-            		}
-            	}
+                    if (!csvTable.containsKey(relativePathToTest)) {
+                        // Mark as invalid
+                        isValid = false;
+                        errorMessage = "File " + relativePathToTest + " is not referenced in images.csv!";
+                        return isValid;
+                    }
+                }
             } else if (file.isDirectory()) {
-            	result = allFilesInTable(file);
+                result = allFilesInTable(file);
             }
         }
-		return result;
+        return result;
     }
 
     /**
      * Return an ID built from the path information of the file
      *
-     * @param filename Image file with (relative) path as obtained from images.csv
+     * @param filename
+     *            Image file with (relative) path as obtained from images.csv
      * @return ID built from the path information of the file.
      */
     private String pathInfoAsID(String filename) {
@@ -641,14 +651,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // is stored in the well column of image.csv, and therefore
             // this information is not used.
             // No tiles and no Z information (2D acquisition)
-            map.put("well", wellFromPosition(pos.substring(0,4)));
+            map.put("well", wellFromPosition(pos.substring(0, 4)));
             map.put("planeNum", "" + Integer.parseInt(pos.substring(4)));
         } else if (len == 8) {
-            map.put("well", wellFromPosition(pos.substring(0,4)));
+            map.put("well", wellFromPosition(pos.substring(0, 4)));
             map.put("tileX", "" + Integer.parseInt(pos.substring(4, 6)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(6, 8)));
         } else if (len == 10 || len == 11) {
-            map.put("well", wellFromPosition(pos.substring(0,4)));
+            map.put("well", wellFromPosition(pos.substring(0, 4)));
             map.put("tileX", "" + Integer.parseInt(pos.substring(4, 6)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(6, 8)));
             map.put("planeNum", "" + Integer.parseInt(pos.substring(8)));
@@ -661,13 +671,15 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     /**
      * Maps a position to a well.
      *
-     * The position is a n-digit string, such as '0202' that maps to well B2.
-     * The number of digits must be even, and the function will divide them in
-     * two n/2 subsets.
+     * The position is a n-digit string, such as '0202' that maps to well B2. The
+     * number of digits must be even, and the function will divide them in two n/2
+     * subsets.
      *
-     * The row is given by one or more letters, the column by an integer:
-     * e.g. 2712 maps to AA12.
-     * @param pos n-digit string that encodes the well (e.g. '0202').
+     * The row is given by one or more letters, the column by an integer: e.g. 2712
+     * maps to AA12.
+     *
+     * @param pos
+     *            n-digit string that encodes the well (e.g. '0202').
      * @return string representing the well (e.g. 'B2')
      */
     private String wellFromPosition(String pos) {
@@ -702,7 +714,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         while (n_digits > 0) {
 
             // Step
-            int step = (int)Math.pow(26, (int)n_digits);
+            int step = (int) Math.pow(26, (int) n_digits);
 
             // Right-most letter
             int r = row / step;
@@ -722,10 +734,13 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Return current value for given metadata entry, or zero if not in the map.
-     * @param metadata Map of string - string key:value pairs.
-     * @param key Name of the metadata value to query.
-     * @return the value for the requested metadata value, or zero if
-     * it is not in the map.
+     *
+     * @param metadata
+     *            Map of string - string key:value pairs.
+     * @param key
+     *            Name of the metadata value to query.
+     * @return the value for the requested metadata value, or zero if it is not in
+     *         the map.
      */
     protected int getMetadataValueOrZero(Map<String, String> metadata, String key) {
         int value = 0;
@@ -737,10 +752,12 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     /**
      * Builds the channel name from the relevant columns in the CSV table row.
-     * @param row Current row
+     *
+     * @param row
+     *            Current row
      * @return channel name.
      */
-    private String buildChannelName(String [] row) {
+    private String buildChannelName(String[] row) {
 
         // Get the ID
         String id = row[7];
@@ -763,12 +780,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         return channelName;
     }
 
-
     /**
      * Count the number of channels in the metadata.
      *
-     * Please note that some channels might be missing. One series could have channel 0 and 2 but no 1.
-     * @param metadata Metadata map.
+     * Please note that some channels might be missing. One series could have
+     * channel 0 and 2 but no 1.
+     *
+     * @param metadata
+     *            Metadata map.
      * @return number of channels in the series.
      */
     private int countChannelsInMetadata(Map<String, String> metadata) {
