@@ -355,6 +355,14 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
         }
 
+        // Make sure that all files in the folder are referenced
+        if (! allFilesInTable(this.folder)) {
+            // The allFilesInTable() function already marked failure and set the
+        	// error message accordingly.
+            assert(isValid == false);
+            return isValid;
+        }
+
         // Mark success
         isValid = true;
         errorMessage = "";
@@ -517,6 +525,60 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
         // Return the table
         return csvTable;
 
+    }
+
+    /**
+     * Make sure that all image files are referenced in the csv file. 
+     * @param allFiles List of all files with full path.
+     * @return true if all files are referenced, false otherwise.
+     */
+    private boolean allFilesInTable(File currentFolder) {
+
+    	// Get relative path
+    	String relativePath;
+    	if (currentFolder.equals(folder)) {
+    		relativePath = "";
+    	} else {
+    		try {
+    			int index = (int) this.folder.toString().length();
+    			relativePath = currentFolder.toString().substring(index + 1);
+    		} catch (Exception e) {
+    			relativePath = "";
+    		}
+    	}
+
+    	// Initialize result
+    	boolean result = true;
+
+    	// Get and check all image files, recursively
+        File[] fList = currentFolder.listFiles();
+        for (File file : fList) {
+            if (file.isFile()) {
+
+            	String filename = file.getName();
+            	String filenameForCheck = filename.toLowerCase(); 
+            	if (filenameForCheck.endsWith(".tif") || filenameForCheck.endsWith(".tiff")) {
+
+                	// Relative path to test
+            		String relativePathToTest = "";
+                	if (relativePath.equals("")) {
+                		relativePathToTest = filename;
+                	} else {
+                		relativePathToTest = relativePath + "/" + filename;
+                	}
+
+            		if (! csvTable.containsKey(relativePathToTest)) {
+            			// Mark as invalid
+            			isValid = false;
+            			errorMessage = "File " + relativePathToTest + " is not referenced in images.csv!";
+            			return isValid;
+            		}
+            	}
+            } else if (file.isDirectory()) {
+            	result = allFilesInTable(file);
+            }
+        }
+		return result;
     }
 
     /**
