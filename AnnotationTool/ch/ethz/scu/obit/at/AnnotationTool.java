@@ -1,7 +1,5 @@
 package ch.ethz.scu.obit.at;
 
-import java.lang.management.ManagementFactory;
-
 import javax.swing.JOptionPane;
 
 import ch.ethz.scu.obit.at.gui.AnnotationToolWindow;
@@ -19,21 +17,6 @@ public class AnnotationTool {
      * @param args Ignored
      */
     public static void main(String[] args) {
-
-        // Make sure we are running on JRE 8 or newer
-        try {
-            double version = Double.parseDouble(
-                    ManagementFactory.getRuntimeMXBean().getSpecVersion());
-            if (version < 1.8) {
-                JOptionPane.showMessageDialog(null,
-                        "Sorry, Annotation Tool requires Java 8 or newer.",
-                        "Minimum JRE version not satisfied",
-                        JOptionPane.WARNING_MESSAGE);
-                System.exit(0);
-            }
-        } catch (Exception e) {
-            // We proceed
-        }
 
         // Check whether the application has been set up properly and it is ready
         // to be used.
