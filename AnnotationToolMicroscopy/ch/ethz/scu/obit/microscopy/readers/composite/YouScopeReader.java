@@ -23,11 +23,13 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     private final static String REGEX_POS = "(position: (?<position>\\d+)*(, )?)*(y-tile: (?<y>\\d+)*(, )?)*(x-tile: (?<x>\\d+)*(, )?)*(z-stack: (?<z>\\d+))*";
     private final static String REGEX_TIME_NAME = ".*_time(?<time>\\d*)\\.tif{1,2}$";
     private final static String REGEX_TIME_FB = ".*_time_(.*)_\\(number_(?<time>\\d*)\\)\\.tif{1,2}$";
+    private final static String REGEX_POS_NAME_FB = ".*\\(pos_(?<pos>\\d*)\\).*$"; // Fall-back for rare cases
 
     /* Private instance variables */
     private static Pattern p_pos = Pattern.compile(REGEX_POS, Pattern.CASE_INSENSITIVE);
     private static Pattern p_time = Pattern.compile(REGEX_TIME_NAME, Pattern.CASE_INSENSITIVE);
     private static Pattern p_time_fb = Pattern.compile(REGEX_TIME_FB, Pattern.CASE_INSENSITIVE);
+    private static Pattern p_pos_name_fb = Pattern.compile(REGEX_POS_NAME_FB, Pattern.CASE_INSENSITIVE); // Fall-back for rare cases
 
     private boolean isValid = false;
 
@@ -116,6 +118,16 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 }
                 if (m_pos.group("z") != null) {
                     planeNum = Integer.parseInt(m_pos.group("z"));
+                }
+            }
+
+            // Try the fall-back option
+            Matcher m_pos_name_fb = p_pos_name_fb.matcher(row[6]);
+            if (m_pos_name_fb.find()) {
+                if (m_pos_name_fb.group("pos") != null) {
+                    String pos = m_pos_name_fb.group("pos");
+                    tileX = Integer.parseInt(pos.substring(0, 2));
+                    tileY = Integer.parseInt(pos.substring(2, 4));
                 }
             }
 
