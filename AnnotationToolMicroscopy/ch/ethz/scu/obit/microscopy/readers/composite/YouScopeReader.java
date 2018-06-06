@@ -20,7 +20,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     /* Protected instance variables */
     private BioFormatsWrapper bioformatsWrapper = null;
     private File folder;
-    private final static String REGEX_POS = "(y-tile: (?<y>\\d+)*(, )?)*(x-tile: (?<x>\\d+)*(, )?)*(z-stack: (?<z>\\d+))*";
+    private final static String REGEX_POS = "(position: (?<position>\\d+)*(, )?)*(y-tile: (?<y>\\d+)*(, )?)*(x-tile: (?<x>\\d+)*(, )?)*(z-stack: (?<z>\\d+))*";
     private final static String REGEX_TIME_NAME = ".*_time(?<time>\\d*)\\.tif{1,2}$";
     private final static String REGEX_TIME_FB = ".*_time_(.*)_\\(number_(?<time>\\d*)\\)\\.tif{1,2}$";
     private final static String REGEX_POS_NAME = ".*position(?<pos>\\d*)_time.*\\.tif{1,2}$";
@@ -95,6 +95,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // Get current row
             String[] row = entry.getValue();
 
+            int position = -1;
             int tileX = -1;
             int tileY = -1;
             int planeNum = -1;
@@ -104,6 +105,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // First, get position information
             Matcher m_pos = p_pos.matcher(row[5]);
             if (m_pos.find()) {
+                if (m_pos.group("position") != null) {
+                    position = Integer.parseInt(m_pos.group("position"));
+                }
                 if (m_pos.group("x") != null) {
                     tileX = Integer.parseInt(m_pos.group("x"));
                 }
@@ -117,13 +121,17 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // Get the well
             well = row[4];
+            boolean wellIsGiven = ! well.isEmpty();
 
             // If the positional information could not be extracted from the corresponding
             // column, try to get it from the file name
             Matcher m_pos_name = p_pos_name.matcher(row[6]);
             if (m_pos_name.find()) {
                 if (m_pos_name.group("pos") != null) {
-                    Map<String, String> map = processPosFromFileName(m_pos_name.group("pos"));
+                    Map<String, String> map = processPosFromFileName(m_pos_name.group("pos"), wellIsGiven);
+                    if (position == -1 && map.get("position") != "") {
+                        position = Integer.parseInt(map.get("position"));
+                    }
                     if (tileX == -1 && map.get("tileX") != "") {
                         tileX = Integer.parseInt(map.get("tileX"));
                     }
@@ -142,7 +150,10 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 Matcher m_pos_name_fb = p_pos_name_fb.matcher(row[6]);
                 if (m_pos_name_fb.find()) {
                     if (m_pos_name_fb.group("pos") != null) {
-                        Map<String, String> map = processPosFromFileName(m_pos_name_fb.group("pos"));
+                        Map<String, String> map = processPosFromFileName(m_pos_name_fb.group("pos"), wellIsGiven);
+                        if (position == -1 && map.get("position") != "") {
+                            position = Integer.parseInt(map.get("position"));
+                        }
                         if (tileX == -1 && map.get("tileX") != "") {
                             tileX = Integer.parseInt(map.get("tileX"));
                         }
@@ -176,6 +187,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             }
 
             // Fallback
+            if (position == -1) {
+                position = 1;
+            }
             if (tileX == -1) {
                 tileX = 1;
             }
@@ -194,7 +208,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
             // Build series ID from row (if present, use path information to build a unique
             // id)
-            String seriesID = "Well_" + well + "_Pos_" + tileX + "_" + tileY + "_Path_" + pathInfoAsID(row[6]);
+            String seriesID = "Well_" + well + "_Pos_" + position + "_" + tileX + "_" + tileY + "_Path_" + pathInfoAsID(row[6]);
 
             // Build full file name
             File file = new File(this.folder + "/" + row[6]);
@@ -355,6 +369,8 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
         }
 
+        long startTime = System.currentTimeMillis();
+
         // Make sure that all files in the folder are referenced
         if (!allFilesInTable(this.folder)) {
             // The allFilesInTable() function already marked failure and set the
@@ -362,6 +378,9 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             assert (isValid == false);
             return isValid;
         }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Total execution time: " + (endTime-startTime) + "ms");
 
         // Mark success
         isValid = true;
@@ -622,13 +641,16 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
      * @param pos
      *            A numeric string of the form '010101' (not strictly 6-character
      *            long).
-     * @return array of positions x, y, z
+     * @param wellIsGiven If true, the first part of pos maps to the well (column+row), otherwise
+     *                    it is considered a generic position index.
+     * @return map containing the interpreted 'position', 'tileX', 'tileY', 'planeNum' and 'well' information.
      */
 
-    private Map<String, String> processPosFromFileName(String pos) {
+    private Map<String, String> processPosFromFileName(String pos, boolean wellIsGiven) {
 
         // Initialize positions
         Map<String, String> map = new HashMap<String, String>();
+        map.put("position", "");
         map.put("tileX", "");
         map.put("tileY", "");
         map.put("planeNum", "");
@@ -640,7 +662,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
         int len = pos.length();
         if (len == 4) {
-            // No well, no tiles, and no Z information (2D acquisition)
+            // No position, no tiles, and no Z information (2D acquisition)
             map.put("tileX", "" + Integer.parseInt(pos.substring(0, 2)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(2, 4)));
         } else if (len == 6 || len == 7) {
@@ -648,17 +670,29 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // hard-coded to 4. They do not have to be; unfortunately,
             // it is not possible to know how to break down the pos
             // string in its components. Usually, the well information
-            // is stored in the well column of image.csv, and therefore
-            // this information is not used.
+            // is stored in the well column of image.csv. We use the
+            // first four digits to encode the position.
             // No tiles and no Z information (2D acquisition)
-            map.put("well", wellFromPosition(pos.substring(0, 4)));
+            if (wellIsGiven == true) {
+                map.put("well", wellFromPosition(pos.substring(0, 4)));
+            } else {
+                map.put("position", "" + Integer.parseInt(pos.substring(0, 4)));
+            }
             map.put("planeNum", "" + Integer.parseInt(pos.substring(4)));
         } else if (len == 8) {
-            map.put("well", wellFromPosition(pos.substring(0, 4)));
+            if (wellIsGiven == true) {
+                map.put("well", wellFromPosition(pos.substring(0, 4)));
+            } else {
+                map.put("position", "" + Integer.parseInt(pos.substring(0, 4)));
+            }
             map.put("tileX", "" + Integer.parseInt(pos.substring(4, 6)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(6, 8)));
         } else if (len == 10 || len == 11) {
-            map.put("well", wellFromPosition(pos.substring(0, 4)));
+            if (wellIsGiven == true) {
+                map.put("well", wellFromPosition(pos.substring(0, 4)));
+            } else {
+                map.put("position", "" + Integer.parseInt(pos.substring(0, 4)));
+            }
             map.put("tileX", "" + Integer.parseInt(pos.substring(4, 6)));
             map.put("tileY", "" + Integer.parseInt(pos.substring(6, 8)));
             map.put("planeNum", "" + Integer.parseInt(pos.substring(8)));
