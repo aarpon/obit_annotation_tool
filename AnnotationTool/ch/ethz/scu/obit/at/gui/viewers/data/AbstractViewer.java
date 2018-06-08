@@ -793,12 +793,14 @@ abstract public class AbstractViewer extends Observable
     	invalidDataset = new File((String)
         		invalidDatasetsTable.getModel().getValueAt(
         				rowIndex, 0));
-    	// Display popup...
-        if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
-        		JPopupMenu popup = createInvalidDatasetsPopup();
-            popup.show(e.getComponent(), e.getX(), e.getY());
-            return;
-        }
+		// Display popup...
+		if (e.isPopupTrigger() && e.getComponent() instanceof JTable) {
+			if (!QueryOS.isLinux()) {
+				JPopupMenu popup = createInvalidDatasetsPopup();
+				popup.show(e.getComponent(), e.getX(), e.getY());
+				return;
+			}
+		}
         // ... or log to output pane on double click.
         if (e.getClickCount() == 2) {
         	String errorMsg = (String)
