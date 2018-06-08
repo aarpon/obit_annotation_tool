@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
 
     private boolean isValid = false;
 
-    private HashMap<String, String[]> csvTable = null;
+    private LinkedHashMap<String, String[]> csvTable = null;
     private HashMap<String, String> seriesNamesMapper = null;
     private List<String> channelNames = null;
 
@@ -75,7 +76,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     public boolean parse() throws Exception {
 
         // Parse the images.csv file
-        Map<String, String[]> csvTable = new HashMap<String, String[]>();
+        Map<String, String[]> csvTable = new LinkedHashMap<String, String[]>();
         csvTable = buildImagesCSVTable(this.folder + "/images.csv");
         if (csvTable.isEmpty()) {
             // The buildImagesCSVTable() function already set the
@@ -121,7 +122,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                 }
             }
 
-            // Try the fall-back option
+            // Try the fall-back option?
             Matcher m_pos_name_fb = p_pos_name_fb.matcher(row[6]);
             if (m_pos_name_fb.find()) {
                 if (m_pos_name_fb.group("pos") != null) {
@@ -410,13 +411,13 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
      *
      * @param fileName
      *            Full path to the images.csv file.
-     * @return Hash map of strings with file name as key and array of string for
+     * @return Linked Hash map of strings with file name as key and array of string for
      *         each row.
      */
-    private HashMap<String, String[]> buildImagesCSVTable(String fileName) {
+    private LinkedHashMap<String, String[]> buildImagesCSVTable(String fileName) {
 
         // Initialize the table
-        csvTable = new HashMap<String, String[]>();
+        csvTable = new LinkedHashMap<String, String[]>();
 
         // Initialize a linked hash set
         LinkedHashSet<String> channelNamesSet = new LinkedHashSet<String>();
@@ -467,7 +468,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
                     // Mark failure
                     isValid = false;
                     errorMessage = "File '" + row[6] + "' referenced more than once in 'images.csv'!";
-                    return new HashMap<String, String[]>();
+                    return new LinkedHashMap<String, String[]>();
                 }
 
                 // Add the row with the file name as key
@@ -484,17 +485,17 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
             // Mark failure
             isValid = false;
             errorMessage = "File 'images.csv' not found!";
-            return new HashMap<String, String[]>();
+            return new LinkedHashMap<String, String[]>();
         } catch (IOException e) {
             // Mark failure
             isValid = false;
             errorMessage = "Could not read file 'images.csv'!";
-            return new HashMap<String, String[]>();
+            return new LinkedHashMap<String, String[]>();
         } catch (Exception e) {
             // Mark failure
             isValid = false;
             errorMessage = "Could not read file 'images.csv'! The error was: " + e.getMessage();
-            return new HashMap<String, String[]>();
+            return new LinkedHashMap<String, String[]>();
         }
 
         // Change the linked hash set to a list
