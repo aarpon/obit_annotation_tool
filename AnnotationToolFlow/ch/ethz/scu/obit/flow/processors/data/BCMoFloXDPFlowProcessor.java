@@ -18,7 +18,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  * BCMoFloXDPFlowProcessor parses folder structures created by the following
  * software and hardware combination:
  *
- * 1. BD FACS™ Sortware (1.2) on BC MoFlo XDP Cell Sorter
+ * 1. Summit (1.x) on BC MoFlo XDP Cell Sorter
  *
  * @author Aaron Ponti
  */
