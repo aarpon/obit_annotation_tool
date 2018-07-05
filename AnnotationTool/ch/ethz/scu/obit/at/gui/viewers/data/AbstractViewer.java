@@ -18,19 +18,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.RowSorter.SortKey;
-import javax.swing.SortOrder;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -138,161 +127,52 @@ abstract public class AbstractViewer extends Observable
 		
 		this.globalSettingsManager = globalSettingsManager;
 		
-		// Create a new JPanel
-		panel = new JPanel();
-		
-		// Create a GridBagLayout
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		panel.setLayout(gridBagLayout);
+        // Create a panel
+        panel = new JPanel();
 
-		// Common constraints
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.anchor = GridBagConstraints.NORTHWEST;
-		constraints.fill = GridBagConstraints.BOTH;
-		
-		// Add a title JLabel
-		title = new JLabel("<html><b>Data viewer</b></html>");
+        // Set a grid bag layout
+        panel.setLayout(new GridBagLayout());
 
-		// Add the tree viewer to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.insets = new Insets(0, 0, 5, 5);
-		panel.add(title, constraints);
-		
-		// Create the Tree
-		rootNode = new RootNode(new RootDescriptor(new File("/"),
-				new File(globalSettingsManager.getUserDataRootDir())));
-		
-		// Create a tree that allows one selection at a time.
-		tree = new DataViewerTree(rootNode);
-		
-		// Listen for when the selection changes.
-		tree.addTreeSelectionListener(this);
-		
-		// Create the scroll pane and add the tree to it. 
-		treeView = new JScrollPane(tree);
+        // Common constraints
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.fill = GridBagConstraints.BOTH;
 
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.45;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 0, 0, 5);
-		panel.add(treeView, constraints);
+        // Add a title JLabel
+        JLabel title = new JLabel("<html><b>Data viewer</b></html>");
 
-		// Add a rescan button
-		scanButton = new JButton("Scan");
-		scanButton.addActionListener(new ActionListener() {
- 
-            public void actionPerformed(ActionEvent e)
-            {
-                scan();
-            }
-        });  
+        // Add the tree viewer to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.gridwidth = 1;
+        constraints.insets = new Insets(0, 5, 5, 0);
+        panel.add(title, constraints);
 
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 2;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 0, 5, 5);
-		panel.add(scanButton, constraints);
-		
-		// Add a simple label
-		metadataView = new JLabel("<html><b>Metadata viewer</b></html>");
-		metadataView.setVerticalAlignment(SwingConstants.TOP);
+		// Create a split panel
+        JSplitPane splitPaneTwo = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                metadataViewerPanel(), invalidDatasetsPanel());
+        splitPaneTwo.setResizeWeight(0.75);
+        splitPaneTwo.setBorder(null);
 
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 3;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 0, 5, 5);
-		panel.add(metadataView, constraints);
-		
-		// Add the table
-		Object[][] mdData = { };
-		String mdColumnNames[] = { "Name", "Value" };
-		metadataViewTable = new JTable(
-				new ReadOnlyTableModel(mdData, mdColumnNames));
-		metadataViewTable.setShowGrid(false);
-		metadataViewTable.setFillsViewportHeight(true);
-		metadataViewTable.setAutoCreateRowSorter(true);
-		metadataViewPane = new JScrollPane(metadataViewTable);
-		
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 4;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.20;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 0, 5, 5);
-		panel.add(metadataViewPane, constraints);
+        // Create a split panel
+        JSplitPane splitPaneOne = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                dataViewerPanel(), splitPaneTwo);
+        splitPaneOne.setResizeWeight(0.5);
+        splitPaneOne.setBorder(null);
 
-		// Add a simple label
-		invalidDatasets = new JLabel("<html><b>Invalid datasets</b></html>");
-		invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
+        // Add the split panel to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 1;
+        constraints.insets = new Insets(0, 0, 0, 0);
+        panel.add(splitPaneOne, constraints);
 
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 5;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		constraints.insets = new Insets(5, 0, 5, 5);
-		panel.add(invalidDatasets, constraints);
-		
-		// Add the table
-		Object[][] data = { };
-		String columnNames[] = { "File or folder", "Issue" };
-		invalidDatasetsTable = new JTable(
-				new ReadOnlyTableModel(data, columnNames));
-		invalidDatasetsTable.setShowGrid(false);
-		invalidDatasetsTable.setFillsViewportHeight(true);
-		invalidDatasetsTable.setAutoCreateRowSorter(true);
-		invalidDatasetsPane = new JScrollPane(invalidDatasetsTable);
-        
-		// Add a context menu
-		invalidDatasetsTable.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (QueryOS.isWindows()) {
-					return;
-				}
-				setListenerOnJTable(e);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				if (QueryOS.isMac()) {
-					return;
-				}
-				setListenerOnJTable(e);
-			}
-		});
-
-		// Add to the layout
-		constraints.gridx = 0;
-		constraints.gridy = 6;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.05;
-		constraints.gridwidth = 1;
-		constraints.gridheight = 1;
-		panel.add(invalidDatasetsPane, constraints);
-		
 		// Set the preferred and minimum size
-		panel.setMinimumSize(new Dimension(400, 700));
+		panel.setMinimumSize(new Dimension(400, 500));
 		panel.setPreferredSize(new Dimension(400, 700));
 
 	}
@@ -913,12 +793,14 @@ abstract public class AbstractViewer extends Observable
     	invalidDataset = new File((String)
         		invalidDatasetsTable.getModel().getValueAt(
         				rowIndex, 0));
-    	// Display popup...
-        if (e.isPopupTrigger() && e.getComponent() instanceof JTable ) {
-        		JPopupMenu popup = createInvalidDatasetsPopup();
-            popup.show(e.getComponent(), e.getX(), e.getY());
-            return;
-        }
+		// Display popup...
+		if (e.isPopupTrigger() && e.getComponent() instanceof JTable) {
+			if (!QueryOS.isLinux()) {
+				JPopupMenu popup = createInvalidDatasetsPopup();
+				popup.show(e.getComponent(), e.getX(), e.getY());
+				return;
+			}
+		}
         // ... or log to output pane on double click.
         if (e.getClickCount() == 2) {
         	String errorMsg = (String)
@@ -928,4 +810,179 @@ abstract public class AbstractViewer extends Observable
         			"' is invalid for following reason: " + errorMsg);
         }
 	}
+
+	private JPanel dataViewerPanel() {
+
+        // Create a panel
+        JPanel dataViewerPanel = new JPanel();
+
+        // Set a grid bag layout
+        dataViewerPanel.setLayout(new GridBagLayout());
+
+        // Common constraints
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        // Create the Tree
+        rootNode = new RootNode(new RootDescriptor(new File("/"),
+                new File(globalSettingsManager.getUserDataRootDir())));
+
+        // Create a tree that allows one selection at a time.
+        tree = new DataViewerTree(rootNode);
+
+        // Listen for when the selection changes.
+        tree.addTreeSelectionListener(this);
+
+        // Create the scroll pane and add the tree to it.
+        treeView = new JScrollPane(tree);
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 0, 0, 5);
+        dataViewerPanel.add(treeView, constraints);
+
+        // Add a rescan button
+        scanButton = new JButton("Scan");
+        scanButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e)
+            {
+                scan();
+            }
+        });
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.insets = new Insets(5, 0, 5, 5);
+        dataViewerPanel.add(scanButton, constraints);
+
+        return dataViewerPanel;
+    }
+
+
+    private JPanel metadataViewerPanel() {
+
+        // Create a panel
+        JPanel metadataViewerPanel = new JPanel();
+
+        // Set a grid bag layout
+        metadataViewerPanel.setLayout(new GridBagLayout());
+
+        // Common constraints
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        // Add a simple label
+        metadataView = new JLabel("<html><b>Metadata viewer</b></html>");
+        metadataView.setVerticalAlignment(SwingConstants.TOP);
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.insets = new Insets(5, 0, 5, 5);
+        metadataViewerPanel.add(metadataView, constraints);
+
+        // Add the table
+        Object[][] mdData = { };
+        String mdColumnNames[] = { "Name", "Value" };
+        metadataViewTable = new JTable(
+                new ReadOnlyTableModel(mdData, mdColumnNames));
+        metadataViewTable.setShowGrid(false);
+        metadataViewTable.setFillsViewportHeight(true);
+        metadataViewTable.setAutoCreateRowSorter(true);
+        metadataViewPane = new JScrollPane(metadataViewTable);
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.insets = new Insets(5, 0, 5, 5);
+        metadataViewerPanel.add(metadataViewPane, constraints);
+
+        return metadataViewerPanel;
+    }
+
+    private JPanel invalidDatasetsPanel() {
+
+        // Create a panel
+        JPanel invalidDatasetsPanel = new JPanel();
+
+        // Set a grid bag layout
+        invalidDatasetsPanel.setLayout(new GridBagLayout());
+
+        // Common constraints
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        // Add a simple label
+        invalidDatasets = new JLabel("<html><b>Invalid datasets</b></html>");
+        invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.insets = new Insets(5, 0, 5, 5);
+        invalidDatasetsPanel.add(invalidDatasets, constraints);
+
+        // Add the table
+        Object[][] data = { };
+        String columnNames[] = { "File or folder", "Issue" };
+        invalidDatasetsTable = new JTable(
+                new ReadOnlyTableModel(data, columnNames));
+        invalidDatasetsTable.setShowGrid(false);
+        invalidDatasetsTable.setFillsViewportHeight(true);
+        invalidDatasetsTable.setAutoCreateRowSorter(true);
+        invalidDatasetsPane = new JScrollPane(invalidDatasetsTable);
+
+        // Add a context menu
+        invalidDatasetsTable.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (QueryOS.isWindows()) {
+                    return;
+                }
+                setListenerOnJTable(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (QueryOS.isMac()) {
+                    return;
+                }
+                setListenerOnJTable(e);
+            }
+        });
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        invalidDatasetsPanel.add(invalidDatasetsPane, constraints);
+
+        return invalidDatasetsPanel;
+    }
 }

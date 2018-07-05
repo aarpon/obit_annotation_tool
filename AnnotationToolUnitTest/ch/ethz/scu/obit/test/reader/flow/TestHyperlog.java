@@ -7,7 +7,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import ch.ethz.scu.obit.bdfacsdivafcs.readers.Hyperlog;
+import ch.ethz.scu.obit.flow.readers.Hyperlog;
 
 /**
  * Test flow cytometry readers and processors.

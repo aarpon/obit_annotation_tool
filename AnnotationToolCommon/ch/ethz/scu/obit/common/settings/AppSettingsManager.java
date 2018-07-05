@@ -36,11 +36,11 @@ import ch.ethz.scu.obit.common.version.VersionInfo;
 
 /**
  * Commodity class to manage the AnnotationTool application properties
- * 
+ *
  * @author Aaron Ponti
- * 
+ *
  * This class is only visible within its package.
- *  
+ *
  */
 public class AppSettingsManager {
 
@@ -59,14 +59,14 @@ public class AppSettingsManager {
 	 * Constructor
 	 */
 	public AppSettingsManager() {
-		
+
 		// Try to load, otherwise initialize
 		if (!load()) {
 			initialize();
 		}
 
 	}
-	
+
 	/**
 	 * Return true if the settings file is valid
 	 * @return true if the settings file is valid
@@ -114,7 +114,7 @@ public class AppSettingsManager {
 	 * @throws ArrayIndexOutOfBoundsException It the index is out of bounds.
      */
 	public void remove(int index) throws ArrayIndexOutOfBoundsException {
-    	
+
 		// We do not allow to remove all settings
 		if (listAppSettings.size() <= 1) {
 			return;
@@ -123,14 +123,14 @@ public class AppSettingsManager {
     	if (index < 0 && index > (listAppSettings.size() - 1)) {
     		throw new ArrayIndexOutOfBoundsException();
     	}
-    	
+
    		listAppSettings.remove(index);
    		index--;
    		if (index < 0) {
    			index = 0;
    		}
    		currentSettingsIndex = index;
-    	
+
     }
 
 	/**
@@ -138,15 +138,15 @@ public class AppSettingsManager {
      * @param index of the AppSettings in the listAppSettings array.
      */
 	public void moveDown(int index) {
-    	
+
 		// We cannot push down the last one
 		if (index == (listAppSettings.size())) {
 			return;
 		}
-		
+
 		Collections.swap(listAppSettings, index, index + 1);
 		currentSettingsIndex = index + 1;
-    	
+
     }
 
 	/**
@@ -154,31 +154,31 @@ public class AppSettingsManager {
      * @param index of the AppSettings in the listAppSettings array.
      */
 	public void moveUp(int index) {
-    	
+
 		// We cannot push down the first one
 		if (index == 0) {
 			return;
 		}
-		
+
 		Collections.swap(listAppSettings, index, index - 1);
 		currentSettingsIndex = index - 1;
 
     }
-	
+
 	/**
 	 * Return all configured openBIS servers
 	 * @return list of server URLs
 	 */
 	public ArrayList<String> getAllServers() {
-	
+
 		ArrayList<String> servers = new ArrayList<String>();
 		for (AppSettings current : listAppSettings) {
 			servers.add(current.getOpenBISURL());
 		}
-		
+
 		return servers;
 	}
-	
+
 	/**
 	 * Return the index of currently active setting
 	 * @return index of currently active setting.
@@ -209,7 +209,7 @@ public class AppSettingsManager {
 	public String getSettingValue(String name) {
 		return listAppSettings.get(currentSettingsIndex).getSettingValue(name);
 	}
-	
+
 	/**
 	 * Set the value of a specific setting
 	 * @param name Name of the setting
@@ -266,7 +266,7 @@ public class AppSettingsManager {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Set the URL of current openBIS server
 	 * @param openBISURL URL for current openBIS server
@@ -291,14 +291,14 @@ public class AppSettingsManager {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Returns the setting for current openBIS server
 	 * @param openBISURL openBIS server URL
 	 * @return AppSettings object
 	 */
 	public AppSettings getSettingsForServer(String openBISURL) {
-	
+
 		// Get the settings
 		for (AppSettings appSettings : listAppSettings) {
 			if (appSettings.getOpenBISURL().equals(openBISURL)) {
@@ -307,8 +307,7 @@ public class AppSettingsManager {
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * Try reading settings from file. If loading fails, current settings are 
 	 * left untouched.
@@ -316,7 +315,7 @@ public class AppSettingsManager {
 	 * @return true if the settings were loaded correctly, false otherwise.
 	 */
 	public boolean load() {
-	
+
 		// Make sure the Properties file exists
 		fileExists = settingsFileExists();
 		if (!fileExists) {
@@ -327,78 +326,85 @@ public class AppSettingsManager {
 			errorMessage = "Settings file does not exist.";
 			return false;
 		}
-	
-	
+
 		// Instantiate new Settings
 		ArrayList<AppSettings> loadedAppSettings = new ArrayList<AppSettings>();
-	
+
 		// Read and parse the XML settings file
 		Document doc = readXMLFile();
 		if (doc == null) {
 			// Error message already set in readXMLFile()
 			return false;
 		}
-		
+
 		// Get the root node
 		Element rootNode = doc.getDocumentElement();
-		
+
 		// Store the file version
 		try {
 			fileVersion = Integer.parseInt(rootNode.getAttribute("version"));
 		} catch (NumberFormatException n) {
 			fileVersion = -1;
 		}
-	
+
 		// Now process all children
 		NodeList openBISURLNodes = rootNode.getChildNodes();
 		for (int i = 0; i < openBISURLNodes.getLength(); i ++) {
 			Node openBISURL = openBISURLNodes.item(i);
-			
+
 			// Create a new AppSettings object
 			AppSettings setting = new AppSettings();
-			
+
 			// Get and add the attributes
 			NamedNodeMap attrs = openBISURL.getAttributes();
-			
+
 			for (int j = 0; j < attrs.getLength(); j++) {
-				
+
 				// Get attribute name and value
 				String name = attrs.item(j).getNodeName();
 				String value = attrs.item(j).getNodeValue();
-				
+
 				// Store it
 				setting.setSettingValue(name, value);
 			}
-	
+
 			// Now add the AppSettings object
 			loadedAppSettings.add(setting);
 		}
-		
+
 		// Now store the loaded settings
 		listAppSettings = loadedAppSettings;
 		currentSettingsIndex = 0;
 		isFileRead = true;
-	
+
 		// Check that the file version is current.
 		if (fileVersion != VersionInfo.applicationSettingsVersion) {
-			
-			// The change between version 4, 5 and 6 is cosmetic, and we can 
-			// just re-save the settings.
-			if (fileVersion == 4 || fileVersion == 5) {
-				
+
+			// The change between version 6 and 7 require an upgrade of the settings file.
+			if (fileVersion == 6) {
+
+				// We update the 
+				AppSettings settings = loadedAppSettings.get(0);
+				String acqStation = settings.getSettingValue("AcquisitionStation");
+				if (acqStation.equals("Generic light microscopes")) {
+					settings.setSettingValue("AcquisitionStation", "Microscopy");
+				} else {
+					settings.setSettingValue("AcquisitionStation", "Flow cytometry");
+				}
+
 				// Save a new file at version.
 				save();
-				
+
 			} else {
 				errorMessage = "The settings file is obsolete.";
 				isFileCurrent = false;
 				return false;
 			}
 		}
-		
+
 		// Set file to be current
 		isFileCurrent = true;
-		
+
 		// Run a validation
 		if (! allSet()) {
 			errorMessage = "File did not pass validation.";
@@ -411,7 +417,7 @@ public class AppSettingsManager {
 
 		// Reset error message
 		errorMessage = "";
-	
+
 		// Return success
 		return true;
 	}
@@ -444,7 +450,7 @@ public class AppSettingsManager {
 
 			// Get all properties for all servers and store them in an XML document
 			for (AppSettings appSettings : listAppSettings) {
-				
+
 				// Get its properties
 			    Map<String, String> currentProperties = 
 			    		appSettings.getAllSettings();
@@ -454,21 +460,21 @@ public class AppSettingsManager {
 
 				// Append all properties as attributes
 				for (Map.Entry<String, String> curr : currentProperties.entrySet() ) {
-					
+
 					// Get the property name and value
 					String propertyName = curr.getKey();
 					String propertyValue = curr.getValue();
-					
+
 					// Store them as attributes of the server element
 					element.setAttribute(propertyName, propertyValue);
-					
+
 				}
 
 				// Append the server element to the document
 				root.appendChild(element);
 
 			}
-			
+
 			// Add the whole tree to the document (by adding the root node)
 			document.appendChild(root);
 
@@ -565,15 +571,15 @@ public class AppSettingsManager {
 	 * folder. It should be used only in code run with admin privileges.
 	 */
 	private boolean createApplicationSettingsDir() {
-		
+
 		// Get the application directory
 		File scuFolder = getSettingsPropertiesDir();
-		
+
 		// Does the folder exist already?
 		if (scuFolder.exists()) {
 			return true;
 		}
-		
+
 		// Try creating it
 	    if (! scuFolder.mkdirs()) {
 	    	errorMessage = "Could not create settings directory.";
@@ -594,12 +600,12 @@ public class AppSettingsManager {
 
 		// Get the common application data folder
 		File applicationDataDir = QueryOS.getOSSpecificAppDataFolder();
-		
+
 		// Append the sub-path common to all platform
         return new File(applicationDataDir +
                 File.separator + "obit" + File.separator + "AnnotationTool");
 	}
-	
+
 	/**
 	 * Returns the properties file name with full path
 	 * @return 	name with full path of the properties files
@@ -637,15 +643,15 @@ public class AppSettingsManager {
 		Document doc = null;
 		try {
 			dBuilder = dbFactory.newDocumentBuilder();
-						
+
 			// Read the file into a String. We need to do this because we MUST
-			// remove any line feeds and blank spaces bewteen XML tags or the
+			// remove any line feeds and blank spaces between XML tags or the
 			// DocumentBuilder will fail parsing the XML content.
 			// DocumentBuilderFactory.setIgnoringElementContentWhitespace(true)
 			// does not seem to help...
 			byte[] b = Files.readAllBytes(Paths.get(getSettingsFileName().toURI()));
 			String xmlString = new String(b, StandardCharsets.UTF_8); 
-			
+
 			// Make sure the String starts with <?xml
 			int indx = xmlString.indexOf("<?xml");
 			if (indx > 0) {
@@ -661,14 +667,14 @@ public class AppSettingsManager {
 
 		    // Also, make sure that there are no spaces between elements
 		    xmlString = xmlString.replaceAll(">\\s*<", "><");
-		    		
+
 		    // Create an input source
 			InputSource is = new InputSource();
 		    is.setCharacterStream(new StringReader(xmlString));
 
 		    // Now parse it
 		    doc = dBuilder.parse(is);
-		    
+
 		} catch (ParserConfigurationException e) {
 			errorMessage = "Error parsing the settings file.";
 			return null;
@@ -680,7 +686,7 @@ public class AppSettingsManager {
 			return null;
 		}
 		doc.getDocumentElement().normalize();
-		
+
 		// Return the document
 		return doc;
 	}

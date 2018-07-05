@@ -900,11 +900,12 @@ public class AnnotationToolAdminDialog extends JDialog {
     private void updateUI() {
     	openBISURLList.setSelectedItem(manager.getActiveServer());
     	acqStationsList.setSelectedItem(manager.getSettingValue("AcquisitionStation"));
+    	acqStationDescription.setText(manager.getAcqStationDescription(manager.getSettingValue("AcquisitionStation")));
     	machineNameText.setText(manager.getSettingValue("HumanFriendlyHostName"));
     	acceptSelfSignedCertsList.setSelectedItem(manager.getSettingValue("AcceptSelfSignedCertificates"));
     	userdirButton.setText(manager.getSettingValue("UserDataDir"));
     	dirButton.setText(manager.getSettingValue("DatamoverIncomingDir"));
-    	
+
     	// Enable/disable buttons
     	toggleDynamicWidgets();
 

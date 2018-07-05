@@ -1,6 +1,6 @@
 package ch.ethz.scu.obit.at.gui.viewers.data;
 
-import ch.ethz.scu.obit.bdfacsdivafcs.gui.viewers.data.BDFACSDIVAFCSViewer;
+import ch.ethz.scu.obit.flow.gui.viewers.data.FlowViewer;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.microscopy.gui.viewers.data.MicroscopyViewer;
 
@@ -23,12 +23,12 @@ public class ViewerFactory {
 		
 		// Return the viewer that fits the "AcquisitionStation"
 		String acqStation = globalSettingsManager.getAcquisitionStation();	
-		if (acqStation.equals("BD Biosciences Cell Analyzers and Sorters")) {
-			metadataViewer = new BDFACSDIVAFCSViewer(globalSettingsManager);
-		} else if (acqStation.equals("Generic light microscopes")) {
+		if (acqStation.equals("Flow cytometry")) {
+			metadataViewer = new FlowViewer(globalSettingsManager);
+		} else if (acqStation.equals("Microscopy")) {
 			metadataViewer = new MicroscopyViewer(globalSettingsManager);
 		} else {
-			System.err.println("Unknown acquisition station! Aborting.");
+			System.err.println("Unknown acquisition station type! Aborting.");
 			System.exit(1);
 		}
 		
