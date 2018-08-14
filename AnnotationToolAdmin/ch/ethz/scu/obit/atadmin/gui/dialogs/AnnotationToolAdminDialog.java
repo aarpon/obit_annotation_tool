@@ -716,7 +716,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		
 		// Add a label for the info text
 		JLabel infoLabel = new JLabel(
-				"<html>It is <u>highly recommended</u> to set " +
+				"<html>It is <b>highly recommended</b> to set " +
 		"both folders on the same file system.</html>");
 		constraints.gridx = 0;
 		constraints.gridy = 15;
