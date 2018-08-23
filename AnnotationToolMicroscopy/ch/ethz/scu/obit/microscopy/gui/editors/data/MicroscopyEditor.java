@@ -536,17 +536,6 @@ public final class MicroscopyEditor extends AbstractEditor {
         areaExpScrollPane.setPreferredSize(new Dimension(400, 50));
         panel.add(areaExpScrollPane, constraints);
 
-		// Create a label for the explanation
-        constraints.insets = new Insets(5, 0, 10, 0);
-        constraints.weightx = 1;
-        constraints.weighty = 0;
-        constraints.gridx = 0;
-        constraints.gridy = gridy++;
-        JLabel labelExpl = new JLabel("If the experiment already exists "
-        		+ "in openBIS, the description will be updated.");
-        labelExpl.setHorizontalAlignment(JLabel.CENTER);
-        panel.add(labelExpl, constraints);
-
         // Create a label for the file
         constraints.insets = new Insets(10, 0, 0, 0);
         constraints.weightx = 1;
