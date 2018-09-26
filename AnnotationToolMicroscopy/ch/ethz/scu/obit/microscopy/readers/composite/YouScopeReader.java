@@ -509,8 +509,7 @@ public class YouScopeReader extends AbstractCompositeMicroscopyReader {
     /**
      * Make sure that all image files are referenced in the csv file.
      *
-     * @param allFiles
-     *            List of all files with full path.
+     * @param currentFolder Full path to the folder to preocess.
      * @return true if all files are referenced, false otherwise.
      */
     private boolean allFilesInTable(File currentFolder) {
