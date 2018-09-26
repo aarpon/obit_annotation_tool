@@ -163,6 +163,7 @@ public class OpenBISProcessor {
                 // the credentials provided were accepted and the user
                 // was successfully logged in.
                 try {
+                    facade = new AtomicReference<IOpenbisServiceFacade>();
                     facade.set(OpenbisServiceFacadeFactory.tryCreate(userName,
                             userPassword, openBISURL, timeout));
                 } catch (UserFailureException e) {
@@ -185,6 +186,7 @@ public class OpenBISProcessor {
                 // Create also an IQueryApiFacade to access the reporting
                 // plugins on the server.
                 try {
+                    queryFacade = new AtomicReference<IQueryApiFacade>();
                     queryFacade.set(FacadeFactory.create(openBISURL,
                             userName, userPassword));
                 } catch (UserFailureException e) {
@@ -277,6 +279,7 @@ public class OpenBISProcessor {
                 userPassword = "";
 
                 // Return false
+                isLoggedIn = false;
                 return false;
 
             } else {
