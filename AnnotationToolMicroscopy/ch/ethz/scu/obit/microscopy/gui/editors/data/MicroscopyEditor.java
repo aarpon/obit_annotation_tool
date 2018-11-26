@@ -387,7 +387,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.gridy = gridy++;
         expTags = new JTextArea("");
         Font f = expTags.getFont();
-        expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
+        expTags.setFont(new Font(f.getFontName(), f.getStyle(), 15));
         expTags.setEditable(false);
 
         // Add a context menu to clear the tags
@@ -510,7 +510,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         expDescription = new JTextArea(
                 metadata.getExperiment().description);
         f = expDescription.getFont();
-        expDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
+        expDescription.setFont(new Font(f.getFontName(), f.getStyle(), 15));
         expDescription.setLineWrap(true);
         expDescription.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -566,7 +566,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.gridy = gridy++;
         fileDescription = new JTextArea("");
         f = fileDescription.getFont();
-        fileDescription.setFont(new Font(f.getFontName(), f.getStyle(), 11));
+        fileDescription.setFont(new Font(f.getFontName(), f.getStyle(), 15));
         fileDescription.setLineWrap(true);
         fileDescription.getDocument().addDocumentListener(new DocumentListener() {
 
