@@ -406,6 +406,36 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     }
 
     /**
+     * Deletes safe-to-remove microscopy-related files. It also
+     * invokes the parent method to delete common safe-to-remove
+     * files like .DS_Store, Thumbs.db, ...
+     * @param file File to be checked.
+     * @return true if the file was recognized as a useless hidden
+     * file and deleted, false if the file is a relevant file to be
+     * processed.
+     */
+    @Override
+    protected boolean deleteIfKnownUselessFile(File file) {
+
+        // Call parent method
+        if (super.deleteIfKnownUselessFile(file) == true) {
+            return true;
+        }
+
+        if (file.isDirectory()) {
+            return false;
+        }
+
+        // Check for microscopy-related files
+        String name = file.getName();
+        if (name.toLowerCase().endsWith(".lifext")) {
+            return file.delete();
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Descriptor that represents a folder containing a dataset.
      *
      * @author Aaron Ponti
