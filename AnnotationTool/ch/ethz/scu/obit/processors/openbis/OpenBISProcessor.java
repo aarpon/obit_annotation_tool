@@ -15,8 +15,10 @@ import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.ethz.scu.obit.at.gui.dialogs.OpenBISLoginDialog;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
+import ch.ethz.sis.openbis.generic.asapi.v3.IApplicationServerApi;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
+import ch.systemsx.cisd.common.spring.HttpInvokerUtils;
 import ch.systemsx.cisd.openbis.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
@@ -43,6 +45,10 @@ public class OpenBISProcessor {
     private String userName = "";
     private String userPassword = "";
     private int timeout = 60000;
+
+    private IApplicationServerApi v3_api;
+    private String v3_sessionToken;
+
     private AtomicReference<IOpenbisServiceFacade> facade =
             new AtomicReference<IOpenbisServiceFacade>();
     private AtomicReference<IQueryApiFacade> queryFacade =
@@ -150,6 +156,40 @@ public class OpenBISProcessor {
             return true;
         }
 
+        // Create a thread for logging in to openBIS using the V3 API
+        Thread v3APILogin = new Thread() {
+
+            @Override
+            public void run() {
+
+                // The V3 API uses a slightly different URL
+                String v3_apiURL = openBISURL  + "/openbis" +
+                        IApplicationServerApi.SERVICE_URL;
+
+                // Log in using V3 API
+                v3_api = HttpInvokerUtils.createServiceStub(
+                        IApplicationServerApi.class, v3_apiURL, timeout);
+
+                // login to obtain a session token
+                try {
+
+                    // Try logging in
+                    v3_sessionToken = v3_api.login(userName, userPassword);
+
+                    // Register a class to log out from openBIS on close or
+                    // runtime shutdwon
+                    Runtime.getRuntime().addShutdownHook(
+                            new V3APILogoutOnShutdown(v3_api, v3_sessionToken));
+
+                } catch (RemoteAccessException e) {
+                    v3_api = null;
+                    v3_sessionToken = "";
+                    reactToRemoteAccessException();
+
+                }
+            }
+        };
+
         // Create a thread for logging in to openBIS and returning an
         // IOpenbisServiceFacade
         Thread serviceFacadeCreator = new Thread() {
@@ -232,6 +272,9 @@ public class OpenBISProcessor {
         // Try logging in with current credentials
         try {
 
+            // Log in using the V3 API
+            v3APILogin.start();
+
             // Create an IOpenbisServiceFacade in one thread to query
             // openBIS for projects, experiments and samples.
             serviceFacadeCreator.start();
@@ -244,6 +287,7 @@ public class OpenBISProcessor {
             infoServiceCreator.start();
 
             // Wait for all threads to finish
+            v3APILogin.join();
             serviceFacadeCreator.join();
             queryFacadeCreator.join();
             infoServiceCreator.join();
@@ -553,6 +597,30 @@ public class OpenBISProcessor {
         loginErrorTitle.set("Thread interrupted");
         loginErrorRecoverable.set(false);
         Thread.currentThread().interrupt();
+    }
+
+    // Add a class that extends thread that is to be called when program is exiting
+    public class V3APILogoutOnShutdown extends Thread {
+
+        IApplicationServerApi v3_api = null;
+        String v3_sessionToken = "";
+
+        public V3APILogoutOnShutdown(IApplicationServerApi v3_api, String v3_sessionToken) {
+            this.v3_api = v3_api;
+            this.v3_sessionToken = v3_sessionToken;
+        }
+
+        @Override
+        public void run() {
+            if (v3_api != null) {
+                try {
+                    System.out.println("Logging out from openBIS (v3 API)...");
+                    v3_api.logout(v3_sessionToken);
+                } catch (Exception e) {
+                    // Do nothing
+                }
+            }
+        }
     }
 
 }
