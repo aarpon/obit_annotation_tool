@@ -616,8 +616,10 @@ public class OpenBISProcessor {
                 try {
                     System.out.println("Logging out from openBIS (v3 API)...");
                     v3_api.logout(v3_sessionToken);
+                } catch (UserFailureException e) {
+                    System.out.println("Could not log oug from openBIS: invalid session token.");
                 } catch (Exception e) {
-                    // Do nothing
+                    System.out.println("Could not log oug from openBIS: " + e.getMessage());
                 }
             }
         }
