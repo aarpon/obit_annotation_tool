@@ -1,6 +1,6 @@
 package ch.ethz.scu.obit.at.gui.viewers.openbis.model;
 
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 
 /**
  * A Custom Space TreeNode
@@ -9,70 +9,72 @@ import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRo
  */
 public class OpenBISSpaceNode extends AbstractOpenBISNode {
 
-	private static final long serialVersionUID = 1L;
-	
-	private SpaceWithProjectsAndRoleAssignments s;
-	
-	/**
-	 * Constructor 
-	 * @param s SpaceWithProjectsAndRoleAssignments object
-	 */
-	public OpenBISSpaceNode(SpaceWithProjectsAndRoleAssignments s) {
-		super(s);
-		this.s = s;
-	}
-	
-	/**
-	 * Returns the type of the node
-	 * @return Type of the node
-	 */		
-	@Override
-	public String getType() { return "Space"; }
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * String representation of the node
-	 * @return String representation of the node
-	 */		
-	@Override
-	public String toString() { return s.getCode(); }
+    private Space s;
 
-	/**
-	 * Space code
-	 * @return Space code
-	 */			
-	@Override
-	public String getCode() { return s.getCode(); }
-	
-	/**
-	 * Space identifier
-	 * @return Space identifier
-	 */			
-	@Override
-	public String getIdentifier() { return s.getCode(); }
+    /**
+     * Constructor
+     * @param s SpaceWithProjectsAndRoleAssignments object
+     */
+    public OpenBISSpaceNode(Space s) {
+        super(s);
+        this.s = s;
+    }
 
-	/**
-	 * Get the icon to be displayed in the JTree
-	 * @return the icon to be displayed in the JTree
-	 */	
-	public javax.swing.Icon getIcon() {
-		return new javax.swing.ImageIcon(
-				getClass().getResource("icons/space.png"));
-	}
-	
-	/**
-	 * Get the tooltip to be displayed when the user places the mouse 
-	 * over the Node in the JTree
-	 * @return the tooltip to be displayed over the Node
-	 */	
-	public String getTooltip() { return "openBIS space"; }
+    /**
+     * Returns the type of the node
+     * @return Type of the node
+     */
+    @Override
+    public String getType() { return "Space"; }
 
-	/**
-	 * Space has children and is therefore not a leaf
-	 * @return false
-	 */
-	@Override
-	public boolean isLeaf() {
-		return false;
-	}
-	
+    /**
+     * String representation of the node
+     * @return String representation of the node
+     */
+    @Override
+    public String toString() { return s.getCode(); }
+
+    /**
+     * Space code
+     * @return Space code
+     */
+    @Override
+    public String getCode() { return s.getCode(); }
+
+    /**
+     * Space identifier
+     * @return Space identifier
+     */
+    @Override
+    public String getIdentifier() { return s.getCode(); }
+
+    /**
+     * Get the icon to be displayed in the JTree
+     * @return the icon to be displayed in the JTree
+     */
+    @Override
+    public javax.swing.Icon getIcon() {
+        return new javax.swing.ImageIcon(
+                getClass().getResource("icons/space.png"));
+    }
+
+    /**
+     * Get the tooltip to be displayed when the user places the mouse
+     * over the Node in the JTree
+     * @return the tooltip to be displayed over the Node
+     */
+    @Override
+    public String getTooltip() { return "openBIS space"; }
+
+    /**
+     * Space has children and is therefore not a leaf
+     * @return false
+     */
+    @Override
+    public boolean isLeaf() {
+        return false;
+    }
+
 }

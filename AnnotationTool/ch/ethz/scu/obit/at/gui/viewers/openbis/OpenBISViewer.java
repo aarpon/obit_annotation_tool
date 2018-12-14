@@ -50,10 +50,12 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 /**
@@ -280,9 +282,9 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         setTagList(metaprojects);
 
         // Get spaces
-        List<SpaceWithProjectsAndRoleAssignments> spaces =
-                openBISProcessor.getSpaces();
-        if (spaces.isEmpty()) {
+        SearchResult<Space> spaces =
+                openBISProcessor.getSpacesWithProjectsAndSelectedExperiments();
+        if (spaces.getTotalCount() == 0) {
             JOptionPane.showMessageDialog(this.panel,
                     "Sorry, there are no (accessible) spaces.\n\n" +
                             "Please ask your administrator to create a " +
@@ -297,7 +299,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // Keep a count of the usable projects
         int nProjects = 0;
 
-        for (SpaceWithProjectsAndRoleAssignments s : spaces) {
+        for (Space s : spaces.getObjects()) {
 
             // Add the space
             space = new OpenBISSpaceNode(s);
@@ -305,6 +307,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // Get the projects for current space
             List<Project> projects = s.getProjects();
+
+            // Drop projects of type "COMMON_ORGANIZATION_UNITS"
+            projects.removeIf(p -> p.getCode().equals("COMMON_ORGANIZATION_UNITS"));
+
             projects.sort(new Comparator<Project>() {
 
                 @Override
@@ -438,14 +444,14 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // If we have a Project, we load the contained Experiments
             Project p = (Project) obj;
-            List<String> expId = new ArrayList<String>();
-            expId.add(p.getIdentifier());
+            List<String> projId = new ArrayList<String>();
+            projId.add(p.getIdentifier().toString());
 
             // Then define and start the worker
             class Worker extends SwingWorker<List<Experiment>, Void> {
 
                 final private OpenBISProcessor o;
-                final private List<String> eId;
+                final private List<String> pId;
                 final private AbstractOpenBISNode n;
                 final private Project p;
 
@@ -456,10 +462,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                  * @param n Node to which to add the Experiment nodes.
                  * @param p Project reference.
                  */
-                public Worker(OpenBISProcessor o, List<String> eId,
+                public Worker(OpenBISProcessor o, List<String> pId,
                         AbstractOpenBISNode n, Project p) {
                     this.o = o;
-                    this.eId = eId;
+                    this.pId = pId;
                     this.n = n;
                     this.p = p;
                 }
@@ -467,7 +473,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 @Override
                 public List<Experiment> doInBackground() {
 
-                    return (o.getExperimentsForProjects(eId));
+                    return (o.getExperimentsForProjects(p));
 
                 }
 
@@ -503,14 +509,14 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             };
 
             // Run the worker!
-            (new Worker(openBISProcessor, expId, node, p)).execute();
+            (new Worker(openBISProcessor, projId, node, p)).execute();
 
         } else if (className.equals("Experiment")) {
 
             // If we have an Experiment, we load the contained Samples
             Experiment e = (Experiment) obj;
             List<String> experimentId = new ArrayList<String>();
-            experimentId.add(e.getIdentifier());
+            experimentId.add(e.getIdentifier().toString());
 
             // To be restored -- and extended -- in the future.
 
@@ -726,9 +732,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         }
 
         // Get the space object from the openBIS node
-        SpaceWithProjectsAndRoleAssignments space =
-                (SpaceWithProjectsAndRoleAssignments)
-                node.getUserObject();
+        Space space = (Space) node.getUserObject();
 
         // Ask the user to specify a project name
         String projectCode = JOptionPane.showInputDialog(
@@ -738,10 +742,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             return false;
         }
 
-        // Call the ingestion server and collect the output
-        QueryTableModel tableModel;
+        // Create the project
+        List<ProjectPermId> createdProjects;
         try {
-            tableModel = openBISProcessor.createProject(
+            createdProjects = openBISProcessor.createProject(
                     space.getCode(), projectCode);
         } catch (Exception e) {
             outputPane.err("Could not create project /" + space.getCode() +
@@ -750,20 +754,20 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             return false;
         }
 
-        // Display the output
-        String success= "";
-        String message = "";
-        List<Serializable[]> rows = tableModel.getRows();
-        for (Serializable[] row : rows) {
-            success = (String)row[0];
-            message = (String)row[1];
-            if (success.equals("true")) {
-                outputPane.log(message);
-                return true;
-            }
+        // One more check
+        if (createdProjects.size() == 0) {
+            outputPane.err("Could not create project /" + space.getCode() +
+                    "/" + projectCode + "! Please contact your "
+                    + "openBIS administrator!");
+            return false;
         }
-        outputPane.err(message);
-        return false;
+
+        // Inform
+        outputPane.log("Project /" + space.getCode() +
+                "/" + projectCode + " created successfully.");
+
+        // Return success
+        return true;
     }
 
     /**

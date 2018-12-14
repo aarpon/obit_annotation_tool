@@ -16,6 +16,17 @@ import org.springframework.remoting.RemoteConnectFailureException;
 import ch.ethz.scu.obit.at.gui.dialogs.OpenBISLoginDialog;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.sis.openbis.generic.asapi.v3.IApplicationServerApi;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.fetchoptions.ExperimentFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.create.ProjectCreation;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.fetchoptions.ProjectFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.fetchoptions.SpaceFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.id.SpacePermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.search.SpaceSearchCriteria;
 import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
 import ch.systemsx.cisd.common.spring.HttpInvokerUtils;
@@ -23,7 +34,7 @@ import ch.systemsx.cisd.openbis.common.api.client.ServiceFinder;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
 import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.IGeneralInformationService;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
+//import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
 import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Metaproject;
@@ -180,6 +191,7 @@ public class OpenBISProcessor {
                     // runtime shutdwon
                     Runtime.getRuntime().addShutdownHook(
                             new V3APILogoutOnShutdown(v3_api, v3_sessionToken));
+
 
                 } catch (RemoteAccessException e) {
                     v3_api = null;
@@ -344,9 +356,10 @@ public class OpenBISProcessor {
      * @throws RemoteAccessException If remote access failed.
      */
     public boolean logout() throws RemoteAccessException {
-        if (facade.get() != null && isLoggedIn && queryFacade.get() != null) {
+        if (facade.get() != null && isLoggedIn && queryFacade.get() != null && v3_api != null) {
             facade.get().logout();
             queryFacade.get().logout();
+            v3_api.logout(v3_sessionToken);
             isLoggedIn = false;
             return true;
         }
@@ -398,27 +411,85 @@ public class OpenBISProcessor {
     }
 
     /**
+     * Returns the list of Spaces in openBIS (as visible for current user).
+     * @return list of Spaces.
+     */
+    public SearchResult<Space> getSpacesWithProjectsAndSelectedExperiments() {
+        if (v3_api == null) {
+            return new SearchResult<Space>(new ArrayList<Space>(), 0);
+        }
+
+        // Space
+        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
+        searchCriteria.withCode();
+        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
+        spaceFetchOptions.sortBy().code();
+
+        ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
+
+
+        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+        projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
+
+        spaceFetchOptions.withProjectsUsing(projectFetchOptions);
+
+        SearchResult<Space> spaces = v3_api.searchSpaces(v3_sessionToken,
+                searchCriteria, spaceFetchOptions);
+
+
+        //        spaces.sort(new Comparator<Map<ISpaceId, Space>>() {
+        //
+        //            @Override
+        //            public int compare(Map<ISpaceId, Space> s1,
+        //                    Map<ISpaceId, Space> s2) {
+        //                // First key-value pair
+        //                Set<ISpaceId> ks1 = s1.keySet();
+        //                Set<ISpaceId> ks2 = s2.keySet();
+        //
+        //                return 1;
+        //                //return s1.get(s1.getCode().compareTo(s2.getCode());
+        //            }
+        //        });
+        return spaces;
+    }
+
+    /**
      * Returns the list of Experiment for a project list (as visible for
      * current user).
      * @param expId List of experiment ids.
      * @return list of Experiments.
      */
-    public ArrayList<Experiment> getExperimentsForProjects(
-            List<String> expId) {
-        if (facade.get() == null) {
+    public List<Experiment> getExperimentsForProjects(Project p) {
+        if (v3_api == null) {
             return new ArrayList<Experiment>();
         }
-        ArrayList<Experiment> exp = (ArrayList<Experiment>)
-                facade.get().listExperimentsForProjects(expId);
-        exp.sort(new Comparator<Experiment>() {
 
-            @Override
-            public int compare(Experiment e1, Experiment e2) {
-                return e1.getCode().compareTo(e2.getCode());
-            }
-        });
-        return (ArrayList<Experiment>)
-                facade.get().listExperimentsForProjects(expId);
+        // We need to retrieve the project again with a
+        // an explicit request to retrieve the experiments
+        //        List<ProjectIdentifier> projId = new ArrayList<ProjectIdentifier>();
+        //        projId.add(p.getIdentifier());
+        //        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+        //        projectFetchOptions.withExperiments();
+        //        Map<IProjectId, Project> projects = v3_api.getProjects(v3_sessionToken, projId, projectFetchOptions);
+        //        Project retrievedProject = projects.get(projId.get(0));
+        List<Experiment> exp = p.getExperiments();
+
+        if (globalSettingsManager.getAcquisitionStation().equals("Microscopy")) {
+
+            // Keep MICROSCOPY_EXPERIMENTS_COLLECTION only
+            exp.removeIf(e -> ! e.getCode().equals("MICROSCOPY_EXPERIMENTS_COLLECTION"));
+
+        } else if (globalSettingsManager.getAcquisitionStation().equals("Flow")) {
+
+            // Keep FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION only
+            exp.removeIf(e -> ! e.getCode().equals("MICROSCOPY_FLOW_CYTOMETRY_COLLECTION"));
+
+        } else {
+
+            // Keep everything
+        }
+
+        return exp;
     }
 
 
@@ -502,18 +573,30 @@ public class OpenBISProcessor {
      *  }
 	 #  </pre>
      */
-    public QueryTableModel createProject(String spaceCode, String projectCode) {
+    public List<ProjectPermId> createProject(String spaceCode, String projectCode) {
 
-        // Set the parameters
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("spaceCode", spaceCode.toUpperCase());
-        parameters.put("projectCode", projectCode.toUpperCase());
+        // Create a project with given space and project codes
+        ProjectCreation projectCreation = new ProjectCreation();
+        projectCreation.setCode(projectCode);
+        projectCreation.setSpaceId(new SpacePermId(spaceCode));
 
-        QueryTableModel tableModel =
-                queryFacade.get().createReportFromAggregationService(
-                        createProjectService, parameters);
+        // Create the project
+        List<ProjectCreation> projectCreationList = new ArrayList<ProjectCreation>();
+        projectCreationList.add(projectCreation);
 
-        return tableModel;
+        List<ProjectPermId> createdProjects = v3_api.createProjects(v3_sessionToken, projectCreationList);
+        return createdProjects;
+
+        //        // Set the parameters
+        //        Map<String, Object> parameters = new HashMap<String, Object>();
+        //        parameters.put("spaceCode", spaceCode.toUpperCase());
+        //        parameters.put("projectCode", projectCode.toUpperCase());
+        //
+        //        QueryTableModel tableModel =
+        //                queryFacade.get().createReportFromAggregationService(
+        //                        createProjectService, parameters);
+        //
+        //        return tableModel;
     }
 
     /**
