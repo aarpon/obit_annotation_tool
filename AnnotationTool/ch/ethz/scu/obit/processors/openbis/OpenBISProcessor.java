@@ -456,7 +456,7 @@ public class OpenBISProcessor {
     /**
      * Returns the list of Experiment for a project list (as visible for
      * current user).
-     * @param expId List of experiment ids.
+     * @param p Project to the queried for experiments.
      * @return list of Experiments.
      */
     public List<Experiment> getExperimentsForProjects(Project p) {
