@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -54,9 +53,8 @@ import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -68,8 +66,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     protected JPanel panel;
     protected JButton scanButton;
-    protected JLabel userTags;
-    protected JList<String> tagList;
+    protected JList<String> userTagList;
+    protected JList<String> sharedTagList;
 
     private GlobalSettingsManager globalSettingsManager;
     private OpenBISProcessor openBISProcessor;
@@ -134,7 +132,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Create a splitpane
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                openBISViewerPanel(), tagsPanel());
+                openBISViewerPanel(), tagsPanels());
         splitPane.setResizeWeight(0.75);
         splitPane.setBorder(null);
 
@@ -259,7 +257,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Check that the session is still open (we just check the
         // facade, the queryFacade is not necessary
-        if (!openBISProcessor.checkSession()) {
+        if (!openBISProcessor.isLoggedIn()) {
             JOptionPane.showMessageDialog(this.panel,
                     "The openBIS session is no longer valid!\n" +
                             "Please try logging in again.",
@@ -283,7 +281,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Get spaces
         SearchResult<Space> spaces =
-                openBISProcessor.getSpacesWithProjectsAndSelectedExperiments();
+                openBISProcessor.getSpacesWithProjectsAndExperiments();
         if (spaces.getTotalCount() == 0) {
             JOptionPane.showMessageDialog(this.panel,
                     "Sorry, there are no (accessible) spaces.\n\n" +
@@ -560,7 +558,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 @Override
                 public List<Sample> doInBackground() {
 
-                    return (o.getSamplesForExperiments(eId));
+                    return (o.getSamplesForExperiments(this.e));
 
                 }
 
@@ -723,7 +721,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private boolean createNewProject(final OpenBISSpaceNode node) {
 
         // Retrieve and store the createProject service
-        if (!openBISProcessor.retrieveAndStoreServices()) {
+        if (!openBISProcessor.isLoggedIn()) {
 
             // TODO Throw an exception to distinguish the case where
             // the project could not be created.
@@ -749,8 +747,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                     space.getCode(), projectCode);
         } catch (Exception e) {
             outputPane.err("Could not create project /" + space.getCode() +
-                    "/" + projectCode + "! Please contact your "
-                    + "openBIS administrator!");
+                    "/" + projectCode + "! " + e.getMessage());
             return false;
         }
 
@@ -778,7 +775,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private boolean createNewMetaProject() {
 
         // Retrieve and store the createProject service
-        if (!openBISProcessor.retrieveAndStoreServices()) {
+        if (!openBISProcessor.isLoggedIn()) {
 
             // TODO Throw an exception to distinguish the case where
             // the project could not be created.
@@ -826,37 +823,22 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             return false;
         }
 
-        // Call the ingestion server and collect the output
-        QueryTableModel tableModel;
-        try {
-            tableModel = openBISProcessor.createMetaProject(metaprojectCode,
-                    metaprojectDescr);
-        } catch (Exception e) {
-            outputPane.err("Could not create tag /" + metaprojectCode +
-                    "! Please contact your openBIS administrator!");
+        // @TODO: This is currently disabled
+
+        boolean success = openBISProcessor.createMetaProject(metaprojectCode,
+                metaprojectDescr);
+
+        if (success) {
+            // Retrieve the updated metaproject list
+            // and update the view
+            outputPane.log("Successfully created tag " + metaprojectCode + ".");
+            clearTagList();
+            setTagList(openBISProcessor.getMetaprojects());
+            return true;
+        } else {
+            outputPane.err("Could not create tag " + metaprojectCode + "!");
             return false;
         }
-
-        // Display the output
-        String success= "";
-        String message = "";
-        List<Serializable[]> rows = tableModel.getRows();
-        for (Serializable[] row : rows) {
-            success = (String)row[0];
-            message = (String)row[1];
-            if (success.equals("true")) {
-                outputPane.log(message);
-
-                // Now retrieve the updated metaproject list
-                // and update the view
-                clearTagList();
-                setTagList(openBISProcessor.getMetaprojects());
-
-                return true;
-            }
-        }
-        outputPane.err(message);
-        return false;
     }
 
     /**
@@ -872,7 +854,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
      * Clear the list of tags in the UI.
      */
     private void clearTagList() {
-        tagList.setModel(new DefaultListModel<String>());
+        userTagList.setModel(new DefaultListModel<String>());
     }
 
     /**
@@ -883,7 +865,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private void setTagList(List<String> metaprojects) {
         clearTagList();
         DefaultListModel<String> listModel =
-                (DefaultListModel<String>) tagList.getModel();
+                (DefaultListModel<String>) userTagList.getModel();
         for (String s : metaprojects) {
             listModel.addElement(s);
         }
@@ -971,7 +953,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         return openBISViewerPanel;
     }
 
-    private JPanel tagsPanel() {
+    private JPanel tagsPanels() {
 
         // Create a panel
         JPanel tagsPanel = new JPanel();
@@ -984,9 +966,14 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.fill = GridBagConstraints.BOTH;
 
+        /*
+         *
+         * PERSONAL TAGS
+         *
+         */
+
         // Add a simple label
-        userTags = new JLabel("<html><b>Tags</b></html>");
-        //userTags.setVerticalAlignment(SwingConstants.TOP);
+        JLabel userTags = new JLabel("<html><b>Personal tags</b></html>");
 
         // Add to the layout
         constraints.gridx = 0;
@@ -1007,8 +994,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         tagsPanel.add(new JLabel(""), constraints);
 
         // Add a push button
-        JButton addTagButton = new JButton("Create new tag...");
-        addTagButton.addActionListener(new ActionListener() {
+        JButton addUserTagButton = new JButton("Create new personal tag...");
+        addUserTagButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1021,15 +1008,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.weighty = 0.0;
         constraints.gridwidth = 1;
         constraints.insets = new Insets(5, 0, 0, 0);
-        tagsPanel.add(addTagButton, constraints);
+        tagsPanel.add(addUserTagButton, constraints);
 
         // Add the list of tags
-        tagList = new JList<String>(new DefaultListModel<String>());
-        tagList.setVisibleRowCount(5);
-        tagList.getSelectionModel().setSelectionMode(
+        userTagList = new JList<String>(new DefaultListModel<String>());
+        userTagList.setVisibleRowCount(5);
+        userTagList.getSelectionModel().setSelectionMode(
                 ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        tagList.setDragEnabled(true);
-        JScrollPane tagScrollPane = new JScrollPane(tagList);
+        userTagList.setDragEnabled(true);
+        JScrollPane userTagScrollPane = new JScrollPane(userTagList);
 
         // Add to the layout
         constraints.gridx = 0;
@@ -1037,9 +1024,69 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         constraints.gridwidth = 3;
-        //constraints.gridheight = 1;
         constraints.insets = new Insets(5, 5, 5, 0);
-        tagsPanel.add(tagScrollPane, constraints);
+        tagsPanel.add(userTagScrollPane, constraints);
+
+        /*
+         *
+         * SHARED TAGS
+         *
+         */
+
+        // Add a simple label
+        JLabel sharedTags = new JLabel("<html><b>Shared tags</b></html>");
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.weightx = 0.0;
+        constraints.weighty = 0.0;
+        constraints.gridwidth = 1;
+        constraints.insets = new Insets(5, 0, 0, 5);
+        tagsPanel.add(sharedTags, constraints);
+
+        // Add a spacer
+        constraints.gridx = 1;
+        constraints.gridy = 2;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.gridwidth = 1;
+        constraints.insets = new Insets(5, 0, 0, 0);
+        tagsPanel.add(new JLabel(""), constraints);
+
+        // Add a push button
+        JButton addSharedTagButton = new JButton("Create new shared tag...");
+        addSharedTagButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createNewMetaProject();
+            }
+        });
+        constraints.gridx = 2;
+        constraints.gridy = 2;
+        constraints.weightx = 0.0;
+        constraints.weighty = 0.0;
+        constraints.gridwidth = 1;
+        constraints.insets = new Insets(5, 0, 0, 0);
+        tagsPanel.add(addSharedTagButton, constraints);
+
+        // Add the list of tags
+        sharedTagList = new JList<String>(new DefaultListModel<String>());
+        sharedTagList.setVisibleRowCount(5);
+        sharedTagList.getSelectionModel().setSelectionMode(
+                ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        sharedTagList.setDragEnabled(true);
+        JScrollPane sharedTagScrollPane = new JScrollPane(sharedTagList);
+
+        // Add to the layout
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 3;
+        constraints.insets = new Insets(5, 5, 5, 0);
+        tagsPanel.add(sharedTagScrollPane, constraints);
 
         return tagsPanel;
     }
