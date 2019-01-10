@@ -39,17 +39,21 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
+import ch.ethz.scu.obit.at.gui.viewers.data.model.CollectionNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.view.DataViewerTree;
 import ch.ethz.scu.obit.at.gui.viewers.data.view.DataViewerTreeToXML;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
+import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyCompositeFileNode;
+import ch.ethz.scu.obit.microscopy.gui.viewers.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
 
@@ -299,6 +303,26 @@ implements ActionListener, TreeSelectionListener {
 
                 // Listen for when the selection changes.
                 tree.addTreeSelectionListener(ref);
+
+                // Add a context menu
+                tree.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if (QueryOS.isWindows()) {
+                            return;
+                        }
+                        setListenerOnJTree(e);
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        if (QueryOS.isMac()) {
+                            return;
+                        }
+                        setListenerOnJTree(e);
+                    }
+                });
 
                 // Clear the metadata table
                 clearMetadataTable();
@@ -836,10 +860,153 @@ implements ActionListener, TreeSelectionListener {
 
 
     /**
-     * Sets a mouse event listener on the JTable
+     * Create a popup menu with actions for the "All experiments" collection node.
+     * @param node Collection node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createCollectionNodePopup(final CollectionNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Set target project to all experiments
+        JMenuItem targetProjectMenuItem = new JMenuItem("Set target project");
+        targetProjectMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(targetProjectMenuItem);
+
+        // Add tags
+        JMenuItem addTagsMenuItem = new JMenuItem("Add tags");
+        addTagsMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(addTagsMenuItem);
+
+        return popup;
+    }
+
+    /**
+     * Create a popup menu with actions for the Experiment nodes.
+     * @param node Experiment node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createExperimentNodePopup(final ExperimentNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Set target project to all experiments
+        JMenuItem targetProjectMenuItem = new JMenuItem("Set target project");
+        targetProjectMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(targetProjectMenuItem);
+
+        // Add tags
+        JMenuItem addTagsMenuItem = new JMenuItem("Add tags");
+        addTagsMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(addTagsMenuItem);
+
+        // Set description
+        JMenuItem setDescriptionMenuItem = new JMenuItem("Set description");
+        setDescriptionMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(setDescriptionMenuItem);
+
+        return popup;
+    }
+
+    /**
+     * Create a popup menu with actions for the MicroscopyFile nodes.
+     * @param node MicroscopyFile node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createMicroscopyFilePopup(final MicroscopyFileNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Set description
+        JMenuItem setDescriptionMenuItem = new JMenuItem("Set description");
+        setDescriptionMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(setDescriptionMenuItem);
+
+        return popup;
+    }
+
+    /**
+     * Create a popup menu with actions for the MicroscopyCompositeFile nodes.
+     * @param node MicroscopyCompositeFile node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createMicroscopyCompositeFilePopup(final MicroscopyCompositeFileNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Set description
+        JMenuItem setDescriptionMenuItem = new JMenuItem("Set description");
+        setDescriptionMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+        popup.add(setDescriptionMenuItem);
+
+        return popup;
+    }
+
+    /**
+     * Sets a mouse event listener on the invalid datasets JTable
      * @param e Mouse event
      */
-    private void setListenerOnJTable(MouseEvent e) {
+    private void setListenerOnInvalidDatasetsJTable(MouseEvent e) {
         invalidDataset = null;
         int r = invalidDatasetsTable.rowAtPoint(e.getPoint());
         if (r >= 0 && r < invalidDatasetsTable.getRowCount()) {
@@ -1025,7 +1192,7 @@ implements ActionListener, TreeSelectionListener {
                 if (QueryOS.isWindows()) {
                     return;
                 }
-                setListenerOnJTable(e);
+                setListenerOnInvalidDatasetsJTable(e);
             }
 
             @Override
@@ -1033,7 +1200,7 @@ implements ActionListener, TreeSelectionListener {
                 if (QueryOS.isMac()) {
                     return;
                 }
-                setListenerOnJTable(e);
+                setListenerOnInvalidDatasetsJTable(e);
             }
         });
 
@@ -1048,4 +1215,53 @@ implements ActionListener, TreeSelectionListener {
 
         return invalidDatasetsPanel;
     }
+
+    /**
+     * Sets a mouse event listener on the JTree
+     * @param e Mouse event
+     */
+    private void setListenerOnJTree(MouseEvent e) {
+
+        if (e.isPopupTrigger() &&
+                e.getComponent() instanceof DataViewerTree) {
+
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+
+            // Get selected node
+            TreePath p = tree.getPathForLocation(x, y);
+            if (p == null) {
+                // There is nothing usable at that location
+                return;
+            }
+            AbstractNode node =
+                    (AbstractNode) p.getLastPathComponent();
+
+            // Type of node
+            String nodeType = node.getClass().getSimpleName();
+
+            // Add relevant context menu
+            if (nodeType.equals("CollectionNode")) {
+                JPopupMenu popup =
+                        createCollectionNodePopup((CollectionNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else if (nodeType.equals("ExperimentNode")) {
+                JPopupMenu popup =
+                        createExperimentNodePopup((ExperimentNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else if (nodeType.equals("MicroscopyFileNode")) {
+                JPopupMenu popup =
+                        createMicroscopyFilePopup((MicroscopyFileNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else if (nodeType.equals("MicroscopyCompositeFileNode")) {
+                JPopupMenu popup =
+                        createMicroscopyCompositeFilePopup((MicroscopyCompositeFileNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else {
+                // Nothing to do.
+            }
+        }
+    }
+
 }

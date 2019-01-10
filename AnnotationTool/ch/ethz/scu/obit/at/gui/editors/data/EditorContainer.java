@@ -27,193 +27,194 @@ import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
  */
 public class EditorContainer extends JPanel implements ActionListener, Observer {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private AbstractEditor metadataEditor;
-	private JButton sendToOpenBISButton;
+    private AbstractEditor metadataEditor;
+    private JButton sendToOpenBISButton;
 
-	protected AbstractViewer dataViewer;
-	protected OpenBISViewer openBISViewer;
-	protected OutputPane outputPane;
-	protected GlobalSettingsManager globalSettingsManager;
+    protected AbstractViewer dataViewer;
+    protected OpenBISViewer openBISViewer;
+    protected OutputPane outputPane;
+    protected GlobalSettingsManager globalSettingsManager;
 
-	/**
-	 * Constructor
-	 * @param dataViewer The (specialized) data viewer.
-	 * @param openBISViewer The openBIS viewer.
-	 * @param outputPane The output pane.
-	 * @param globalSettingsManager The global settings manager.
-	 */
-	public EditorContainer(AbstractViewer dataViewer, 
-			OpenBISViewer openBISViewer, OutputPane outputPane,
-			GlobalSettingsManager globalSettingsManager) {
-		
-		// Store the references
-		this.dataViewer = dataViewer;
-		this.openBISViewer = openBISViewer;
-		this.outputPane = outputPane;
-		this.globalSettingsManager = globalSettingsManager;
-		
-		// Create a GridBagLayout
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		setLayout(gridBagLayout);
+    /**
+     * Constructor
+     * @param dataViewer The (specialized) data viewer.
+     * @param openBISViewer The openBIS viewer.
+     * @param outputPane The output pane.
+     * @param globalSettingsManager The global settings manager.
+     */
+    public EditorContainer(AbstractViewer dataViewer,
+            OpenBISViewer openBISViewer, OutputPane outputPane,
+            GlobalSettingsManager globalSettingsManager) {
 
-		// Common constraints
-		GridBagConstraints constraints = new GridBagConstraints();
-		
-		// Add a title JLabel
-		JLabel title = new JLabel("<html><b>Data editor</b></html>");
+        // Store the references
+        this.dataViewer = dataViewer;
+        this.openBISViewer = openBISViewer;
+        this.outputPane = outputPane;
+        this.globalSettingsManager = globalSettingsManager;
 
-		// Add the tree viewer to the layout
-		constraints.anchor = GridBagConstraints.NORTHWEST;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.insets = new Insets(0, 0, 5, 0);
-		add(title, constraints);
+        // Create a GridBagLayout
+        GridBagLayout gridBagLayout = new GridBagLayout();
+        setLayout(gridBagLayout);
 
-		// Add the editor
-		metadataEditor = EditorFactory.createEditor(globalSettingsManager, dataViewer, openBISViewer);
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.weightx = 1.0;
-		constraints.weighty = 1.0;
-		constraints.insets = new Insets(5, 0, 5, 0);
-		add(metadataEditor.getPanel(), constraints);
-		
-		// Add a "Send to openBIS" button
-		sendToOpenBISButton = new JButton("Send to openBIS");
-		constraints.gridx = 0;
-		constraints.gridy = 2;
-		constraints.weightx = 1.0;
-		constraints.weighty = 0.0;
-		constraints.insets = new Insets(5, 0, 5, 0);
-		sendToOpenBISButton.addActionListener(this);
-		add(sendToOpenBISButton, constraints);
-		
-		// Set the preferred and minimum size
-		this.setMinimumSize(new Dimension(400, 500));
-		this.setPreferredSize(new Dimension(400, 700));
-		
+        // Common constraints
+        GridBagConstraints constraints = new GridBagConstraints();
 
-	}
+        // Add a title JLabel
+        JLabel title = new JLabel("<html><b>Data editor</b></html>");
 
-	/**
-	 * ActionPerformed method from the ActionListener interface
-	 * @param e The ActionEvent object
-	 */
-	public void actionPerformed(ActionEvent e) {
-		
-		if (e.getSource() == sendToOpenBISButton) {
-			
-			// Make sure all models are ready
-			if (!dataViewer.isReady() || !openBISViewer.isReady()) {
-				outputPane.warn("Data is not ready to be sent to openBIS!");
-				return;
-			}
+        // Add the tree viewer to the layout
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.insets = new Insets(0, 0, 5, 0);
+        add(title, constraints);
 
-			// Update the data model with the openBIS and user attributes
-			if (!metadataEditor.updateDataModel()) {
-				outputPane.warn("No new datasets ready for upload!");
-				return;
-			}
+        // Add the editor
+        metadataEditor = EditorFactory.createEditor(globalSettingsManager, dataViewer, openBISViewer);
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.insets = new Insets(5, 0, 5, 0);
+        add(metadataEditor.getPanel(), constraints);
 
-			// Get the output directory
-			String outputDirectory = globalSettingsManager.getUserDataRootDir();
+        // Add a "Send to openBIS" button
+        sendToOpenBISButton = new JButton("Send to openBIS");
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
+        constraints.insets = new Insets(5, 0, 5, 0);
+        sendToOpenBISButton.addActionListener(this);
+        add(sendToOpenBISButton, constraints);
 
-			// Save to XML (*_properties.oix)
-			if (dataViewer.saveToXML(outputDirectory)) {
-				outputPane.log("Annotations successfully written.");
-			} else {
-				outputPane.err("Could not write annotations! " +
-					"Sending data to openBIS failed!");
-				return;
-			}
+        // Set the preferred and minimum size
+        this.setMinimumSize(new Dimension(400, 500));
+        this.setPreferredSize(new Dimension(400, 700));
 
-			// Save the data structure file (data_structure.ois)
-			if (dataViewer.saveDataStructureMap(
-					outputDirectory + File.separator +
-					openBISViewer.getUserName())) {
-				outputPane.log("Data structure map successfully written.");
-			} else {
-				outputPane.err("Could not data structure map! " +
-					"Sending data to openBIS failed!");
-				return;
-			}
 
-			// Now move the user folder to the datamover incoming folder
-			new ATDataMover(globalSettingsManager, openBISViewer.getUserName()).move();
-			outputPane.log("Data transferred.");
-			
-			// Re-scan
-			dataViewer.scan();
-		}
     }
-	
-	/**
-	 * Return a reference to the contained editor
-	 * @return a reference to the editor
-	 */
-	public AbstractEditor getEditor() {
-		return metadataEditor;
-	}
 
-	@Override
-	public void update(Observable o, Object arg) {
-		
-		// Get the ObserverAction
-		ObserverActionParameters observerActionParams = 
-				(ObserverActionParameters) arg;
+    /**
+     * ActionPerformed method from the ActionListener interface
+     * @param e The ActionEvent object
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-		// Perform the correct action
-		switch (observerActionParams.action) {
-		case ABOUT_TO_RESCAN:
-			
-			// Disable the send to openBIS button
-			sendToOpenBISButton.setEnabled(false);
+        if (e.getSource() == sendToOpenBISButton) {
 
-			break;
+            // Make sure all models are ready
+            if (!dataViewer.isReady() || !openBISViewer.isReady()) {
+                outputPane.warn("Data is not ready to be sent to openBIS!");
+                return;
+            }
 
-		case SCAN_COMPLETE:
+            // Update the data model with the openBIS and user attributes
+            if (!metadataEditor.updateDataModel()) {
+                outputPane.warn("No new datasets ready for upload!");
+                return;
+            }
 
-			// Nothing to do
-			break;
+            // Get the output directory
+            String outputDirectory = globalSettingsManager.getUserDataRootDir();
 
-		case EXPERIMENT_CHANGED:
+            // Save to XML (*_properties.oix)
+            if (dataViewer.saveToXML(outputDirectory)) {
+                outputPane.log("Annotations successfully written.");
+            } else {
+                outputPane.err("Could not write annotations! " +
+                        "Sending data to openBIS failed!");
+                return;
+            }
 
-			// Nothing to do
-			break;
+            // Save the data structure file (data_structure.ois)
+            if (dataViewer.saveDataStructureMap(
+                    outputDirectory + File.separator +
+                    openBISViewer.getUserName())) {
+                outputPane.log("Data structure map successfully written.");
+            } else {
+                outputPane.err("Could not data structure map! " +
+                        "Sending data to openBIS failed!");
+                return;
+            }
 
-		case FILE_CHANGED:
+            // Now move the user folder to the datamover incoming folder
+            new ATDataMover(globalSettingsManager, openBISViewer.getUserName()).move();
+            outputPane.log("Data transferred.");
 
-			// Nothing to do
-			break;
+            // Re-scan
+            dataViewer.scan();
+        }
+    }
 
-		case ABOUT_TO_SCAN_INCREMENTALLY:
-			
-			// Disable the send to openBIS button
-			sendToOpenBISButton.setEnabled(false);
-			break;
-			
-		case INCREMENTAL_SCAN_COMPLETE:
-			
-			// Disable the send to openBIS button
-			sendToOpenBISButton.setEnabled(true);
-			break;
+    /**
+     * Return a reference to the contained editor
+     * @return a reference to the editor
+     */
+    public AbstractEditor getEditor() {
+        return metadataEditor;
+    }
 
-		case READY_TO_SEND:
-			
-			// Re-enable the send to openBIS button
-			sendToOpenBISButton.setEnabled(true);
+    @Override
+    public void update(Observable o, Object arg) {
 
-			break;
-			
-			
-		default:
-			break;
-		}
-	}
+        // Get the ObserverAction
+        ObserverActionParameters observerActionParams =
+                (ObserverActionParameters) arg;
+
+        // Perform the correct action
+        switch (observerActionParams.action) {
+        case ABOUT_TO_RESCAN:
+
+            // Disable the send to openBIS button
+            sendToOpenBISButton.setEnabled(false);
+
+            break;
+
+        case SCAN_COMPLETE:
+
+            // Nothing to do
+            break;
+
+        case EXPERIMENT_CHANGED:
+
+            // Nothing to do
+            break;
+
+        case FILE_CHANGED:
+
+            // Nothing to do
+            break;
+
+        case ABOUT_TO_SCAN_INCREMENTALLY:
+
+            // Disable the send to openBIS button
+            sendToOpenBISButton.setEnabled(false);
+            break;
+
+        case INCREMENTAL_SCAN_COMPLETE:
+
+            // Enable the send to openBIS button
+            sendToOpenBISButton.setEnabled(true);
+            break;
+
+        case READY_TO_SEND:
+
+            // Re-enable the send to openBIS button
+            sendToOpenBISButton.setEnabled(true);
+
+            break;
+
+
+        default:
+            break;
+        }
+    }
 
 }

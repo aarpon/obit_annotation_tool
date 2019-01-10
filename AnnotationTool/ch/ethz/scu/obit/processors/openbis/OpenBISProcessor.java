@@ -299,8 +299,8 @@ public class OpenBISProcessor {
         // getSpacesWithProjectsAndExperiments().
         List<Experiment> exp = p.getExperiments();
 
-        // Remove the ORGANIZATION_UNITS_COLLECTION (user tags)
-        exp.removeIf(e -> e.getCode().equals("ORGANIZATION_UNITS_COLLECTION"));
+        //        // Remove the ORGANIZATION_UNITS_COLLECTION (user tags)
+        //        exp.removeIf(e -> e.getCode().equals("ORGANIZATION_UNITS_COLLECTION"));
 
         // Return the filtered list
         return exp;

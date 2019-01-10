@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.ExecutionException;
@@ -307,20 +306,26 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             List<Project> projects = s.getProjects();
 
             // Drop projects of type "COMMON_ORGANIZATION_UNITS"
-            projects.removeIf(p -> p.getCode().equals("COMMON_ORGANIZATION_UNITS"));
+            //projects.removeIf(p -> p.getCode().equals("COMMON_ORGANIZATION_UNITS"));
 
-            projects.sort(new Comparator<Project>() {
-
-                @Override
-                public int compare(Project p1, Project p2) {
-                    return p1.getCode().compareTo(p2.getCode());
-                }
-            });
+            //            projects.sort(new Comparator<Project>() {
+            //
+            //                @Override
+            //                public int compare(Project p1, Project p2) {
+            //                    return p1.getCode().compareTo(p2.getCode());
+            //                }
+            //            });
 
             // We add the projects -- experiments and samples will be
             // lazily loaded on node expansion
             for (Project p : projects) {
 
+                // We keep but do not display projects with code
+                // "COMMON_ORGANIZATION_UNITS", since those store the
+                // shared tags for the space.
+                if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                    continue;
+                }
                 // Add the project
                 project = new OpenBISProjectNode(p);
                 space.add(project);
@@ -490,6 +495,13 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                     for (Experiment e : experiments) {
+
+                        // We keep the experiment with code "ORGANIZATION_UNITS_COLLECTION"
+                        // but we do not add it to the tree since it contains the user tags.
+                        if (e.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
+                            continue;
+                        }
+
                         // Add the experiments
                         OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
                         model.insertNodeInto(experiment, n, n.getChildCount());
@@ -779,8 +791,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // TODO Throw an exception to distinguish the case where
             // the project could not be created.
-            outputPane.err("Could not retrieve openBIS services! " +
-                    "Please contact your administrator!");
+            outputPane.err("No valid session! Please log in first!");
             return false;
 
         }

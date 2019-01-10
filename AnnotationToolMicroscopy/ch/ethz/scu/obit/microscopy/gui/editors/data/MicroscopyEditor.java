@@ -35,10 +35,12 @@ import ch.ethz.scu.obit.at.gui.editors.data.AbstractEditor;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
+import ch.ethz.scu.obit.at.gui.viewers.data.model.CollectionNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.model.MicroscopyMetadataMapper;
@@ -46,6 +48,7 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experimen
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 
 /**
  * Metadata editor panel.
@@ -86,7 +89,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 
     /**
      * Constructor
-     * @param dataViewer data viwer
+     * @param dataViewer data viewer
      * @param openBISViewer openBIS viewer
      * @param globalSettingsManager global settings manager
      */
@@ -237,6 +240,10 @@ public final class MicroscopyEditor extends AbstractEditor {
             dialog.setModal(true);
             return false;
         }
+
+        // Get the Space
+        OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) defaultProjectNode.getParent();
+        Space space = (Space) spaceNode.getUserObject();
 
         // Create all MicroscopyMetadataMapper objects and initially assign all
         // experiments to the first project
@@ -481,7 +488,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         constraints.gridx = 0;
         constraints.gridy = gridy++;
         JLabel labelTagsExpl = new JLabel(
-                "Drag and drop your tags here from the openBIS Viewer.");
+                "Drag and drop your tags here from the openBIS viewer.");
         labelTagsExpl.setHorizontalAlignment(JLabel.CENTER);
         panel.add(labelTagsExpl, constraints);
 
@@ -831,14 +838,17 @@ public final class MicroscopyEditor extends AbstractEditor {
         // We extract all experiments from the data model
         RootNode dataRoot = (RootNode) dataModel.getRoot();
 
+        // Get the collection node
+        CollectionNode collectionNode = (CollectionNode) dataRoot.getChildAt(0);
+
         // First level are the folder nodes
-        int dataNChildren = dataRoot.getChildCount();
+        int dataNChildren = collectionNode.getChildCount();
 
         for (int i = 0; i < dataNChildren; i++) {
 
             // Get the FolderNode
             ExperimentNode experimentNode =
-                    (ExperimentNode) dataRoot.getChildAt(i);
+                    (ExperimentNode) collectionNode.getChildAt(i);
 
             // Store the reference to the ExperimentNode
             experiments.add(experimentNode);
