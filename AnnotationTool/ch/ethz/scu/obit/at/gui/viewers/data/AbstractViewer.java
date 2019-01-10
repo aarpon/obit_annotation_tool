@@ -1006,19 +1006,6 @@ implements ActionListener, TreeSelectionListener {
         });
         popup.add(targetProjectMenuItem);
 
-        // Add tags
-        JMenuItem setTagsMenuItem = new JMenuItem("Set tags");
-        setTagsMenuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                JOptionPane.showMessageDialog(null, "Implement me!");
-
-            }
-        });
-        popup.add(setTagsMenuItem);
-
         // Set description
         JMenuItem setDescriptionMenuItem = new JMenuItem("Set description");
         setDescriptionMenuItem.addActionListener(new ActionListener() {
@@ -1032,6 +1019,19 @@ implements ActionListener, TreeSelectionListener {
         });
         popup.add(setDescriptionMenuItem);
 
+        // Add tags
+        JMenuItem setTagsMenuItem = new JMenuItem("Set tags");
+        setTagsMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+
+            }
+        });
+
+        popup.add(setTagsMenuItem);
         return popup;
     }
 
