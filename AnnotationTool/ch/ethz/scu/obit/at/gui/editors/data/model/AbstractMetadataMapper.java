@@ -1,7 +1,7 @@
 package ch.ethz.scu.obit.at.gui.editors.data.model;
 
-import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
+import ch.ethz.scu.obit.at.gui.openbis.model.OpenBISProjectNode;
 
 /**
  * Object that collects all relevant metadata from the Data Model and the

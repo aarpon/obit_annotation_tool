@@ -1,8 +1,8 @@
 package ch.ethz.scu.obit.at.gui.editors.data;
 
-import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.flow.gui.editors.data.FlowEditor;
+import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
+import ch.ethz.scu.obit.at.gui.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.microscopy.gui.editors.data.MicroscopyEditor;
 

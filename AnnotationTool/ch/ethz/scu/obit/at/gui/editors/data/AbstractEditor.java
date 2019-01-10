@@ -14,12 +14,12 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.tree.TreeModel;
 
+import ch.ethz.scu.obit.at.gui.ObserverActionParameters;
+import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
-import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
-import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.AbstractOpenBISNode;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.at.gui.openbis.OpenBISViewer;
+import ch.ethz.scu.obit.at.gui.openbis.model.AbstractOpenBISNode;
+import ch.ethz.scu.obit.at.gui.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 /**

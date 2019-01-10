@@ -1,8 +1,8 @@
 package ch.ethz.scu.obit.microscopy.gui.editors.data.model;
 
+import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
-import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.at.gui.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experiment;
 
 /**

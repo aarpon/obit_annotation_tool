@@ -20,11 +20,11 @@ import javax.swing.WindowConstants;
 
 import org.springframework.remoting.RemoteAccessException;
 
+import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
+import ch.ethz.scu.obit.at.gui.data.ViewerFactory;
 import ch.ethz.scu.obit.at.gui.editors.data.EditorContainer;
+import ch.ethz.scu.obit.at.gui.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
-import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
-import ch.ethz.scu.obit.at.gui.viewers.data.ViewerFactory;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.version.VersionInfo;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;

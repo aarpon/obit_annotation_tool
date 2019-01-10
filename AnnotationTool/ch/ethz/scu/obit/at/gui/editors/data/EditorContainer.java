@@ -15,10 +15,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
+import ch.ethz.scu.obit.at.gui.ObserverActionParameters;
+import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
+import ch.ethz.scu.obit.at.gui.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
-import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
-import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 /**
