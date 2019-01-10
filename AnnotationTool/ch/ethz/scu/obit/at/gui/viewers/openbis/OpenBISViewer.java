@@ -118,7 +118,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a title JLabel
-        JLabel title = new JLabel("<html><b>openBIS viewer</b></html>");
+        JLabel title = new JLabel("<html><b>openBIS</b></html>");
 
         // Add the tree viewer to the layout
         constraints.gridx = 0;
@@ -648,7 +648,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // Add relevant context menu
             if (nodeType.equals("OpenBISSpaceNode")) {
-
                 JPopupMenu popup =
                         createSpacePopup((OpenBISSpaceNode) node);
                 popup.show(e.getComponent(), x, y);
@@ -673,9 +672,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         JPopupMenu popup = new JPopupMenu();
 
         // Create new project
-        String menuEntry = "Create new project";
-        JMenuItem menuItem = new JMenuItem(menuEntry);
-        menuItem.addActionListener(new ActionListener() {
+        JMenuItem createProjectMenuItem = new JMenuItem("Create new project");
+        createProjectMenuItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e)
@@ -684,10 +682,21 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                     // Rescan
                     scan();
                 }
-
             }
         });
-        popup.add(menuItem);
+        popup.add(createProjectMenuItem);
+
+        // Create new tag
+        JMenuItem createTagMenuItem = new JMenuItem("Create new tag");
+        createTagMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+            }
+        });
+        popup.add(createTagMenuItem);
 
         return popup;
     }

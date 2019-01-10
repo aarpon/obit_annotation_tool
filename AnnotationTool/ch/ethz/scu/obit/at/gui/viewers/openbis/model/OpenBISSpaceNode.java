@@ -1,5 +1,9 @@
 package ch.ethz.scu.obit.at.gui.viewers.openbis.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 
 /**
@@ -13,6 +17,9 @@ public class OpenBISSpaceNode extends AbstractOpenBISNode {
 
     private Space s;
 
+    boolean tagsRetrieved = false;
+    public List<Sample> tags;
+
     /**
      * Constructor
      * @param s SpaceWithProjectsAndRoleAssignments object
@@ -20,6 +27,8 @@ public class OpenBISSpaceNode extends AbstractOpenBISNode {
     public OpenBISSpaceNode(Space s) {
         super(s);
         this.s = s;
+
+        this.tags = new ArrayList<Sample>();
     }
 
     /**

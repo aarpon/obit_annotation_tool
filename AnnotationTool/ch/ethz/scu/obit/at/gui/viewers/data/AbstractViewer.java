@@ -155,7 +155,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a title JLabel
-        JLabel title = new JLabel("<html><b>Data viewer</b></html>");
+        JLabel title = new JLabel("<html><b>Data</b></html>");
 
         // Add the tree viewer to the layout
         constraints.gridx = 0;
@@ -968,8 +968,8 @@ implements ActionListener, TreeSelectionListener {
         popup.add(targetProjectMenuItem);
 
         // Add tags
-        JMenuItem addTagsMenuItem = new JMenuItem("Add tags");
-        addTagsMenuItem.addActionListener(new ActionListener() {
+        JMenuItem setTagsMenuItem = new JMenuItem("Set tags");
+        setTagsMenuItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e)
@@ -978,7 +978,7 @@ implements ActionListener, TreeSelectionListener {
 
             }
         });
-        popup.add(addTagsMenuItem);
+        popup.add(setTagsMenuItem);
 
         return popup;
     }
@@ -1007,8 +1007,8 @@ implements ActionListener, TreeSelectionListener {
         popup.add(targetProjectMenuItem);
 
         // Add tags
-        JMenuItem addTagsMenuItem = new JMenuItem("Add tags");
-        addTagsMenuItem.addActionListener(new ActionListener() {
+        JMenuItem setTagsMenuItem = new JMenuItem("Set tags");
+        setTagsMenuItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e)
@@ -1017,7 +1017,7 @@ implements ActionListener, TreeSelectionListener {
 
             }
         });
-        popup.add(addTagsMenuItem);
+        popup.add(setTagsMenuItem);
 
         // Set description
         JMenuItem setDescriptionMenuItem = new JMenuItem("Set description");
@@ -1196,7 +1196,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a simple label
-        metadataView = new JLabel("<html><b>Metadata viewer</b></html>");
+        metadataView = new JLabel("<html><b>Metadata</b></html>");
         metadataView.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout
