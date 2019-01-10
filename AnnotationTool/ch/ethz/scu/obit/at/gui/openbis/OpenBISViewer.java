@@ -864,48 +864,93 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     /**
      * Return the default target openBIS project as set in the User settings
      * or the first returned project from openBIS if none is set.
-     * @return Code of the selected openBISProject node.
+     * @return Selected openBISProject node.
      */
-    public String getCodeForDefaultProjectOrFirst() {
+    public OpenBISProjectNode getCodeForDefaultProjectOrFirst() {
 
         // This method must be called after the openBIS server nodes
         // have been retrieved.
         TreeModel model = tree.getModel();
         if (model == null) {
-            return "";
+            return null;
+        }
+
+        // Retrieve the root node and check if it has children
+        OpenBISUserNode rootNode = (OpenBISUserNode) model.getRoot();
+        if (rootNode == null) {
+            return null;
+        }
+        if (rootNode.getChildCount() == 0) {
+            return null;
         }
 
         // Retrieve the default target project from the User settings or
         // revert to the first project in the list if none is set.
         String defaultProject = globalSettingsManager.getDefaultProject();
-        defaultProject = "";
+
+        // Make sure the identifier is valid, otherwise return first project
+
+        String spaceName = "";
+        if (! defaultProject.equals("")) {
+            // Extract the space name
+            int index = defaultProject.indexOf("/", 1);
+            if (index == -1) {
+                // Do not search!
+                defaultProject = "";
+            } else {
+                // Drop the first '/' and stop before the one we found
+                spaceName = defaultProject.substring(1, index);
+            }
+        }
+
+        // Retrieve the node
         if (defaultProject.equals("")) {
 
-            // Retrieve the first space
-            OpenBISUserNode rootNode = (OpenBISUserNode) model.getRoot();
-            if (rootNode == null) {
-                return "";
-            }
-            if (rootNode.getChildCount() == 0) {
-                return "";
-            }
-            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode.getChildAt(0);
+            // Just return the first project node we find
 
-            // Retrieve the first space
-            if (spaceNode.getChildCount() == 0) {
-                return "";
+            for (int i = 0; i < rootNode.getChildCount(); i++) {
+
+                // Get ith space
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode.getChildAt(i);
+
+                // Retrieve the children
+                if (spaceNode.getChildCount() == 0) {
+                    continue;
+                } else {
+                    return (OpenBISProjectNode) spaceNode.getChildAt(0);
+                }
             }
-            OpenBISProjectNode projectNode = (OpenBISProjectNode) spaceNode.getChildAt(0);
-            if (projectNode == null) {
-                return "";
-            }
-            return projectNode.getIdentifier();
 
         } else {
 
-            return defaultProject;
+            // Search for the node with given identifier
+            for (int i = 0; i < rootNode.getChildCount(); i++) {
 
+                // Get ith space
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode.getChildAt(i);
+
+                // Make sure this is the right space to prevent checking
+                // any projects for nothing
+                if (! spaceNode.getIdentifier().equals(spaceName)) {
+                    continue;
+                }
+
+                // Retrieve the children
+                for (int j = 0; j < spaceNode.getChildCount(); j++) {
+
+                    // Get jth project
+                    OpenBISProjectNode projectNode = (OpenBISProjectNode) spaceNode.getChildAt(j);
+
+                    // Check whether this is the default one
+                    if (projectNode.getIdentifier().equals(defaultProject)) {
+                        return projectNode;
+                    }
+                }
+
+            }
         }
+
+        return null;
     }
 
     /**
