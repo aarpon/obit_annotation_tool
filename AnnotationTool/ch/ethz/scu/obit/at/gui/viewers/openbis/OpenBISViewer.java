@@ -862,6 +862,53 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     }
 
     /**
+     * Return the default target openBIS project as set in the User settings
+     * or the first returned project from openBIS if none is set.
+     * @return Code of the selected openBISProject node.
+     */
+    public String getCodeForDefaultProjectOrFirst() {
+
+        // This method must be called after the openBIS server nodes
+        // have been retrieved.
+        TreeModel model = tree.getModel();
+        if (model == null) {
+            return "";
+        }
+
+        // Retrieve the default target project from the User settings or
+        // revert to the first project in the list if none is set.
+        String defaultProject = globalSettingsManager.getDefaultProject();
+        defaultProject = "";
+        if (defaultProject.equals("")) {
+
+            // Retrieve the first space
+            OpenBISUserNode rootNode = (OpenBISUserNode) model.getRoot();
+            if (rootNode == null) {
+                return "";
+            }
+            if (rootNode.getChildCount() == 0) {
+                return "";
+            }
+            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode.getChildAt(0);
+
+            // Retrieve the first space
+            if (spaceNode.getChildCount() == 0) {
+                return "";
+            }
+            OpenBISProjectNode projectNode = (OpenBISProjectNode) spaceNode.getChildAt(0);
+            if (projectNode == null) {
+                return "";
+            }
+            return projectNode.getIdentifier();
+
+        } else {
+
+            return defaultProject;
+
+        }
+    }
+
+    /**
      * Set the project with given identifier as the default target.
      * @param projectId The openBIS project identifier.
      * @return bool True if the default project could be set successfully, false otherwise.
