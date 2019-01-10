@@ -65,8 +65,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     protected JPanel panel;
     protected JButton scanButton;
+    protected JLabel userTags;
     protected JList<String> userTagList;
-    protected JList<String> sharedTagList;
 
     private GlobalSettingsManager globalSettingsManager;
     private OpenBISProcessor openBISProcessor;
@@ -131,7 +131,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Create a splitpane
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                openBISViewerPanel(), tagsPanels());
+                openBISViewerPanel(), tagsPanel());
         splitPane.setResizeWeight(0.75);
         splitPane.setBorder(null);
 
@@ -373,7 +373,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Inform
         outputPane.log("Retrieving openBIS structure completed.");
-
     }
 
     /**
@@ -861,6 +860,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         }
     }
 
+
     /**
      * Return the default target openBIS project as set in the User settings
      * or the first returned project from openBIS if none is set.
@@ -939,6 +939,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     }
 
+    /**
+     * Create the panel that contains the openBIS tree viewer
+     * @return a JPanel.
+     */
     private JPanel openBISViewerPanel() {
 
         // Create a panel
@@ -1020,7 +1024,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         return openBISViewerPanel;
     }
 
-    private JPanel tagsPanels() {
+    private JPanel tagsPanel() {
 
         // Create a panel
         JPanel tagsPanel = new JPanel();
@@ -1033,14 +1037,9 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.fill = GridBagConstraints.BOTH;
 
-        /*
-         *
-         * PERSONAL TAGS
-         *
-         */
-
         // Add a simple label
-        JLabel userTags = new JLabel("<html><b>Personal tags</b></html>");
+        userTags = new JLabel("<html><b>Tags</b></html>");
+        //userTags.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout
         constraints.gridx = 0;
@@ -1061,8 +1060,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         tagsPanel.add(new JLabel(""), constraints);
 
         // Add a push button
-        JButton addUserTagButton = new JButton("Create new personal tag...");
-        addUserTagButton.addActionListener(new ActionListener() {
+        JButton addTagButton = new JButton("Create new tag...");
+        addTagButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1075,7 +1074,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.weighty = 0.0;
         constraints.gridwidth = 1;
         constraints.insets = new Insets(5, 0, 0, 0);
-        tagsPanel.add(addUserTagButton, constraints);
+        tagsPanel.add(addTagButton, constraints);
 
         // Add the list of tags
         userTagList = new JList<String>(new DefaultListModel<String>());
@@ -1083,7 +1082,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         userTagList.getSelectionModel().setSelectionMode(
                 ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         userTagList.setDragEnabled(true);
-        JScrollPane userTagScrollPane = new JScrollPane(userTagList);
+        JScrollPane tagScrollPane = new JScrollPane(userTagList);
 
         // Add to the layout
         constraints.gridx = 0;
@@ -1091,71 +1090,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         constraints.gridwidth = 3;
+        //constraints.gridheight = 1;
         constraints.insets = new Insets(5, 5, 5, 0);
-        tagsPanel.add(userTagScrollPane, constraints);
-
-        /*
-         *
-         * SHARED TAGS
-         *
-         */
-
-        // Add a simple label
-        JLabel sharedTags = new JLabel("<html><b>Shared tags</b></html>");
-
-        // Add to the layout
-        constraints.gridx = 0;
-        constraints.gridy = 2;
-        constraints.weightx = 0.0;
-        constraints.weighty = 0.0;
-        constraints.gridwidth = 1;
-        constraints.insets = new Insets(5, 0, 0, 5);
-        tagsPanel.add(sharedTags, constraints);
-
-        // Add a spacer
-        constraints.gridx = 1;
-        constraints.gridy = 2;
-        constraints.weightx = 1.0;
-        constraints.weighty = 0.0;
-        constraints.gridwidth = 1;
-        constraints.insets = new Insets(5, 0, 0, 0);
-        tagsPanel.add(new JLabel(""), constraints);
-
-        // Add a push button
-        JButton addSharedTagButton = new JButton("Create new shared tag...");
-        addSharedTagButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                createNewMetaProject();
-            }
-        });
-        constraints.gridx = 2;
-        constraints.gridy = 2;
-        constraints.weightx = 0.0;
-        constraints.weighty = 0.0;
-        constraints.gridwidth = 1;
-        constraints.insets = new Insets(5, 0, 0, 0);
-        tagsPanel.add(addSharedTagButton, constraints);
-
-        // Add the list of tags
-        sharedTagList = new JList<String>(new DefaultListModel<String>());
-        sharedTagList.setVisibleRowCount(5);
-        sharedTagList.getSelectionModel().setSelectionMode(
-                ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        sharedTagList.setDragEnabled(true);
-        JScrollPane sharedTagScrollPane = new JScrollPane(sharedTagList);
-
-        // Add to the layout
-        constraints.gridx = 0;
-        constraints.gridy = 3;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.gridwidth = 3;
-        constraints.insets = new Insets(5, 5, 5, 0);
-        tagsPanel.add(sharedTagScrollPane, constraints);
+        tagsPanel.add(tagScrollPane, constraints);
 
         return tagsPanel;
     }
-
 }
