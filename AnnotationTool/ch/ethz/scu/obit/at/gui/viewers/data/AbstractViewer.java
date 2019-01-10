@@ -860,6 +860,91 @@ implements ActionListener, TreeSelectionListener {
 
 
     /**
+     * Create a popup menu with actions for the root node.
+     * @param node Root node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createRootNodePopup(final RootNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Show in Explorer/Finder
+        String menuEntry = "";
+        if (QueryOS.isWindows()) {
+            menuEntry = "Show in Windows Explorer";
+        } else if (QueryOS.isMac()) {
+            menuEntry = "Show in Finder";
+        } else {
+            throw new UnsupportedOperationException(
+                    "Operating system not supported.");
+        }
+
+        // Add Show in {file browser}
+        JMenuItem navigateToUserFolderMenuItem = new JMenuItem(menuEntry);
+        navigateToUserFolderMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                // Build the full path of the invalid dataset
+                File userDataFolder = new File(globalSettingsManager.getUserDataRootDir() +
+                        File.separator + userName);
+
+                String fullPathStr;
+                try {
+                    fullPathStr = userDataFolder.getCanonicalPath();
+                } catch (IOException e1) {
+                    outputPane.err("Could not retrieve full path " +
+                            "of selected invalid dataset!");
+                    return;
+                }
+
+                // Command arguments
+                String command = "";
+                String commandName = "";
+                String commandArgument = "";
+                if (QueryOS.isMac()) {
+                    command = "open";
+                    commandName = "Finder";
+                    commandArgument = "";
+                } else if (QueryOS.isWindows()) {
+                    command = "Explorer.exe";
+                    commandName = "Windows Explorer";
+                    commandArgument = "/root,";
+                } else {
+                    throw new UnsupportedOperationException(
+                            "Operating system not supported.");
+                }
+
+                // Inform
+                outputPane.log("Opening user folder in " + commandName + "...");
+
+                // Execute the command
+                String [] commandArray = new String[3];
+                commandArray[0] = command;
+                commandArray[1] = commandArgument;
+                commandArray[2] = fullPathStr;
+                try {
+                    Process p = Runtime.getRuntime().exec(commandArray);
+                    p.waitFor();
+                } catch (IOException e1) {
+                    outputPane.err("Could not show invalid dataset "
+                            + "in " + commandName + "!");
+                } catch (InterruptedException e1) {
+                    outputPane.err("Could not show invalid dataset "
+                            + "in " + commandName + "!");
+                }
+
+            }
+
+        });
+        popup.add(navigateToUserFolderMenuItem);
+
+        return popup;
+    }
+
+    /**
      * Create a popup menu with actions for the "All experiments" collection node.
      * @param node Collection node to which the popup menu is associated.
      * @return a JPopupMenu for the passed item
@@ -1242,7 +1327,11 @@ implements ActionListener, TreeSelectionListener {
             String nodeType = node.getClass().getSimpleName();
 
             // Add relevant context menu
-            if (nodeType.equals("CollectionNode")) {
+            if (nodeType.equals("RootNode")) {
+                JPopupMenu popup =
+                        createRootNodePopup((RootNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else if (nodeType.equals("CollectionNode")) {
                 JPopupMenu popup =
                         createCollectionNodePopup((CollectionNode) node);
                 popup.show(e.getComponent(), x, y);
