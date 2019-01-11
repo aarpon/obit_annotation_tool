@@ -26,6 +26,7 @@ import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.create.ProjectCreation;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.fetchoptions.ProjectFetchOptions;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.search.ProjectSearchCriteria;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.fetchoptions.SampleFetchOptions;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
@@ -60,6 +61,10 @@ public class OpenBISProcessor {
             new AtomicReference<String>("");
     private AtomicBoolean loginErrorRecoverable = new AtomicBoolean(true);
 
+    // Cache spaces and projects
+    private boolean dataIsCached = false;
+    private boolean dataWithExperiments = false;
+    private SearchResult<Space> cachedSpacesWithProjects = null;
 
     /**
      * Constructor
@@ -73,6 +78,10 @@ public class OpenBISProcessor {
         // Set the currently active server
         this.openBISURL = globalSettingsManager.getActiveServer();
 
+        // Initialize cache
+        this.dataIsCached = false;
+        this.dataWithExperiments = false;
+        this.cachedSpacesWithProjects = null;
     }
 
     /**
@@ -251,6 +260,16 @@ public class OpenBISProcessor {
     }
 
     /**
+     * Reset the cached data.
+     */
+    public void resetData() {
+
+        this.dataIsCached = false;
+        this.dataWithExperiments = false;
+        this.cachedSpacesWithProjects = null;
+    }
+
+    /**
      * Returns the list of Spaces in openBIS (as visible for current user).
      * @return list of Spaces.
      */
@@ -259,6 +278,11 @@ public class OpenBISProcessor {
         // Do we have a valid session?
         if (v3_api == null) {
             return new SearchResult<Space>(new ArrayList<Space>(), 0);
+        }
+
+        // Is the data cached and with experiments?
+        if (dataIsCached && dataWithExperiments) {
+            return cachedSpacesWithProjects;
         }
 
         // Space
@@ -275,10 +299,50 @@ public class OpenBISProcessor {
 
         spaceFetchOptions.withProjectsUsing(projectFetchOptions);
 
-        SearchResult<Space> spaces = v3_api.searchSpaces(v3_sessionToken,
+        cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
                 searchCriteria, spaceFetchOptions);
 
-        return spaces;
+        // Update cache information
+        dataIsCached = true;
+        dataWithExperiments = true;
+
+        return cachedSpacesWithProjects;
+    }
+
+    /**
+     * Returns the list of Spaces in openBIS (as visible for current user).
+     * @return list of Spaces.
+     */
+    public SearchResult<Space> getSpacesWithProjects() {
+
+        // Do we have a valid session?
+        if (v3_api == null) {
+            return new SearchResult<Space>(new ArrayList<Space>(), 0);
+        }
+
+        // Is the data cached?
+        if (dataIsCached) {
+
+            // We return whether it has experiments or not,
+            // since spaces and projects will be there.
+            return cachedSpacesWithProjects;
+        }
+
+        // Space
+        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
+        searchCriteria.withCode();
+        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
+        spaceFetchOptions.sortBy().code();
+        spaceFetchOptions.withProjects();
+
+        cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
+                searchCriteria, spaceFetchOptions);
+
+        // Update cache information
+        dataIsCached = true;
+        dataWithExperiments = false;
+
+        return cachedSpacesWithProjects;
     }
 
     /**
@@ -294,16 +358,38 @@ public class OpenBISProcessor {
             return new ArrayList<Experiment>();
         }
 
-        // Retrieve the experiments. We can call getExperiments() since the
-        // the Experiments were fetched when searching for projects in
-        // getSpacesWithProjectsAndExperiments().
-        List<Experiment> exp = p.getExperiments();
+        if (dataWithExperiments == true) {
 
-        //        // Remove the ORGANIZATION_UNITS_COLLECTION (user tags)
-        //        exp.removeIf(e -> e.getCode().equals("ORGANIZATION_UNITS_COLLECTION"));
+            // Retrieve the experiments. We can call getExperiments() since the
+            // the Experiments were fetched when searching for projects in
+            // getSpacesWithProjectsAndExperiments().
+            return p.getExperiments();
 
-        // Return the filtered list
-        return exp;
+        } else {
+
+            // We need to retrieve the experiments from openBIS
+            ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
+            searchCriteria.withCode();
+            searchCriteria.withPermId().thatEquals(p.getPermId().toString());
+            ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+            projectFetchOptions.sortBy().code();
+
+            ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
+            projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
+
+            SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
+                    searchCriteria, projectFetchOptions);
+
+            if (projects.getTotalCount() == 0) {
+                return new ArrayList<Experiment>();
+            }
+
+            // Get the project and extract the experiments
+            Project proj = projects.getObjects().get(0);
+            return proj.getExperiments();
+
+        }
+
     }
 
 
@@ -484,17 +570,6 @@ public class OpenBISProcessor {
         loginErrorTitle.set("Connection error");
         loginErrorRecoverable.set(false);
     }
-
-    //    /**
-    //     * React to a InterruptedException exception
-    //     */
-    //    private void reactToInterruptedException() {
-    //        loginErrorMessage.set("Connection thread interrupted!\n\n" +
-    //                "The application will now quit.");
-    //        loginErrorTitle.set("Thread interrupted");
-    //        loginErrorRecoverable.set(false);
-    //        Thread.currentThread().interrupt();
-    //    }
 
     // Add a class that extends thread that is to be called when program is exiting
     public class V3APILogoutOnShutdown extends Thread {

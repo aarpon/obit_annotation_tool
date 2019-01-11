@@ -279,8 +279,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         setTagList(metaprojects);
 
         // Get spaces
-        SearchResult<Space> spaces =
-                openBISProcessor.getSpacesWithProjectsAndExperiments();
+        SearchResult<Space> spaces = openBISProcessor.getSpacesWithProjects();
         if (spaces.getTotalCount() == 0) {
             JOptionPane.showMessageDialog(this.panel,
                     "Sorry, there are no (accessible) spaces.\n\n" +
@@ -304,17 +303,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // Get the projects for current space
             List<Project> projects = s.getProjects();
-
-            // Drop projects of type "COMMON_ORGANIZATION_UNITS"
-            //projects.removeIf(p -> p.getCode().equals("COMMON_ORGANIZATION_UNITS"));
-
-            //            projects.sort(new Comparator<Project>() {
-            //
-            //                @Override
-            //                public int compare(Project p1, Project p2) {
-            //                    return p1.getCode().compareTo(p2.getCode());
-            //                }
-            //            });
 
             // We add the projects -- experiments and samples will be
             // lazily loaded on node expansion
