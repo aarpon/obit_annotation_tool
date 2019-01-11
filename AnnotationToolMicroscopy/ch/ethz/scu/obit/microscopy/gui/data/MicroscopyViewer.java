@@ -19,7 +19,6 @@ import javax.swing.tree.TreePath;
 import ch.ethz.scu.obit.at.gui.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.data.model.AbstractNode;
-import ch.ethz.scu.obit.at.gui.data.model.CollectionNode;
 import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.microscopy.gui.data.model.MicroscopyCompositeFileNode;
@@ -90,9 +89,7 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
 
         // Print the attributes
         String className = nodeInfo.getClass().getSimpleName();
-        if (className.equals("Collection")) {
-            clearMetadataTable();
-        } else if (className.equals("Experiment")) {
+        if (className.equals("Experiment")) {
             clearMetadataTable();
             addAttributesToMetadataTable(
                     ((MicroscopyProcessor.Experiment)
@@ -233,18 +230,14 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
         MicroscopyFileNode microscopyFileNode;
         MicroscopyCompositeFileNode microscopyCompositeFileNode;
 
-        // Create the collection node
-        CollectionNode collectionNode = new CollectionNode(folderDescriptor.collectionDescriptor);
-        rootNode.add(collectionNode);
-
-        for (String expKey : folderDescriptor.collectionDescriptor.experiments.keySet()) {
+        for (String expKey : folderDescriptor.experiments.keySet()) {
 
             // Get the ExperimentDescriptor
-            Experiment e = folderDescriptor.collectionDescriptor.experiments.get(expKey);
+            Experiment e = folderDescriptor.experiments.get(expKey);
 
             // Add the experiment
             experimentNode = new ExperimentNode(e);
-            collectionNode.add(experimentNode);
+            rootNode.add(experimentNode);
 
             // Add its files
             for (String microscopyKey: e.microscopyFiles.keySet()) {

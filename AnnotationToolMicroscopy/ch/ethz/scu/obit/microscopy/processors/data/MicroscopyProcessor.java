@@ -17,7 +17,6 @@ import ch.ethz.scu.obit.microscopy.readers.composite.AbstractCompositeMicroscopy
 import ch.ethz.scu.obit.microscopy.readers.composite.CompositeMicroscopyReaderFactory;
 import ch.ethz.scu.obit.processors.AbstractProcessor;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
-import ch.ethz.scu.obit.processors.data.model.CollectionDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 import ch.ethz.scu.obit.processors.data.model.PathAwareDescriptor;
@@ -328,11 +327,11 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             // contains current file
             Experiment expDesc;
             String experimentName = dir.getName();
-            if (folderDescriptor.collectionDescriptor.experiments.containsKey(experimentName)) {
-                expDesc = folderDescriptor.collectionDescriptor.experiments.get(experimentName);
+            if (folderDescriptor.experiments.containsKey(experimentName)) {
+                expDesc = folderDescriptor.experiments.get(experimentName);
             } else {
                 expDesc = new Experiment(dir);
-                folderDescriptor.collectionDescriptor.experiments.put(experimentName, expDesc);
+                folderDescriptor.experiments.put(experimentName, expDesc);
             }
 
             // If the file is an attachment, add it and move on
@@ -544,9 +543,10 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     public class UserFolder extends RootDescriptor {
 
         /**
-         * Descriptor for the experiment collection.
+         * Hash map of experiments.
          */
-        public Collection collectionDescriptor = null;
+        public final Map<String, Experiment> experiments =
+                new LinkedHashMap<String, Experiment>();
 
         /**
          * Constructor
@@ -561,8 +561,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             // Set the descriptor name
             this.setName(fullFolder.getName());
 
-            // Create the Collection descriptor
-            collectionDescriptor = new Collection();
         }
 
         @Override
@@ -570,35 +568,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             return "Folder";
         }
 
-    }
-
-    public class Collection extends CollectionDescriptor {
-
-        /**
-         * Hash map of experiments.
-         */
-        public final Map<String, Experiment> experiments =
-                new LinkedHashMap<String, Experiment>();
-
-        /**
-         * Constructor
-         * @param fullFolder Full path to the folder
-         * @param userRootFolder Full path to the user data folder.
-         */
-        public Collection() {
-
-            // Invoke parent constructor
-            super();
-
-            // Set the descriptor name
-            this.setName("All experiments");
-
-        }
-
-        @Override
-        public String getType() {
-            return "Collection";
-        }
     }
 
     /**
