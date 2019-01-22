@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.Set;
 
 import javax.swing.JPanel;
-import javax.swing.tree.TreeModel;
 
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
@@ -35,24 +34,16 @@ implements ActionListener, Observer {
     protected GlobalSettingsManager globalSettingsManager;
 
     /**
-     * References to the data viewer and model
+     * References to the data and openBIS viewers
      */
     protected AbstractViewer dataViewer;
-    protected TreeModel dataModel;
-
-    /**
-     * References to the openBIS viewer and model
-     */
     protected OpenBISViewer openBISViewer;
-    protected TreeModel openBISModel;
 
     // List of experiments from the Data Model
-    protected List<ExperimentNode> experiments =
-            new ArrayList<ExperimentNode>();
+    protected List<ExperimentNode> experiments = null;
 
     // List of openBISProjects
-    protected List<OpenBISProjectNode> openBISProjects =
-            new ArrayList<OpenBISProjectNode>();
+    protected List<OpenBISProjectNode> openBISProjects = null;
 
     /**
      * Constructor
@@ -72,6 +63,12 @@ implements ActionListener, Observer {
         this.globalSettingsManager = globalSettingsManager;
         this.dataViewer = dataViewer;
         this.openBISViewer = openBISViewer;
+
+        // Initialize node lists
+        experiments = new ArrayList<ExperimentNode>();
+
+        // List of openBISProjects
+        openBISProjects = new ArrayList<OpenBISProjectNode>();
 
         // Set the preferred and minimum size
         panel.setMinimumSize(new Dimension(400, 500));
