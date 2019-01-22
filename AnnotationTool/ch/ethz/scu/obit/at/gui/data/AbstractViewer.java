@@ -44,7 +44,6 @@ import javax.swing.tree.TreePath;
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.data.model.AbstractNode;
-import ch.ethz.scu.obit.at.gui.data.model.CollectionNode;
 import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.data.view.DataViewerTree;
@@ -945,45 +944,6 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Create a popup menu with actions for the "All experiments" collection node.
-     * @param node Collection node to which the popup menu is associated.
-     * @return a JPopupMenu for the passed item
-     */
-    private JPopupMenu createCollectionNodePopup(final CollectionNode node) {
-
-        // Create the popup menu.
-        JPopupMenu popup = new JPopupMenu();
-
-        // Set target project to all experiments
-        JMenuItem targetProjectMenuItem = new JMenuItem("Set target project");
-        targetProjectMenuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                JOptionPane.showMessageDialog(null, "Implement me!");
-
-            }
-        });
-        popup.add(targetProjectMenuItem);
-
-        // Add tags
-        JMenuItem setTagsMenuItem = new JMenuItem("Set tags");
-        setTagsMenuItem.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                JOptionPane.showMessageDialog(null, "Implement me!");
-
-            }
-        });
-        popup.add(setTagsMenuItem);
-
-        return popup;
-    }
-
-    /**
      * Create a popup menu with actions for the Experiment nodes.
      * @param node Experiment node to which the popup menu is associated.
      * @return a JPopupMenu for the passed item
@@ -1330,10 +1290,6 @@ implements ActionListener, TreeSelectionListener {
             if (nodeType.equals("RootNode")) {
                 JPopupMenu popup =
                         createRootNodePopup((RootNode) node);
-                popup.show(e.getComponent(), x, y);
-            } else if (nodeType.equals("CollectionNode")) {
-                JPopupMenu popup =
-                        createCollectionNodePopup((CollectionNode) node);
                 popup.show(e.getComponent(), x, y);
             } else if (nodeType.equals("ExperimentNode")) {
                 JPopupMenu popup =

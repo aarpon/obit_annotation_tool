@@ -34,7 +34,6 @@ import javax.swing.event.DocumentListener;
 import ch.ethz.scu.obit.at.gui.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.data.model.AbstractNode;
-import ch.ethz.scu.obit.at.gui.data.model.CollectionNode;
 import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.editors.data.AbstractEditor;
@@ -838,17 +837,14 @@ public final class MicroscopyEditor extends AbstractEditor {
         // We extract all experiments from the data model
         RootNode dataRoot = (RootNode) dataModel.getRoot();
 
-        // Get the collection node
-        CollectionNode collectionNode = (CollectionNode) dataRoot.getChildAt(0);
-
         // First level are the folder nodes
-        int dataNChildren = collectionNode.getChildCount();
+        int dataNChildren = dataRoot.getChildCount();
 
         for (int i = 0; i < dataNChildren; i++) {
 
             // Get the FolderNode
             ExperimentNode experimentNode =
-                    (ExperimentNode) collectionNode.getChildAt(i);
+                    (ExperimentNode) dataRoot.getChildAt(i);
 
             // Store the reference to the ExperimentNode
             experiments.add(experimentNode);
