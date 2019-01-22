@@ -9,12 +9,12 @@ public class VersionInfo {
     /**
      * Program version
      */
-    public static final String version = "1.1.2";
+    public static final String version = "2.0.0";
 
     /**
      * Version status: "alpha", "beta", or "" for a stable release
      */
-    public static final String status = "";
+    public static final String status = "pre-alpha";
 
     /**
      *  Copyright string
@@ -38,6 +38,11 @@ public class VersionInfo {
      *  User settings (XML) file version
      */
     public static final int userSettingsVersion = 1;
+
+    /**
+     *  oBITXML (XML) metadata settings (.oix) file
+     */
+    public static final int oBITXMLVersion = 2;
 
     /**
      * Convert the version from string to integer

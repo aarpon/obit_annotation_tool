@@ -145,6 +145,8 @@ public final class MicroscopyEditor extends AbstractEditor {
             // Set the openBIS experiment identifier
             Map<String, String> expOpenBISAttributes =
                     new Hashtable<String, String>();
+            expOpenBISAttributes.put("openBISCollectionIdentifier",
+                    currentMetadata.getOpenBISCollectionIdentifier());
             expOpenBISAttributes.put("openBISIdentifier",
                     currentMetadata.getOpenBISExerimentIdentifier());
             expOpenBISAttributes.put("openBISSpaceIdentifier",
@@ -157,7 +159,6 @@ public final class MicroscopyEditor extends AbstractEditor {
             expUserAttributes.put("description",
                     currentMetadata.getExperiment().description);
             expUserAttributes.put("tags", expDescr.tags);
-            expUserAttributes.put("version", expDescr.version);
             expDescr.addUserAttributes(expUserAttributes);
 
             // Now get the MicroscopyFile children of the Experiment
@@ -181,6 +182,9 @@ public final class MicroscopyEditor extends AbstractEditor {
                 microscopyFileOpenBISAttributes.put(
                         "openBISSpaceIdentifier",
                         currentMetadata.getOpenBISSpaceIdentifier());
+                microscopyFileOpenBISAttributes.put(
+                        "openBISCollectionIdentifier",
+                        currentMetadata.getOpenBISCollectionIdentifier());
                 microscopyFileOpenBISAttributes.put(
                         "openBISExperimentIdentifier",
                         currentMetadata.getOpenBISExerimentIdentifier());
