@@ -64,7 +64,9 @@ public class OpenBISProcessor {
     // Cache spaces and projects
     private boolean dataIsCached = false;
     private boolean dataWithExperiments = false;
+    private boolean tagCollectionsAreCached = false;
     private SearchResult<Space> cachedSpacesWithProjects = null;
+    private Map<Space, Project> tagsCollectionPerSpace = null;
 
     /**
      * Constructor
@@ -81,7 +83,9 @@ public class OpenBISProcessor {
         // Initialize cache
         this.dataIsCached = false;
         this.dataWithExperiments = false;
+        this.tagCollectionsAreCached = false;
         this.cachedSpacesWithProjects = null;
+        this.tagsCollectionPerSpace = null;
     }
 
     /**
@@ -234,39 +238,15 @@ public class OpenBISProcessor {
     }
 
     /**
-     * Retrieves and returns the list of metaprojects for current session.
-     * @return list of metaprojects.
-     */
-    public List<String> getMetaprojects() {
-        return new ArrayList<String>();
-
-        //        if (infoService.get() == null) {
-        //            return new ArrayList<String>();
-        //        }
-        //        List<Metaproject> metaprojects = infoService.get().listMetaprojects(
-        //                queryFacade.get().getSessionToken());
-        //        metaprojects.sort(new Comparator<Metaproject>() {
-        //
-        //            @Override
-        //            public int compare(Metaproject m1, Metaproject m2) {
-        //                return m1.getName().toLowerCase().compareTo(m2.getName().toLowerCase());
-        //            }
-        //        });
-        //        List<String> tags = new ArrayList<String>();
-        //        for (Metaproject m : metaprojects) {
-        //            tags.add(m.getName());
-        //        }
-        //        return tags;
-    }
-
-    /**
      * Reset the cached data.
      */
     public void resetData() {
 
         this.dataIsCached = false;
         this.dataWithExperiments = false;
+        this.tagCollectionsAreCached = false;
         this.cachedSpacesWithProjects = null;
+        this.tagsCollectionPerSpace = null;
     }
 
     /**
@@ -274,7 +254,8 @@ public class OpenBISProcessor {
      *
      * The spaces (with the contained projects and experiments) are cached.
      * On a second call, the cached version is returned. To force a retrieval,
-     * call resetData() first.
+     * call resetData() first. Also, references to COMMON_ORGANISATION_UNIT
+     * projects (common 'tags') are cached.
      *
      * @return list of Spaces.
      */
@@ -304,12 +285,16 @@ public class OpenBISProcessor {
 
         spaceFetchOptions.withProjectsUsing(projectFetchOptions);
 
+        // Search openBIS
         cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
                 searchCriteria, spaceFetchOptions);
 
         // Update cache information
         dataIsCached = true;
         dataWithExperiments = true;
+
+        // Cache the space tag collections
+        cacheTagCollections();
 
         return cachedSpacesWithProjects;
     }
@@ -319,7 +304,8 @@ public class OpenBISProcessor {
      *
      * The spaces (with the contained projects) are cached.
      * On a second call, the cached version is returned. To force a retrieval,
-     * call resetData() first.
+     * call resetData() first.  Also, references to COMMON_ORGANISATION_UNIT
+     * projects (common 'tags') are cached.
      *
      * @return list of Spaces.
      */
@@ -345,12 +331,16 @@ public class OpenBISProcessor {
         spaceFetchOptions.sortBy().code();
         spaceFetchOptions.withProjects();
 
+        // Search openBIS
         cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
                 searchCriteria, spaceFetchOptions);
 
         // Update cache information
         dataIsCached = true;
         dataWithExperiments = false;
+
+        // Cache the space tag collections
+        cacheTagCollections();
 
         return cachedSpacesWithProjects;
     }
@@ -565,6 +555,35 @@ public class OpenBISProcessor {
     }
 
     /**
+     * Caches the list of tag collections for all spaces.
+     */
+    private void cacheTagCollections() {
+
+        if (! dataIsCached || cachedSpacesWithProjects.getTotalCount() == 0) {
+            this.tagsCollectionPerSpace = null;
+            this.tagCollectionsAreCached = false;
+            return;
+        }
+
+        // Initialize map
+        tagsCollectionPerSpace = new HashMap<Space, Project>();
+
+        // Store references to COMMON_ORGANISATION_UNIT projects (tag collections)
+        if (cachedSpacesWithProjects.getTotalCount() > 0) {
+            for (Space s : cachedSpacesWithProjects.getObjects()) {
+                for (Project p : s.getProjects()) {
+                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                        tagsCollectionPerSpace.put(s, p);
+                    }
+                }
+            }
+        }
+
+        // Set cached flag to true
+        this.tagCollectionsAreCached = true;
+    }
+
+    /**
      * React to a RemoteConnectFailure exception
      */
     private void reactToRemoteConnectFailureException() {
@@ -619,138 +638,6 @@ public class OpenBISProcessor {
                     System.out.println("Could not log oug from openBIS: " + e.getMessage());
                 }
             }
-        }
-    }
-
-    /**
-     * Return the default target openBIS project as set in the User settings
-     * or the first returned project from openBIS if none is set.
-     * @return ProjectInfo object for the project.
-     */
-    public ProjectInfo getDefaultProjectOrFirst() {
-
-        // Do we have a valid session?
-        if (v3_api == null) {
-            return null;
-        }
-
-        // This call might be cached already.
-        SearchResult<Space> spaces = getSpacesWithProjects();
-
-        // Retrieve the default target project from the User settings or
-        // revert to the first project in the list if none is set.
-        String defaultProject = globalSettingsManager.getDefaultProject();
-
-        // Make sure the identifier is valid, otherwise return first project
-
-        String spaceName = "";
-        if (! defaultProject.equals("")) {
-            // Extract the space name
-            int index = defaultProject.indexOf("/", 1);
-            if (index == -1) {
-                // Do not search!
-                defaultProject = "";
-            } else {
-                // Drop the first '/' and stop before the one we found
-                spaceName = defaultProject.substring(1, index);
-            }
-        }
-
-        // Retrieve the node
-        if (defaultProject.equals("")) {
-
-            // Just return the first project node we find
-
-            for (int i = 0; i < spaces.getTotalCount(); i++) {
-
-                // Get ith space
-                Space space = spaces.getObjects().get(i);
-
-                // Retrieve the children
-                List<Project> projects = space.getProjects();
-
-                int nProjects = projects.size();
-                if (nProjects == 0) {
-                    continue;
-                }
-
-                for (int j = 0; j < nProjects; j++) {
-
-                    Project p = projects.get(j);
-
-                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
-                        continue;
-                    }
-
-                    ProjectInfo projectInfo = new ProjectInfo(p, space);
-                    return projectInfo;
-                }
-            }
-
-        } else {
-
-            // Find the project with the correct identifier
-
-            for (int i = 0; i < spaces.getTotalCount(); i++) {
-
-                // Get ith space
-                Space space = spaces.getObjects().get(i);
-
-                if (! space.getCode().equals(spaceName)) {
-                    continue;
-                }
-
-                // Retrieve the children
-                List<Project> projects = space.getProjects();
-
-                int nProjects = projects.size();
-                if (nProjects == 0) {
-                    continue;
-                }
-
-                for (int j = 0; j < nProjects; j++) {
-
-                    Project p = projects.get(j);
-
-                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
-                        continue;
-                    }
-
-                    // Check whether this is the default one
-                    if (p.getIdentifier().toString().equals(defaultProject)) {
-
-                        ProjectInfo projectInfo = new ProjectInfo(p, space);
-                        return projectInfo;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Collect information for a Project
-     *
-     */
-    public class ProjectInfo {
-
-        public Space space;
-        public Project project;
-        public String spaceIdentifier;
-        public String spaceCode;
-        public String projectIdentifier;
-        public String projectCode;
-
-
-        public ProjectInfo(Project project, Space space) {
-
-            this.space = space;
-            this.project = project;
-            this.spaceIdentifier = space.getPermId().toString();
-            this.spaceCode= space.getCode();
-            this.projectIdentifier = project.getIdentifier().toString();
-            this.projectCode = project.getCode();
         }
     }
 
