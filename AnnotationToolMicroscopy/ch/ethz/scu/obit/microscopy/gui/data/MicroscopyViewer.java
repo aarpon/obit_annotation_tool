@@ -29,6 +29,7 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experimen
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFileSeries;
+import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 
 /**
  * Simple graphical viewer for the MicroscopyProcessor.
@@ -43,9 +44,10 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
      * Constructor
      * @param globalSettingsManager global settings manager
      */
-    public MicroscopyViewer(GlobalSettingsManager globalSettingsManager) {
+    public MicroscopyViewer(GlobalSettingsManager globalSettingsManager,
+            OpenBISProcessor openBISProcessor) {
 
-        super(globalSettingsManager);
+        super(globalSettingsManager, openBISProcessor);
 
         // Listen for when a node is about to be opened (for lazy loading)
         tree.addTreeWillExpandListener(this);

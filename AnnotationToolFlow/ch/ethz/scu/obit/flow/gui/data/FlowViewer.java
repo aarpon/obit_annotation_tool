@@ -30,6 +30,7 @@ import ch.ethz.scu.obit.flow.processors.data.model.Tube;
 import ch.ethz.scu.obit.flow.processors.data.model.UserFolder;
 import ch.ethz.scu.obit.flow.processors.data.model.Well;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
+import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 
 /**
  * Simple graphical viewer for the AbstractFlowProcessor
@@ -41,9 +42,10 @@ public final class FlowViewer extends AbstractViewer {
      * Constructor
      * @param globalSettingsManager global settings manager.
      */
-    public FlowViewer(GlobalSettingsManager globalSettingsManager) {
+    public FlowViewer(GlobalSettingsManager globalSettingsManager,
+            OpenBISProcessor openBISProcessor) {
 
-        super(globalSettingsManager);
+        super(globalSettingsManager, openBISProcessor);
     }
 
     /**

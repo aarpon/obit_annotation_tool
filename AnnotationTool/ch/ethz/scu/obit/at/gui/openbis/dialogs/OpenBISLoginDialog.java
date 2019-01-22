@@ -1,4 +1,4 @@
-package ch.ethz.scu.obit.at.gui.dialogs;
+package ch.ethz.scu.obit.at.gui.openbis.dialogs;
 
 import java.awt.Color;
 import java.awt.Font;

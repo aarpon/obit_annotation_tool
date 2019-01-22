@@ -1,7 +1,7 @@
-package ch.ethz.scu.obit.at.gui.editors.data.model;
+package ch.ethz.scu.obit.at.gui.data;
 
 import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
-import ch.ethz.scu.obit.at.gui.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor.ProjectInfo;
 
 /**
  * Object that collects all relevant metadata from the Data Model and the
@@ -22,7 +22,7 @@ public abstract class AbstractMetadataMapper {
     /**
      * openBIS project node (from the openBIS viewer)
      */
-    public OpenBISProjectNode openBISProjectNode;
+    public ProjectInfo projectInfo;
 
     /**
      * Get the openBIS Experiment Identifier
@@ -42,10 +42,10 @@ public abstract class AbstractMetadataMapper {
      * @param openBISProjectNode openBIS project node (from the openBIS viewer)
      */
     public AbstractMetadataMapper(ExperimentNode experimentNode,
-            OpenBISProjectNode openBISProjectNode) {
+            ProjectInfo projectInfo) {
 
         this.experimentNode = experimentNode;
-        this.openBISProjectNode = openBISProjectNode;
+        this.projectInfo = projectInfo;
 
     }
 }

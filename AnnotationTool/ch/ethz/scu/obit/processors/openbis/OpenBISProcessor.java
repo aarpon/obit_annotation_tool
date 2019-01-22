@@ -12,7 +12,7 @@ import javax.swing.JOptionPane;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 
-import ch.ethz.scu.obit.at.gui.dialogs.OpenBISLoginDialog;
+import ch.ethz.scu.obit.at.gui.openbis.dialogs.OpenBISLoginDialog;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.sis.openbis.generic.asapi.v3.IApplicationServerApi;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
@@ -271,6 +271,11 @@ public class OpenBISProcessor {
 
     /**
      * Returns the list of Spaces in openBIS (as visible for current user).
+     *
+     * The spaces (with the contained projects and experiments) are cached.
+     * On a second call, the cached version is returned. To force a retrieval,
+     * call resetData() first.
+     *
      * @return list of Spaces.
      */
     public SearchResult<Space> getSpacesWithProjectsAndExperiments() {
@@ -311,6 +316,11 @@ public class OpenBISProcessor {
 
     /**
      * Returns the list of Spaces in openBIS (as visible for current user).
+     *
+     * The spaces (with the contained projects) are cached.
+     * On a second call, the cached version is returned. To force a retrieval,
+     * call resetData() first.
+     *
      * @return list of Spaces.
      */
     public SearchResult<Space> getSpacesWithProjects() {
@@ -426,6 +436,21 @@ public class OpenBISProcessor {
         // Return the samples
         return samples;
     }
+
+    //    /**
+    //     * Return the tags for the given Space.
+    //     *
+    //     * A tag is a sample of type ORGANIZATION_UNIT stored in the
+    //     * experiment ORGANIZATION_UNITS_COLLECTION.
+    //     *
+    //     * The tags are cached.
+    //     *
+    //     * @param space Space to be queried.
+    //     * @return list of tags.
+    //     */
+    //    public List<Sample> getTagsForSpace(Space space) {
+    //
+    //    }
 
     /**
      * Check whether the v3 API is initialized properly and the session is active.
@@ -594,6 +619,138 @@ public class OpenBISProcessor {
                     System.out.println("Could not log oug from openBIS: " + e.getMessage());
                 }
             }
+        }
+    }
+
+    /**
+     * Return the default target openBIS project as set in the User settings
+     * or the first returned project from openBIS if none is set.
+     * @return ProjectInfo object for the project.
+     */
+    public ProjectInfo getDefaultProjectOrFirst() {
+
+        // Do we have a valid session?
+        if (v3_api == null) {
+            return null;
+        }
+
+        // This call might be cached already.
+        SearchResult<Space> spaces = getSpacesWithProjects();
+
+        // Retrieve the default target project from the User settings or
+        // revert to the first project in the list if none is set.
+        String defaultProject = globalSettingsManager.getDefaultProject();
+
+        // Make sure the identifier is valid, otherwise return first project
+
+        String spaceName = "";
+        if (! defaultProject.equals("")) {
+            // Extract the space name
+            int index = defaultProject.indexOf("/", 1);
+            if (index == -1) {
+                // Do not search!
+                defaultProject = "";
+            } else {
+                // Drop the first '/' and stop before the one we found
+                spaceName = defaultProject.substring(1, index);
+            }
+        }
+
+        // Retrieve the node
+        if (defaultProject.equals("")) {
+
+            // Just return the first project node we find
+
+            for (int i = 0; i < spaces.getTotalCount(); i++) {
+
+                // Get ith space
+                Space space = spaces.getObjects().get(i);
+
+                // Retrieve the children
+                List<Project> projects = space.getProjects();
+
+                int nProjects = projects.size();
+                if (nProjects == 0) {
+                    continue;
+                }
+
+                for (int j = 0; j < nProjects; j++) {
+
+                    Project p = projects.get(j);
+
+                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                        continue;
+                    }
+
+                    ProjectInfo projectInfo = new ProjectInfo(p, space);
+                    return projectInfo;
+                }
+            }
+
+        } else {
+
+            // Find the project with the correct identifier
+
+            for (int i = 0; i < spaces.getTotalCount(); i++) {
+
+                // Get ith space
+                Space space = spaces.getObjects().get(i);
+
+                if (! space.getCode().equals(spaceName)) {
+                    continue;
+                }
+
+                // Retrieve the children
+                List<Project> projects = space.getProjects();
+
+                int nProjects = projects.size();
+                if (nProjects == 0) {
+                    continue;
+                }
+
+                for (int j = 0; j < nProjects; j++) {
+
+                    Project p = projects.get(j);
+
+                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                        continue;
+                    }
+
+                    // Check whether this is the default one
+                    if (p.getIdentifier().toString().equals(defaultProject)) {
+
+                        ProjectInfo projectInfo = new ProjectInfo(p, space);
+                        return projectInfo;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Collect information for a Project
+     *
+     */
+    public class ProjectInfo {
+
+        public Space space;
+        public Project project;
+        public String spaceIdentifier;
+        public String spaceCode;
+        public String projectIdentifier;
+        public String projectCode;
+
+
+        public ProjectInfo(Project project, Space space) {
+
+            this.space = space;
+            this.project = project;
+            this.spaceIdentifier = space.getPermId().toString();
+            this.spaceCode= space.getCode();
+            this.projectIdentifier = project.getIdentifier().toString();
+            this.projectCode = project.getCode();
         }
     }
 

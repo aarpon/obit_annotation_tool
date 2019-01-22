@@ -20,9 +20,11 @@ import javax.swing.WindowConstants;
 
 import org.springframework.remoting.RemoteAccessException;
 
+import ch.ethz.scu.obit.at.gui.data.AbstractMetadataManager;
+import ch.ethz.scu.obit.at.gui.data.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.data.AbstractViewer;
+import ch.ethz.scu.obit.at.gui.data.MetadataManagerFactory;
 import ch.ethz.scu.obit.at.gui.data.ViewerFactory;
-import ch.ethz.scu.obit.at.gui.editors.data.EditorContainer;
 import ch.ethz.scu.obit.at.gui.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
@@ -116,7 +118,8 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
 
         // Add the metadata viewer
         try {
-            metadataViewer = ViewerFactory.createViewer(globalSettingsManager);
+            metadataViewer = ViewerFactory.createViewer(globalSettingsManager,
+                    openBISProcessor);
         } catch (Exception e1) {
             System.err.println("There was a problem instantiating "
                     + "the tools for current acquisition station.");
@@ -152,8 +155,8 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
         // Add the editor: it is important to create this object as
         // the last one, since it requires non-null references to the
         // metadata, the openBIS viewers, and the output pane!
-        EditorContainer editorContainer = new EditorContainer(
-                metadataViewer, openBISViewer, outputPane, globalSettingsManager);
+        //        EditorContainer editorContainer = new EditorContainer(
+        //                metadataViewer, openBISViewer, outputPane, globalSettingsManager);
 
         // Set constraints and add widget
         //        constraints.gridx = 1;
@@ -165,12 +168,17 @@ public final class AnnotationToolWindow extends JFrame implements ActionListener
         //        constraints.insets = new Insets(5, 0, 0, 5);
         //        mainPanel.add(editorContainer, constraints);
 
+        // Metadata manager
+        AbstractMetadataManager<? extends AbstractMetadataMapper> metadataManager =
+                MetadataManagerFactory.createEditor(
+                        globalSettingsManager, metadataViewer, openBISViewer, openBISProcessor);
+
         // Add observers to the viewers and the editor container.
-        metadataViewer.addObserver(editorContainer.getEditor());
-        metadataViewer.addObserver(editorContainer);
-        openBISViewer.addObserver(editorContainer.getEditor());
-        openBISViewer.addObserver(editorContainer);
-        editorContainer.getEditor().addObserver(editorContainer);
+        metadataViewer.addObserver(metadataManager);
+        //        metadataViewer.addObserver(editorContainer);
+        openBISViewer.addObserver(metadataManager);
+        //        openBISViewer.addObserver(editorContainer);
+        //editorContainer.getEditor().addObserver(editorContainer);
 
         // Add a "Send to openBIS" button
         sendToOpenBISButton = new JButton("Send to openBIS");

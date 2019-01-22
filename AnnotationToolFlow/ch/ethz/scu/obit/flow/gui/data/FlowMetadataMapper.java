@@ -1,14 +1,14 @@
-package ch.ethz.scu.obit.flow.gui.editors.data.model;
+package ch.ethz.scu.obit.flow.gui.data;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import ch.ethz.scu.obit.at.gui.data.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
-import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
-import ch.ethz.scu.obit.at.gui.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
 import ch.ethz.scu.obit.flow.processors.data.model.Tray;
+import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor.ProjectInfo;
 
 /**
  * Collects all relevant metadata to allow the registration of an
@@ -29,10 +29,10 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
      * @param openBISProjectNode  openBIS project node (in the openBIS viewer)
      */
     public FlowMetadataMapper(ExperimentNode experimentNode,
-            OpenBISProjectNode openBISProjectNode) {
+            ProjectInfo projectInfo) {
 
         // Call the base constructor
-        super(experimentNode, openBISProjectNode);
+        super(experimentNode, projectInfo);
 
         // Set the supported geometries
         this.supportedTrayGeometries = new ArrayList<String>();
@@ -69,7 +69,7 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
      * @return the experiment name
      */
     public String getProjectName() {
-        return openBISProjectNode.toString();
+        return projectInfo.projectCode;
     }
 
     /**
@@ -78,7 +78,10 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
      */
     @Override
     public String getOpenBISExerimentIdentifier() {
-        String openBISProjectID = openBISProjectNode.getIdentifier();
+        if (projectInfo == null) {
+            return "";
+        }
+        String openBISProjectID = projectInfo.projectIdentifier;
         Experiment e = (Experiment) experimentNode.getUserObject();
         return (openBISProjectID + "/" + e.getCode()).toUpperCase();
     }
@@ -89,7 +92,10 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
      */
     @Override
     public String getOpenBISSpaceIdentifier() {
-        String openBISProjectID = openBISProjectNode.getIdentifier();
+        if (projectInfo == null) {
+            return "";
+        }
+        String openBISProjectID = projectInfo.projectIdentifier;
 
         // Find the first occurrence of / which is NOT at the beginning
         int indx = openBISProjectID.indexOf("/", 1);

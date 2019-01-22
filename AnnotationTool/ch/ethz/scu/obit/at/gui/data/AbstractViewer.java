@@ -43,8 +43,8 @@ import javax.swing.tree.TreePath;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.ObserverActionParameters;
+import ch.ethz.scu.obit.at.gui.data.dialogs.DataPickProjectDialog;
 import ch.ethz.scu.obit.at.gui.data.model.AbstractNode;
-import ch.ethz.scu.obit.at.gui.data.model.CollectionNode;
 import ch.ethz.scu.obit.at.gui.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.data.view.DataViewerTree;
@@ -56,6 +56,10 @@ import ch.ethz.scu.obit.microscopy.gui.data.model.MicroscopyCompositeFileNode;
 import ch.ethz.scu.obit.microscopy.gui.data.model.MicroscopyFileNode;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
+import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
+import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor.ProjectInfo;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 
 /**
  * Abstract viewer for processors
@@ -63,6 +67,9 @@ import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
  */
 abstract public class AbstractViewer extends Observable
 implements ActionListener, TreeSelectionListener {
+
+    // Store a reference to the OpenBISProcessor
+    protected OpenBISProcessor openBISProcessor;
 
     protected GlobalSettingsManager globalSettingsManager;
 
@@ -139,9 +146,11 @@ implements ActionListener, TreeSelectionListener {
      * The constructor creates the actual panel to be displayed on the UI.
      * @param globalSettingsManager The global settings manager.
      */
-    public AbstractViewer(GlobalSettingsManager globalSettingsManager) {
+    public AbstractViewer(GlobalSettingsManager globalSettingsManager,
+            OpenBISProcessor openBISProcessor) {
 
         this.globalSettingsManager = globalSettingsManager;
+        this.openBISProcessor = openBISProcessor;
 
         // Create a panel
         panel = new JPanel();
@@ -941,21 +950,8 @@ implements ActionListener, TreeSelectionListener {
         });
         popup.add(navigateToUserFolderMenuItem);
 
-        return popup;
-    }
-
-    /**
-     * Create a popup menu with actions for the "All experiments" collection node.
-     * @param node Collection node to which the popup menu is associated.
-     * @return a JPopupMenu for the passed item
-     */
-    private JPopupMenu createCollectionNodePopup(final CollectionNode node) {
-
-        // Create the popup menu.
-        JPopupMenu popup = new JPopupMenu();
-
-        // Set target project to all experiments
-        JMenuItem targetProjectMenuItem = new JMenuItem("Set target project");
+        // Set target project for all experiments
+        JMenuItem targetProjectMenuItem = new JMenuItem("Set target project for all experiments");
         targetProjectMenuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -968,7 +964,7 @@ implements ActionListener, TreeSelectionListener {
         popup.add(targetProjectMenuItem);
 
         // Add tags
-        JMenuItem setTagsMenuItem = new JMenuItem("Set tags");
+        JMenuItem setTagsMenuItem = new JMenuItem("Set tags for all experiments");
         setTagsMenuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -1000,8 +996,21 @@ implements ActionListener, TreeSelectionListener {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                JOptionPane.showMessageDialog(null, "Implement me!");
+                System.out.println(e.getActionCommand());
 
+                // Get the list of Spaces and Projects
+                SearchResult<Space> spaces = openBISProcessor.getSpacesWithProjects();
+
+                // Get the default project
+                ProjectInfo projectInfo = openBISProcessor.getDefaultProjectOrFirst();
+
+                // Open a modal dialog
+                DataPickProjectDialog dataPickProjectDialog =
+                        new DataPickProjectDialog(spaces,
+                                projectInfo.space, projectInfo.project);
+
+                // Retrieve the result
+                ProjectInfo targetProject = dataPickProjectDialog.getTargetProject();
             }
         });
         popup.add(targetProjectMenuItem);
@@ -1331,10 +1340,6 @@ implements ActionListener, TreeSelectionListener {
                 JPopupMenu popup =
                         createRootNodePopup((RootNode) node);
                 popup.show(e.getComponent(), x, y);
-            } else if (nodeType.equals("CollectionNode")) {
-                JPopupMenu popup =
-                        createCollectionNodePopup((CollectionNode) node);
-                popup.show(e.getComponent(), x, y);
             } else if (nodeType.equals("ExperimentNode")) {
                 JPopupMenu popup =
                         createExperimentNodePopup((ExperimentNode) node);
@@ -1353,4 +1358,30 @@ implements ActionListener, TreeSelectionListener {
         }
     }
 
+    /**
+     * Return the list of Experiment Nodes.
+     * @return List of ExperimentNode objects.
+     */
+    public List<ExperimentNode> getListOfExperimentNodes() {
+
+        // Clear the tree model
+        TreeModel model = tree.getModel();
+        if (model == null) {
+            return new ArrayList<ExperimentNode>();
+        }
+
+        RootNode rootNode = (RootNode) model.getRoot();
+        if (rootNode == null) {
+            return new ArrayList<ExperimentNode>();
+        }
+
+        List<ExperimentNode> experimentNodes = new ArrayList<ExperimentNode>();
+
+        // Collect the references to all ExperimentNodes
+        for (int i = 0; i < rootNode.getChildCount(); i++) {
+            experimentNodes.add((ExperimentNode) rootNode.getChildAt(i));
+        }
+
+        return experimentNodes;
+    }
 }
