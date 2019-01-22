@@ -8,9 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.ExecutionException;
@@ -50,11 +48,12 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 
 /**
  * Graphical user interface to log in to openBIS and choose where to store
@@ -67,7 +66,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     protected JPanel panel;
     protected JButton scanButton;
     protected JLabel userTags;
-    protected JList<String> tagList;
+    protected JList<String> userTagList;
 
     private GlobalSettingsManager globalSettingsManager;
     private OpenBISProcessor openBISProcessor;
@@ -119,7 +118,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a title JLabel
-        JLabel title = new JLabel("<html><b>openBIS viewer</b></html>");
+        JLabel title = new JLabel("<html><b>openBIS</b></html>");
 
         // Add the tree viewer to the layout
         constraints.gridx = 0;
@@ -257,7 +256,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Check that the session is still open (we just check the
         // facade, the queryFacade is not necessary
-        if (!openBISProcessor.checkSession()) {
+        if (!openBISProcessor.isLoggedIn()) {
             JOptionPane.showMessageDialog(this.panel,
                     "The openBIS session is no longer valid!\n" +
                             "Please try logging in again.",
@@ -280,9 +279,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         setTagList(metaprojects);
 
         // Get spaces
-        List<SpaceWithProjectsAndRoleAssignments> spaces =
-                openBISProcessor.getSpaces();
-        if (spaces.isEmpty()) {
+        SearchResult<Space> spaces = openBISProcessor.getSpacesWithProjects();
+        if (spaces.getTotalCount() == 0) {
             JOptionPane.showMessageDialog(this.panel,
                     "Sorry, there are no (accessible) spaces.\n\n" +
                             "Please ask your administrator to create a " +
@@ -297,7 +295,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // Keep a count of the usable projects
         int nProjects = 0;
 
-        for (SpaceWithProjectsAndRoleAssignments s : spaces) {
+        for (Space s : spaces.getObjects()) {
 
             // Add the space
             space = new OpenBISSpaceNode(s);
@@ -305,18 +303,17 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // Get the projects for current space
             List<Project> projects = s.getProjects();
-            projects.sort(new Comparator<Project>() {
-
-                @Override
-                public int compare(Project p1, Project p2) {
-                    return p1.getCode().compareTo(p2.getCode());
-                }
-            });
 
             // We add the projects -- experiments and samples will be
             // lazily loaded on node expansion
             for (Project p : projects) {
 
+                // We keep but do not display projects with code
+                // "COMMON_ORGANIZATION_UNITS", since those store the
+                // shared tags for the space.
+                if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                    continue;
+                }
                 // Add the project
                 project = new OpenBISProjectNode(p);
                 space.add(project);
@@ -364,7 +361,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Inform
         outputPane.log("Retrieving openBIS structure completed.");
-
     }
 
     /**
@@ -438,14 +434,14 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // If we have a Project, we load the contained Experiments
             Project p = (Project) obj;
-            List<String> expId = new ArrayList<String>();
-            expId.add(p.getIdentifier());
+            List<String> projId = new ArrayList<String>();
+            projId.add(p.getIdentifier().toString());
 
             // Then define and start the worker
             class Worker extends SwingWorker<List<Experiment>, Void> {
 
                 final private OpenBISProcessor o;
-                final private List<String> eId;
+                final private List<String> pId;
                 final private AbstractOpenBISNode n;
                 final private Project p;
 
@@ -456,10 +452,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                  * @param n Node to which to add the Experiment nodes.
                  * @param p Project reference.
                  */
-                public Worker(OpenBISProcessor o, List<String> eId,
+                public Worker(OpenBISProcessor o, List<String> pId,
                         AbstractOpenBISNode n, Project p) {
                     this.o = o;
-                    this.eId = eId;
+                    this.pId = pId;
                     this.n = n;
                     this.p = p;
                 }
@@ -467,7 +463,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 @Override
                 public List<Experiment> doInBackground() {
 
-                    return (o.getExperimentsForProjects(eId));
+                    return (o.getExperimentsForProjects(p));
 
                 }
 
@@ -486,6 +482,13 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                     for (Experiment e : experiments) {
+
+                        // We keep the experiment with code "ORGANIZATION_UNITS_COLLECTION"
+                        // but we do not add it to the tree since it contains the user tags.
+                        if (e.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
+                            continue;
+                        }
+
                         // Add the experiments
                         OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
                         model.insertNodeInto(experiment, n, n.getChildCount());
@@ -503,14 +506,14 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             };
 
             // Run the worker!
-            (new Worker(openBISProcessor, expId, node, p)).execute();
+            (new Worker(openBISProcessor, projId, node, p)).execute();
 
         } else if (className.equals("Experiment")) {
 
             // If we have an Experiment, we load the contained Samples
             Experiment e = (Experiment) obj;
             List<String> experimentId = new ArrayList<String>();
-            experimentId.add(e.getIdentifier());
+            experimentId.add(e.getIdentifier().toString());
 
             // To be restored -- and extended -- in the future.
 
@@ -554,7 +557,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 @Override
                 public List<Sample> doInBackground() {
 
-                    return (o.getSamplesForExperiments(eId));
+                    return (o.getSamplesForExperiments(this.e));
 
                 }
 
@@ -632,7 +635,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // Add relevant context menu
             if (nodeType.equals("OpenBISSpaceNode")) {
-
                 JPopupMenu popup =
                         createSpacePopup((OpenBISSpaceNode) node);
                 popup.show(e.getComponent(), x, y);
@@ -657,9 +659,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         JPopupMenu popup = new JPopupMenu();
 
         // Create new project
-        String menuEntry = "Create new project";
-        JMenuItem menuItem = new JMenuItem(menuEntry);
-        menuItem.addActionListener(new ActionListener() {
+        JMenuItem createProjectMenuItem = new JMenuItem("Create new project");
+        createProjectMenuItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e)
@@ -668,10 +669,21 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                     // Rescan
                     scan();
                 }
-
             }
         });
-        popup.add(menuItem);
+        popup.add(createProjectMenuItem);
+
+        // Create new tag
+        JMenuItem createTagMenuItem = new JMenuItem("Create new tag");
+        createTagMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                JOptionPane.showMessageDialog(null, "Implement me!");
+            }
+        });
+        popup.add(createTagMenuItem);
 
         return popup;
     }
@@ -717,7 +729,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private boolean createNewProject(final OpenBISSpaceNode node) {
 
         // Retrieve and store the createProject service
-        if (!openBISProcessor.retrieveAndStoreServices()) {
+        if (!openBISProcessor.isLoggedIn()) {
 
             // TODO Throw an exception to distinguish the case where
             // the project could not be created.
@@ -726,9 +738,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         }
 
         // Get the space object from the openBIS node
-        SpaceWithProjectsAndRoleAssignments space =
-                (SpaceWithProjectsAndRoleAssignments)
-                node.getUserObject();
+        Space space = (Space) node.getUserObject();
 
         // Ask the user to specify a project name
         String projectCode = JOptionPane.showInputDialog(
@@ -738,32 +748,31 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             return false;
         }
 
-        // Call the ingestion server and collect the output
-        QueryTableModel tableModel;
+        // Create the project
+        List<ProjectPermId> createdProjects;
         try {
-            tableModel = openBISProcessor.createProject(
+            createdProjects = openBISProcessor.createProject(
                     space.getCode(), projectCode);
         } catch (Exception e) {
+            outputPane.err("Could not create project /" + space.getCode() +
+                    "/" + projectCode + "! " + e.getMessage());
+            return false;
+        }
+
+        // One more check
+        if (createdProjects.size() == 0) {
             outputPane.err("Could not create project /" + space.getCode() +
                     "/" + projectCode + "! Please contact your "
                     + "openBIS administrator!");
             return false;
         }
 
-        // Display the output
-        String success= "";
-        String message = "";
-        List<Serializable[]> rows = tableModel.getRows();
-        for (Serializable[] row : rows) {
-            success = (String)row[0];
-            message = (String)row[1];
-            if (success.equals("true")) {
-                outputPane.log(message);
-                return true;
-            }
-        }
-        outputPane.err(message);
-        return false;
+        // Inform
+        outputPane.log("Project /" + space.getCode() +
+                "/" + projectCode + " created successfully.");
+
+        // Return success
+        return true;
     }
 
     /**
@@ -774,12 +783,11 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private boolean createNewMetaProject() {
 
         // Retrieve and store the createProject service
-        if (!openBISProcessor.retrieveAndStoreServices()) {
+        if (!openBISProcessor.isLoggedIn()) {
 
             // TODO Throw an exception to distinguish the case where
             // the project could not be created.
-            outputPane.err("Could not retrieve openBIS services! " +
-                    "Please contact your administrator!");
+            outputPane.err("No valid session! Please log in first!");
             return false;
 
         }
@@ -822,38 +830,24 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             return false;
         }
 
-        // Call the ingestion server and collect the output
-        QueryTableModel tableModel;
-        try {
-            tableModel = openBISProcessor.createMetaProject(metaprojectCode,
-                    metaprojectDescr);
-        } catch (Exception e) {
-            outputPane.err("Could not create tag /" + metaprojectCode +
-                    "! Please contact your openBIS administrator!");
+        // @TODO: This is currently disabled
+
+        boolean success = openBISProcessor.createMetaProject(metaprojectCode,
+                metaprojectDescr);
+
+        if (success) {
+            // Retrieve the updated metaproject list
+            // and update the view
+            outputPane.log("Successfully created tag " + metaprojectCode + ".");
+            clearTagList();
+            setTagList(openBISProcessor.getMetaprojects());
+            return true;
+        } else {
+            outputPane.err("Could not create tag " + metaprojectCode + "!");
             return false;
         }
-
-        // Display the output
-        String success= "";
-        String message = "";
-        List<Serializable[]> rows = tableModel.getRows();
-        for (Serializable[] row : rows) {
-            success = (String)row[0];
-            message = (String)row[1];
-            if (success.equals("true")) {
-                outputPane.log(message);
-
-                // Now retrieve the updated metaproject list
-                // and update the view
-                clearTagList();
-                setTagList(openBISProcessor.getMetaprojects());
-
-                return true;
-            }
-        }
-        outputPane.err(message);
-        return false;
     }
+
 
     /**
      * Set the project with given identifier as the default target.
@@ -868,7 +862,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
      * Clear the list of tags in the UI.
      */
     private void clearTagList() {
-        tagList.setModel(new DefaultListModel<String>());
+        userTagList.setModel(new DefaultListModel<String>());
     }
 
     /**
@@ -879,13 +873,17 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private void setTagList(List<String> metaprojects) {
         clearTagList();
         DefaultListModel<String> listModel =
-                (DefaultListModel<String>) tagList.getModel();
+                (DefaultListModel<String>) userTagList.getModel();
         for (String s : metaprojects) {
             listModel.addElement(s);
         }
 
     }
 
+    /**
+     * Create the panel that contains the openBIS tree viewer
+     * @return a JPanel.
+     */
     private JPanel openBISViewerPanel() {
 
         // Create a panel
@@ -1020,12 +1018,12 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         tagsPanel.add(addTagButton, constraints);
 
         // Add the list of tags
-        tagList = new JList<String>(new DefaultListModel<String>());
-        tagList.setVisibleRowCount(5);
-        tagList.getSelectionModel().setSelectionMode(
+        userTagList = new JList<String>(new DefaultListModel<String>());
+        userTagList.setVisibleRowCount(5);
+        userTagList.getSelectionModel().setSelectionMode(
                 ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        tagList.setDragEnabled(true);
-        JScrollPane tagScrollPane = new JScrollPane(tagList);
+        userTagList.setDragEnabled(true);
+        JScrollPane tagScrollPane = new JScrollPane(userTagList);
 
         // Add to the layout
         constraints.gridx = 0;
@@ -1039,5 +1037,4 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         return tagsPanel;
     }
-
 }

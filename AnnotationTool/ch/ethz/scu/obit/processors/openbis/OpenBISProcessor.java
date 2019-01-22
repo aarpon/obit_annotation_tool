@@ -1,7 +1,6 @@
 package ch.ethz.scu.obit.processors.openbis;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,20 +14,27 @@ import org.springframework.remoting.RemoteConnectFailureException;
 
 import ch.ethz.scu.obit.at.gui.dialogs.OpenBISLoginDialog;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
-import ch.systemsx.cisd.common.exceptions.InvalidSessionException;
+import ch.ethz.sis.openbis.generic.asapi.v3.IApplicationServerApi;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.entitytype.id.EntityTypePermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.create.ExperimentCreation;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.fetchoptions.ExperimentFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.id.ExperimentPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.search.ExperimentSearchCriteria;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.create.ProjectCreation;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.fetchoptions.ProjectFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.search.ProjectSearchCriteria;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.fetchoptions.SampleFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.fetchoptions.SpaceFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.id.SpacePermId;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.search.SpaceSearchCriteria;
 import ch.systemsx.cisd.common.exceptions.UserFailureException;
-import ch.systemsx.cisd.openbis.common.api.client.ServiceFinder;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.IOpenbisServiceFacade;
-import ch.systemsx.cisd.openbis.dss.client.api.v1.OpenbisServiceFacadeFactory;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.IGeneralInformationService;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SpaceWithProjectsAndRoleAssignments;
-import ch.systemsx.cisd.openbis.generic.shared.basic.dto.Metaproject;
-import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.FacadeFactory;
-import ch.systemsx.cisd.openbis.plugin.query.client.api.v1.IQueryApiFacade;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.AggregationServiceDescription;
-import ch.systemsx.cisd.openbis.plugin.query.shared.api.v1.dto.QueryTableModel;
+import ch.systemsx.cisd.common.spring.HttpInvokerUtils;
 
 /**
  * Processor that takes care of getting user credentials and logging in
@@ -43,18 +49,11 @@ public class OpenBISProcessor {
     private String userName = "";
     private String userPassword = "";
     private int timeout = 60000;
-    private AtomicReference<IOpenbisServiceFacade> facade =
-            new AtomicReference<IOpenbisServiceFacade>();
-    private AtomicReference<IQueryApiFacade> queryFacade =
-            new AtomicReference<IQueryApiFacade>();
-    private AtomicReference<IGeneralInformationService> infoService =
-            new AtomicReference<IGeneralInformationService>();
 
-    private boolean isLoggedIn = false;
+    private IApplicationServerApi v3_api;
+    private String v3_sessionToken;
 
-    private AggregationServiceDescription createProjectService = null;
-
-    private AggregationServiceDescription createMetaProjectService = null;
+    //    private AggregationServiceDescription createMetaProjectService = null;
 
     private AtomicReference<String> loginErrorMessage =
             new AtomicReference<String>("");
@@ -62,6 +61,10 @@ public class OpenBISProcessor {
             new AtomicReference<String>("");
     private AtomicBoolean loginErrorRecoverable = new AtomicBoolean(true);
 
+    // Cache spaces and projects
+    private boolean dataIsCached = false;
+    private boolean dataWithExperiments = false;
+    private SearchResult<Space> cachedSpacesWithProjects = null;
 
     /**
      * Constructor
@@ -75,6 +78,10 @@ public class OpenBISProcessor {
         // Set the currently active server
         this.openBISURL = globalSettingsManager.getActiveServer();
 
+        // Initialize cache
+        this.dataIsCached = false;
+        this.dataWithExperiments = false;
+        this.cachedSpacesWithProjects = null;
     }
 
     /**
@@ -82,34 +89,10 @@ public class OpenBISProcessor {
      * @return user name or empty String if log on was not successful
      */
     public String getUserName() {
-        if (!isLoggedIn) {
+        if (!isLoggedIn()) {
             return "";
         }
         return userName;
-    }
-
-    /**
-     * Check whether we are currently logged in to openBIS.
-     * @return true if we are logged in, false otherwise.
-     */
-    public boolean isLoggedIn() {
-        return isLoggedIn && facade.get() != null;
-    }
-
-    /**
-     * Check if the facades are still valid.
-     * @return true if they are still valid, false otherwise.
-     */
-    public boolean checkSession() {
-        try {
-            facade.get().checkSession();
-        } catch ( InvalidSessionException e ) {
-            facade.set(null);
-            queryFacade.set(null);
-            isLoggedIn = false;
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -146,125 +129,69 @@ public class OpenBISProcessor {
         }
 
         // Are we already logged in?
-        if (isLoggedIn) {
+        if (isLoggedIn()) {
             return true;
         }
 
-        // Create a thread for logging in to openBIS and returning an
-        // IOpenbisServiceFacade
-        Thread serviceFacadeCreator = new Thread() {
+        // Create a thread for logging in to openBIS using the V3 API
+        Thread v3APILogin = new Thread() {
 
             @Override
             public void run() {
 
-                // Create an IOpenbisServiceFacade to query openBIS for
-                // projects, experiments and samples.
-                // If the factory returns a valid object, it means that
-                // the credentials provided were accepted and the user
-                // was successfully logged in.
+                // The V3 API uses a slightly different URL
+                String v3_apiURL = openBISURL  + "/openbis" + IApplicationServerApi.SERVICE_URL;
+
+                // Log in using V3 API
+                v3_api = HttpInvokerUtils.createServiceStub(
+                        IApplicationServerApi.class, v3_apiURL, timeout);
+
+                // login to obtain a session token
                 try {
-                    facade = new AtomicReference<IOpenbisServiceFacade>();
-                    facade.set(OpenbisServiceFacadeFactory.tryCreate(userName,
-                            userPassword, openBISURL, timeout));
-                } catch (UserFailureException e) {
-                    facade.set(null); reactToUserFailureException();
+
+                    // Try logging in
+                    v3_sessionToken = v3_api.login(userName, userPassword);
+
+                    if (v3_sessionToken != null) {
+                        // Register a class to log out from openBIS on close or
+                        // runtime shutdown
+                        Runtime.getRuntime().addShutdownHook(new V3APILogoutOnShutdown(
+                                v3_api, v3_sessionToken));
+                    } else {
+
+                        // Login failed for bad credentials
+                        v3_api = null;
+                        v3_sessionToken = "";
+                        reactToUserFailureException();
+                    }
+
                 } catch (RemoteConnectFailureException e) {
-                    facade.set(null); reactToRemoteConnectFailureException();
+
+                    // Login failed for connection issues
+                    v3_api = null;
+                    v3_sessionToken = "";
+                    reactToRemoteConnectFailureException();
+
                 } catch (RemoteAccessException e) {
-                    facade.set(null); reactToRemoteAccessException();
+
+                    // Login failed for connection issues
+                    v3_api = null;
+                    v3_sessionToken = "";
+                    reactToRemoteAccessException();
+
                 }
             }
         };
 
-        // Create a thread for logging in to openBIS and returning an
-        // IQueryApiFacade
-        Thread queryFacadeCreator = new Thread() {
+        // Log in using the V3 API
+        v3APILogin.start();
 
-            @Override
-            public void run() {
+        // Wait for all threads to finish
+        v3APILogin.join();
 
-                // Create also an IQueryApiFacade to access the reporting
-                // plugins on the server.
-                try {
-                    queryFacade = new AtomicReference<IQueryApiFacade>();
-                    queryFacade.set(FacadeFactory.create(openBISURL,
-                            userName, userPassword));
-                } catch (UserFailureException e) {
-                    queryFacade.set(null); reactToUserFailureException();
-                } catch (RemoteConnectFailureException e) {
-                    queryFacade.set(null); reactToRemoteConnectFailureException();
-                } catch (RemoteAccessException e) {
-                    queryFacade.set(null); reactToRemoteAccessException();
-                }
+        if (isLoggedIn() == true) {
 
-            }
-        };
-
-        // Create a thread for getting the metadata querying service
-        Thread infoServiceCreator = new Thread() {
-
-            @Override
-            public void run() {
-
-                // Create also an IQueryApiFacade to access the reporting
-                // plugins on the server.
-                try {
-                    // Instantiate metadata querying service
-                    ServiceFinder serviceFinder = new ServiceFinder("openbis",
-                            IGeneralInformationService.SERVICE_URL);
-                    infoService.set(serviceFinder.createService(
-                            IGeneralInformationService.class, openBISURL));
-                } catch (Exception e) {
-                    infoService.set(null);
-                }
-            }
-        };
-
-        // Should we accept self-signed certificates?
-        String acceptSelfSignedCerts = globalSettingsManager.acceptSelfSignedCertificates();
-
-        // Set the force-accept-ssl-certificate option if requested
-        // by the administrator
-        if (acceptSelfSignedCerts.equals("yes")) {
-            System.setProperty("force-accept-ssl-certificate", "true");
-        }
-
-        // Try logging in with current credentials
-        try {
-
-            // Create an IOpenbisServiceFacade in one thread to query
-            // openBIS for projects, experiments and samples.
-            serviceFacadeCreator.start();
-
-            // Create also an IQueryApiFacade in another thread to access
-            // the reporting plug-ins on the server.
-            queryFacadeCreator.start();
-
-            // Get the information service in yet another thread.
-            infoServiceCreator.start();
-
-            // Wait for all threads to finish
-            serviceFacadeCreator.join();
-            queryFacadeCreator.join();
-            infoServiceCreator.join();
-
-        } catch (InterruptedException e) {
-
-            // Thread interrupted
-            facade.set(null);
-            queryFacade.set(null);
-            infoService.set(null);
-            reactToInterruptedException();
-
-        }
-
-        // Set isLoggedIn to true
-        if (facade.get() != null && queryFacade.get() != null) {
-
-            // Successful login
-            isLoggedIn = true;
-
-            // Return success
+            // Authentication successful
             return true;
 
         } else {
@@ -279,7 +206,7 @@ public class OpenBISProcessor {
                 userPassword = "";
 
                 // Return false
-                isLoggedIn = false;
+                //                isLoggedIn = false;
                 return false;
 
             } else {
@@ -290,7 +217,6 @@ public class OpenBISProcessor {
             }
 
         }
-
         return false;
     }
 
@@ -300,10 +226,8 @@ public class OpenBISProcessor {
      * @throws RemoteAccessException If remote access failed.
      */
     public boolean logout() throws RemoteAccessException {
-        if (facade.get() != null && isLoggedIn && queryFacade.get() != null) {
-            facade.get().logout();
-            queryFacade.get().logout();
-            isLoggedIn = false;
+        if (isLoggedIn()) {
+            v3_api.logout(v3_sessionToken);
             return true;
         }
         return false;
@@ -314,67 +238,168 @@ public class OpenBISProcessor {
      * @return list of metaprojects.
      */
     public List<String> getMetaprojects() {
-        if (infoService.get() == null) {
-            return new ArrayList<String>();
-        }
-        List<Metaproject> metaprojects = infoService.get().listMetaprojects(
-                queryFacade.get().getSessionToken());
-        metaprojects.sort(new Comparator<Metaproject>() {
+        return new ArrayList<String>();
 
-            @Override
-            public int compare(Metaproject m1, Metaproject m2) {
-                return m1.getName().toLowerCase().compareTo(m2.getName().toLowerCase());
-            }
-        });
-        List<String> tags = new ArrayList<String>();
-        for (Metaproject m : metaprojects) {
-            tags.add(m.getName());
-        }
-        return tags;
+        //        if (infoService.get() == null) {
+        //            return new ArrayList<String>();
+        //        }
+        //        List<Metaproject> metaprojects = infoService.get().listMetaprojects(
+        //                queryFacade.get().getSessionToken());
+        //        metaprojects.sort(new Comparator<Metaproject>() {
+        //
+        //            @Override
+        //            public int compare(Metaproject m1, Metaproject m2) {
+        //                return m1.getName().toLowerCase().compareTo(m2.getName().toLowerCase());
+        //            }
+        //        });
+        //        List<String> tags = new ArrayList<String>();
+        //        for (Metaproject m : metaprojects) {
+        //            tags.add(m.getName());
+        //        }
+        //        return tags;
+    }
+
+    /**
+     * Reset the cached data.
+     */
+    public void resetData() {
+
+        this.dataIsCached = false;
+        this.dataWithExperiments = false;
+        this.cachedSpacesWithProjects = null;
     }
 
     /**
      * Returns the list of Spaces in openBIS (as visible for current user).
+     *
+     * The spaces (with the contained projects and experiments) are cached.
+     * On a second call, the cached version is returned. To force a retrieval,
+     * call resetData() first.
+     *
      * @return list of Spaces.
      */
-    public List<SpaceWithProjectsAndRoleAssignments> getSpaces() {
-        if (facade.get() == null) {
-            return new ArrayList<SpaceWithProjectsAndRoleAssignments>();
-        }
-        List<SpaceWithProjectsAndRoleAssignments> spaces = facade.get().getSpacesWithProjects();
-        spaces.sort(new Comparator<SpaceWithProjectsAndRoleAssignments>() {
+    public SearchResult<Space> getSpacesWithProjectsAndExperiments() {
 
-            @Override
-            public int compare(SpaceWithProjectsAndRoleAssignments s1,
-                    SpaceWithProjectsAndRoleAssignments s2) {
-                return s1.getCode().compareTo(s2.getCode());
-            }
-        });
-        return spaces;
+        // Do we have a valid session?
+        if (v3_api == null) {
+            return new SearchResult<Space>(new ArrayList<Space>(), 0);
+        }
+
+        // Is the data cached and with experiments?
+        if (dataIsCached && dataWithExperiments) {
+            return cachedSpacesWithProjects;
+        }
+
+        // Space
+        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
+        searchCriteria.withCode();
+        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
+        spaceFetchOptions.sortBy().code();
+
+        ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
+
+
+        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+        projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
+
+        spaceFetchOptions.withProjectsUsing(projectFetchOptions);
+
+        cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
+                searchCriteria, spaceFetchOptions);
+
+        // Update cache information
+        dataIsCached = true;
+        dataWithExperiments = true;
+
+        return cachedSpacesWithProjects;
+    }
+
+    /**
+     * Returns the list of Spaces in openBIS (as visible for current user).
+     *
+     * The spaces (with the contained projects) are cached.
+     * On a second call, the cached version is returned. To force a retrieval,
+     * call resetData() first.
+     *
+     * @return list of Spaces.
+     */
+    public SearchResult<Space> getSpacesWithProjects() {
+
+        // Do we have a valid session?
+        if (v3_api == null) {
+            return new SearchResult<Space>(new ArrayList<Space>(), 0);
+        }
+
+        // Is the data cached?
+        if (dataIsCached) {
+
+            // We return whether it has experiments or not,
+            // since spaces and projects will be there.
+            return cachedSpacesWithProjects;
+        }
+
+        // Space
+        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
+        searchCriteria.withCode();
+        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
+        spaceFetchOptions.sortBy().code();
+        spaceFetchOptions.withProjects();
+
+        cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
+                searchCriteria, spaceFetchOptions);
+
+        // Update cache information
+        dataIsCached = true;
+        dataWithExperiments = false;
+
+        return cachedSpacesWithProjects;
     }
 
     /**
      * Returns the list of Experiment for a project list (as visible for
      * current user).
-     * @param expId List of experiment ids.
+     * @param p Project to the queried for experiments.
      * @return list of Experiments.
      */
-    public ArrayList<Experiment> getExperimentsForProjects(
-            List<String> expId) {
-        if (facade.get() == null) {
+    public List<Experiment> getExperimentsForProjects(Project p) {
+
+        // Do we have a valid session?
+        if (! isLoggedIn()) {
             return new ArrayList<Experiment>();
         }
-        ArrayList<Experiment> exp = (ArrayList<Experiment>)
-                facade.get().listExperimentsForProjects(expId);
-        exp.sort(new Comparator<Experiment>() {
 
-            @Override
-            public int compare(Experiment e1, Experiment e2) {
-                return e1.getCode().compareTo(e2.getCode());
+        if (dataWithExperiments == true) {
+
+            // Retrieve the experiments. We can call getExperiments() since the
+            // the Experiments were fetched when searching for projects in
+            // getSpacesWithProjectsAndExperiments().
+            return p.getExperiments();
+
+        } else {
+
+            // We need to retrieve the experiments from openBIS
+            ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
+            searchCriteria.withCode();
+            searchCriteria.withPermId().thatEquals(p.getPermId().toString());
+            ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+            projectFetchOptions.sortBy().code();
+
+            ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
+            projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
+
+            SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
+                    searchCriteria, projectFetchOptions);
+
+            if (projects.getTotalCount() == 0) {
+                return new ArrayList<Experiment>();
             }
-        });
-        return (ArrayList<Experiment>)
-                facade.get().listExperimentsForProjects(expId);
+
+            // Get the project and extract the experiments
+            Project proj = projects.getObjects().get(0);
+            return proj.getExperiments();
+
+        }
+
     }
 
 
@@ -384,92 +409,119 @@ public class OpenBISProcessor {
      * @param expId List of experiment ids.
      * @return list of Samples.
      */
-    public ArrayList<Sample> getSamplesForExperiments(List<String> expId) {
-        if (facade == null) {
+    public List<Sample> getSamplesForExperiments(Experiment exp) {
+        if (! isLoggedIn()) {
             return new ArrayList<Sample>();
         }
-        return (ArrayList<Sample>)
-                facade.get().listSamplesForExperiments(expId);
+
+        // Search for Experiments with given code and fetch its samples
+        ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
+        searchCriteria.withPermId().thatEquals(exp.getPermId().toString());
+        ExperimentFetchOptions expFetchOptions = new ExperimentFetchOptions();
+        expFetchOptions.sortBy().code();
+        expFetchOptions.withSamplesUsing(new SampleFetchOptions());
+
+        SearchResult<Experiment> experiments = v3_api.searchExperiments(v3_sessionToken,
+                searchCriteria, expFetchOptions);
+
+        // Make sure that we found only one experiment
+        assert(experiments.getTotalCount() == 1);
+
+        // Get the experiment
+        Experiment experiment = experiments.getObjects().get(0);
+
+        // Get the samples
+        List<Sample> samples = experiment.getSamples();
+
+        // Return the samples
+        return samples;
     }
 
+    //    /**
+    //     * Return the tags for the given Space.
+    //     *
+    //     * A tag is a sample of type ORGANIZATION_UNIT stored in the
+    //     * experiment ORGANIZATION_UNITS_COLLECTION.
+    //     *
+    //     * The tags are cached.
+    //     *
+    //     * @param space Space to be queried.
+    //     * @return list of tags.
+    //     */
+    //    public List<Sample> getTagsForSpace(Space space) {
+    //
+    //    }
+
     /**
-     * Retrieve and store the create_project and create_metaproject ingestion
-     * services from the server.
-     * @return true if the services could be retrieved successfully,
-     * false otherwise. If the services were retrieved already, returns true
-     * with no additional actions.
+     * Check whether the v3 API is initialized properly and the session is active.
+     * @return true if the v3 API is initialized properly and the session is active,
+     * false otherwise.
      */
-    public boolean retrieveAndStoreServices() {
+    public boolean isLoggedIn() {
 
-        // Do we already have the services?
-        if (createProjectService != null && createMetaProjectService != null) {
-            return true;
-        }
+        // Check that the v3 API is initialized and the session is active
+        // (i.e. we had a valid login).
+        return (v3_api != null && v3_sessionToken != "");
 
-        // Retrieve the create_project ingestion service from the server
-        List<AggregationServiceDescription> aggregationServices =
-                queryFacade.get().listAggregationServices();
-
-        // Go over all returned services and store a reference to the
-        // create_project ingestion plug-in.
-        for (AggregationServiceDescription service : aggregationServices)
-        {
-            // The 'shared_create_project', 'micr_create_project' and
-            // 'flow_create_project' plug-ins are identical and we can
-            // use either one; but we have to check for all since we do
-            // not know which core technologies are enabled.
-            if (service.getServiceKey().equals("shared_create_project") ||
-                    service.getServiceKey().equals("flow_create_project") ||
-                    service.getServiceKey().equals("micr_create_project")) {
-                createProjectService = service;
-
-            } else if (service.getServiceKey().equals("shared_create_metaproject")) {
-                createMetaProjectService = service;
-            } else {
-                // Continue;
-            }
-        }
-
-        // Have we found them?
-        return (createProjectService != null & createMetaProjectService != null);
     }
 
     /**
      * Create a project with given code in the specified space.
      * @param spaceCode Code of the project to be created.
      * @param projectCode Code of the space where the project will be created.
-     * @return a QueryTableModel with one row containing "success" and "message"
-     * column. You can query the content of the QueryTableModel as follows:
-     *
-     *  <pre>
-     *  {@code
-     *  String success= "";
-     *	String message = "";
-     *	List<Serializable[]> rows = tableModel.getRows();
-     *	for (Serializable[] row : rows) {
-     *		success = (String)row[0];
-     *		message = (String)row[1];
-     *		if (success.equals("true")) {
-     *			System.out.println(message);
-     *			return true;
-     *		}
-     *	}
-     *	System.err.println(message);
-     *  }
-	 #  </pre>
+     * @return a list of ProjectPermId for the created projects.
      */
-    public QueryTableModel createProject(String spaceCode, String projectCode) {
+    public List<ProjectPermId> createProject(String spaceCode, String projectCode) {
 
-        // Set the parameters
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("spaceCode", spaceCode.toUpperCase());
-        parameters.put("projectCode", projectCode.toUpperCase());
+        // Create a project with given space and project codes
+        ProjectCreation projectCreation = new ProjectCreation();
+        projectCreation.setCode(projectCode);
+        projectCreation.setSpaceId(new SpacePermId(spaceCode));
 
-        QueryTableModel tableModel =
-                queryFacade.get().createReportFromAggregationService(
-                        createProjectService, parameters);
+        // Create the project
+        List<ProjectCreation> projectCreationList = new ArrayList<ProjectCreation>();
+        projectCreationList.add(projectCreation);
 
-        return tableModel;
+        List<ProjectPermId> createdProjects = v3_api.createProjects(v3_sessionToken, projectCreationList);
+
+        // Now create the COLLECTIONs with CODE MICROSCOPY_EXPERIMENTS_COLLECTION and
+        // FLOW_EXPERIMENTS_COLLECTION
+        for (ProjectPermId id : createdProjects) {
+
+            // Create collection MICROSCOPY_EXPERIMENTS_COLLECTION object
+            ExperimentCreation micrExpCreation = new ExperimentCreation();
+            micrExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            micrExpCreation.setProjectId(id);
+            micrExpCreation.setCode("MICROSCOPY_EXPERIMENTS_COLLECTION");
+            micrExpCreation.setProperty("Name", "Microscopy Experiment Collection");
+
+            // Create collection FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION object
+            ExperimentCreation flowExpCreation = new ExperimentCreation();
+            flowExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            flowExpCreation.setProjectId(id);
+            flowExpCreation.setCode("FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION");
+            flowExpCreation.setProperty("Name", "Flow Cytometry Experiment Collection");
+
+            // Create collection ORGANIZATION_UNITS_COLLECTION object
+            ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
+            orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            orgUnitExpCreation.setProjectId(id);
+            orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
+            orgUnitExpCreation.setProperty("Name", "Organization Unit Collection");
+
+            // Create the experiments
+            List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
+            experimentCreationList.add(micrExpCreation);
+            experimentCreationList.add(flowExpCreation);
+            experimentCreationList.add(orgUnitExpCreation);
+
+            List<ExperimentPermId> createdExperiments = v3_api.createExperiments(v3_sessionToken, experimentCreationList);
+            System.out.println(createdExperiments);
+
+        }
+
+        // Return the list of created projects
+        return createdProjects;
     }
 
     /**
@@ -496,7 +548,7 @@ public class OpenBISProcessor {
      *}
      * </pre>
      */
-    public QueryTableModel createMetaProject(String metaprojectCode,
+    public boolean createMetaProject(String metaprojectCode,
             String metaprojectDescr) {
 
         // Set the parameters
@@ -505,11 +557,11 @@ public class OpenBISProcessor {
         parameters.put("metaprojectCode", metaprojectCode);
         parameters.put("metaprojectDescr", metaprojectDescr);
 
-        QueryTableModel tableModel =
-                queryFacade.get().createReportFromAggregationService(
-                        createMetaProjectService, parameters);
+        //            QueryTableModel tableModel =
+        //                    queryFacade.get().createReportFromAggregationService(
+        //                            createMetaProjectService, parameters);
 
-        return tableModel;
+        return false;
     }
 
     /**
@@ -544,15 +596,162 @@ public class OpenBISProcessor {
         loginErrorRecoverable.set(false);
     }
 
+    // Add a class that extends thread that is to be called when program is exiting
+    public class V3APILogoutOnShutdown extends Thread {
+
+        IApplicationServerApi v3_api = null;
+        String v3_sessionToken = "";
+
+        public V3APILogoutOnShutdown(IApplicationServerApi v3_api, String v3_sessionToken) {
+            this.v3_api = v3_api;
+            this.v3_sessionToken = v3_sessionToken;
+        }
+
+        @Override
+        public void run() {
+            if (v3_api != null && (v3_sessionToken != null || !v3_sessionToken.equals(""))) {
+                try {
+                    System.out.println("Logging out from openBIS (v3 API)...");
+                    v3_api.logout(v3_sessionToken);
+                } catch (UserFailureException e) {
+                    System.out.println("Could not log oug from openBIS: invalid session token.");
+                } catch (Exception e) {
+                    System.out.println("Could not log oug from openBIS: " + e.getMessage());
+                }
+            }
+        }
+    }
+
     /**
-     * React to a InterruptedException exception
+     * Return the default target openBIS project as set in the User settings
+     * or the first returned project from openBIS if none is set.
+     * @return ProjectInfo object for the project.
      */
-    private void reactToInterruptedException() {
-        loginErrorMessage.set("Connection thread interrupted!\n\n" +
-                "The application will now quit.");
-        loginErrorTitle.set("Thread interrupted");
-        loginErrorRecoverable.set(false);
-        Thread.currentThread().interrupt();
+    public ProjectInfo getDefaultProjectOrFirst() {
+
+        // Do we have a valid session?
+        if (v3_api == null) {
+            return null;
+        }
+
+        // This call might be cached already.
+        SearchResult<Space> spaces = getSpacesWithProjects();
+
+        // Retrieve the default target project from the User settings or
+        // revert to the first project in the list if none is set.
+        String defaultProject = globalSettingsManager.getDefaultProject();
+
+        // Make sure the identifier is valid, otherwise return first project
+
+        String spaceName = "";
+        if (! defaultProject.equals("")) {
+            // Extract the space name
+            int index = defaultProject.indexOf("/", 1);
+            if (index == -1) {
+                // Do not search!
+                defaultProject = "";
+            } else {
+                // Drop the first '/' and stop before the one we found
+                spaceName = defaultProject.substring(1, index);
+            }
+        }
+
+        // Retrieve the node
+        if (defaultProject.equals("")) {
+
+            // Just return the first project node we find
+
+            for (int i = 0; i < spaces.getTotalCount(); i++) {
+
+                // Get ith space
+                Space space = spaces.getObjects().get(i);
+
+                // Retrieve the children
+                List<Project> projects = space.getProjects();
+
+                int nProjects = projects.size();
+                if (nProjects == 0) {
+                    continue;
+                }
+
+                for (int j = 0; j < nProjects; j++) {
+
+                    Project p = projects.get(j);
+
+                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                        continue;
+                    }
+
+                    ProjectInfo projectInfo = new ProjectInfo(p, space);
+                    return projectInfo;
+                }
+            }
+
+        } else {
+
+            // Find the project with the correct identifier
+
+            for (int i = 0; i < spaces.getTotalCount(); i++) {
+
+                // Get ith space
+                Space space = spaces.getObjects().get(i);
+
+                if (! space.getCode().equals(spaceName)) {
+                    continue;
+                }
+
+                // Retrieve the children
+                List<Project> projects = space.getProjects();
+
+                int nProjects = projects.size();
+                if (nProjects == 0) {
+                    continue;
+                }
+
+                for (int j = 0; j < nProjects; j++) {
+
+                    Project p = projects.get(j);
+
+                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                        continue;
+                    }
+
+                    // Check whether this is the default one
+                    if (p.getIdentifier().toString().equals(defaultProject)) {
+
+                        ProjectInfo projectInfo = new ProjectInfo(p, space);
+                        return projectInfo;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Collect information for a Project
+     *
+     */
+    public class ProjectInfo {
+
+        public Space space;
+        public Project project;
+        public String spaceIdentifier;
+        public String spaceCode;
+        public String projectIdentifier;
+        public String projectCode;
+
+
+        public ProjectInfo(Project project, Space space) {
+
+            this.space = space;
+            this.project = project;
+            this.spaceIdentifier = space.getPermId().toString();
+            this.spaceCode= space.getCode();
+            this.projectIdentifier = project.getIdentifier().toString();
+            this.projectCode = project.getCode();
+        }
     }
 
 }
