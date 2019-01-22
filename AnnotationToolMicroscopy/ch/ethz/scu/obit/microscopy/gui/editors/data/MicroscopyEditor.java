@@ -36,7 +36,6 @@ import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
-import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
@@ -53,10 +52,6 @@ import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
  *
  */
 public final class MicroscopyEditor extends AbstractEditor {
-
-    // List of experiments from the Data Model
-    private List<ExperimentNode> experiments =
-            new ArrayList<ExperimentNode>();
 
     // List of metadata mappers
     private List<MicroscopyMetadataMapper> metadataMappersList =
@@ -218,8 +213,8 @@ public final class MicroscopyEditor extends AbstractEditor {
         }
 
         // Store the and openBIS nodes
-        storeOpenBISProjects();
-        storeExperiments();
+        openBISProjects = openBISViewer.getOpenBISProjectNodes();
+        experiments = dataViewer.getExperimentNodes();
 
         // Check that there is at least one entry in each of the
         // arrays
@@ -819,34 +814,6 @@ public final class MicroscopyEditor extends AbstractEditor {
             comboProjectList.addActionListener(l);
         }
 
-    }
-
-    /**
-     * Collects and stores data folders for mapping
-     */
-    private void storeExperiments() {
-
-        // Reset the Experiment list
-        experiments = new ArrayList<ExperimentNode>();
-
-        // Store the data model
-        dataModel = dataViewer.getDataModel();
-
-        // We extract all experiments from the data model
-        RootNode dataRoot = (RootNode) dataModel.getRoot();
-
-        // First level are the folder nodes
-        int dataNChildren = dataRoot.getChildCount();
-
-        for (int i = 0; i < dataNChildren; i++) {
-
-            // Get the FolderNode
-            ExperimentNode experimentNode =
-                    (ExperimentNode) dataRoot.getChildAt(i);
-
-            // Store the reference to the ExperimentNode
-            experiments.add(experimentNode);
-        }
     }
 
     /**

@@ -17,8 +17,8 @@ import javax.swing.tree.TreeModel;
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
+import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
@@ -45,6 +45,10 @@ implements ActionListener, Observer {
      */
     protected OpenBISViewer openBISViewer;
     protected TreeModel openBISModel;
+
+    // List of experiments from the Data Model
+    protected List<ExperimentNode> experiments =
+            new ArrayList<ExperimentNode>();
 
     // List of openBISProjects
     protected List<OpenBISProjectNode> openBISProjects =
@@ -144,49 +148,6 @@ implements ActionListener, Observer {
             break;
         default:
             break;
-        }
-    }
-
-    /**
-     * Collects and stores openBIS projects for mapping
-     */
-    protected void storeOpenBISProjects() {
-
-        // Store the openBIS model
-        openBISModel = openBISViewer.getDataModel();
-
-        // We extract all projects from the openBIS model and create a list
-        // with which we will then create JComboBox associated to each project
-        // from the data model
-        openBISProjects = new ArrayList<OpenBISProjectNode>();
-
-        AbstractOpenBISNode openBISRoot =
-                (AbstractOpenBISNode) openBISModel.getRoot();
-
-        // Iterate over the space nodes (there should be at least one)
-        for (int i = 0; i < openBISRoot.getChildCount(); i++) {
-
-            // Get the Space
-            AbstractOpenBISNode openBISSpaceNode =
-                    (AbstractOpenBISNode) openBISRoot.getChildAt(i);
-
-            // Go over the child Projects
-            int n = openBISSpaceNode.getChildCount();
-
-            for (int j = 0; j < n; j++) {
-
-                // Get the OpenBISProjectNode
-                OpenBISProjectNode openBISProjectNode =
-                        (OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
-
-                // Add it to the list: we wrap it into a wrapper
-                // class to override the toString() method; we do
-                // this because in constrast to what happens in the
-                // openBIS viewer, here we need the (openBIS) identifier
-                //  instead of the code.
-                openBISProjects.add(openBISProjectNode);
-
-            }
         }
     }
 

@@ -158,6 +158,48 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     }
 
     /**
+     * Return a list of OpenBISProjectNodes from the data model.
+     * @return List of OpenBISProjectNode objects.
+     */
+    public List<OpenBISProjectNode> getOpenBISProjectNodes() {
+
+        // Store the openBIS model
+        TreeModel openBISModel = getDataModel();
+
+        // We extract all projects from the openBIS model and create a list
+        // with which we will then create JComboBox associated to each project
+        // from the data model
+        List<OpenBISProjectNode> openBISProjects = new ArrayList<OpenBISProjectNode>();
+
+        AbstractOpenBISNode openBISRoot =
+                (AbstractOpenBISNode) openBISModel.getRoot();
+
+        // Iterate over the space nodes (there should be at least one)
+        for (int i = 0; i < openBISRoot.getChildCount(); i++) {
+
+            // Get the Space
+            AbstractOpenBISNode openBISSpaceNode =
+                    (AbstractOpenBISNode) openBISRoot.getChildAt(i);
+
+            // Go over the child Projects
+            int n = openBISSpaceNode.getChildCount();
+
+            for (int j = 0; j < n; j++) {
+
+                // Get the OpenBISProjectNode
+                OpenBISProjectNode openBISProjectNode =
+                        (OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
+
+                // Add it to the list.
+                openBISProjects.add(openBISProjectNode);
+
+            }
+        }
+
+        return openBISProjects;
+    }
+
+    /**
      * Returns the user name if successfully logged in, empty string otherwise
      * @return user name or empty String if log on was not successful
      */
@@ -273,7 +315,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
         // Retrieve metaprojects
-        List<String> metaprojects = openBISProcessor.getMetaprojects();
+        List<String> metaprojects = new ArrayList<String>(); //openBISProcessor.getMetaprojects();
 
         // Fill the list
         setTagList(metaprojects);
@@ -840,7 +882,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             // and update the view
             outputPane.log("Successfully created tag " + metaprojectCode + ".");
             clearTagList();
-            setTagList(openBISProcessor.getMetaprojects());
+            //setTagList(openBISProcessor.getMetaprojects());
             return true;
         } else {
             outputPane.err("Could not create tag " + metaprojectCode + "!");

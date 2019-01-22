@@ -392,7 +392,6 @@ public class OpenBISProcessor {
 
     }
 
-
     /**
      * Returns the list of Samples for an Experiment list (as visible for
      * current user).
