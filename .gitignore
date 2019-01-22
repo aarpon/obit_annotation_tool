@@ -1,4 +1,3 @@
-./idea
 /bin/
 /dist/AnnotationToolExe/*.jar
 /dist/AnnotationToolExe/*.exe
@@ -6,3 +5,4 @@
 /dist/AnnotationToolAdminExe/*.exe
 /out/
 test_bin
+/.idea/
