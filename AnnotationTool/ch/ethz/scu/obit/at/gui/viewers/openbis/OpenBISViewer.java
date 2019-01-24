@@ -47,6 +47,7 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
+import ch.ethz.scu.obit.microscopy.processors.data.model.Tag;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
@@ -66,7 +67,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     protected JPanel panel;
     protected JButton scanButton;
     protected JLabel userTags;
-    protected JList<String> userTagList;
+    protected JList<Tag> userTagList;
 
     private GlobalSettingsManager globalSettingsManager;
     private OpenBISProcessor openBISProcessor;
@@ -76,8 +77,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     private String defaultRootNodeString = "/";
 
     // Keep track of the last visited TreePath to prevent multiple firing
-    // of treeWillExpand().
+    // of treeWillExpand() and last selected node to prevent processing
+    // a valueChanged event twice.
     private TreePath lastVisitedPath = null;
+    private AbstractOpenBISNode lastSelectedNode = null;
 
     private boolean isReady = false;
 
@@ -158,6 +161,45 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     }
 
     /**
+     * Return the default target openBIS project as set in the User settings
+     * or the first returned project from openBIS if none is set.
+     * @return openBISProject node or null if there are no projects in openBIS.
+     */
+    public OpenBISProjectNode getDefaultProjectOrFirst() {
+
+        // This method must be called after the openBIS server nodes
+        // have been retrieved.
+        List<OpenBISProjectNode> openBISProjects = getOpenBISProjectNodes();
+
+        if (openBISProjects.size() == 0) {
+            // No projects retrieved/found!
+            return null;
+        }
+
+        // Retrieve the default target project from the User settings or
+        // revert to the first project in the list if none is set.
+        OpenBISProjectNode defaultProjectNode = null;
+        String defaultProject = globalSettingsManager.getDefaultProject();
+        if (defaultProject.equals("")) {
+            defaultProjectNode = openBISProjects.get(0);
+        } else {
+            for (OpenBISProjectNode current : openBISProjects) {
+                if (current.getIdentifier().equals(defaultProject)) {
+                    defaultProjectNode = current;
+                    break;
+                }
+            }
+            if (defaultProjectNode == null) {
+                // The stored default project does not exist!
+                // Fallback to the first one in the list.
+                defaultProjectNode = openBISProjects.get(0);
+            }
+        }
+
+        return defaultProjectNode;
+    }
+
+    /**
      * Return a list of OpenBISProjectNodes from the data model.
      * @return List of OpenBISProjectNode objects.
      */
@@ -223,8 +265,41 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         if (node == null) {
             return;
         }
+        // The valuedChanged() method is called twice when the a node is
+        // chosen in the tree. Workaround: do not process the same node
+        // twice in a row
+        if (node == lastSelectedNode) {
+            return;
+        }
+        lastSelectedNode = node;
 
-        // TODO Implement!
+        // If the Node is a space, refresh the tags
+        // Get the node object
+        Object nodeInfo = node.getUserObject();
+
+        // Print the attributes
+        String className = nodeInfo.getClass().getSimpleName();
+        if (className.equals("Space")) {
+
+            // Cast
+            Space space = (Space) nodeInfo;
+
+            // Retrieve tags for current space
+            List<Sample> tags = openBISProcessor.getTagsForSpace(space);
+
+            // Clear the tag list
+            clearTagList();
+
+            // Add the new tags to the list
+            setTagList(tags);
+
+            // TODO Notify the editor of the change
+
+        }
+
+        // Reset the lastSelectedNode
+        lastSelectedNode = null;
+
     }
 
     /**
@@ -314,12 +389,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // Set the root of the tree
         userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
-        // Retrieve metaprojects
-        List<String> metaprojects = new ArrayList<String>(); //openBISProcessor.getMetaprojects();
-
-        // Fill the list
-        setTagList(metaprojects);
-
         // Get spaces
         SearchResult<Space> spaces = openBISProcessor.getSpacesWithProjects();
         if (spaces.getTotalCount() == 0) {
@@ -397,6 +466,12 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             // We do not need to return, this case is treated below
 
         }
+
+        // Clear the tag list
+        clearTagList();
+
+        // Set the tags for the default space/project
+        setTagListFromOpenBISProjectNode(getDefaultProjectOrFirst());
 
         // Re-enable the "scan" button
         scanButton.setEnabled(true);
@@ -904,22 +979,44 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
      * Clear the list of tags in the UI.
      */
     private void clearTagList() {
-        userTagList.setModel(new DefaultListModel<String>());
+        userTagList.setModel(new DefaultListModel<Tag>());
+    }
+
+    /**
+     * Extract and set the list of tags for the given openBIS project node.
+     * @param tags An OpenBISProjectNode.
+     */
+    private void setTagListFromOpenBISProjectNode(OpenBISProjectNode projectNode) {
+
+        // Clear the list of tags
+        clearTagList();
+
+        if (projectNode == null ) {
+            return;
+        }
+
+        // Retrieve the parent Space
+        OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+        Space space = (Space) spaceNode.getUserObject();
+
+        // Retrieve the tag list
+        List<Sample> tags = openBISProcessor.getTagsForSpace(space);
+
+        // Fill the tag list
+        setTagList(tags);
     }
 
     /**
      * Set the list of tags in the UI.
-     * @param metaprojects List of tags retrieved from openBIS.
-     *                     Tags are called 'metaprojects' in openBIS.
+     * @param tags List of tags retrieved from openBIS.
      */
-    private void setTagList(List<String> metaprojects) {
+    private void setTagList(List<Sample> tags) {
         clearTagList();
-        DefaultListModel<String> listModel =
-                (DefaultListModel<String>) userTagList.getModel();
-        for (String s : metaprojects) {
-            listModel.addElement(s);
+        DefaultListModel<Tag> listModel =
+                (DefaultListModel<Tag>) userTagList.getModel();
+        for (Sample tag : tags) {
+            listModel.addElement(new Tag(tag));
         }
-
     }
 
     /**
@@ -1060,7 +1157,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         tagsPanel.add(addTagButton, constraints);
 
         // Add the list of tags
-        userTagList = new JList<String>(new DefaultListModel<String>());
+        userTagList = new JList<Tag>(new DefaultListModel<Tag>());
         userTagList.setVisibleRowCount(5);
         userTagList.getSelectionModel().setSelectionMode(
                 ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -1079,4 +1176,5 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         return tagsPanel;
     }
+
 }

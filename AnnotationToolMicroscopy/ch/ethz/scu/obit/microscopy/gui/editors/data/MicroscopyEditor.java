@@ -224,7 +224,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 
         // Retrieve the default target project from the User settings or
         // revert to the first project in the list if none is set.
-        OpenBISProjectNode defaultProjectNode = getDefaultProjectOrFirst();
+        OpenBISProjectNode defaultProjectNode = openBISViewer.getDefaultProjectOrFirst();
         if (defaultProjectNode == null) {
             JOptionPane optionPane = new JOptionPane(
                     "No projects could be found in openBIS!\n\n" +

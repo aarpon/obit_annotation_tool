@@ -403,6 +403,10 @@ public class OpenBISProcessor {
             return new ArrayList<Sample>();
         }
 
+        if (exp == null) {
+            return new ArrayList<Sample>();
+        }
+
         // Search for Experiments with given code and fetch its samples
         ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
         searchCriteria.withPermId().thatEquals(exp.getPermId().toString());
@@ -426,20 +430,77 @@ public class OpenBISProcessor {
         return samples;
     }
 
-    //    /**
-    //     * Return the tags for the given Space.
-    //     *
-    //     * A tag is a sample of type ORGANIZATION_UNIT stored in the
-    //     * experiment ORGANIZATION_UNITS_COLLECTION.
-    //     *
-    //     * The tags are cached.
-    //     *
-    //     * @param space Space to be queried.
-    //     * @return list of tags.
-    //     */
-    //    public List<Sample> getTagsForSpace(Space space) {
-    //
-    //    }
+    /**
+     * Return the tags for the given Space.
+     *
+     * A tag is a sample of type ORGANIZATION_UNIT stored in the
+     * experiment ORGANIZATION_UNITS_COLLECTION.
+     *
+     * The tags are cached.
+     *
+     * @param space Space to be queried.
+     * @return list of tags.
+     */
+    public List<Sample> getTagsForSpace(Space space) {
+
+        // Does the Space have a tags collection?
+        Project collection = tagsCollectionPerSpace.get(space);
+        if (collection == null) {
+            return new ArrayList<Sample>();
+        }
+
+        // Retrieve the experiments
+        List<Experiment> experiments = getExperimentsForProjects(collection);
+
+        // Get the ORGANIZATION_UNITS_COLLECTION experiment
+        Experiment orgUnits = null;
+        for (int i = 0; i < experiments.size(); i++) {
+            Experiment current = experiments.get(i);
+            System.out.println(current.getCode());
+            if (current.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
+                orgUnits = current;
+                break;
+            }
+        }
+
+        // Get samples
+        List<Sample> tags = getSamplesForExperiments(orgUnits);
+
+        // Return them
+        return tags;
+
+    }
+
+    /**
+     * Return the tags for the given Space.
+     *
+     * A tag is a sample of type ORGANIZATION_UNIT stored in the
+     * experiment ORGANIZATION_UNITS_COLLECTION.
+     *
+     * The tags are cached.
+     *
+     * @param space Space to be queried.
+     * @return list of tags.
+     */
+    public List<String> getTagNamesForSpace(Space space) {
+
+        // Does the Space have a tags collection?
+        List<Sample> tags = getTagsForSpace(space);
+        if (tags == null) {
+            return new ArrayList<String>();
+        }
+
+        // Create a list of tag names
+        ArrayList<String> tagNamesList = new ArrayList<String>();
+
+        for (Sample tag: tags) {
+
+            tagNamesList.add(tag.getCode());
+        }
+
+        // Return them
+        return tagNamesList;
+    }
 
     /**
      * Check whether the v3 API is initialized properly and the session is active.

@@ -253,41 +253,4 @@ implements ActionListener, Observer {
         return buff.toString().trim().replaceAll(" ", ", ");
     }
 
-    /**
-     * Return the default target openBIS project as set in the User settings
-     * or the first returned project from openBIS if none is set.
-     * @return openBISProject node.
-     * @throws Exception if the openBIS server nodes have not been retrieved yet.
-     */
-    public OpenBISProjectNode getDefaultProjectOrFirst() throws Exception {
-
-        // This method must be called after the openBIS server nodes
-        // have been retrieved.
-        if (openBISProjects.size() == 0) {
-            // No projects retrieved/found!
-            return null;
-        }
-
-        // Retrieve the default target project from the User settings or
-        // revert to the first project in the list if none is set.
-        OpenBISProjectNode defaultProjectNode = null;
-        String defaultProject = globalSettingsManager.getDefaultProject();
-        if (defaultProject.equals("")) {
-            defaultProjectNode = openBISProjects.get(0);
-        } else {
-            for (OpenBISProjectNode current : openBISProjects) {
-                if (current.getIdentifier().equals(defaultProject)) {
-                    defaultProjectNode = current;
-                    break;
-                }
-            }
-            if (defaultProjectNode == null) {
-                // The stored default project does not exist!
-                // Fallback to the first one in the list.
-                defaultProjectNode = openBISProjects.get(0);
-            }
-        }
-
-        return defaultProjectNode;
-    }
 }

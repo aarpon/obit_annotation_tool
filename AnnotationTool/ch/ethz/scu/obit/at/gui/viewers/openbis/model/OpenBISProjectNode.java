@@ -78,4 +78,13 @@ public class OpenBISProjectNode extends AbstractOpenBISNode {
         return false;
     }
 
+    /**
+     * Get the identifier of the containing space.
+     * @return The space identifier.
+     * @return
+     */
+    public String getSpaceIdentifier() {
+        return identifier;
+    }
+
 }

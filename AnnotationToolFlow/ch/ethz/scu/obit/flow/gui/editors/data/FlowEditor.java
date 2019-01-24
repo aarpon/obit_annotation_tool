@@ -318,7 +318,7 @@ public final class FlowEditor extends AbstractEditor {
 
         // Retrieve the default target project from the User settings or
         // revert to the first project in the list if none is set.
-        OpenBISProjectNode defaultProjectNode = getDefaultProjectOrFirst();
+        OpenBISProjectNode defaultProjectNode = openBISViewer.getDefaultProjectOrFirst();
 
         // Create all FlowMetadataMapper objects and initially
         // assign each folder to the first project
