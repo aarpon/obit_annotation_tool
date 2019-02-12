@@ -307,6 +307,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                 // broken and cannot be read by bioformats. To prevent registration
                 // failures on the DataStore Server, we try opening any suspiciously
                 // small file to reduce the risk of failed registrations on the DSS.
+                // Since we already checked whether the file is a supported microscopy
+                // file (or an attachment), we just go ahead and try to open it.
                 if (file.length() <= 4096) {
                     // We try opening the file -- if it fails, we flag it as corrupted.
                     try {
@@ -428,7 +430,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             return false;
         }
 
-        // Check for microscopy-related files
+        // Check for microscopy-related files that we do not need to keep
         String name = file.getName();
         if (name.toLowerCase().endsWith(".lifext")) {
             return file.delete();
