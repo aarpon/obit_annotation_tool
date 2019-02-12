@@ -302,10 +302,12 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                 }
 
                 // Failed Nikon acquisitions are known to create a 4096-byte header
-                // only file that the bio-formats library will fail reading. We
-                // check for such a case to prevent that the registration
-                // will fail on the DataStore Server.
-                if (ext.toLowerCase().equals(".nd2") && file.length() <= 4096) {
+                // only file that the bio-formats library will fail reading. Also Leica
+                // failed acquisition can result in very small files (<1kB) that are
+                // broken and cannot be read by bioformats. To prevent registration
+                // failures on the DataStore Server, we try opening any suspiciously
+                // small file to reduce the risk of failed registrations on the DSS.
+                if (file.length() <= 4096) {
                     // We try opening the file -- if it fails, we flag it as corrupted.
                     try {
                         BioFormatsWrapper wrapper = new BioFormatsWrapper(file);
