@@ -21,6 +21,7 @@ import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 import ch.ethz.scu.obit.processors.data.model.PathAwareDescriptor;
 import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
+import ch.ethz.scu.obit.processors.data.model.Tag;
 import ch.ethz.scu.obit.processors.data.validator.GenericValidator;
 
 /**
@@ -489,7 +490,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
         /**
          *  Experiment tags (comma-separated list)
          */
-        public String tags = "";
+        public List<Tag> tags = null;
 
         /**
          *  Store the microscopy files associated with this Experiment
@@ -529,6 +530,43 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             return "Experiment";
         }
 
+        /**
+         * Return the list of Tags as comma-separated string.
+         * @return string of comma-separated tags.
+         */
+        public String getTagList() {
+
+            // Build the string with a buffer
+            StringBuffer buff = new StringBuffer();
+
+            for (Tag tag : tags) {
+                buff.append(tag.toString());
+                buff.append(" ");
+            }
+
+            // Return the string
+            return buff.toString().trim().replaceAll(" ", ", ");
+
+        }
+
+        /**
+         * Return the list of Tag identifiers as comma-separated string.
+         * @return string of comma-separated tags.
+         */
+        public String getTagIdentifierList() {
+
+            // Build the string with a buffer
+            StringBuffer buff = new StringBuffer();
+
+            for (Tag tag : tags) {
+                buff.append(tag.getIdentifier());
+                buff.append(" ");
+            }
+
+            // Return the string
+            return buff.toString().trim().replaceAll(" ", ", ");
+
+        }
     }
 
     /**

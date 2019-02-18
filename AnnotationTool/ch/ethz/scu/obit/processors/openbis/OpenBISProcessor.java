@@ -28,7 +28,9 @@ import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.fetchoptions.ProjectFetc
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.id.ProjectPermId;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.search.ProjectSearchCriteria;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.create.SampleCreation;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.fetchoptions.SampleFetchOptions;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.id.SamplePermId;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.fetchoptions.SpaceFetchOptions;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.id.SpacePermId;
@@ -534,8 +536,8 @@ public class OpenBISProcessor {
 
         List<ProjectPermId> createdProjects = v3_api.createProjects(v3_sessionToken, projectCreationList);
 
-        // Now create the COLLECTIONs with CODE MICROSCOPY_EXPERIMENTS_COLLECTION and
-        // FLOW_EXPERIMENTS_COLLECTION
+        // Now create the COLLECTIONs with CODE MICROSCOPY_EXPERIMENTS_COLLECTION,
+        // FLOW_EXPERIMENTS_COLLECTION and ORGANIZATION_UNITS_COLLECTION.
         for (ProjectPermId id : createdProjects) {
 
             // Create collection MICROSCOPY_EXPERIMENTS_COLLECTION object
@@ -575,43 +577,123 @@ public class OpenBISProcessor {
     }
 
     /**
-     * Create a metaproject (tag) with given code for current user.
-     * @param metaprojectCode Code of the metaproject (tag) to be created.
-     * @param metaprojectDescr Description for the metaproject (optional).
-     * @return a QueryTableModel with one row containing "success" and "message"
-     * column. You can query the content of the QueryTableModel as follows:
+     * Create a <b>commong tag</b> with given code in given space.
+     * @param space Space where to create the new tag.
+     * @param tagCode Code of the tag to be created.
+     * @param tagDescr Description for the tag (optional).
+     * @return true if the tag could be created, false otherwise.
      *
-     * <pre>
-     * {@code
-     *String success= "";
-     *String message = "";
-     *List<Serializable[]> rows = tableModel.getRows();
-     *for (Serializable[] row : rows) {
-     *	success = (String)row[0];
-     *	message = (String)row[1];
-     *	if (success.equals("true")) {
-     *		System.out.println(message);
-     *		return true;
-     *	}
-     *}
-     *System.err.println(message);
-     *}
-     * </pre>
+     * Please notice that is the space does not contain a
+     * COMMON_ORGANIZATION_UNITS, this will be created.
      */
-    public boolean createMetaProject(String metaprojectCode,
-            String metaprojectDescr) {
+    public boolean createTag(Space space, String tagCode, String tagDescr) {
 
-        // Set the parameters
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("userName", this.userName);
-        parameters.put("metaprojectCode", metaprojectCode);
-        parameters.put("metaprojectDescr", metaprojectDescr);
+        // Check if the project COMMON_ORGANIZATION_UNITS exists
+        Project collection = tagsCollectionPerSpace.get(space);
+        if (collection == null) {
 
-        //            QueryTableModel tableModel =
-        //                    queryFacade.get().createReportFromAggregationService(
-        //                            createMetaProjectService, parameters);
+            // Create the COMMON_ORGANIZATION_UNITS project
+            collection = createTagContainerProjectAndExperiment(space);
+            if (collection == null) {
+                return false;
+            }
+        }
 
-        return false;
+        // Get the ORGANIZATION_UNITS_COLLECTION collection
+        ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
+        searchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
+        searchCriteria.withProject().withPermId().thatEquals(collection.getPermId().toString());
+        ExperimentFetchOptions fetchOptions = new ExperimentFetchOptions();
+        SearchResult<Experiment> experiments = v3_api.searchExperiments(v3_sessionToken,
+                searchCriteria, fetchOptions);
+        if (experiments.getTotalCount() == 0) {
+            return false;
+        }
+
+        // Get the Experiment
+        Experiment experiment = experiments.getObjects().get(0);
+
+        // Add the Tag (a sample of type ORGANIZATION_UNIT)
+        SampleCreation orgUnitCreation = new SampleCreation();
+        orgUnitCreation.setTypeId(new EntityTypePermId("ORGANIZATION_UNIT"));
+        orgUnitCreation.setSpaceId(space.getPermId());
+        orgUnitCreation.setProjectId(collection.getPermId());
+        orgUnitCreation.setExperimentId(experiment.getPermId());
+        orgUnitCreation.setCode(tagCode.replaceAll("\\s","_").trim());
+        // @TODO: Should this become $NAME and $DESCRIPTION?
+        orgUnitCreation.setProperty("Name", tagCode);
+        //orgUnitCreation.setProperty("$DESCRIPTION", tagDescr);
+        List<SampleCreation> sampleCreationList = new ArrayList<SampleCreation>();
+        sampleCreationList.add(orgUnitCreation);
+
+        List<SamplePermId> createdSamples = v3_api.createSamples(v3_sessionToken, sampleCreationList);
+
+        if (createdSamples == null || createdSamples.size() == 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Create the COMMON_ORGANIZATION_UNITS Project in the given Space.
+     * @param space Space where to create the COMMON_ORGANIZATION_UNITS Project.
+     * @return the created COMMON_ORGANIZATION_UNITS Project or null if creation failed.
+     */
+    private Project createTagContainerProjectAndExperiment(Space space) {
+
+        // Create a project with given space and project code "COMMON_ORGANIZATION_UNITS"
+        ProjectCreation projectCreation = new ProjectCreation();
+        projectCreation.setCode("COMMON_ORGANIZATION_UNITS");
+        projectCreation.setSpaceId(space.getPermId());
+
+        // Create the project
+        List<ProjectCreation> projectCreationList = new ArrayList<ProjectCreation>();
+        projectCreationList.add(projectCreation);
+
+        List<ProjectPermId> createdProjects = v3_api.createProjects(v3_sessionToken, projectCreationList);
+        if (createdProjects.size() == 0) {
+            return null;
+        }
+
+        // Get the Project permId
+        ProjectPermId permId = createdProjects.get(0);
+
+        // We need to retrieve the Projects from openBIS
+        ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
+        searchCriteria.withPermId().thatEquals(permId.toString());
+        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+        SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
+                searchCriteria, projectFetchOptions);
+
+        if (projects.getTotalCount() == 0) {
+            return null;
+        }
+
+        // Get the newly created Project object
+        Project createdProject = projects.getObjects().get(0);
+
+        List<ExperimentPermId> createdExperiments = null;
+
+        // Now create the COLLECTION with CODE ORGANIZATION_UNITS_COLLECTION
+        ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
+        orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+        orgUnitExpCreation.setProjectId(permId);
+        orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
+        orgUnitExpCreation.setProperty("Name", "Organization Unit Collection");
+
+        // Create the experiment
+        List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
+        experimentCreationList.add(orgUnitExpCreation);
+
+        createdExperiments = v3_api.createExperiments(v3_sessionToken, experimentCreationList);
+
+        if (createdExperiments == null || createdExperiments.size() == 0) {
+            return null;
+        }
+
+        // Return the newly created Project
+        return createdProject;
     }
 
     /**

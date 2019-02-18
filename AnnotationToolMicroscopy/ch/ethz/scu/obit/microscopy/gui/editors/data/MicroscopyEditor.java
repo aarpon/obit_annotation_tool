@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -27,7 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -45,6 +42,8 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experimen
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
+import ch.ethz.scu.obit.processors.data.model.Tag;
+import ch.ethz.scu.obit.processors.data.model.TagListImportTransferHandler;
 
 /**
  * Metadata editor panel.
@@ -75,7 +74,6 @@ public final class MicroscopyEditor extends AbstractEditor {
     private JComboBox<String> comboProjectList;
     private JTextArea expDescription;
     private JTextArea fileDescription;
-    private JTextArea expTags;
     private JScrollPane areaFileScrollPane;
     private JScrollPane areaExpScrollPane;
 
@@ -153,7 +151,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                     new Hashtable<String, String>();
             expUserAttributes.put("description",
                     currentMetadata.getExperiment().description);
-            expUserAttributes.put("tags", expDescr.tags);
+            expUserAttributes.put("tags", expDescr.getTagIdentifierList());
             expDescr.addUserAttributes(expUserAttributes);
 
             // Now get the MicroscopyFile children of the Experiment
@@ -410,67 +408,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         });
 
         // Append a custom transfer handler
-        expTags.setTransferHandler(new TransferHandler() {
-
-            private static final long serialVersionUID = 1L;
-
-            // Check if the transfer is valid
-            @Override
-            public boolean canImport(TransferHandler.TransferSupport info) {
-
-                // We only import Strings
-                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    return false;
-                }
-
-                // Can be imported
-                return true;
-            }
-
-            // Import and format the data
-            @Override
-            public boolean importData(TransferHandler.TransferSupport info) {
-
-                // Only if we are dropping something onto the field
-                if (!info.isDrop()) {
-                    return false;
-                }
-
-                // And only if it is a string flavor
-                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    return false;
-                }
-
-                // Get and format the strings
-                Transferable t = info.getTransferable();
-                String data;
-                try {
-                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
-                    data = data.replaceAll("(\r\n|\n)", ", ");
-                }
-                catch (Exception e) {
-                    return false;
-                }
-
-                // Create the complete list
-                String currentText = expTags.getText();
-                if (! currentText.equals("")) {
-                    data = currentText + ", " + data;
-                }
-
-                // Clean the tag list
-                data = cleanTagList(data);
-
-                // Set the tag list
-                expTags.setText(data);
-
-                // Update the Experiment
-                updateExpTags();
-
-                // Return success
-                return true;
-            }
-        });
+        expTags.setTransferHandler(new TagListImportTransferHandler(this));
         panel.add(expTags, constraints);
 
         // Create a label for the explanation
@@ -790,7 +728,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         expDescription.setText(metadata.getExperiment().description);
 
         // Update the tags
-        expTags.setText(metadata.getExperiment().tags);
+        expTags.setText(metadata.getExperiment().getTagList());
 
         // Remove listeners on the comboProjectList element to prevent firing
         // while we set the value.
@@ -926,7 +864,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                             currentExperimentIndex);
 
                     // Store the experiment description
-                    metadata.getExperiment().tags = "";
+                    metadata.getExperiment().tags = null;
                 }
             });
             popup.add(clearMenuItem);
@@ -939,13 +877,11 @@ public final class MicroscopyEditor extends AbstractEditor {
     /**
      * We update the experiment tags.
      */
-    protected void updateExpTags() {
+    @Override
+    protected void updateExpTags(List<Tag> tagList) {
 
         // How many experiments do we have?
         int nExperiments = metadataMappersList.size();
-
-        // Selected tags
-        String selectedTags = expTags.getText();
 
         // Default to set the tags for current experiment only.
         int n = 0;
@@ -971,7 +907,7 @@ public final class MicroscopyEditor extends AbstractEditor {
             for (int i = 0; i < nExperiments; i++) {
                 ((Experiment)
                         metadataMappersList.get(i).experimentNode.getUserObject()).tags =
-                        selectedTags;
+                        tagList;
             }
 
         } else {
@@ -983,7 +919,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                     currentExperimentIndex);
 
             // Store the experiment description
-            metadata.getExperiment().tags = selectedTags;
+            metadata.getExperiment().tags = tagList;
         }
 
     }

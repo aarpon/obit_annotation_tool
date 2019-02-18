@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -455,66 +453,80 @@ public final class FlowEditor extends AbstractEditor {
 
         // Append a custom transfer handler
         expTags.setTransferHandler(new TransferHandler() {
-
-            private static final long serialVersionUID = 1L;
-
-            // Check if the transfer is valid
             @Override
             public boolean canImport(TransferHandler.TransferSupport info) {
 
-                // We only import Strings
-                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    return false;
-                }
-
-                // Can be imported
-                return true;
+                throw new Exception("Implement me!");
             }
 
-            // Import and format the data
             @Override
             public boolean importData(TransferHandler.TransferSupport info) {
 
-                // Only if we are dropping something onto the field
-                if (!info.isDrop()) {
-                    return false;
-                }
-
-                // And only if it is a string flavor
-                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    return false;
-                }
-
-                // Get and format the strings
-                Transferable t = info.getTransferable();
-                String data;
-                try {
-                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
-                    data = data.replaceAll("(\r\n|\n)", ", ");
-                }
-                catch (Exception e) {
-                    return false;
-                }
-
-                // Create the complete list
-                String currentText = expTags.getText();
-                if (! currentText.equals("")) {
-                    data = currentText + ", " + data;
-                }
-
-                // Clean the tag list
-                data = cleanTagList(data);
-
-                // Set the tag list
-                expTags.setText(data);
-
-                // Update the Experiment
-                updateExpTags();
-
-                // Return success
-                return true;
+                throw new Exception("Implement me!");
             }
+
         });
+        //        expTags.setTransferHandler(new TransferHandler() {
+        //
+        //            private static final long serialVersionUID = 1L;
+        //
+        //            // Check if the transfer is valid
+        //            @Override
+        //            public boolean canImport(TransferHandler.TransferSupport info) {
+        //
+        //                // We only import Strings
+        //                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+        //                    return false;
+        //                }
+        //
+        //                // Can be imported
+        //                return true;
+        //            }
+        //
+        //            // Import and format the data
+        //            @Override
+        //            public boolean importData(TransferHandler.TransferSupport info) {
+        //
+        //                // Only if we are dropping something onto the field
+        //                if (!info.isDrop()) {
+        //                    return false;
+        //                }
+        //
+        //                // And only if it is a string flavor
+        //                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+        //                    return false;
+        //                }
+        //
+        //                // Get and format the strings
+        //                Transferable t = info.getTransferable();
+        //                String data;
+        //                try {
+        //                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
+        //                    data = data.replaceAll("(\r\n|\n)", ", ");
+        //                }
+        //                catch (Exception e) {
+        //                    return false;
+        //                }
+        //
+        //                // Create the complete list
+        //                String currentText = expTags.getText();
+        //                if (! currentText.equals("")) {
+        //                    data = currentText + ", " + data;
+        //                }
+        //
+        //                // Clean the tag list
+        //                data = cleanTagList(data);
+        //
+        //                // Set the tag list
+        //                expTags.setText(data);
+        //
+        //                // Update the Experiment
+        //                updateExpTags();
+        //
+        //                // Return success
+        //                return true;
+        //            }
+        //        });
         panel.add(expTags, constraints);
 
         // Create a label for the explanation
@@ -834,7 +846,8 @@ public final class FlowEditor extends AbstractEditor {
     /**
      * We update the experiment tags.
      */
-    protected void updateExpTags() {
+    @Override
+    protected void updateExpTags(List<Tag> tagList) {
 
         // How many experiments do we have?
         int nExperiments = metadataMappersList.size();

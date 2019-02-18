@@ -47,7 +47,8 @@ import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 import ch.ethz.scu.obit.common.utils.QueryOS;
-import ch.ethz.scu.obit.microscopy.processors.data.model.Tag;
+import ch.ethz.scu.obit.processors.data.model.Tag;
+import ch.ethz.scu.obit.processors.data.model.TagListExportTransferHandler;
 import ch.ethz.scu.obit.processors.openbis.OpenBISProcessor;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.common.search.SearchResult;
 import ch.ethz.sis.openbis.generic.asapi.v3.dto.experiment.Experiment;
@@ -279,10 +280,21 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Print the attributes
         String className = nodeInfo.getClass().getSimpleName();
-        if (className.equals("Space")) {
+        if (className.equals("Space") || className.equals("Project")) {
 
-            // Cast
-            Space space = (Space) nodeInfo;
+            Space space = null;
+            if (className.equals("Space"))
+            {
+                // Get the space
+                space = (Space) nodeInfo;
+
+            } else {
+
+                // Get the Space from the parent node
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node.getParent();
+                space = (Space) spaceNode.getUserObject();
+
+            }
 
             // Retrieve tags for current space
             List<Sample> tags = openBISProcessor.getTagsForSpace(space);
@@ -897,7 +909,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
      * it as a child of the passed OpenBISSpaceNode
      * @return true if creation was successfull, false otherwise.
      */
-    private boolean createNewMetaProject() {
+    private boolean createNewTag() {
 
         // Retrieve and store the createProject service
         if (!openBISProcessor.isLoggedIn()) {
@@ -909,11 +921,58 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         }
 
+        // Make sure something is selected in the tree
+        AbstractOpenBISNode node = (AbstractOpenBISNode) tree.getLastSelectedPathComponent();
+
+        // If nothing is selected, inform the user and return here!
+        if (node == null) {
+
+            JOptionPane.showMessageDialog(null,
+                    "Please choose the SPACE where to add the new tag!",
+                    "Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+
+        }
+
+        String className = node.getClass().getSimpleName();
+        Space space = null;
+        if (className.equals("OpenBISSpaceNode")) {
+
+            space = (Space) node.getUserObject();
+
+        } else if (className.equals("OpenBISProjectNode")) {
+
+            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node.getParent();
+            space = (Space) spaceNode.getUserObject();
+
+        } else if (className.equals("OpenBISExperimentNode")) {
+
+            OpenBISProjectNode projectNode = (OpenBISProjectNode) node.getParent();
+            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+            space = (Space) spaceNode.getUserObject();
+
+        } else if (className.equals("OpenBISSampleListNode")) {
+
+            OpenBISExperimentNode experimentNode = (OpenBISExperimentNode) node.getParent();
+            OpenBISProjectNode projectNode = (OpenBISProjectNode) experimentNode.getParent();
+            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+            space = (Space) spaceNode.getUserObject();
+
+        } else {
+
+            JOptionPane.showMessageDialog(null,
+                    "Please choose the SPACE where to add the new tag!",
+                    "Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
         // Ask the user to specify a metaproject name and description.
         // The maximum length of a metaproject code in openBIS is 60
         // characters.
-        String metaprojectCode;
-        String metaprojectDescr;
+        String tagCode;
+        String tagDescr;
         JTextField nameTextField = new JTextField(30);
         JTextField descrTextField = new JTextField();
         Object[] fields = {
@@ -924,20 +983,20 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 "Create new tag...",
                 JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            metaprojectCode = nameTextField.getText();
-            metaprojectDescr = descrTextField.getText();
-            if (metaprojectCode == null || metaprojectCode.equals("")) {
+            tagCode = nameTextField.getText();
+            tagDescr = descrTextField.getText();
+            if (tagCode == null || tagCode.equals("")) {
                 outputPane.warn("Creation of new tag aborted by user.");
                 return false;
             }
-            if (metaprojectCode.length() > 60) {
+            if (tagCode.length() > 60) {
                 outputPane.err("The name of the tag cannot be more"
                         + " than 60 characters long.");
                 return false;
             }
-            if (metaprojectCode.contains(" ") ||
-                    metaprojectCode.contains("\\") ||
-                    metaprojectCode.contains("/")) {
+            if (tagCode.contains(" ") ||
+                    tagCode.contains("\\") ||
+                    tagCode.contains("/")) {
                 outputPane.err("The name of the tag cannot contain spaces,"
                         + " slashes, or backslashes.");
                 return false;
@@ -947,20 +1006,17 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             return false;
         }
 
-        // @TODO: This is currently disabled
-
-        boolean success = openBISProcessor.createMetaProject(metaprojectCode,
-                metaprojectDescr);
+        boolean success = openBISProcessor.createTag(space, tagCode, tagDescr);
 
         if (success) {
             // Retrieve the updated metaproject list
             // and update the view
-            outputPane.log("Successfully created tag " + metaprojectCode + ".");
+            outputPane.log("Successfully created tag " + tagCode + ".");
             clearTagList();
-            //setTagList(openBISProcessor.getMetaprojects());
+            setTagList(openBISProcessor.getTagsForSpace(space));
             return true;
         } else {
-            outputPane.err("Could not create tag " + metaprojectCode + "!");
+            outputPane.err("Could not create tag " + tagCode + "!");
             return false;
         }
     }
@@ -1145,7 +1201,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                createNewMetaProject();
+                createNewTag();
             }
         });
         constraints.gridx = 2;
@@ -1162,6 +1218,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         userTagList.getSelectionModel().setSelectionMode(
                 ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         userTagList.setDragEnabled(true);
+        userTagList.setTransferHandler(new TagListExportTransferHandler(userTagList));
         JScrollPane tagScrollPane = new JScrollPane(userTagList);
 
         // Add to the layout

@@ -12,6 +12,7 @@ import java.util.Observer;
 import java.util.Set;
 
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
@@ -20,6 +21,7 @@ import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
+import ch.ethz.scu.obit.processors.data.model.Tag;
 
 /**
  * Abstract editor for processors
@@ -29,6 +31,7 @@ abstract public class AbstractEditor extends Observable
 implements ActionListener, Observer {
 
     protected JPanel panel;
+    protected JTextArea expTags;
 
     // Reference to the global settings manager
     protected GlobalSettingsManager globalSettingsManager;
@@ -93,6 +96,11 @@ implements ActionListener, Observer {
      * @param p Action parameters for the Observer.
      */
     abstract protected void resetMetadata(ObserverActionParameters p);
+
+    /**
+     * Update the Experiment tags.
+     */
+    abstract protected void updateExpTags(List<Tag> tagList);
 
     /**
      * Observer update method
@@ -226,7 +234,7 @@ implements ActionListener, Observer {
      * @param tagList List of tags to be processed.
      * @return comma-separated list of tags.
      */
-    protected String cleanTagList(String tagList) {
+    private String cleanTagList(String tagList) {
 
         // Split the string into items
         List<String> items = Arrays.asList(tagList.split("\\s*,\\s*"));
@@ -253,4 +261,28 @@ implements ActionListener, Observer {
         return buff.toString().trim().replaceAll(" ", ", ");
     }
 
+    /**
+     * Updates the tags in the UI and updates the Experiments.
+     * @param tagList List of tags to be processed.
+     * @return comma-separated list of tags.
+     */
+    public void appendTags(List<Tag> tagList)
+    {
+        // Build the string with a buffer
+        StringBuffer buff = new StringBuffer();
+
+        for (Tag tag : tagList) {
+            buff.append(tag.toString());
+            buff.append(" ");
+        }
+
+        // Return the string
+        String strTags = buff.toString().trim().replaceAll(" ", ", ");
+
+        // Set current text
+        expTags.setText(strTags);
+
+        // Update the Experiment
+        updateExpTags(tagList);
+    }
 }
