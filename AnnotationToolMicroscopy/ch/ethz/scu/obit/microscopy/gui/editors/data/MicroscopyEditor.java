@@ -629,16 +629,32 @@ public final class MicroscopyEditor extends AbstractEditor {
 
                         // Apply to all
                         for (int i = 0; i < nExperiments; i++) {
-                            metadataMappersList.get(i).openBISProjectNode = selProjNode;
+
+                            // Get the metadata mapper
+                            MicroscopyMetadataMapper mapper = metadataMappersList.get(i);
+
+                            // Set the project
+                            mapper.openBISProjectNode = selProjNode;
+
+                            // Reset tags
+                            mapper.getExperiment().tags = new ArrayList<Tag>();
                         }
 
                     } else {
 
+                        // Get the metadata mapper
+                        MicroscopyMetadataMapper mapper = metadataMappersList.get(currentExperimentIndex);
+
                         // Apply to current experiment only
-                        metadataMappersList.get(
-                                currentExperimentIndex).openBISProjectNode =
-                                selProjNode;
+                        mapper.openBISProjectNode = selProjNode;
+
+                        // Reset tags
+                        mapper.getExperiment().tags = new ArrayList<Tag>();
+
                     }
+
+                    // Clear the tag field
+                    expTags.setText("");
                 }
             }
         });
