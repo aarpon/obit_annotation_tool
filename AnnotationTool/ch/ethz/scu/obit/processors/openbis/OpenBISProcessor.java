@@ -65,7 +65,6 @@ public class OpenBISProcessor {
 
     // Cache spaces and projects
     private boolean dataIsCached = false;
-    private boolean dataWithExperiments = false;
     private boolean tagCollectionsAreCached = false;
     private SearchResult<Space> cachedSpacesWithProjects = null;
     private Map<Space, Project> tagsCollectionPerSpace = null;
@@ -84,7 +83,6 @@ public class OpenBISProcessor {
 
         // Initialize cache
         this.dataIsCached = false;
-        this.dataWithExperiments = false;
         this.tagCollectionsAreCached = false;
         this.cachedSpacesWithProjects = null;
         this.tagsCollectionPerSpace = null;
@@ -245,60 +243,9 @@ public class OpenBISProcessor {
     public void resetData() {
 
         this.dataIsCached = false;
-        this.dataWithExperiments = false;
         this.tagCollectionsAreCached = false;
         this.cachedSpacesWithProjects = null;
         this.tagsCollectionPerSpace = null;
-    }
-
-    /**
-     * Returns the list of Spaces in openBIS (as visible for current user).
-     *
-     * The spaces (with the contained projects and experiments) are cached.
-     * On a second call, the cached version is returned. To force a retrieval,
-     * call resetData() first. Also, references to COMMON_ORGANISATION_UNIT
-     * projects (common 'tags') are cached.
-     *
-     * @return list of Spaces.
-     */
-    public SearchResult<Space> getSpacesWithProjectsAndExperiments() {
-
-        // Do we have a valid session?
-        if (v3_api == null) {
-            return new SearchResult<Space>(new ArrayList<Space>(), 0);
-        }
-
-        // Is the data cached and with experiments?
-        if (dataIsCached && dataWithExperiments) {
-            return cachedSpacesWithProjects;
-        }
-
-        // Space
-        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
-        searchCriteria.withCode();
-        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
-        spaceFetchOptions.sortBy().code();
-
-        ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
-
-
-        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
-        projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
-
-        spaceFetchOptions.withProjectsUsing(projectFetchOptions);
-
-        // Search openBIS
-        cachedSpacesWithProjects = v3_api.searchSpaces(v3_sessionToken,
-                searchCriteria, spaceFetchOptions);
-
-        // Update cache information
-        dataIsCached = true;
-        dataWithExperiments = true;
-
-        // Cache the space tag collections
-        cacheTagCollections();
-
-        return cachedSpacesWithProjects;
     }
 
     /**
@@ -339,7 +286,6 @@ public class OpenBISProcessor {
 
         // Update cache information
         dataIsCached = true;
-        dataWithExperiments = false;
 
         // Cache the space tag collections
         cacheTagCollections();
@@ -360,37 +306,26 @@ public class OpenBISProcessor {
             return new ArrayList<Experiment>();
         }
 
-        if (dataWithExperiments == true) {
+        // We need to retrieve the experiments from openBIS
+        ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
+        searchCriteria.withCode();
+        searchCriteria.withPermId().thatEquals(p.getPermId().toString());
+        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+        projectFetchOptions.sortBy().code();
 
-            // Retrieve the experiments. We can call getExperiments() since the
-            // the Experiments were fetched when searching for projects in
-            // getSpacesWithProjectsAndExperiments().
-            return p.getExperiments();
+        ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
+        projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
 
-        } else {
+        SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
+                searchCriteria, projectFetchOptions);
 
-            // We need to retrieve the experiments from openBIS
-            ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
-            searchCriteria.withCode();
-            searchCriteria.withPermId().thatEquals(p.getPermId().toString());
-            ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
-            projectFetchOptions.sortBy().code();
-
-            ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
-            projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
-
-            SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
-                    searchCriteria, projectFetchOptions);
-
-            if (projects.getTotalCount() == 0) {
-                return new ArrayList<Experiment>();
-            }
-
-            // Get the project and extract the experiments
-            Project proj = projects.getObjects().get(0);
-            return proj.getExperiments();
-
+        if (projects.getTotalCount() == 0) {
+            return new ArrayList<Experiment>();
         }
+
+        // Get the project and extract the experiments
+        Project proj = projects.getObjects().get(0);
+        return proj.getExperiments();
 
     }
 
@@ -458,7 +393,6 @@ public class OpenBISProcessor {
         Experiment orgUnits = null;
         for (int i = 0; i < experiments.size(); i++) {
             Experiment current = experiments.get(i);
-            System.out.println(current.getCode());
             if (current.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
                 orgUnits = current;
                 break;
