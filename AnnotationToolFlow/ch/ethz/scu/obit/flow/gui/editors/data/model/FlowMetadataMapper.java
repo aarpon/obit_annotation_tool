@@ -18,117 +18,127 @@ import ch.ethz.scu.obit.flow.processors.data.model.Tray;
  */
 public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
-	/**
-	 * Selected experiment node.
-	 */
-	public ExperimentNode experimentNode;
-	
-	/**
-	 * Selected openBIS project node.
-	 */
-	public OpenBISProjectNode openBISProjectNode;
-	
-	/**
-	 * Support tray geometries.
-	 */
-	public ArrayList<String> supportedTrayGeometries;
-	
-	/** 
-	 * Constructor
-	 * @param expNode Experiment node (in the data viewr)
-	 * @param openBISProjectNode  openBIS project node (in the openBIS viewer)
-	 */
-	public FlowMetadataMapper(ExperimentNode expNode,
-                              OpenBISProjectNode openBISProjectNode) {
-	
-		// Assign folder and openBIS project nodes
-		this.experimentNode = expNode;
-		this.openBISProjectNode = openBISProjectNode;
-		
-		// Set the supported geometries
-		this.supportedTrayGeometries = new ArrayList<String>();
-		this.supportedTrayGeometries.add("96_WELLS_8X12");
-		this.supportedTrayGeometries.add("384_WELLS_16x24");
-	}
+    /**
+     * Selected experiment node.
+     */
+    public ExperimentNode experimentNode;
 
-	/**
-	 * Get the folder name
-	 * @return the folder name
-	 */
-	public String getFolderName() {
-		return experimentNode.getParent().toString();
-	}
-	
-	/**
-	 * Get the experiment descriptor
-	 * @return the experiment descriptor
-	 */
-	public Experiment getExperiment() {
-		return (Experiment) experimentNode.getUserObject();
-	}
+    /**
+     * Selected openBIS project node.
+     */
+    public OpenBISProjectNode openBISProjectNode;
 
-	/**
-	 * Get the experiment name
-	 * @return the experiment name
-	 */
-	public String getExperimentName() {
-		return experimentNode.toString();
-	}
+    /**
+     * Support tray geometries.
+     */
+    public ArrayList<String> supportedTrayGeometries;
 
-	/**
-	 * Get the project name
-	 * @return the experiment name
-	 */
-	public String getProjectName() {
-		return openBISProjectNode.toString();
-	}
+    /**
+     * Constructor
+     * @param expNode Experiment node (in the data viewr)
+     * @param openBISProjectNode  openBIS project node (in the openBIS viewer)
+     */
+    public FlowMetadataMapper(ExperimentNode experimentNode,
+            OpenBISProjectNode openBISProjectNode) {
 
-	/**
-	 * Get the openBIS Experiment Identifier
-	 * @return the openBIS Experiment identifier
-	 */
-	public String getOpenBISExerimentIdentifier() {
-		String openBISProjectID = openBISProjectNode.getIdentifier();
-		Experiment e = (Experiment) experimentNode.getUserObject();
-		return (openBISProjectID + "/" + e.getCode()).toUpperCase();
-	}
-	
-	/**
-	 * Get the openBIS Space Identifier
-	 * @return the openBIS space identifier
-	 */
-	public String getOpenBISSpaceIdentifier() {
-		String openBISProjectID = openBISProjectNode.getIdentifier();
-		
-		// Find the first occurrence of / which is NOT at the beginning
-		int indx = openBISProjectID.indexOf("/", 1);
-		
-		if (indx == -1) {
-			// This should not happen, since the identifier came
-			// from openBIS in the first place.
-			System.err.println(
-					"Malformed openBIS project identifier!");
-			return "INVALID";
-		}
-		
-		return (openBISProjectID.substring(0, indx).toUpperCase());
-	}
+        // Assign folder and openBIS project nodes
+        this.experimentNode = experimentNode;
+        this.openBISProjectNode = openBISProjectNode;
 
-	/**
-	 * Get the plates for the stored Experiment.
-	 * @return Plates contained in current Experiment. 
-	 */
-	public Map<String, Tray> getTraysForExperiment() {
-		
-		// Empty result set
-		Map<String, Tray> emptySet = new LinkedHashMap<String, Tray>();
-		
-		// Do we have a folder node already?
-		if (this.experimentNode == null) {
-			return emptySet;
-		}
-		
-		// Return the trays
-		return ((Experiment) this.experimentNode.getUserObject()).trays;
-	}
+        // Set the supported geometries
+        this.supportedTrayGeometries = new ArrayList<String>();
+        this.supportedTrayGeometries.add("96_WELLS_8X12");
+        this.supportedTrayGeometries.add("384_WELLS_16x24");
+    }
+
+    /**
+     * Get the folder name
+     * @return the folder name
+     */
+    public String getFolderName() {
+        return experimentNode.getParent().toString();
+    }
+
+    /**
+     * Get the experiment descriptor
+     * @return the experiment descriptor
+     */
+    public Experiment getExperiment() {
+        return (Experiment) experimentNode.getUserObject();
+    }
+
+    /**
+     * Get the experiment name
+     * @return the experiment name
+     */
+    public String getExperimentName() {
+        return experimentNode.toString();
+    }
+
+    /**
+     * Get the project name
+     * @return the experiment name
+     */
+    public String getProjectName() {
+        return openBISProjectNode.toString();
+    }
+
+    /**
+     * Get the openBIS Experiment (Collection) Identifier
+     * @return the openBIS Experiment identifier
+     */
+    public String getOpenBISCollectionIdentifier() {
+        String openBISProjectID = openBISProjectNode.getIdentifier();
+        return (openBISProjectID + "/FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION");
+    }
+
+    /**
+     * Get the openBIS Experiment Identifier
+     * @return the openBIS Experiment identifier
+     */
+    @Override
+    public String getOpenBISExerimentIdentifier() {
+        Experiment e = (Experiment) experimentNode.getUserObject();
+        return (getOpenBISCollectionIdentifier() + "/" + e.getCode()).toUpperCase();
+    }
+
+    /**
+     * Get the openBIS Space Identifier
+     * @return the openBIS space identifier
+     */
+    @Override
+    public String getOpenBISSpaceIdentifier() {
+        String openBISProjectID = openBISProjectNode.getIdentifier();
+
+        // Find the first occurrence of / which is NOT at the beginning
+        int indx = openBISProjectID.indexOf("/", 1);
+
+        if (indx == -1) {
+            // This should not happen, since the identifier came
+            // from openBIS in the first place.
+            System.err.println(
+                    "Malformed openBIS project identifier!");
+            return "INVALID";
+        }
+
+        return (openBISProjectID.substring(0, indx).toUpperCase());
+    }
+
+    /**
+     * Get the plates for the stored Experiment.
+     * @return Plates contained in current Experiment.
+     */
+    public Map<String, Tray> getTraysForExperiment() {
+
+        // Empty result set
+        Map<String, Tray> emptySet = new LinkedHashMap<String, Tray>();
+
+        // Do we have a folder node already?
+        if (this.experimentNode == null) {
+            return emptySet;
+        }
+
+        // Return the trays
+        return ((Experiment) this.experimentNode.getUserObject()).trays;
+    }
 }

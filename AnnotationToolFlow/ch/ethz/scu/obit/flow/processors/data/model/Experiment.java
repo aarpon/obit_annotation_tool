@@ -12,86 +12,67 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  */
 public class Experiment extends ExperimentDescriptor {
 
-	// An Experiment can contain TRAYS that in turn contain SPECIMENs 
-	// which contain TUBEs, or directly SPECIMENs containing TUBEs.
+    // An Experiment can contain TRAYS that in turn contain SPECIMENs
+    // which contain TUBEs, or directly SPECIMENs containing TUBEs.
 
     /**
-     *  Experiment version
-     *  
-     *  This is used to keep track of the structure of the experiment so that
-     *  older versions of Experiments stored in openBIS are recognized and
-     *  can potentially be upgraded.
+     * ArrayList of Tray's
      */
-    public final String version = "1";
+    public Map<String, Tray> trays =
+            new LinkedHashMap<String, Tray>();
 
     /**
-     *  Experiment description
+     * ArrayList of Specimen's
      */
-	public String description = "";
+    public Map<String, Specimen> specimens =
+            new LinkedHashMap<String, Specimen>();
 
-	/**
-	 *  Experiment tags (comma-separated list)
-	 */
-	public String tags = "";
+    /**
+     * Constructor
+     * @param fullPath Full path to the experiment folder.
+     * @param userRootDataPath Full path to current user folder.
+     */
+    public Experiment(File fullPath, File userRootDataPath) {
 
-	/**
-	 * ArrayList of Tray's
-	 */
-	public Map<String, Tray> trays = 
-			new LinkedHashMap<String, Tray>();
+        super(fullPath, userRootDataPath);
+        this.setName(fullPath.getName());
 
-	/**
-	 * ArrayList of Specimen's
-	 */
-	public Map<String, Specimen> specimens = 
-			new LinkedHashMap<String, Specimen>();
+        // Set the attribute relative path. Since this will be
+        // used by the openBIS dropboxes running on a Unix machine,
+        // we make sure to use forward slashes for path separators
+        // when we set it as an attribute.
+        attributes.put("relativePath",
+                this.relativePath.replace("\\", "/"));
 
-	/**
-	 * Constructor
-	 * @param fullPath Full path to the experiment folder.
-	 * @param userRootDataPath Full path to current user folder.
-	 */
-	public Experiment(File fullPath, File userRootDataPath) {
+    }
 
-		super(fullPath, userRootDataPath);
-		this.setName(fullPath.getName());
+    /**
+     * Alternative constructor
+     * @param fullPath Full path of the experiment.
+     * @param name Name of the experiment.
+     * @param userRootDataPath Full path to current user folder.
+     */
+    public Experiment(File fullPath, String name, File userRootDataPath) {
 
-		// Set the attribute relative path. Since this will be 
-		// used by the openBIS dropboxes running on a Unix machine, 
-		// we make sure to use forward slashes for path separators 
-		// when we set it as an attribute.
-		attributes.put("relativePath",
-				this.relativePath.replace("\\", "/"));
+        super(fullPath, userRootDataPath);
+        this.setName(name);
 
-	}
+        // Set the attribute relative path. Since this will be
+        // used by the openBIS dropboxes running on a Unix machine,
+        // we make sure to use forward slashes for path separators
+        // when we set it as an attribute.
+        attributes.put("relativePath",
+                this.relativePath.replace("\\", "/"));
 
-	/**
-	 * Alternative constructor
-	 * @param fullPath Full path of the experiment.
-	 * @param name Name of the experiment.
-	 * @param userRootDataPath Full path to current user folder.
-	 */
-	public Experiment(File fullPath, String name, File userRootDataPath) {
+    }
 
-		super(fullPath, userRootDataPath);
-		this.setName(name);
+    /**
+     * Return a simplified class name to use in XML.
+     * @return simplified class name.
+     */
+    @Override
+    public String getType() {
+        return "Experiment";
+    }
 
-		// Set the attribute relative path. Since this will be 
-		// used by the openBIS dropboxes running on a Unix machine, 
-		// we make sure to use forward slashes for path separators 
-		// when we set it as an attribute.
-		attributes.put("relativePath",
-				this.relativePath.replace("\\", "/"));
-
-	}
-
-	/**
-	 * Return a simplified class name to use in XML.
-	 * @return simplified class name.
-	 */
-	@Override		
-	public String getType() {
-		return "Experiment";
-	}
-
-} 
+}

@@ -23,7 +23,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -42,6 +41,8 @@ import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.SampleDescriptor;
+import ch.ethz.scu.obit.processors.data.model.Tag;
+import ch.ethz.scu.obit.processors.data.model.TagListImportTransferHandler;
 
 /**
  * Metadata editor panel.
@@ -62,7 +63,6 @@ public final class FlowEditor extends AbstractEditor {
     protected Map<JComboBox<String>, Tray> comboGeometryList;
     protected JComboBox<String> comboProjectList;
     protected JTextArea expDescription;
-    protected JTextArea expTags;
 
     /**
      * Constructor
@@ -117,6 +117,8 @@ public final class FlowEditor extends AbstractEditor {
             // Set the openBIS experiment identifier
             Map<String, String> expOpenBISAttributes =
                     new Hashtable<String, String>();
+            expOpenBISAttributes.put("openBISCollectionIdentifier",
+                    metadata.getOpenBISCollectionIdentifier());
             expOpenBISAttributes.put("openBISIdentifier",
                     metadata.getOpenBISExerimentIdentifier());
             expOpenBISAttributes.put("openBISSpaceIdentifier",
@@ -127,8 +129,7 @@ public final class FlowEditor extends AbstractEditor {
             Map<String, String> expUserAttributes =
                     new Hashtable<String, String>();
             expUserAttributes.put("description", expDescr.description);
-            expUserAttributes.put("tags", expDescr.tags);
-            expUserAttributes.put("version", expDescr.version);
+            expUserAttributes.put("tags", expDescr.getTagIdentifierList());
             expDescr.addUserAttributes(expUserAttributes);
 
             // Now get the Trays and Specimens children of the Experiment
@@ -426,7 +427,7 @@ public final class FlowEditor extends AbstractEditor {
         constraints.weighty = 0;
         constraints.gridx = 0;
         constraints.gridy = gridy++;
-        expTags = new JTextArea(metadata.getExperiment().tags);
+        expTags = new JTextArea(metadata.getExperiment().getTagList());
         Font f = expTags.getFont();
         expTags.setFont(new Font(f.getFontName(), f.getStyle(), 11));
         expTags.setEditable(false);
@@ -452,81 +453,7 @@ public final class FlowEditor extends AbstractEditor {
         });
 
         // Append a custom transfer handler
-        expTags.setTransferHandler(new TransferHandler() {
-            @Override
-            public boolean canImport(TransferHandler.TransferSupport info) {
-
-                throw new Exception("Implement me!");
-            }
-
-            @Override
-            public boolean importData(TransferHandler.TransferSupport info) {
-
-                throw new Exception("Implement me!");
-            }
-
-        });
-        //        expTags.setTransferHandler(new TransferHandler() {
-        //
-        //            private static final long serialVersionUID = 1L;
-        //
-        //            // Check if the transfer is valid
-        //            @Override
-        //            public boolean canImport(TransferHandler.TransferSupport info) {
-        //
-        //                // We only import Strings
-        //                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-        //                    return false;
-        //                }
-        //
-        //                // Can be imported
-        //                return true;
-        //            }
-        //
-        //            // Import and format the data
-        //            @Override
-        //            public boolean importData(TransferHandler.TransferSupport info) {
-        //
-        //                // Only if we are dropping something onto the field
-        //                if (!info.isDrop()) {
-        //                    return false;
-        //                }
-        //
-        //                // And only if it is a string flavor
-        //                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-        //                    return false;
-        //                }
-        //
-        //                // Get and format the strings
-        //                Transferable t = info.getTransferable();
-        //                String data;
-        //                try {
-        //                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
-        //                    data = data.replaceAll("(\r\n|\n)", ", ");
-        //                }
-        //                catch (Exception e) {
-        //                    return false;
-        //                }
-        //
-        //                // Create the complete list
-        //                String currentText = expTags.getText();
-        //                if (! currentText.equals("")) {
-        //                    data = currentText + ", " + data;
-        //                }
-        //
-        //                // Clean the tag list
-        //                data = cleanTagList(data);
-        //
-        //                // Set the tag list
-        //                expTags.setText(data);
-        //
-        //                // Update the Experiment
-        //                updateExpTags();
-        //
-        //                // Return success
-        //                return true;
-        //            }
-        //        });
+        expTags.setTransferHandler(new TagListImportTransferHandler(this));
         panel.add(expTags, constraints);
 
         // Create a label for the explanation
@@ -852,9 +779,6 @@ public final class FlowEditor extends AbstractEditor {
         // How many experiments do we have?
         int nExperiments = metadataMappersList.size();
 
-        // Selected tags
-        String selectedTags = expTags.getText();
-
         // Default to set the tags for current experiment only.
         int n = 0;
         if (nExperiments > 1) {
@@ -879,7 +803,7 @@ public final class FlowEditor extends AbstractEditor {
             for (int i = 0; i < nExperiments; i++) {
                 ((Experiment)
                         metadataMappersList.get(i).experimentNode.getUserObject()).tags =
-                        selectedTags;
+                        tagList;
             }
 
         } else {
@@ -891,7 +815,7 @@ public final class FlowEditor extends AbstractEditor {
                     currentExperimentIndex);
 
             // Store the experiment description
-            metadata.getExperiment().tags = selectedTags;
+            metadata.getExperiment().tags = tagList;
         }
 
     }
