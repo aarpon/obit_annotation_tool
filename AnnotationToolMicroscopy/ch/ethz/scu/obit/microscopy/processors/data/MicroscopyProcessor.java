@@ -490,7 +490,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
         /**
          *  Experiment tags (comma-separated list)
          */
-        public List<Tag> tags = null;
+        public List<Tag> tags = new ArrayList<Tag>();
 
         /**
          *  Store the microscopy files associated with this Experiment

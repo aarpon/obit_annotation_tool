@@ -880,7 +880,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                             currentExperimentIndex);
 
                     // Store the experiment description
-                    metadata.getExperiment().tags = null;
+                    metadata.getExperiment().tags = new ArrayList<Tag>();
                 }
             });
             popup.add(clearMenuItem);
