@@ -55,8 +55,6 @@ public class OpenBISProcessor {
     private IApplicationServerApi v3_api;
     private String v3_sessionToken;
 
-    //    private AggregationServiceDescription createMetaProjectService = null;
-
     private AtomicReference<String> loginErrorMessage =
             new AtomicReference<String>("");
     private AtomicReference<String> loginErrorTitle =
@@ -349,7 +347,11 @@ public class OpenBISProcessor {
         searchCriteria.withPermId().thatEquals(exp.getPermId().toString());
         ExperimentFetchOptions expFetchOptions = new ExperimentFetchOptions();
         expFetchOptions.sortBy().code();
-        expFetchOptions.withSamplesUsing(new SampleFetchOptions());
+
+        // Make sure to retrieve the Sample properties
+        SampleFetchOptions sampleFetchOptions = new SampleFetchOptions();
+        sampleFetchOptions.withProperties();
+        expFetchOptions.withSamplesUsing(sampleFetchOptions);
 
         SearchResult<Experiment> experiments = v3_api.searchExperiments(v3_sessionToken,
                 searchCriteria, expFetchOptions);
@@ -481,12 +483,19 @@ public class OpenBISProcessor {
             micrExpCreation.setCode("MICROSCOPY_EXPERIMENTS_COLLECTION");
             micrExpCreation.setProperty("Name", "Microscopy Experiment Collection");
 
-            // Create collection FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION object
-            ExperimentCreation flowExpCreation = new ExperimentCreation();
-            flowExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
-            flowExpCreation.setProjectId(id);
-            flowExpCreation.setCode("FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION");
-            flowExpCreation.setProperty("Name", "Flow Cytometry Experiment Collection");
+            // Create collection FLOW_SORTERS_EXPERIMENTS_COLLECTION object
+            ExperimentCreation flowSorterExpCreation = new ExperimentCreation();
+            flowSorterExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            flowSorterExpCreation.setProjectId(id);
+            flowSorterExpCreation.setCode("FLOW_SORTERS_EXPERIMENTS_COLLECTION");
+            flowSorterExpCreation.setProperty("Name", "Flow Cytometry Cell Sorters Experiment Collection");
+
+            // Create collection FLOW_ANALYZERS_EXPERIMENTS_COLLECTION object
+            ExperimentCreation flowAnalyzersExpCreation = new ExperimentCreation();
+            flowAnalyzersExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            flowAnalyzersExpCreation.setProjectId(id);
+            flowAnalyzersExpCreation.setCode("FLOW_ANALYZERS_EXPERIMENTS_COLLECTION");
+            flowAnalyzersExpCreation.setProperty("Name", "Flow Cytometry Cell Aanlyzers Experiment Collection");
 
             // Create collection ORGANIZATION_UNITS_COLLECTION object
             ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
@@ -498,12 +507,12 @@ public class OpenBISProcessor {
             // Create the experiments
             List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
             experimentCreationList.add(micrExpCreation);
-            experimentCreationList.add(flowExpCreation);
+            experimentCreationList.add(flowSorterExpCreation);
             experimentCreationList.add(orgUnitExpCreation);
 
             List<ExperimentPermId> createdExperiments = v3_api.createExperiments(v3_sessionToken, experimentCreationList);
-            System.out.println(createdExperiments);
 
+            // @TODO: Check the returned createdExperiments list.
         }
 
         // Return the list of created projects
@@ -523,12 +532,12 @@ public class OpenBISProcessor {
     public boolean createTag(Space space, String tagCode, String tagDescr) {
 
         // Check if the project COMMON_ORGANIZATION_UNITS exists
-        Project collection = tagsCollectionPerSpace.get(space);
-        if (collection == null) {
+        Project commonOrganizationUnitProject = tagsCollectionPerSpace.get(space);
+        if (commonOrganizationUnitProject == null) {
 
             // Create the COMMON_ORGANIZATION_UNITS project
-            collection = createTagContainerProjectAndExperiment(space);
-            if (collection == null) {
+            commonOrganizationUnitProject = createTagContainerProjectAndExperiment(space);
+            if (commonOrganizationUnitProject == null) {
                 return false;
             }
         }
@@ -536,30 +545,55 @@ public class OpenBISProcessor {
         // Get the ORGANIZATION_UNITS_COLLECTION collection
         ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
         searchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
-        searchCriteria.withProject().withPermId().thatEquals(collection.getPermId().toString());
+        searchCriteria.withProject().withPermId().thatEquals(commonOrganizationUnitProject.getPermId().toString());
         ExperimentFetchOptions fetchOptions = new ExperimentFetchOptions();
         SearchResult<Experiment> experiments = v3_api.searchExperiments(v3_sessionToken,
                 searchCriteria, fetchOptions);
         if (experiments.getTotalCount() == 0) {
-            return false;
+
+            // Create collection ORGANIZATION_UNITS_COLLECTION object
+            ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
+            orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            orgUnitExpCreation.setProjectId(commonOrganizationUnitProject.getPermId());
+            orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
+            orgUnitExpCreation.setProperty("$NAME", "Organization Unit Collection");
+
+            // Create the experiments
+            List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
+            experimentCreationList.add(orgUnitExpCreation);
+            List<ExperimentPermId> experimentIds = v3_api.createExperiments(v3_sessionToken, experimentCreationList);
+
+            // Now fetch the newly created Experiment
+            ExperimentSearchCriteria newExpSearchCriteria = new ExperimentSearchCriteria();
+            newExpSearchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
+            newExpSearchCriteria.withPermId().thatEquals(experimentIds.get(0).toString());
+            newExpSearchCriteria.withProject().withPermId().thatEquals(commonOrganizationUnitProject.getPermId().toString());
+            ExperimentFetchOptions newExpFetchOptions = new ExperimentFetchOptions();
+            experiments = v3_api.searchExperiments(v3_sessionToken, newExpSearchCriteria, newExpFetchOptions);
+
+            if (experiments.getTotalCount() == 0) {
+                // Could not create the collection!
+                return false;
+            }
         }
 
         // Get the Experiment
         Experiment experiment = experiments.getObjects().get(0);
 
-        // Add the Tag (a sample of type ORGANIZATION_UNIT)
+        // Add the Tag (a sample of type ORGANIZATION_UNIT; the code is auto-generated)
         SampleCreation orgUnitCreation = new SampleCreation();
         orgUnitCreation.setTypeId(new EntityTypePermId("ORGANIZATION_UNIT"));
         orgUnitCreation.setSpaceId(space.getPermId());
-        orgUnitCreation.setProjectId(collection.getPermId());
+        orgUnitCreation.setProjectId(commonOrganizationUnitProject.getPermId());
         orgUnitCreation.setExperimentId(experiment.getPermId());
-        orgUnitCreation.setCode(tagCode.replaceAll("\\s","_").trim());
-        // @TODO: Should this become $NAME and $DESCRIPTION?
-        orgUnitCreation.setProperty("Name", tagCode);
-        //orgUnitCreation.setProperty("$DESCRIPTION", tagDescr);
+
+        // Set name and description as the properties $NAME and $DESCRIPTION
+        orgUnitCreation.setProperty("$NAME", tagCode);
+        orgUnitCreation.setProperty("$DESCRIPTION", tagDescr);
+
+        // Create the sample
         List<SampleCreation> sampleCreationList = new ArrayList<SampleCreation>();
         sampleCreationList.add(orgUnitCreation);
-
         List<SamplePermId> createdSamples = v3_api.createSamples(v3_sessionToken, sampleCreationList);
 
         if (createdSamples == null || createdSamples.size() == 0) {

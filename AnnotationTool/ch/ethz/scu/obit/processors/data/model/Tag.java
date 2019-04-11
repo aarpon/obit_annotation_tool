@@ -13,7 +13,7 @@ public class Tag {
 
     @Override
     public String toString() {
-        return this.tag.getCode();
+        return this.tag.getProperty("$NAME");
     }
 
     public String getIdentifier() {

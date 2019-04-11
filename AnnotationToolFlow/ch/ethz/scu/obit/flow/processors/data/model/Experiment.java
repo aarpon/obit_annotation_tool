@@ -10,7 +10,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  * Descriptor representing an experiment obtained from the FCS file.
  * @author Aaron Ponti
  */
-public class Experiment extends ExperimentDescriptor {
+public abstract class Experiment extends ExperimentDescriptor {
 
     // An Experiment can contain TRAYS that in turn contain SPECIMENs
     // which contain TUBEs, or directly SPECIMENs containing TUBEs.
@@ -74,5 +74,14 @@ public class Experiment extends ExperimentDescriptor {
     public String getType() {
         return "Experiment";
     }
+
+    /**
+     * Return the identifier prefix of the collection type.
+     *
+     * The Sorter and Analyzer Experiment classes must re-implement this method.
+     *
+     * @return One of {"FLOW_ANALYZERS", "FLOW_SORTERS_"}
+     */
+    public abstract String getOpenBISCollectionIdentifierPrefix();
 
 }

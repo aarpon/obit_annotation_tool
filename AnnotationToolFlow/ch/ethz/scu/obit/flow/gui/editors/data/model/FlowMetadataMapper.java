@@ -89,7 +89,10 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
      */
     public String getOpenBISCollectionIdentifier() {
         String openBISProjectID = openBISProjectNode.getIdentifier();
-        return (openBISProjectID + "/FLOW_CYTOMETRY_EXPERIMENTS_COLLECTION");
+        String collectionName = ((Experiment)experimentNode.getUserObject())
+                .getOpenBISCollectionIdentifierPrefix() +
+                "EXPERIMENTS_COLLECTION";
+        return (openBISProjectID + "/" + collectionName);
     }
 
     /**
@@ -98,8 +101,9 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
      */
     @Override
     public String getOpenBISExerimentIdentifier() {
-        Experiment e = (Experiment) experimentNode.getUserObject();
-        return (getOpenBISCollectionIdentifier() + "/" + e.getCode()).toUpperCase();
+        String openBISProjectID = openBISProjectNode.getIdentifier();
+        String code = ((Experiment)experimentNode.getUserObject()).getCode();
+        return (openBISProjectID + "/" + code).toUpperCase();
     }
 
     /**
