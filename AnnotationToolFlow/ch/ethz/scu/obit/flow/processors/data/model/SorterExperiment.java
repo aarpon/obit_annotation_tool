@@ -36,7 +36,7 @@ public class SorterExperiment extends Experiment {
      */
     @Override
     public String getOpenBISCollectionIdentifierPrefix() {
-        return "FLOW_SORTERS";
+        return "FLOW_SORTERS_";
 
     }
 }

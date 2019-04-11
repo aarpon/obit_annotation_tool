@@ -80,7 +80,7 @@ public abstract class Experiment extends ExperimentDescriptor {
      *
      * The Sorter and Analyzer Experiment classes must re-implement this method.
      *
-     * @return One of {"FLOW_ANALYZERS", "FLOW_SORTERS_"}
+     * @return One of {"FLOW_ANALYZERS_", "FLOW_SORTERS_"}
      */
     public abstract String getOpenBISCollectionIdentifierPrefix();
 
