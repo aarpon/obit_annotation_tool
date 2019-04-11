@@ -273,11 +273,12 @@ implements ActionListener, Observer {
 
         for (Tag tag : tagList) {
             buff.append(tag.toString());
-            buff.append(" ");
+            buff.append("; ");
         }
 
-        // Return the string
-        String strTags = buff.toString().trim().replaceAll(" ", ", ");
+        // Build the string
+        String strTags = buff.toString().trim();
+        strTags = strTags.substring(0, strTags.length() - 1);
 
         // Set current text
         expTags.setText(strTags);
