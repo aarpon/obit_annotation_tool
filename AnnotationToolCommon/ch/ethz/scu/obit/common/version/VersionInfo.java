@@ -14,14 +14,14 @@ public class VersionInfo {
     /**
      * Version status: "alpha", "beta", or "" for a stable release
      */
-    public static final String status = "pre-alpha";
+    public static final String status = "beta";
 
     /**
      *  Copyright string
      */
     public static final String copyright = "Copyright " +
             Character.toString('\u00A9') +
-            " 2012 - 2018, Single Cell Unit, " +
+            " 2012 - 2019, Single Cell Unit, " +
             "D-BSSE, ETH Zurich (Basel)";
 
     /**
