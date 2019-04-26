@@ -87,6 +87,13 @@ public class OpenBISProcessor {
     }
 
     /**
+     * Invalidate the data cache to force a rescan of openBIS.
+     */
+    public void invalidateDataCache() {
+        dataIsCached = false;
+    }
+
+    /**
      * Returns the user name if successfully logged in, empty string otherwise
      * @return user name or empty String if log on was not successful
      */
@@ -481,39 +488,43 @@ public class OpenBISProcessor {
             micrExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
             micrExpCreation.setProjectId(id);
             micrExpCreation.setCode("MICROSCOPY_EXPERIMENTS_COLLECTION");
-            micrExpCreation.setProperty("Name", "Microscopy Experiment Collection");
+            micrExpCreation.setProperty("$NAME", "Microscopy experiments collection");
 
             // Create collection FLOW_SORTERS_EXPERIMENTS_COLLECTION object
             ExperimentCreation flowSorterExpCreation = new ExperimentCreation();
             flowSorterExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
             flowSorterExpCreation.setProjectId(id);
             flowSorterExpCreation.setCode("FLOW_SORTERS_EXPERIMENTS_COLLECTION");
-            flowSorterExpCreation.setProperty("Name", "Flow Cytometry Cell Sorters Experiment Collection");
+            flowSorterExpCreation.setProperty("$NAME", "Flow sorters experiments collection");
 
             // Create collection FLOW_ANALYZERS_EXPERIMENTS_COLLECTION object
             ExperimentCreation flowAnalyzersExpCreation = new ExperimentCreation();
             flowAnalyzersExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
             flowAnalyzersExpCreation.setProjectId(id);
             flowAnalyzersExpCreation.setCode("FLOW_ANALYZERS_EXPERIMENTS_COLLECTION");
-            flowAnalyzersExpCreation.setProperty("Name", "Flow Cytometry Cell Aanlyzers Experiment Collection");
+            flowAnalyzersExpCreation.setProperty("$NAME", "Flow analyzers experiment collection");
 
             // Create collection ORGANIZATION_UNITS_COLLECTION object
             ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
             orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
             orgUnitExpCreation.setProjectId(id);
             orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
-            orgUnitExpCreation.setProperty("Name", "Organization Unit Collection");
+            orgUnitExpCreation.setProperty("$NAME", "Organization Unit Collection");
 
             // Create the experiments
             List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
             experimentCreationList.add(micrExpCreation);
             experimentCreationList.add(flowSorterExpCreation);
+            experimentCreationList.add(flowAnalyzersExpCreation);
             experimentCreationList.add(orgUnitExpCreation);
 
             List<ExperimentPermId> createdExperiments = v3_api.createExperiments(v3_sessionToken, experimentCreationList);
 
             // @TODO: Check the returned createdExperiments list.
         }
+
+        // Invalidate cache
+        dataIsCached = false;
 
         // Return the list of created projects
         return createdProjects;

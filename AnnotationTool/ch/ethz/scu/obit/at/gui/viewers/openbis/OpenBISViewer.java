@@ -1135,6 +1135,11 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+
+                // Invalidate the cache
+                openBISProcessor.invalidateDataCache();
+
+                // Rescan
                 scan();
             }
         });
