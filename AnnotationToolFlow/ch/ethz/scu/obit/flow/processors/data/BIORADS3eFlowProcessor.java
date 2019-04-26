@@ -8,9 +8,7 @@ import java.util.Map;
 import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
 import ch.ethz.scu.obit.flow.processors.data.model.SorterExperiment;
 import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
-import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.flow.processors.data.model.Tube;
-import ch.ethz.scu.obit.flow.processors.data.model.Well;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
@@ -278,53 +276,11 @@ public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
             // Is the container a Tray or Specimen?
             if (identifyContainerType(processor).equals("TRAY")) {
 
-                // Create a new TrayDescriptor or reuse an existing one
-                Tray trayDesc;
-                String trayName = getTrayName(processor);
-                String trayKey = experimentName + "_" + trayName;
-                if (expDesc.trays.containsKey(trayKey)) {
-                    trayDesc = expDesc.trays.get(trayKey);
-                } else {
-                    trayDesc =
-                            new Tray(trayName);
-                    // Store attributes
-                    trayDesc.addAttributes(getTrayAttributes(processor));
-                    // Store it in the experiment descriptor
-                    expDesc.trays.put(trayKey, trayDesc);
-                }
-
-                // Create a new Specimen or reuse an existing one
-                Specimen specDesc;
-                String specName = getSpecimenName(processor);
-                String specKey = trayKey + "_" + specName;
-                if (trayDesc.specimens.containsKey(specKey)) {
-                    specDesc = trayDesc.specimens.get(specKey);
-                } else {
-                    specDesc =
-                            new Specimen(specName);
-                    // Store attributes
-                    specDesc.addAttributes(getSpecimenAttributes(processor));
-                    // Store it in the tray descriptor
-                    trayDesc.specimens.put(specKey, specDesc);
-                }
-
-                // Create a new Well descriptor or reuse an existing one
-                Well wellDesc;
-                String wellName = getTubeOrWellName(processor);
-                String wellKey = specKey + "_" + wellName;
-                if (! specDesc.tubes.containsKey(wellKey)) {
-                    wellDesc = new Well(wellName, file, userRootFolder);
-                    // Store attributes
-                    wellDesc.addAttributes(getTubeOrWellAttributes(processor));
-                    // Store events and parameter attributes
-                    wellDesc.fcsFile.parameterList =
-                            new FCSFileParameterList(
-                                    processor.numEvents(),
-                                    processor.numParameters(),
-                                    processor.parametersAttr);
-                    // Store it in the specimen descriptor
-                    specDesc.tubes.put(wellKey, wellDesc);
-                }
+                validator.isValid = false;
+                validator.invalidFilesOrFolders.put(file,
+                        "This experiment contains TRAYs, which are not expected from "
+                                + " the S3e Cell Sorter!");
+                return;
 
             } else {
 
