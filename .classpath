@@ -52,6 +52,6 @@
 	<classpathentry kind="lib" path="lib/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S275.0-r1524559460.jar"/>
 	<classpathentry kind="lib" path="lib/v3_api/openBIS-API-V3-batteries-included-S287.0-r1541665630.jar"/>
-	<classpathentry kind="lib" path="lib/bioformats-6.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/bioformats-5.9.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
