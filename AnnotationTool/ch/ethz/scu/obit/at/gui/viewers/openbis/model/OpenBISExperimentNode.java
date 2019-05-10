@@ -36,6 +36,9 @@ public class OpenBISExperimentNode extends AbstractOpenBISNode {
      */
     @Override
     public String toString() {
+        if (e.getProperties().containsKey("$NAME")) {
+            return e.getProperties().get("$NAME");
+        }
         return e.getCode();
     }
 

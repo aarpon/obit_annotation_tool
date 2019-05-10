@@ -319,6 +319,7 @@ public class OpenBISProcessor {
         projectFetchOptions.sortBy().code();
 
         ExperimentFetchOptions experimentFetchOptions = new ExperimentFetchOptions();
+        experimentFetchOptions.withProperties();
         projectFetchOptions.withExperimentsUsing(experimentFetchOptions);
 
         SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
