@@ -881,7 +881,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         List<ProjectPermId> createdProjects;
         try {
             createdProjects = openBISProcessor.createProject(
-                    space.getCode(), projectCode);
+                    space.getCode(), projectCode, false);
         } catch (Exception e) {
             outputPane.err("Could not create project /" + space.getCode() +
                     "/" + projectCode + "! " + e.getMessage());
