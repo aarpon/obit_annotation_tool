@@ -358,6 +358,7 @@ public class OpenBISProcessor {
 
         // Make sure to retrieve the Sample properties
         SampleFetchOptions sampleFetchOptions = new SampleFetchOptions();
+        sampleFetchOptions.withType();
         sampleFetchOptions.withProperties();
         expFetchOptions.withSamplesUsing(sampleFetchOptions);
 

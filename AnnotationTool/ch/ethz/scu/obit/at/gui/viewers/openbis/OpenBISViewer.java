@@ -41,7 +41,7 @@ import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSampleListNode;
+import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSampleNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISSpaceNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISUserNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.view.OpenBISViewerTree;
@@ -703,18 +703,31 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                         samples = new ArrayList<Sample>();
                     }
 
-                    int nSamples = samples.size();
-                    String title = "";
-                    if (nSamples == 0) {
-                        title = "No samples";
-                    } else if (nSamples == 1) {
-                        title = "One sample";
-                    } else {
-                        title = nSamples + " samples";
+                    if (samples.size() > 0) {
+
+                        // Get the model
+                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+
+                        // Append the experiment samples
+                        for (Sample sample : samples) {
+
+                            // Is it an EXPERIMENT sample?
+                            if (sample.getType().toString().endsWith("_EXPERIMENT")) {
+
+                                String nodeName = sample.getCode();
+                                if (sample.getProperties().containsKey("$NAME")) {
+                                    nodeName = sample.getProperties().get("$NAME");
+                                }
+
+                                // Add to the tree
+                                model.insertNodeInto(new OpenBISSampleNode(sample),
+                                        n, n.getChildCount());
+
+                            }
+
+                        }
+
                     }
-                    DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-                    model.insertNodeInto(new OpenBISSampleListNode(title),
-                            n, n.getChildCount());
 
                     // Inform
                     outputPane.log("Retrieved number of samples for experiment " +
@@ -952,7 +965,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
             space = (Space) spaceNode.getUserObject();
 
-        } else if (className.equals("OpenBISSampleListNode")) {
+        } else if (className.equals("OpenBISSampleNode")) {
 
             OpenBISExperimentNode experimentNode = (OpenBISExperimentNode) node.getParent();
             OpenBISProjectNode projectNode = (OpenBISProjectNode) experimentNode.getParent();

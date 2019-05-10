@@ -3,7 +3,8 @@ package ch.ethz.scu.obit.at.gui.viewers.openbis.model;
 
 import java.util.Map;
 
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.sample.Sample;
+
 
 /**
  * A Custom Sample TreeNode
@@ -30,7 +31,7 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
      * @return Type of the node
      */
     @Override
-    public String getType() { return "Sample"; }
+    public String getType() { return "Experiment sample"; }
 
     /**
      * String representation of the node
@@ -40,24 +41,14 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
     public String toString() {
         // Get the name if present or fall back to the sample code
         Map<String, String> properties = s.getProperties();
-        if (properties.containsKey("LSR_FORTESSA_PLATE_NAME")) {
-            return properties.get("LSR_FORTESSA_PLATE_NAME");
-        } else if (properties.containsKey("LSR_FORTESSA_WELL_NAME")) {
-            return properties.get("LSR_FORTESSA_WELL_NAME");
-        } else if (properties.containsKey("LSR_FORTESSA_TUBE_NAME")) {
-            return properties.get("LSR_FORTESSA_TUBE_NAME");
-        } else if (properties.containsKey("FACS_ARIA_PLATE_NAME")) {
-            return properties.get("FACS_ARIA_PLATE_NAME");
-        } else if (properties.containsKey("FACS_ARIA_WELL_NAME")) {
-            return properties.get("FACS_ARIA_WELL_NAME");
-        } else if (properties.containsKey("FACS_ARIA_TUBE_NAME")) {
-            return properties.get("FACS_ARIA_TUBE_NAME");
-        } else {
-            if (properties.isEmpty()) {
-                return "Tubeset";
-            }
+        if (properties.isEmpty()) {
+            return s.getCode();
         }
-        return s.getCode();
+        if (properties.containsKey("$NAME")) {
+            return properties.get("$NAME");
+        } else {
+            return s.getCode();
+        }
     }
 
     /**
@@ -72,7 +63,7 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
      * @return Sample identifier
      */
     @Override
-    public String getIdentifier() { return s.getIdentifier(); }
+    public String getIdentifier() { return s.getIdentifier().getIdentifier(); }
 
     /**
      * Get the icon to be displayed in the JTree
@@ -81,7 +72,7 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
     @Override
     public javax.swing.Icon getIcon() {
         return new javax.swing.ImageIcon(
-                getClass().getResource("icons/sample.png"));
+                getClass().getResource("icons/experiment_sample.png"));
     }
 
     /**
@@ -90,7 +81,7 @@ public class OpenBISSampleNode extends AbstractOpenBISNode {
      * @return the tooltip to be displayed over the Node
      */
     @Override
-    public String getTooltip() { return s.getCode(); }
+    public String getTooltip() { return "Experiment sample"; }
 
     /**
      * Sample does not have children and is therefore a leaf
