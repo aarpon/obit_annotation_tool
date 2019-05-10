@@ -607,9 +607,9 @@ public class OpenBISProcessor {
         orgUnitCreation.setProjectId(commonOrganizationUnitProject.getPermId());
         orgUnitCreation.setExperimentId(experiment.getPermId());
 
-        // Set name and description as the properties $NAME and $DESCRIPTION
+        // Set name and description as the properties $NAME and DESCRIPTION
         orgUnitCreation.setProperty("$NAME", tagCode);
-        orgUnitCreation.setProperty("$DESCRIPTION", tagDescr);
+        orgUnitCreation.setProperty("DESCRIPTION", tagDescr);
 
         // Create the sample
         List<SampleCreation> sampleCreationList = new ArrayList<SampleCreation>();
