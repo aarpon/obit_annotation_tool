@@ -1,7 +1,9 @@
 package ch.ethz.scu.obit.processors.data.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -10,6 +12,16 @@ import java.util.Arrays;
  *
  */
 public class ExperimentDescriptor extends PathAwareDescriptor{
+
+    /**
+     *  Experiment description
+     */
+    public String description = "";
+
+    /**
+     *  Experiment tags (comma-separated list)
+     */
+    public List<Tag> tags = new ArrayList<Tag>();
 
     /**
      *  List of accepted attachment file extensions
@@ -113,6 +125,45 @@ public class ExperimentDescriptor extends PathAwareDescriptor{
 
         // Check whether the file is a valid attachment
         return Arrays.asList(validAttachmentExtensions).contains(ext);
+
+    }
+
+
+    /**
+     * Return the list of Tags as comma-separated string.
+     * @return string of comma-separated tags.
+     */
+    public String getTagList() {
+
+        // Build the string with a buffer
+        StringBuffer buff = new StringBuffer();
+
+        for (Tag tag : tags) {
+            buff.append(tag.toString());
+            buff.append(" ");
+        }
+
+        // Return the string
+        return buff.toString().trim().replaceAll(" ", ", ");
+
+    }
+
+    /**
+     * Return the list of Tag identifiers as comma-separated string.
+     * @return string of comma-separated tags.
+     */
+    public String getTagIdentifierList() {
+
+        // Build the string with a buffer
+        StringBuffer buff = new StringBuffer();
+
+        for (Tag tag : tags) {
+            buff.append(tag.getIdentifier());
+            buff.append(" ");
+        }
+
+        // Return the string
+        return buff.toString().trim().replaceAll(" ", ", ");
 
     }
 

@@ -479,6 +479,37 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
+     * Return a list of ExperimentNode from the data model.
+     * @return List of ExperimentNode objects.
+     */
+    public List<ExperimentNode> getExperimentNodes() {
+
+        // Reset the Experiment list
+        List<ExperimentNode> experiments = new ArrayList<ExperimentNode>();
+
+        // Store the data model
+        TreeModel dataModel = getDataModel();
+
+        // We extract all experiments from the data model
+        RootNode dataRoot = (RootNode) dataModel.getRoot();
+
+        // First level are the folder nodes
+        int dataNChildren = dataRoot.getChildCount();
+
+        for (int i = 0; i < dataNChildren; i++) {
+
+            // Get the FolderNode
+            ExperimentNode experimentNode =
+                    (ExperimentNode) dataRoot.getChildAt(i);
+
+            // Store the reference to the ExperimentNode
+            experiments.add(experimentNode);
+        }
+
+        return experiments;
+    }
+
+    /**
      * Initialize the Tree. If a Tree already exists, it is cleared
      * and replaced.
      */

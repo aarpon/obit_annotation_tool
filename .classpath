@@ -8,7 +8,11 @@
 	<classpathentry kind="src" output="test_bin" path="AnnotationToolUnitTest"/>
 	<classpathentry kind="src" path="AnnotationToolUpdater"/>
 	<classpathentry kind="con" path="org.boris.winrun4j.eclipse.WINRUN4J_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/dss_client/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/cglib-nodep.jar"/>
@@ -47,6 +51,7 @@
 	<classpathentry kind="lib" path="lib/query_api/marathon-spring-util-1.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout.jar"/>
 	<classpathentry kind="lib" path="lib/query_api/openBIS-query-API-S275.0-r1524559460.jar"/>
+	<classpathentry kind="lib" path="lib/v3_api/openBIS-API-V3-batteries-included-S287.0-r1541665630.jar"/>
 	<classpathentry kind="lib" path="lib/bioformats-5.9.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

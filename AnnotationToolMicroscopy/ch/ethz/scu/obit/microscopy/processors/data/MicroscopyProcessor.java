@@ -302,10 +302,14 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                 }
 
                 // Failed Nikon acquisitions are known to create a 4096-byte header
-                // only file that the bio-formats library will fail reading. We
-                // check for such a case to prevent that the registration
-                // will fail on the DataStore Server.
-                if (ext.toLowerCase().equals(".nd2") && file.length() <= 4096) {
+                // only file that the bio-formats library will fail reading. Also Leica
+                // failed acquisition can result in very small files (<1kB) that are
+                // broken and cannot be read by bioformats. To prevent registration
+                // failures on the DataStore Server, we try opening any suspiciously
+                // small file to reduce the risk of failed registrations on the DSS.
+                // Since we already checked whether the file is a supported microscopy
+                // file (or an attachment), we just go ahead and try to open it.
+                if (file.length() <= 4096) {
                     // We try opening the file -- if it fails, we flag it as corrupted.
                     try {
                         BioFormatsWrapper wrapper = new BioFormatsWrapper(file);
@@ -426,7 +430,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             return false;
         }
 
-        // Check for microscopy-related files
+        // Check for microscopy-related files that we do not need to keep
         String name = file.getName();
         if (name.toLowerCase().endsWith(".lifext")) {
             return file.delete();
@@ -476,24 +480,6 @@ public final class MicroscopyProcessor extends AbstractProcessor {
      * @author Aaron Ponti
      */
     public class Experiment extends ExperimentDescriptor {
-
-        /**
-         *  Experiment version
-         * This is used to keep track of the structure of the experiment
-         * so that older versions of Experiments stored in openBIS are
-         * recognized and can potentially be upgraded.
-         */
-        public final String version = "1";
-
-        /**
-         *  Experiment description
-         */
-        public String description = "";
-
-        /**
-         *  Experiment tags (comma-separated list)
-         */
-        public String tags = "";
 
         /**
          *  Store the microscopy files associated with this Experiment
