@@ -416,6 +416,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
         // Consider only the part of the file name without the basename
         int startIndex = basename.length();
 
+        // Keep track of the last file extension seen
+        String lastFileExtensionSeen = "";
+
         // Process all files
         for (int i = 0; i < filesAssociatedToNDFile.size(); i++) {
 
@@ -431,6 +434,13 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             } catch (Exception e) {
                 currentFileNamePart = filesAssociatedToNDFile.get(i).getName();
             }
+
+            // Get the file extension
+            int lastDotIndex = currentFileNamePart.lastIndexOf(".");
+            String currentFileExtension = currentFileNamePart.substring(lastDotIndex);
+
+
+            // Parse the file name (template)
             Matcher m = FILENAME_PATTERN.matcher(currentFileNamePart);
             if (m.find()) {
 
@@ -514,7 +524,8 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 if (currentSeriesDimensions[0] != seriesSizeX ||
                         currentSeriesDimensions[1] != seriesSizeY ||
                         currentSeriesDimensions[2] != seriesSizeZ ||
-                        currentSeriesDimensions[3] != seriesSizeT) {
+                        currentSeriesDimensions[3] != seriesSizeT ||
+                        (!lastFileExtensionSeen.equals("") && !currentFileExtension.equals(lastFileExtensionSeen)) ) {
 
                     // Start a new series
                     seriesNum++;
@@ -523,6 +534,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             } else {
                 currentSeriesDimensions = new Integer[] {seriesSizeX, seriesSizeY, seriesSizeZ, seriesSizeT};
             }
+
+            // Update the lastFileExtensionSeen property
+            lastFileExtensionSeen = currentFileExtension;
 
             // Are we allowed to use this series number?
             if (i == 0) {
