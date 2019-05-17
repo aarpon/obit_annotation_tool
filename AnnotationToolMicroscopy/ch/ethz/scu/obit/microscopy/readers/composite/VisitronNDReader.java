@@ -23,7 +23,8 @@ import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
     private final static String FILENAME_REGEX =
-            "(_w(?<channel>\\d.*?)" +                // Channel number (optional)
+            "(?<basename>.*?)" +                     // Base name
+                    "(_w(?<channel>\\d.*?)" +        // Channel number (optional)
                     "(?<channelName>.*?))?" +        // Channel name (optional)
                     "(_s(?<series>\\d.*?))?" +       // Series number (optional)
                     "(_t(?<timepoint>\\d.*?))?" +    // Time index (optional)
@@ -290,7 +291,8 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
         }
         minAllowedSeriesNum = mx + 1;
 
-        // The additional files are added as independent series
+        // The additional files are added as independent series.
+        // The basename obtained from the ND file can no longer be used.
         for (File file : additionalFiles) {
             // Create a list with one file
             List<File> currentFile = new ArrayList<File>(1);
@@ -394,8 +396,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
      * Build Series objects from the list of files.
      * @param listOfFiles List of files to process
      * @return true if the parsing of the files into series was successful, false otherwise.
+     * @throws Exception
      */
-    private Boolean buildSeriesFromFileList(List<File> filesAssociatedToNDFile, int minAllowedSeriesNum) {
+    private Boolean buildSeriesFromFileList(List<File> filesAssociatedToNDFile, int minAllowedSeriesNum) throws Exception {
 
         // Keep track of the channels
         // Create a map of channel names and numbers
@@ -410,11 +413,14 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
         // Create a map of series numbers to list of file names
         Map<Integer, ArrayList<String>> seriesFileList = new HashMap<Integer, ArrayList<String>>();
 
+        // Create a map of series numbers to list of file names
+        Map<Integer, String> seriesBasename = new HashMap<Integer, String>();
+
         // Create a map of series dimensions
         Map<Integer, Integer[]> seriesDimensions = new HashMap<Integer, Integer[]>();
 
         // Consider only the part of the file name without the basename
-        int startIndex = basename.length();
+        int startIndex = 0; // basename.length();
 
         // Keep track of the last file extension seen
         String lastFileExtensionSeen = "";
@@ -439,10 +445,28 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             int lastDotIndex = currentFileNamePart.lastIndexOf(".");
             String currentFileExtension = currentFileNamePart.substring(lastDotIndex);
 
+            // Initialize currentBasename as the basename
+            String currentBasename = basename;
 
             // Parse the file name (template)
             Matcher m = FILENAME_PATTERN.matcher(currentFileNamePart);
             if (m.find()) {
+
+                // Get the information from the file name
+                if (m.group("basename") != null && m.group("basename") != "") {
+
+                    currentBasename = m.group("basename");
+
+                    // Compare it with the known basename
+                    if (!basename.equals("") && !currentBasename.equals(basename)) {
+                        // Could not parse and process the file name
+                        isValid = false;
+                        errorMessage = "The file " + filesAssociatedToNDFile.get(i) +
+                                " associated to the ND file does not have the " +
+                                "expected basename (" + basename + ")!";
+                        return isValid;
+                    }
+                }
 
                 // Get the information from the file name
                 if (m.group("series") != null && m.group("series") != "") {
@@ -455,15 +479,6 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                     seriesNum = 0;
                 }
 
-                // Retrieve the channel name from the file name
-                if (m.group("channelName") != null && m.group("channelName") != "") {
-                    // The channel in the file name is 1-based
-                    channelNameFromFileName = m.group("channelName");
-                } else {
-                    // Not channel name; fall back to ""
-                    channelNameFromFileName = "";
-                }
-
                 // Retrieve the channel number from the file name
                 if (m.group("channel") != null && m.group("channel") != "") {
                     // The channel in the file name is 1-based
@@ -471,6 +486,15 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 } else {
                     // No channel number; fall back to 0
                     channelNumberFromFileName = -1;
+                }
+
+                // Retrieve the channel name from the file name
+                if (m.group("channelName") != null && m.group("channelName") != "") {
+                    // The channel in the file name is 1-based
+                    channelNameFromFileName = m.group("channelName");
+                } else {
+                    // Not channel name; fall back to ""
+                    channelNameFromFileName = "";
                 }
 
                 // Get the timepoint
@@ -554,7 +578,8 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 currentSeriesChannels = new HashMap<String, Integer>();
             }
 
-            // Retrieve the channel name from the file metadata
+            // Retrieve the channel name from the file metadata (there is always
+            // only one channel in a single file)
             String channelNameFromMetadata = currAttr.get("series_0").get("channelName0");
 
             // Get consistent channel name and number of the series
@@ -628,6 +653,9 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 seriesTimepoints.put(seriesNum, timepoints);
             }
 
+            // Store the series basename
+            seriesBasename.put(seriesNum, currentBasename);
+
             // Store the file name in current series
             if (seriesFileList.containsKey(seriesNum)) {
                 seriesFileList.get(seriesNum).add(filesAssociatedToNDFile.get(i).getAbsolutePath());
@@ -670,7 +698,8 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                             currentAttr.get("series_" + s),
                             seriesChannels.get(s),
                             seriesTimepoints.get(s),
-                            seriesFileList.get(s)
+                            seriesFileList.get(s),
+                            seriesBasename.get(s)
                             )
                     );
 
@@ -685,7 +714,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
     }
 
     private HashMap<String, String> updateSeriesMetadata(HashMap<String, String> seriesAttr,
-            Map<String, Integer> channels, List<Integer> timepoints, List<String> fileList) {
+            Map<String, Integer> channels, List<Integer> timepoints, List<String> fileList, String basename) {
 
         // New attributes
         HashMap<String, String> newSeriesAttr = new HashMap<String, String>();
@@ -714,7 +743,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             double[] color = BioFormatsWrapper.getDefaultChannelColor(channelNumber);
 
             newSeriesAttr.put("channelName" + channelNumber, channelName);
-            newSeriesAttr.put("channelColor" + channelNumber, Arrays.toString(color));
+            newSeriesAttr.put("channelColor" + channelNumber, implode(color));
             newSeriesAttr.put("exWaveLength" + channelNumber, "NaN");
             newSeriesAttr.put("emWaveLength" + channelNumber, "NaN");
         }
@@ -724,7 +753,10 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
         newSeriesAttr.put("sizeT", "" + timepoints.size());
 
         // Add the file list
-        newSeriesAttr.put("filenames", "" + Arrays.toString(fileList.toArray()));
+        newSeriesAttr.put("filenames", implode(fileList));
+
+        // Add the basename
+        newSeriesAttr.put("basename", basename);
 
         return newSeriesAttr;
     }
