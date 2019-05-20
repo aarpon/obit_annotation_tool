@@ -23,7 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
@@ -38,6 +37,7 @@ import javax.swing.tree.TreePath;
 
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
+import ch.ethz.scu.obit.at.gui.viewers.openbis.dialogs.OpenBISCreateTagDialog;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
@@ -72,6 +72,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     private GlobalSettingsManager globalSettingsManager;
     private OpenBISProcessor openBISProcessor;
+    private OpenBISCreateTagDialog createTagDialog;
 
     private OpenBISUserNode userNode;
     private OpenBISViewerTree tree;
@@ -920,7 +921,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     /**
      * Asks the user to give a project name and will then try to create
      * it as a child of the passed OpenBISSpaceNode
-     * @return true if creation was successfull, false otherwise.
+     * @return true if creation was successful, false otherwise.
      */
     private boolean createNewTag() {
 
@@ -934,89 +935,106 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         }
 
-        // Make sure something is selected in the tree
+        // Get the list of spaces
+        SearchResult<Space> spaceResult = this.openBISProcessor.getSpacesWithProjects();
+        if (spaceResult.getTotalCount() == 0) {
+            return false;
+        }
+
+        // Get the list of Spaces
+        List<Space> spaces = spaceResult.getObjects();
+
+        // Is there something already selected in the tree?
         AbstractOpenBISNode node = (AbstractOpenBISNode) tree.getLastSelectedPathComponent();
 
-        // If nothing is selected, inform the user and return here!
-        if (node == null) {
-
-            JOptionPane.showMessageDialog(null,
-                    "Please choose the SPACE where to add the new tag!",
-                    "Warning",
-                    JOptionPane.WARNING_MESSAGE);
-            return false;
-
-        }
-
-        String className = node.getClass().getSimpleName();
+        // Initialize the Space object
         Space space = null;
-        if (className.equals("OpenBISSpaceNode")) {
 
-            space = (Space) node.getUserObject();
+        if (node != null) {
+            String className = node.getClass().getSimpleName();
+            if (className.equals("OpenBISSpaceNode")) {
 
-        } else if (className.equals("OpenBISProjectNode")) {
+                space = (Space) node.getUserObject();
 
-            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node.getParent();
-            space = (Space) spaceNode.getUserObject();
+            } else if (className.equals("OpenBISProjectNode")) {
 
-        } else if (className.equals("OpenBISExperimentNode")) {
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node.getParent();
+                space = (Space) spaceNode.getUserObject();
 
-            OpenBISProjectNode projectNode = (OpenBISProjectNode) node.getParent();
-            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
-            space = (Space) spaceNode.getUserObject();
+            } else if (className.equals("OpenBISExperimentNode")) {
 
-        } else if (className.equals("OpenBISSampleNode")) {
+                OpenBISProjectNode projectNode = (OpenBISProjectNode) node.getParent();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+                space = (Space) spaceNode.getUserObject();
 
-            OpenBISExperimentNode experimentNode = (OpenBISExperimentNode) node.getParent();
-            OpenBISProjectNode projectNode = (OpenBISProjectNode) experimentNode.getParent();
-            OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
-            space = (Space) spaceNode.getUserObject();
+            } else if (className.equals("OpenBISSampleNode")) {
 
+                OpenBISExperimentNode experimentNode = (OpenBISExperimentNode) node.getParent();
+                OpenBISProjectNode projectNode = (OpenBISProjectNode) experimentNode.getParent();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+                space = (Space) spaceNode.getUserObject();
+
+            } else {
+
+                JOptionPane.showMessageDialog(null,
+                        "Please choose the SPACE where to add the new tag!",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        }
+
+        // Create the dialog
+        if (createTagDialog == null) {
+            createTagDialog = new OpenBISCreateTagDialog(spaces, space);
         } else {
+            createTagDialog.setSelectedSpace(space);
+            createTagDialog.resetTagFields();
+            createTagDialog.setVisible(true);
+        }
 
-            JOptionPane.showMessageDialog(null,
-                    "Please choose the SPACE where to add the new tag!",
-                    "Warning",
-                    JOptionPane.WARNING_MESSAGE);
+        // Did the user cancel?
+        if (createTagDialog.wasCancelled()) {
+            outputPane.log("Tag creation cancelled.");
             return false;
         }
 
-        // Ask the user to specify a metaproject name and description.
-        // The maximum length of a metaproject code in openBIS is 60
-        // characters.
-        String tagName;
-        String tagDescr;
-        JTextField nameTextField = new JTextField(30);
-        JTextField descrTextField = new JTextField();
-        Object[] fields = {
-                "Tag name", nameTextField,
-                "Tag description (optional)", descrTextField
-        };
-        int option = JOptionPane.showConfirmDialog(null, fields,
-                "Create new tag...",
-                JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            tagName = nameTextField.getText();
-            tagDescr = descrTextField.getText();
-            if (tagName == null || tagName.equals("")) {
-                outputPane.warn("Creation of new tag aborted by user.");
-                return false;
-            }
-            if (tagName.length() > 60) {
-                outputPane.err("The name of the tag cannot be more"
-                        + " than 60 characters long.");
-                return false;
-            }
-        } else {
+        // Retrieve the entered information.
+        space = createTagDialog.getSelectedSpace();
+        String tagName = createTagDialog.getTagName();
+        String tagDescr = createTagDialog.getTagDescription();
+
+        if (tagName == null || tagName.equals("")) {
             outputPane.warn("Creation of new tag aborted by user.");
             return false;
         }
+        if (tagName.length() > 60) {
+            outputPane.err("The name of the tag cannot be more"
+                    + " than 60 characters long.");
+            return false;
+        }
 
+        // Try creating the tag
         boolean success = openBISProcessor.createTag(space, tagName, tagDescr);
 
         if (success) {
-            // Retrieve the updated metaproject list
-            // and update the view
+
+            // Retrieve the updated metaproject list and update the view
+
+            // Make sure the selected space is shown in the tree
+            TreeModel model = tree.getModel();
+            OpenBISUserNode rootNode = (OpenBISUserNode) model.getRoot();
+            for (int i = 0; i < rootNode.getChildCount(); i++) {
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode.getChildAt(i);
+                Space currentSpace = (Space) spaceNode.getUserObject();
+                if (currentSpace.getPermId().toString().equals(
+                        space.getPermId().toString())) {
+
+                    tree.setSelectionPath(new TreePath(spaceNode.getPath()));
+                }
+            }
+
+            // Update the tag list
             outputPane.log("Successfully created tag " + tagName + ".");
             clearTagList();
             setTagList(openBISProcessor.getTagsForSpace(space));
