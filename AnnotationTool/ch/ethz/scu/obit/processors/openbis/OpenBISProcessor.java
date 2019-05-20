@@ -670,7 +670,7 @@ public class OpenBISProcessor {
         orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
         orgUnitExpCreation.setProjectId(permId);
         orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
-        orgUnitExpCreation.setProperty("Name", "Organization Unit Collection");
+        orgUnitExpCreation.setProperty("$NAME", "Organization Unit Collection");
 
         // Create the experiment
         List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
