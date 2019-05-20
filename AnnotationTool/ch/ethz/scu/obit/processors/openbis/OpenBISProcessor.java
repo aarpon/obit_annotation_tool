@@ -360,6 +360,8 @@ public class OpenBISProcessor {
         SampleFetchOptions sampleFetchOptions = new SampleFetchOptions();
         sampleFetchOptions.withType();
         sampleFetchOptions.withProperties();
+        sampleFetchOptions.withSpace();
+        sampleFetchOptions.withProject();
         expFetchOptions.withSamplesUsing(sampleFetchOptions);
 
         SearchResult<Experiment> experiments = v3_api.searchExperiments(v3_sessionToken,

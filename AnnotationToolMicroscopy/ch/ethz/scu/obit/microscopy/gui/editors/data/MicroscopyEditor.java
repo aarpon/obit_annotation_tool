@@ -44,6 +44,7 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Microscop
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.Tag;
 import ch.ethz.scu.obit.processors.data.model.TagListImportTransferHandler;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
 
 /**
  * Metadata editor panel.
@@ -196,6 +197,15 @@ public final class MicroscopyEditor extends AbstractEditor {
         }
 
         return true;
+    }
+
+    @Override
+    public String getCurrentProjectIdentifier() {
+
+        MicroscopyMetadataMapper mapper = metadataMappersList.get(currentExperimentIndex);
+        Project project = (Project) mapper.getOpenBISProjectNode().getUserObject();
+        String identifier = project.getIdentifier().toString();
+        return identifier;
     }
 
     /**

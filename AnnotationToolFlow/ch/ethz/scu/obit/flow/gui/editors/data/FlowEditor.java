@@ -27,6 +27,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import ch.ethz.scu.obit.at.gui.editors.data.AbstractEditor;
+import ch.ethz.scu.obit.at.gui.pane.OutputPane;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
@@ -43,6 +44,7 @@ import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
 import ch.ethz.scu.obit.processors.data.model.SampleDescriptor;
 import ch.ethz.scu.obit.processors.data.model.Tag;
 import ch.ethz.scu.obit.processors.data.model.TagListImportTransferHandler;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
 
 /**
  * Metadata editor panel.
@@ -89,6 +91,16 @@ public final class FlowEditor extends AbstractEditor {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
+    }
+
+
+    @Override
+    public String getCurrentProjectIdentifier() {
+
+        FlowMetadataMapper mapper = metadataMappersList.get(currentExperimentIndex);
+        Project project = (Project) mapper.getOpenBISProjectNode().getUserObject();
+        String identifier = project.getIdentifier().toString();
+        return identifier;
     }
 
     /**

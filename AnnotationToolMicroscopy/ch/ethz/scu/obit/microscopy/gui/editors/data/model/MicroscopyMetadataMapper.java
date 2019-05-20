@@ -14,16 +14,6 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experimen
 public final class MicroscopyMetadataMapper extends AbstractMetadataMapper {
 
     /**
-     * Experiment node
-     */
-    public ExperimentNode experimentNode;
-
-    /**
-     * openBIS project node
-     */
-    public OpenBISProjectNode openBISProjectNode;
-
-    /**
      * Constructor
      * @param experimentNode experiment node (from the data viewer)
      * @param openBISProjectNode openBIS project node (from the openBIS viewer)

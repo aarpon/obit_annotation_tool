@@ -19,16 +19,6 @@ import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
-     * Selected experiment node.
-     */
-    public ExperimentNode experimentNode;
-
-    /**
-     * Selected openBIS project node.
-     */
-    public OpenBISProjectNode openBISProjectNode;
-
-    /**
      * Support tray geometries.
      */
     public ArrayList<String> supportedTrayGeometries;

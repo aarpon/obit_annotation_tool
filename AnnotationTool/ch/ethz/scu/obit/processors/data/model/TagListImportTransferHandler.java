@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.TransferHandler;
 
 import ch.ethz.scu.obit.at.gui.editors.data.AbstractEditor;
@@ -36,7 +37,7 @@ public class TagListImportTransferHandler extends TransferHandler {
         return (flavors[0].getHumanPresentableName().equals("TagListTransferable"));
     }
 
-    // Import and format the data    @Override
+    // Import and format the data
     @Override
     public boolean importData(TransferHandler.TransferSupport support) {
 
@@ -61,14 +62,62 @@ public class TagListImportTransferHandler extends TransferHandler {
             Transferable t = support.getTransferable();
             Object value = t.getTransferData(SUPPORTED_DATE_FLAVOR);
 
-            if (value instanceof ArrayList) {
+            if (value instanceof ArrayList<?>) {
 
-                // Cast the object to a list of tags
-                editor.appendTags((List<Tag>) value);
+                // Get the project from the editor
+                String projectIdentifier = editor.getCurrentProjectIdentifier();
+
+                // Check that the SPACE of the source and target are the same.
+                // It is enough to test the first tag.
+                List<Tag> listOfTags = (List<Tag>) value;
+
+                if (listOfTags.size() == 0) {
+                    return false;
+                }
+
+                Tag tag = listOfTags.get(0);
+                String tagIdentifier = tag.getIdentifier();
+
+                // Compare the spaces
+                int projectIndex = projectIdentifier.substring(1).indexOf("/");
+                int tagIndex = tagIdentifier.substring(1).indexOf("/");
+
+                String projectSpace = projectIdentifier.substring(1, projectIndex + 1);
+                String tagSpace = tagIdentifier.substring(1, tagIndex + 1);
+                if (projectIndex == -1 || tagIndex == -1 ||
+                        projectIndex != tagIndex ||
+                        !projectSpace.equals(tagSpace)) {
+
+                    String tagString = listOfTags.size() == 1 ?
+                            "\u2022 The Tag belongs to " + tagSpace :
+                                "\u2022 The Tags belong to " + tagSpace;
+
+                    // Spaces do not match: display the error message in the output pane
+                    String errorMessage = "The tags and the selected project must belong " +
+                            "to the same space!\n" +
+                            "\u2022 The assigned Project belongs to " + projectSpace + ".\n" +
+                            tagString + ".\n\n" +
+                            "Select the Space of interest in the openBIS panel on the right to\n" +
+                            "display the list of tags belonging to it.";
+
+                    // Display an error dialog to make it clear
+                    JOptionPane.showMessageDialog(null, errorMessage,
+                            "Cannot assign tags!", JOptionPane.ERROR_MESSAGE);
+
+                    // Return failure.
+                    return false;
+                }
+
+                // Append the tags
+                editor.appendTags(listOfTags);
+
+                // Return success.
+                return true;
             }
 
         } catch (UnsupportedFlavorException | IOException e) {
 
+            // Return failure.
             return false;
         }
 
