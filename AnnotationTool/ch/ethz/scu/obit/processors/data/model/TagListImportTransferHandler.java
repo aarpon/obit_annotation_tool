@@ -97,7 +97,7 @@ public class TagListImportTransferHandler extends TransferHandler {
                             "to the same space!\n" +
                             "\u2022 The assigned Project belongs to " + projectSpace + ".\n" +
                             tagString + ".\n\n" +
-                            "Select the Space of interest in the openBIS panel on the right to\n" +
+                            "Select " + projectSpace + " in the openBIS panel on the right to\n" +
                             "display the list of tags belonging to it.";
 
                     // Display an error dialog to make it clear
