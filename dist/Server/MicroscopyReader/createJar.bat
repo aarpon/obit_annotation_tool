@@ -19,7 +19,7 @@ SET BUILD_PATH=%CURRENT_DIR%\build
 ECHO Generating MicroscopyReader jar to use in the microscopy core technology dropbox
 
 ECHO Compiling classes...
-%JAVAC% -cp %CLASSPATH% -source 1.7 -target 1.7 @"%CURRENT_DIR%.\files.txt" -d %BUILD_PATH%
+%JAVAC% -cp %CLASSPATH% -source 1.8 -target 1.8 @"%CURRENT_DIR%.\files.txt" -d %BUILD_PATH%
 
 ECHO Packaging JAR archive...
 
