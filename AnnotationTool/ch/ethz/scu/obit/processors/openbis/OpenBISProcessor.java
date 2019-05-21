@@ -460,7 +460,7 @@ public class OpenBISProcessor {
 
         // Check that the v3 API is initialized and the session is active
         // (i.e. we had a valid login).
-        return (v3_api != null && v3_sessionToken != "");
+        return (v3_api != null && !v3_sessionToken.equals(""));
 
     }
 

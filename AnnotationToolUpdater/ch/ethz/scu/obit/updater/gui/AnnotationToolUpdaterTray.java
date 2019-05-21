@@ -153,7 +153,7 @@ public class AnnotationToolUpdaterTray {
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(null, "AnnotationTool Updater version " + VersionInfo.version + ".",
-						"About", 0, appIcon);
+						"About", JOptionPane.INFORMATION_MESSAGE, appIcon);
 			}
 		});
 

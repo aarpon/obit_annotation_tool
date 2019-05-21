@@ -349,7 +349,7 @@ public final class BCMoFloXDPFlowProcessor extends AbstractFlowProcessor {
         // The Sortware software does not store the experiment name in the FCS file.
         // Therefore, we return the name of the containing folder
         File fcsFile = processor.getFile();
-        return fcsFile.getParentFile().getName().toString();
+        return fcsFile.getParentFile().getName();
     }
 
     /**

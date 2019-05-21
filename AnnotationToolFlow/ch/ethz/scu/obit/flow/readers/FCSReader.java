@@ -939,13 +939,13 @@ public final class FCSReader extends AbstractReader {
 			key = "P" + i + "B";
 			String bits = TEXTMapStandard.get("$" + key);
 			if (bits == null) {
-			    if (datatype == "D") {
+			    if (datatype.equals("D")) {
 			        bits = "64";  
-			    } else if (datatype == "F") {
+			    } else if (datatype.equals("F")) {
                     bits = "32";  
-                } else if (datatype == "I") {
+                } else if (datatype.equals("I")) {
                     bits = "32";  
-                } else if (datatype == "A") {
+                } else if (datatype.equals("A")) {
                     bits = "8";
                 } else {
                     bits = "32";

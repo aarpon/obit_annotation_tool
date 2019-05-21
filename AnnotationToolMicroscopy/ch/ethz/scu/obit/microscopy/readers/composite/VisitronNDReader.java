@@ -453,7 +453,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             if (m.find()) {
 
                 // Get the information from the file name
-                if (m.group("basename") != null && m.group("basename") != "") {
+                if (m.group("basename") != null && !m.group("basename").equals("")) {
 
                     currentBasename = m.group("basename");
 
@@ -469,7 +469,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 }
 
                 // Get the information from the file name
-                if (m.group("series") != null && m.group("series") != "") {
+                if (m.group("series") != null && !m.group("series").equals("")) {
 
                     // The series number in the file name is 1-based
                     seriesNum = Integer.parseInt(m.group("series")) - 1;
@@ -480,7 +480,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 }
 
                 // Retrieve the channel number from the file name
-                if (m.group("channel") != null && m.group("channel") != "") {
+                if (m.group("channel") != null && !m.group("channel").equals("")) {
                     // The channel in the file name is 1-based
                     channelNumberFromFileName = Integer.parseInt(m.group("channel")) - 1;
                 } else {
@@ -489,7 +489,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 }
 
                 // Retrieve the channel name from the file name
-                if (m.group("channelName") != null && m.group("channelName") != "") {
+                if (m.group("channelName") != null && !m.group("channelName").equals("")) {
                     // The channel in the file name is 1-based
                     channelNameFromFileName = m.group("channelName");
                 } else {
@@ -498,7 +498,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 }
 
                 // Get the timepoint
-                if (m.group("timepoint") != null && m.group("timepoint") != "") {
+                if (m.group("timepoint") != null && !m.group("timepoint").equals("")) {
                     // The timepoint in the file name is 1-based
                     timepoint = Integer.parseInt(m.group("timepoint")) - 1;
                 } else {
@@ -557,6 +557,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
                 }
             } else {
                 currentSeriesDimensions = new Integer[] {seriesSizeX, seriesSizeY, seriesSizeZ, seriesSizeT};
+                seriesDimensions.put(seriesNum, currentSeriesDimensions);
             }
 
             // Update the lastFileExtensionSeen property

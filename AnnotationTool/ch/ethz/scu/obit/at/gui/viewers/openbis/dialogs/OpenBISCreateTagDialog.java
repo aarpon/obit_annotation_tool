@@ -288,7 +288,7 @@ public class OpenBISCreateTagDialog extends JDialog {
 
         @Override
         public String toString() {
-            return this.space.getCode().toString();
+            return this.space.getCode();
         }
 
         public Space getSpace() {

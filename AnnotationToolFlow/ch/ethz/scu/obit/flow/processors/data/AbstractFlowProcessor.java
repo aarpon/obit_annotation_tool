@@ -230,7 +230,7 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 		if (experimentName.isEmpty()) {
 		    // As experiment name, return the name of the containing folder
 		    File fcsFile = processor.getFile();
-		    experimentName = fcsFile.getParentFile().getName().toString();
+		    experimentName = fcsFile.getParentFile().getName();
 		}
 		return experimentName;
 	}

@@ -37,15 +37,15 @@ public class FlowProcessorFactory {
 
 		hardwareString = FlowProcessorFactory.recursiveDir(folderToScan);
 
-		if (BDLSRFortessaFlowProcessor.isValidHardwareString(hardwareString) == true) {
+		if (BDLSRFortessaFlowProcessor.isValidHardwareString(hardwareString)) {
 			return new BDLSRFortessaFlowProcessor(folder);
-		} else if (BDFACSAriaFlowProcessor.isValidHardwareString(hardwareString) == true) {
+		} else if (BDFACSAriaFlowProcessor.isValidHardwareString(hardwareString)) {
 			return new BDFACSAriaFlowProcessor(folder);
-		} else if (BDInfluxFlowProcessor.isValidHardwareString(hardwareString) == true) {
+		} else if (BDInfluxFlowProcessor.isValidHardwareString(hardwareString)) {
 			return new BDInfluxFlowProcessor(folder);
-		} else if (BCMoFloXDPFlowProcessor.isValidHardwareString(hardwareString) == true) {
+		} else if (BCMoFloXDPFlowProcessor.isValidHardwareString(hardwareString)) {
 			return new BCMoFloXDPFlowProcessor(folder);
-		} else if (BIORADS3eFlowProcessor.isValidHardwareString(hardwareString) == true) {
+		} else if (BIORADS3eFlowProcessor.isValidHardwareString(hardwareString)) {
 			return new BIORADS3eFlowProcessor(folder);
 		} else {
 			throw new IOException("Unknown hardware type!");
