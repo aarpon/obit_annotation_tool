@@ -304,10 +304,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             clearTagList();
 
             // Add the new tags to the list
-            setTagList(tags);
-
-            // TODO Notify the editor of the change
-
+            setTagList(tags, space);
         }
 
         // Reset the lastSelectedNode
@@ -1037,7 +1034,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             // Update the tag list
             outputPane.log("Successfully created tag " + tagName + ".");
             clearTagList();
-            setTagList(openBISProcessor.getTagsForSpace(space));
+            setTagList(openBISProcessor.getTagsForSpace(space), space);
             return true;
         } else {
             outputPane.err("Could not create tag " + tagName + "!");
@@ -1083,20 +1080,21 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         List<Sample> tags = openBISProcessor.getTagsForSpace(space);
 
         // Fill the tag list
-        setTagList(tags);
+        setTagList(tags, space);
     }
 
     /**
      * Set the list of tags in the UI.
      * @param tags List of tags retrieved from openBIS.
      */
-    private void setTagList(List<Sample> tags) {
+    private void setTagList(List<Sample> tags, Space space) {
         clearTagList();
         DefaultListModel<Tag> listModel =
                 (DefaultListModel<Tag>) userTagList.getModel();
         for (Sample tag : tags) {
             listModel.addElement(new Tag(tag));
         }
+        userTags.setText("<html><b>Tags</b> from <b>" + space.getCode() + "</b></html>");
     }
 
     /**
