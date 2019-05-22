@@ -971,13 +971,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
                 space = (Space) spaceNode.getUserObject();
 
+            } else if (className.equals("OpenBISUserNode")) {
+
+                // User node: fall back to picking the first node in the tree
+                space = null;
+
             } else {
 
-                JOptionPane.showMessageDialog(null,
-                        "Please choose the SPACE where to add the new tag!",
-                        "Warning",
-                        JOptionPane.WARNING_MESSAGE);
-                return false;
+                // Unknown node... Fall back to picking the first node in the tree.
+                space = null;
             }
         }
 
