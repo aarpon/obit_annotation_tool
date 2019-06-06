@@ -613,12 +613,17 @@ public class OpenBISProcessor {
 
         // Set name and description as the properties $NAME and DESCRIPTION
         orgUnitCreation.setProperty("$NAME", tagCode);
-        orgUnitCreation.setProperty("DESCRIPTION", tagDescr);
+        orgUnitCreation.setProperty("$DESCRIPTION", tagDescr);
 
         // Create the sample
         List<SampleCreation> sampleCreationList = new ArrayList<SampleCreation>();
         sampleCreationList.add(orgUnitCreation);
-        List<SamplePermId> createdSamples = v3_api.createSamples(v3_sessionToken, sampleCreationList);
+        List<SamplePermId> createdSamples = null;
+        try {
+            createdSamples = v3_api.createSamples(v3_sessionToken, sampleCreationList);
+        } catch (Exception e) {
+            createdSamples = null;
+        }
 
         if (createdSamples == null || createdSamples.size() == 0) {
             return false;
