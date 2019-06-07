@@ -1030,6 +1030,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                         space.getPermId().toString())) {
 
                     tree.setSelectionPath(new TreePath(spaceNode.getPath()));
+                    break;
                 }
             }
 
