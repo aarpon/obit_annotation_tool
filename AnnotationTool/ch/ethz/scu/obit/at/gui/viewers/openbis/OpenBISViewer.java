@@ -1018,8 +1018,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         if (success) {
 
-            // Retrieve the updated metaproject list and update the view
-
             // Make sure the selected space is shown in the tree
             TreeModel model = tree.getModel();
             OpenBISUserNode rootNode = (OpenBISUserNode) model.getRoot();
@@ -1169,7 +1167,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             public void actionPerformed(ActionEvent e) {
 
                 // Invalidate the cache
-                openBISProcessor.invalidateDataCache();
+                openBISProcessor.resetCachedData();
 
                 // Rescan
                 scan();

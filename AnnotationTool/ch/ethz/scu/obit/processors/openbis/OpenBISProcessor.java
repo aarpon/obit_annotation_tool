@@ -87,13 +87,6 @@ public class OpenBISProcessor {
     }
 
     /**
-     * Invalidate the data cache to force a rescan of openBIS.
-     */
-    public void invalidateDataCache() {
-        dataIsCached = false;
-    }
-
-    /**
      * Returns the user name if successfully logged in, empty string otherwise
      * @return user name or empty String if log on was not successful
      */
@@ -245,7 +238,7 @@ public class OpenBISProcessor {
     /**
      * Reset the cached data.
      */
-    public void resetData() {
+    public void resetCachedData() {
 
         this.dataIsCached = false;
         this.tagCollectionsAreCached = false;
