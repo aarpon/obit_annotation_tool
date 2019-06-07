@@ -135,7 +135,7 @@ class AppSettings {
 			return "Cell analyzers and sorters "
 					+ "(FCS 3.0/3.1)";
 		} else if (name.equals("Microscopy")) {
-			return "Light microscopes (LOCI bio-formats compatible)";
+			return "Light microscopes (Open Microscopy Environment Bio-Formats compatible)";
 		} else {
 			throw (new IllegalArgumentException("Unknown acquisition station."));
 		}

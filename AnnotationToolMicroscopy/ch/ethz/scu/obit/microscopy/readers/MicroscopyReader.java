@@ -12,7 +12,7 @@ import ch.ethz.scu.obit.readers.AbstractReader;
 /**
  * A generic bio-formats based file processor that should manage to parse
  * metadata information from any microscopy file format supported by
- * LOCI's bio-formats library.
+ * Open Microscopy Environment Bio-Formats library.
  *
  * @author Aaron Ponti
  *
