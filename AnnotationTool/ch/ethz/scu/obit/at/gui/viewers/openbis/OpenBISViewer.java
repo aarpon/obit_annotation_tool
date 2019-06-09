@@ -60,10 +60,11 @@ import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
 /**
  * Graphical user interface to log in to openBIS and choose where to store
  * acquired datasets.
+ *
  * @author Aaron Ponti
  */
-public class OpenBISViewer extends Observable
-implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
+public class OpenBISViewer extends Observable implements ActionListener,
+        TreeSelectionListener, TreeWillExpandListener {
 
     protected JPanel panel;
     protected JButton scanButton;
@@ -92,14 +93,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     String loginErrorTitle = "";
     boolean loginErrorRecoverable = true;
 
-
     /**
      * Constructor
-     * @param openBISProcessor openBIS Processor
-     * @param outputPane output pane
+     *
+     * @param openBISProcessor      openBIS Processor
+     * @param outputPane            output pane
      * @param globalSettingsManager global settings manager
      */
-    public OpenBISViewer(OpenBISProcessor openBISProcessor, OutputPane outputPane,
+    public OpenBISViewer(OpenBISProcessor openBISProcessor,
+            OutputPane outputPane,
             GlobalSettingsManager globalSettingsManager) {
 
         // Store the global settings manager
@@ -156,6 +158,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Return the OpenBISProcessor.
+     *
      * @return the OpenBISProcessor.
      */
     public OpenBISProcessor getOpenBISProcessor() {
@@ -163,8 +166,9 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
     }
 
     /**
-     * Return the default target openBIS project as set in the User settings
-     * or the first returned project from openBIS if none is set.
+     * Return the default target openBIS project as set in the User settings or
+     * the first returned project from openBIS if none is set.
+     *
      * @return openBISProject node or null if there are no projects in openBIS.
      */
     public OpenBISProjectNode getDefaultProjectOrFirst() {
@@ -203,6 +207,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Return a list of OpenBISProjectNodes from the data model.
+     *
      * @return List of OpenBISProjectNode objects.
      */
     public List<OpenBISProjectNode> getOpenBISProjectNodes() {
@@ -215,15 +220,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // from the data model
         List<OpenBISProjectNode> openBISProjects = new ArrayList<OpenBISProjectNode>();
 
-        AbstractOpenBISNode openBISRoot =
-                (AbstractOpenBISNode) openBISModel.getRoot();
+        AbstractOpenBISNode openBISRoot = (AbstractOpenBISNode) openBISModel
+                .getRoot();
 
         // Iterate over the space nodes (there should be at least one)
         for (int i = 0; i < openBISRoot.getChildCount(); i++) {
 
             // Get the Space
-            AbstractOpenBISNode openBISSpaceNode =
-                    (AbstractOpenBISNode) openBISRoot.getChildAt(i);
+            AbstractOpenBISNode openBISSpaceNode = (AbstractOpenBISNode) openBISRoot
+                    .getChildAt(i);
 
             // Go over the child Projects
             int n = openBISSpaceNode.getChildCount();
@@ -231,8 +236,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             for (int j = 0; j < n; j++) {
 
                 // Get the OpenBISProjectNode
-                OpenBISProjectNode openBISProjectNode =
-                        (OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
+                OpenBISProjectNode openBISProjectNode = (OpenBISProjectNode) openBISSpaceNode
+                        .getChildAt(j);
 
                 // Add it to the list.
                 openBISProjects.add(openBISProjectNode);
@@ -245,6 +250,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Returns the user name if successfully logged in, empty string otherwise
+     *
      * @return user name or empty String if log on was not successful
      */
     public String getUserName() {
@@ -256,14 +262,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Called when selection in the Tree View is changed.
+     *
      * @param e A TreeSelectionEvent
      */
     @Override
     public void valueChanged(TreeSelectionEvent e) {
 
         // Get the selected tree node
-        AbstractOpenBISNode node = (AbstractOpenBISNode)
-                tree.getLastSelectedPathComponent();
+        AbstractOpenBISNode node = (AbstractOpenBISNode) tree
+                .getLastSelectedPathComponent();
         if (node == null) {
             return;
         }
@@ -284,15 +291,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         if (className.equals("Space") || className.equals("Project")) {
 
             Space space = null;
-            if (className.equals("Space"))
-            {
+            if (className.equals("Space")) {
                 // Get the space
                 space = (Space) nodeInfo;
 
             } else {
 
                 // Get the Space from the parent node
-                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node.getParent();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node
+                        .getParent();
                 space = (Space) spaceNode.getUserObject();
 
             }
@@ -311,6 +318,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Return the Tree's data model.
+     *
      * @return data model tree
      */
     public TreeModel getDataModel() {
@@ -330,8 +338,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // Clear the tree model
         TreeModel model = tree.getModel();
         if (model != null) {
-            DefaultMutableTreeNode rootNode =
-                    (DefaultMutableTreeNode) model.getRoot();
+            DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model
+                    .getRoot();
             if (rootNode != null) {
                 rootNode.removeAllChildren();
                 ((DefaultTreeModel) model).reload();
@@ -374,7 +382,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // Do we have a connection with openBIS?
         // We just need an active facade for scanning; the queryFacade
         // should actually be on as well, but we do not need it here.
-        if (! openBISProcessor.isLoggedIn()) {
+        if (!openBISProcessor.isLoggedIn()) {
             return;
         }
 
@@ -382,10 +390,9 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // facade, the queryFacade is not necessary
         if (!openBISProcessor.isLoggedIn()) {
             JOptionPane.showMessageDialog(this.panel,
-                    "The openBIS session is no longer valid!\n" +
-                            "Please try logging in again.",
-                            "Session error",
-                            JOptionPane.ERROR_MESSAGE);
+                    "The openBIS session is no longer valid!\n"
+                            + "Please try logging in again.",
+                    "Session error", JOptionPane.ERROR_MESSAGE);
             clearTree();
             return;
         }
@@ -397,16 +404,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
         // Get spaces
-        SearchResult<Space> spaces = openBISProcessor.retrieveAndCacheSpacesWithProjects();
+        SearchResult<Space> spaces = openBISProcessor.retrieveAndCacheSpaces();
         if (spaces.getTotalCount() == 0) {
             JOptionPane.showMessageDialog(this.panel,
-                    "Sorry, there are no (accessible) spaces.\n\n" +
-                            "Please ask your administrator to create a " +
-                            "space for you or to grant you access to an " +
-                            "existing one.\nNo data registration will be " +
-                            "possible until this issue is fixed.",
-                            "Warning",
-                            JOptionPane.WARNING_MESSAGE);
+                    "Sorry, there are no (accessible) spaces.\n\n"
+                            + "Please ask your administrator to create a "
+                            + "space for you or to grant you access to an "
+                            + "existing one.\nNo data registration will be "
+                            + "possible until this issue is fixed.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
             // We do not need to return, this case is treated below
         }
 
@@ -420,7 +426,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             userNode.add(space);
 
             // Get the projects for current space
-            List<Project> projects = s.getProjects();
+            List<Project> projects = openBISProcessor.getProjectsForSpace(s);
 
             // We add the projects -- experiments and samples will be
             // lazily loaded on node expansion
@@ -437,7 +443,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 space.add(project);
                 nProjects++;
             }
-
 
         }
 
@@ -463,13 +468,12 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             }
         } else {
             JOptionPane.showMessageDialog(this.panel,
-                    "Sorry, there are no (accessible) projects.\n\n" +
-                            "You will need to create one yourself or " +
-                            "ask your space administrator to do it " +
-                            "for you.\nNo data registration will be " +
-                            "possible until this issue is fixed.",
-                            "Warning",
-                            JOptionPane.WARNING_MESSAGE);
+                    "Sorry, there are no (accessible) projects.\n\n"
+                            + "You will need to create one yourself or "
+                            + "ask your space administrator to do it "
+                            + "for you.\nNo data registration will be "
+                            + "possible until this issue is fixed.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
             // We do not need to return, this case is treated below
 
         }
@@ -489,9 +493,12 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Returns true if the viewer has completed creation of the data model
+     *
      * @return true if the data model is complete, false otherwise
      */
-    public boolean isReady() { return isReady; }
+    public boolean isReady() {
+        return isReady;
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -500,17 +507,18 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Return the reference to the JPanel to be added to a container component
+     *
      * @return JPanel reference
      */
     public JPanel getPanel() {
         return panel;
     }
 
-
     /**
      * Called when a node in the Tree is about to expand.
-     * @param event A TreeExpansionEvent.
-     * Required by TreeWillExpandListener interface.
+     *
+     * @param event A TreeExpansionEvent. Required by TreeWillExpandListener
+     *              interface.
      */
     @Override
     public void treeWillExpand(TreeExpansionEvent event)
@@ -521,14 +529,14 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         } else {
             lastVisitedPath = path;
         }
-        loadLazyChildren(
-                (AbstractOpenBISNode) path.getLastPathComponent());
+        loadLazyChildren((AbstractOpenBISNode) path.getLastPathComponent());
     }
 
     /**
      * Called when a node in the Tree is about to collapse.
-     * @param event A TreeExpansionEvent.
-     * Required by TreeWillExpandListener interface.
+     *
+     * @param event A TreeExpansionEvent. Required by TreeWillExpandListener
+     *              interface.
      */
     @Override
     public void treeWillCollapse(TreeExpansionEvent event)
@@ -538,6 +546,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Load the childen of the specified node if needed.
+     *
      * @param node Node to query for children.
      */
     private synchronized void loadLazyChildren(AbstractOpenBISNode node) {
@@ -571,10 +580,11 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
                 /**
                  * Constructor.
-                 * @param o	OpenBISProcessor reference.
+                 *
+                 * @param o   OpenBISProcessor reference.
                  * @param eId List of Experiment identifiers.
-                 * @param n Node to which to add the Experiment nodes.
-                 * @param p Project reference.
+                 * @param n   Node to which to add the Experiment nodes.
+                 * @param p   Project reference.
                  */
                 public Worker(OpenBISProcessor o, List<String> pId,
                         AbstractOpenBISNode n, Project p) {
@@ -607,27 +617,32 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                     DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                     for (Experiment e : experiments) {
 
-                        // We keep the experiment with code "ORGANIZATION_UNITS_COLLECTION"
-                        // but we do not add it to the tree since it contains the user tags.
-                        if (e.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
+                        // We keep the experiment with code
+                        // "ORGANIZATION_UNITS_COLLECTION"
+                        // but we do not add it to the tree since it contains
+                        // the user tags.
+                        if (e.getCode()
+                                .equals("ORGANIZATION_UNITS_COLLECTION")) {
                             continue;
                         }
 
                         // Add the experiments
-                        OpenBISExperimentNode experiment = new OpenBISExperimentNode(e);
+                        OpenBISExperimentNode experiment = new OpenBISExperimentNode(
+                                e);
                         model.insertNodeInto(experiment, n, n.getChildCount());
                     }
 
                     // Inform
-                    outputPane.log("Retrieved list of experiments for project " +
-                            p.getIdentifier() + ".");
+                    outputPane.log("Retrieved list of experiments for project "
+                            + p.getIdentifier() + ".");
 
                     // Mark the node as loaded
                     n.setLoaded();
 
                 }
 
-            };
+            }
+            ;
 
             // Run the worker!
             (new Worker(openBISProcessor, projId, node, p)).execute();
@@ -641,14 +656,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             // To be restored -- and extended -- in the future.
 
-            //EnumSet<SampleFetchOption> opts = EnumSet.of(SampleFetchOption.PROPERTIES);
-            //List<Sample> samples =
-            //		facade.listSamplesForExperiments(experimentID, opts);
-            //for (Sample sm : samples) {
-            //	// Add the samples
-            //	OpenBISSampleNode sample = new OpenBISSampleNode(sm);
-            //	node.add(sample);
-            //}
+            // EnumSet<SampleFetchOption> opts =
+            // EnumSet.of(SampleFetchOption.PROPERTIES);
+            // List<Sample> samples =
+            // facade.listSamplesForExperiments(experimentID, opts);
+            // for (Sample sm : samples) {
+            // // Add the samples
+            // OpenBISSampleNode sample = new OpenBISSampleNode(sm);
+            // node.add(sample);
+            // }
 
             // Temporarily, we just display the number of contained
             // samples in the Experiment. Later we could re-enable this
@@ -665,10 +681,11 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
                 /**
                  * Constructor.
-                 * @param o	OpenBISProcessor reference.
+                 *
+                 * @param o   OpenBISProcessor reference.
                  * @param eId List of Experiment identifiers.
-                 * @param n Node to which to add the Sample nodes.
-                 * @param e Experiment reference.
+                 * @param n   Node to which to add the Sample nodes.
+                 * @param e   Experiment reference.
                  */
                 public Worker(OpenBISProcessor o, List<String> eId,
                         AbstractOpenBISNode n, Experiment e) {
@@ -701,22 +718,27 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                     if (samples.size() > 0) {
 
                         // Get the model
-                        DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+                        DefaultTreeModel model = (DefaultTreeModel) tree
+                                .getModel();
 
                         // Append the experiment samples
                         for (Sample sample : samples) {
 
                             // Is it an EXPERIMENT sample?
-                            if (sample.getType().toString().endsWith("_EXPERIMENT")) {
+                            if (sample.getType().toString()
+                                    .endsWith("_EXPERIMENT")) {
 
                                 String nodeName = sample.getCode();
-                                if (sample.getProperties().containsKey("$NAME")) {
-                                    nodeName = sample.getProperties().get("$NAME");
+                                if (sample.getProperties()
+                                        .containsKey("$NAME")) {
+                                    nodeName = sample.getProperties()
+                                            .get("$NAME");
                                 }
 
                                 // Add to the tree
-                                model.insertNodeInto(new OpenBISSampleNode(sample),
-                                        n, n.getChildCount());
+                                model.insertNodeInto(
+                                        new OpenBISSampleNode(sample), n,
+                                        n.getChildCount());
 
                             }
 
@@ -725,14 +747,15 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                     }
 
                     // Inform
-                    outputPane.log("Retrieved number of samples for experiment " +
-                            e.getIdentifier() + ".");
+                    outputPane.log("Retrieved number of samples for experiment "
+                            + e.getIdentifier() + ".");
 
                     // Mark the node as loaded
                     n.setLoaded();
                 }
 
-            };
+            }
+            ;
 
             // Run the worker!
             (new Worker(openBISProcessor, experimentId, node, e)).execute();
@@ -747,12 +770,13 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Sets a mouse event listener on the JTree
+     *
      * @param e Mouse event
      */
     private void setListenerOnJTree(MouseEvent e) {
 
-        if (e.isPopupTrigger() &&
-                e.getComponent() instanceof OpenBISViewerTree) {
+        if (e.isPopupTrigger()
+                && e.getComponent() instanceof OpenBISViewerTree) {
 
             // Position of mouse click
             int x = e.getPoint().x;
@@ -764,20 +788,19 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
                 // There is nothing usable at that location
                 return;
             }
-            AbstractOpenBISNode node =
-                    (AbstractOpenBISNode) p.getLastPathComponent();
+            AbstractOpenBISNode node = (AbstractOpenBISNode) p
+                    .getLastPathComponent();
 
             // Type of node
             String nodeType = node.getClass().getSimpleName();
 
             // Add relevant context menu
             if (nodeType.equals("OpenBISSpaceNode")) {
-                JPopupMenu popup =
-                        createSpacePopup((OpenBISSpaceNode) node);
+                JPopupMenu popup = createSpacePopup((OpenBISSpaceNode) node);
                 popup.show(e.getComponent(), x, y);
             } else if (nodeType.equals("OpenBISProjectNode")) {
-                JPopupMenu popup =
-                        createProjectPopup((OpenBISProjectNode) node);
+                JPopupMenu popup = createProjectPopup(
+                        (OpenBISProjectNode) node);
                 popup.show(e.getComponent(), x, y);
             } else {
                 // Nothing to do.
@@ -787,6 +810,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Create a popup menu with actions for a space node
+     *
      * @param node OpenBIS Space node to which the popup menu is associated.
      * @return a JPopupMenu for the passed item
      */
@@ -800,8 +824,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         createProjectMenuItem.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 if (createNewProject(node)) {
                     // Rescan
                     scan();
@@ -815,8 +838,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         createTagMenuItem.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 createNewTag();
             }
         });
@@ -827,6 +849,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Create a popup menu with actions for a project node
+     *
      * @param node OpenBIS Project node to which the popup menu is associated.
      * @return a JPopupMenu for the passed item
      */
@@ -841,8 +864,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         menuItem.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 // Set the project with given identified as default target
                 if (setAsDefaultProject(node.getIdentifier())) {
                     outputPane.log("Project successfully set as default.");
@@ -856,10 +878,10 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         return popup;
     }
 
-
     /**
-     * Asks the user to give a project name and will then try to create
-     * it as a child of the passed OpenBISSpaceNode
+     * Asks the user to give a project name and will then try to create it as a
+     * child of the passed OpenBISSpaceNode
+     *
      * @param node An OpenBISSpaceNode
      * @return true if creation was successfull, false otherwise.
      */
@@ -878,8 +900,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         Space space = (Space) node.getUserObject();
 
         // Ask the user to specify a project name
-        String projectCode = JOptionPane.showInputDialog(
-                "Please enter new project name (code)");
+        String projectCode = JOptionPane
+                .showInputDialog("Please enter new project name (code)");
         if (projectCode == null || projectCode.equals("")) {
             outputPane.warn("Creation of new project aborted by user.");
             return false;
@@ -888,33 +910,34 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         // Create the project
         List<ProjectPermId> createdProjects;
         try {
-            createdProjects = openBISProcessor.createProject(
-                    space.getCode(), projectCode, false);
+            createdProjects = openBISProcessor.createProject(space.getCode(),
+                    projectCode, false);
         } catch (Exception e) {
-            outputPane.err("Could not create project /" + space.getCode() +
-                    "/" + projectCode + "! " + e.getMessage());
+            outputPane.err("Could not create project /" + space.getCode() + "/"
+                    + projectCode + "! " + e.getMessage());
             return false;
         }
 
         // One more check
         if (createdProjects.size() == 0) {
-            outputPane.err("Could not create project /" + space.getCode() +
-                    "/" + projectCode + "! Please contact your "
+            outputPane.err("Could not create project /" + space.getCode() + "/"
+                    + projectCode + "! Please contact your "
                     + "openBIS administrator!");
             return false;
         }
 
         // Inform
-        outputPane.log("Project /" + space.getCode() +
-                "/" + projectCode + " created successfully.");
+        outputPane.log("Project /" + space.getCode() + "/" + projectCode
+                + " created successfully.");
 
         // Return success
         return true;
     }
 
     /**
-     * Asks the user to give a project name and will then try to create
-     * it as a child of the passed OpenBISSpaceNode
+     * Asks the user to give a project name and will then try to create it as a
+     * child of the passed OpenBISSpaceNode
+     *
      * @return true if creation was successful, false otherwise.
      */
     private boolean createNewTag() {
@@ -930,7 +953,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         }
 
         // Get the list of spaces
-        SearchResult<Space> spaceResult = this.openBISProcessor.retrieveAndCacheSpacesWithProjects();
+        SearchResult<Space> spaceResult = this.openBISProcessor
+                .retrieveAndCacheSpaces();
         if (spaceResult.getTotalCount() == 0) {
             return false;
         }
@@ -939,7 +963,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         List<Space> spaces = spaceResult.getObjects();
 
         // Is there something already selected in the tree?
-        AbstractOpenBISNode node = (AbstractOpenBISNode) tree.getLastSelectedPathComponent();
+        AbstractOpenBISNode node = (AbstractOpenBISNode) tree
+                .getLastSelectedPathComponent();
 
         // Initialize the Space object
         Space space = null;
@@ -952,20 +977,26 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             } else if (className.equals("OpenBISProjectNode")) {
 
-                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node.getParent();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node
+                        .getParent();
                 space = (Space) spaceNode.getUserObject();
 
             } else if (className.equals("OpenBISExperimentNode")) {
 
-                OpenBISProjectNode projectNode = (OpenBISProjectNode) node.getParent();
-                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+                OpenBISProjectNode projectNode = (OpenBISProjectNode) node
+                        .getParent();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode
+                        .getParent();
                 space = (Space) spaceNode.getUserObject();
 
             } else if (className.equals("OpenBISSampleNode")) {
 
-                OpenBISExperimentNode experimentNode = (OpenBISExperimentNode) node.getParent();
-                OpenBISProjectNode projectNode = (OpenBISProjectNode) experimentNode.getParent();
-                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode.getParent();
+                OpenBISExperimentNode experimentNode = (OpenBISExperimentNode) node
+                        .getParent();
+                OpenBISProjectNode projectNode = (OpenBISProjectNode) experimentNode
+                        .getParent();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) projectNode
+                        .getParent();
                 space = (Space) spaceNode.getUserObject();
 
             } else if (className.equals("OpenBISUserNode")) {
@@ -975,7 +1006,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
             } else {
 
-                // Unknown node... Fall back to picking the first node in the tree.
+                // Unknown node... Fall back to picking the first node in the
+                // tree.
                 space = null;
             }
         }
@@ -1019,10 +1051,11 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             TreeModel model = tree.getModel();
             OpenBISUserNode rootNode = (OpenBISUserNode) model.getRoot();
             for (int i = 0; i < rootNode.getChildCount(); i++) {
-                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode.getChildAt(i);
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) rootNode
+                        .getChildAt(i);
                 Space currentSpace = (Space) spaceNode.getUserObject();
-                if (currentSpace.getPermId().toString().equals(
-                        space.getPermId().toString())) {
+                if (currentSpace.getPermId().toString()
+                        .equals(space.getPermId().toString())) {
 
                     tree.setSelectionPath(new TreePath(spaceNode.getPath()));
                     break;
@@ -1040,11 +1073,12 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         }
     }
 
-
     /**
      * Set the project with given identifier as the default target.
+     *
      * @param projectId The openBIS project identifier.
-     * @return bool True if the default project could be set successfully, false otherwise.
+     * @return bool True if the default project could be set successfully, false
+     *         otherwise.
      */
     private boolean setAsDefaultProject(final String projectId) {
         return globalSettingsManager.setDefaultProject(projectId);
@@ -1059,14 +1093,16 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Extract and set the list of tags for the given openBIS project node.
+     *
      * @param tags An OpenBISProjectNode.
      */
-    private void setTagListFromOpenBISProjectNode(OpenBISProjectNode projectNode) {
+    private void setTagListFromOpenBISProjectNode(
+            OpenBISProjectNode projectNode) {
 
         // Clear the list of tags
         clearTagList();
 
-        if (projectNode == null ) {
+        if (projectNode == null) {
             return;
         }
 
@@ -1083,20 +1119,23 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
     /**
      * Set the list of tags in the UI.
+     *
      * @param tags List of tags retrieved from openBIS.
      */
     private void setTagList(List<Sample> tags, Space space) {
         clearTagList();
-        DefaultListModel<Tag> listModel =
-                (DefaultListModel<Tag>) userTagList.getModel();
+        DefaultListModel<Tag> listModel = (DefaultListModel<Tag>) userTagList
+                .getModel();
         for (Sample tag : tags) {
             listModel.addElement(new Tag(tag));
         }
-        userTags.setText("<html><b>Tags</b> from <b>" + space.getCode() + "</b></html>");
+        userTags.setText(
+                "<html><b>Tags</b> from <b>" + space.getCode() + "</b></html>");
     }
 
     /**
      * Create the panel that contains the openBIS tree viewer
+     *
      * @return a JPanel.
      */
     private JPanel openBISViewerPanel() {
@@ -1176,8 +1215,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.gridy = 1;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
-        //constraints.gridwidth = 1;
-        //constraints.gridheight = 1;
+        // constraints.gridwidth = 1;
+        // constraints.gridheight = 1;
         constraints.gridwidth = 3;
         constraints.insets = new Insets(0, 5, 5, 0);
         openBISViewerPanel.add(scanButton, constraints);
@@ -1200,7 +1239,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
 
         // Add a simple label
         userTags = new JLabel("<html><b>Tags</b></html>");
-        //userTags.setVerticalAlignment(SwingConstants.TOP);
+        // userTags.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout
         constraints.gridx = 0;
@@ -1243,7 +1282,8 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         userTagList.getSelectionModel().setSelectionMode(
                 ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         userTagList.setDragEnabled(true);
-        userTagList.setTransferHandler(new TagListExportTransferHandler(userTagList));
+        userTagList.setTransferHandler(
+                new TagListExportTransferHandler(userTagList));
         JScrollPane tagScrollPane = new JScrollPane(userTagList);
 
         // Add to the layout
@@ -1252,7 +1292,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         constraints.gridwidth = 3;
-        //constraints.gridheight = 1;
+        // constraints.gridheight = 1;
         constraints.insets = new Insets(5, 5, 5, 0);
         tagsPanel.add(tagScrollPane, constraints);
 
