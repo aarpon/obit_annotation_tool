@@ -63,9 +63,7 @@ public class OpenBISProcessor {
 
     // Cache spaces and projects
     private boolean dataIsCached = false;
-    private boolean tagCollectionsAreCached = false;
     private SearchResult<Space> cachedSpacesWithProjects = null;
-    private Map<Space, Project> tagsCollectionPerSpace = null;
 
     /**
      * Constructor
@@ -78,12 +76,6 @@ public class OpenBISProcessor {
 
         // Set the currently active server
         this.openBISURL = globalSettingsManager.getActiveServer();
-
-        // Initialize cache
-        this.dataIsCached = false;
-        this.tagCollectionsAreCached = false;
-        this.cachedSpacesWithProjects = null;
-        this.tagsCollectionPerSpace = null;
     }
 
     /**
@@ -241,22 +233,40 @@ public class OpenBISProcessor {
     public void resetCachedData() {
 
         this.dataIsCached = false;
-        this.tagCollectionsAreCached = false;
         this.cachedSpacesWithProjects = null;
-        this.tagsCollectionPerSpace = null;
+    }
+
+    /**
+     * Return true if the cached data is still valid.
+     * 
+     * Internally, the OpenBISProcessor will trigger a
+     * refresh next time the data is accessed. External
+     * views can force a refresh calling the
+     * retrieveAndCacheSpacesWithProjects() method.
+     * 
+     * If the data cache is no longer valid, external
+     * views should be updated as well.
+     * 
+     * @return true if the cached data is still valid,
+     * false otherwise.
+     */
+    public boolean isDataCacheValid() {
+    	return !dataIsCached;
     }
 
     /**
      * Returns the list of Spaces in openBIS (as visible for current user).
      *
-     * The spaces (with the contained projects) are cached.
+     * The spaces (with the contained projects) are cached. The experiments
+     * and samples in the projects are NOT retrieved.
+     *  
      * On a second call, the cached version is returned. To force a retrieval,
      * call resetData() first.  Also, references to COMMON_ORGANISATION_UNIT
-     * projects (common 'tags') are cached.
+     * projects (common 'tags') are cached. Again, the actual tags
      *
      * @return list of Spaces.
      */
-    public SearchResult<Space> getSpacesWithProjects() {
+    public SearchResult<Space> retrieveAndCacheSpacesWithProjects() {
 
         // Do we have a valid session?
         if (v3_api == null) {
@@ -285,15 +295,44 @@ public class OpenBISProcessor {
         // Update cache information
         dataIsCached = true;
 
-        // Cache the space tag collections
-        cacheTagCollections();
-
         return cachedSpacesWithProjects;
     }
 
     /**
+     * Returns the list of Projects for a given Space.
+     * 
+     * All Projects are contained, also COMMON_ORGANIZATION_UNITS projects.
+     * These should be filtered out for display.
+     * 
+     * @param s Space to the queried for Projects.
+     * @return list of Projects.
+     */
+    public List<Project> getProjectsForSpace(Space s) {
+
+    	// Space
+        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
+        searchCriteria.withPermId().thatEquals(s.getPermId().getPermId());
+        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
+        spaceFetchOptions.sortBy().code();
+        spaceFetchOptions.withProjects();
+
+        // Search openBIS
+        SearchResult<Space> spaceSearchResults = v3_api.searchSpaces(v3_sessionToken,
+                searchCriteria, spaceFetchOptions);
+        if (spaceSearchResults.getTotalCount() == 0) {
+        	return new ArrayList<Project>();
+        }
+        return spaceSearchResults.getObjects().get(0).getProjects();	
+    }
+
+
+    /**
      * Returns the list of Experiment for a project list (as visible for
      * current user).
+     * 
+     * All experiments are contained, also ORGANIZATION_UNITS_COLLECTION experiments.
+     * These should be filtered out for display.
+     * 
      * @param p Project to the queried for experiments.
      * @return list of Experiments.
      */
@@ -302,6 +341,11 @@ public class OpenBISProcessor {
         // Do we have a valid session?
         if (! isLoggedIn()) {
             return new ArrayList<Experiment>();
+        }
+
+        // Is the data cached?
+        if (! dataIsCached) {
+        	retrieveAndCacheSpacesWithProjects();
         }
 
         // We need to retrieve the experiments from openBIS
@@ -335,12 +379,20 @@ public class OpenBISProcessor {
      * @return list of Samples.
      */
     public List<Sample> getSamplesForExperiments(Experiment exp) {
-        if (! isLoggedIn()) {
+
+    	// Do we have a valid session?
+    	if (! isLoggedIn()) {
             return new ArrayList<Sample>();
         }
 
+    	// Do we have a valid experiment?
         if (exp == null) {
             return new ArrayList<Sample>();
+        }
+
+        // Is the data cached?
+        if (! dataIsCached) {
+        	retrieveAndCacheSpacesWithProjects();
         }
 
         // Search for Experiments with given code and fetch its samples
@@ -386,62 +438,49 @@ public class OpenBISProcessor {
      */
     public List<Sample> getTagsForSpace(Space space) {
 
-        // Does the Space have a tags collection?
-        Project collection = tagsCollectionPerSpace.get(space);
-        if (collection == null) {
+        // Do we have a valid session?
+        if (! isLoggedIn()) {
             return new ArrayList<Sample>();
         }
 
-        // Retrieve the experiments
-        List<Experiment> experiments = getExperimentsForProjects(collection);
-
-        // Get the ORGANIZATION_UNITS_COLLECTION experiment
-        Experiment orgUnits = null;
-        for (int i = 0; i < experiments.size(); i++) {
-            Experiment current = experiments.get(i);
-            if (current.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
-                orgUnits = current;
-                break;
-            }
+        // Is the data cached?
+        if (! dataIsCached) {
+        	retrieveAndCacheSpacesWithProjects();
         }
 
-        // Get samples
-        List<Sample> tags = getSamplesForExperiments(orgUnits);
+    	// Initialize tag list
+    	List<Sample> tags = new ArrayList<Sample>();
 
-        // Return them
-        return tags;
+    	// Retrieve projects
+    	List<Project> projects = space.getProjects();
+    	if (projects.size() == 0) {
 
-    }
+    		// Query openBIS
+    		projects = getProjectsForSpace(space);	
+    		space.setProjects(projects);
+    	}
 
-    /**
-     * Return the tags for the given Space.
-     *
-     * A tag is a sample of type ORGANIZATION_UNIT stored in the
-     * experiment ORGANIZATION_UNITS_COLLECTION.
-     *
-     * The tags are cached.
-     *
-     * @param space Space to be queried.
-     * @return list of tags.
-     */
-    public List<String> getTagNamesForSpace(Space space) {
+    	for (Project project : projects) {
+    		if (project.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
 
-        // Does the Space have a tags collection?
-        List<Sample> tags = getTagsForSpace(space);
-        if (tags == null) {
-            return new ArrayList<String>();
-        }
+    			// Retrieve collections
+    			List<Experiment> experiments = getExperimentsForProjects(project);
 
-        // Create a list of tag names
-        ArrayList<String> tagNamesList = new ArrayList<String>();
+    			for (Experiment experiment : experiments) {
+    				if (experiment.getCode().equals("ORGANIZATION_UNITS_COLLECTION")) {
 
-        for (Sample tag: tags) {
+    					// Retrieve samples
+    					tags = getSamplesForExperiments(experiment);
 
-            tagNamesList.add(tag.getCode());
-        }
+    					break;
+    				}
+    			}
+    		}
+    	}
 
-        // Return them
-        return tagNamesList;
+    	// Return them
+    	return tags;
+
     }
 
     /**
@@ -468,6 +507,16 @@ public class OpenBISProcessor {
      * @return a list of ProjectPermId for the created projects.
      */
     public List<ProjectPermId> createProject(String spaceCode, String projectCode, boolean createDataCollections) {
+
+        // Do we have a valid session?
+        if (! isLoggedIn()) {
+            return new ArrayList<ProjectPermId>();
+        }
+
+        // Is the data cached?
+        if (! dataIsCached) {
+        	retrieveAndCacheSpacesWithProjects();
+        }
 
         // Create a project with given space and project codes
         ProjectCreation projectCreation = new ProjectCreation();
@@ -529,8 +578,8 @@ public class OpenBISProcessor {
             v3_api.createExperiments(v3_sessionToken, experimentCreationList);
         }
 
-        // Invalidate cache
-        dataIsCached = false;
+        // Reset the cached data
+        resetCachedData();
 
         // Return the list of created projects
         return createdProjects;
@@ -548,8 +597,34 @@ public class OpenBISProcessor {
      */
     public boolean createTag(Space space, String tagCode, String tagDescr) {
 
-        // Check if the project COMMON_ORGANIZATION_UNITS exists
-        Project commonOrganizationUnitProject = tagsCollectionPerSpace.get(space);
+        // Do we have a valid session?
+        if (! isLoggedIn()) {
+            return false;
+        }
+
+        // Is the data cached?
+        if (! dataIsCached) {
+        	retrieveAndCacheSpacesWithProjects();
+        }
+        
+         // Get projects
+        List<Project> projects = space.getProjects();
+    	if (projects.size() == 0) {
+    		
+    		// Query openBIS
+    		projects = getProjectsForSpace(space);	
+    		space.setProjects(projects);
+    	}
+    	
+        // Find the COMMON_ORGANIZATION_UNITS project
+        Project commonOrganizationUnitProject = null;
+        for (Project project : projects) {
+        	if (project.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+        		commonOrganizationUnitProject = project;
+        		break;
+        	}
+        }
+
         if (commonOrganizationUnitProject == null) {
 
             // Create the COMMON_ORGANIZATION_UNITS project
@@ -558,7 +633,6 @@ public class OpenBISProcessor {
                 return false;
             }
         }
-
         // Get the ORGANIZATION_UNITS_COLLECTION collection
         ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
         searchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
@@ -622,6 +696,7 @@ public class OpenBISProcessor {
             return false;
         }
 
+        // Return success
         return true;
     }
 
@@ -631,6 +706,11 @@ public class OpenBISProcessor {
      * @return the created COMMON_ORGANIZATION_UNITS Project or null if creation failed.
      */
     private Project createTagContainerProjectAndExperiment(Space space) {
+
+        // Do we have a valid session?
+        if (! isLoggedIn()) {
+            return null;
+        }
 
         // Create a project with given space and project code "COMMON_ORGANIZATION_UNITS"
         ProjectCreation projectCreation = new ProjectCreation();
@@ -684,35 +764,6 @@ public class OpenBISProcessor {
 
         // Return the newly created Project
         return createdProject;
-    }
-
-    /**
-     * Caches the list of tag collections for all spaces.
-     */
-    private void cacheTagCollections() {
-
-        if (! dataIsCached || cachedSpacesWithProjects.getTotalCount() == 0) {
-            this.tagsCollectionPerSpace = null;
-            this.tagCollectionsAreCached = false;
-            return;
-        }
-
-        // Initialize map
-        tagsCollectionPerSpace = new HashMap<Space, Project>();
-
-        // Store references to COMMON_ORGANISATION_UNIT projects (tag collections)
-        if (cachedSpacesWithProjects.getTotalCount() > 0) {
-            for (Space s : cachedSpacesWithProjects.getObjects()) {
-                for (Project p : s.getProjects()) {
-                    if (p.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
-                        tagsCollectionPerSpace.put(s, p);
-                    }
-                }
-            }
-        }
-
-        // Set cached flag to true
-        this.tagCollectionsAreCached = true;
     }
 
     /**

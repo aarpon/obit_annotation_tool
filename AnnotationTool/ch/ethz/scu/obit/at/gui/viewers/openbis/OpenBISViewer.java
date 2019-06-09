@@ -307,9 +307,6 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
             setTagList(tags, space);
         }
 
-        // Reset the lastSelectedNode
-        lastSelectedNode = null;
-
     }
 
     /**
@@ -400,7 +397,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         userNode = new OpenBISUserNode(openBISProcessor.getUserName());
 
         // Get spaces
-        SearchResult<Space> spaces = openBISProcessor.getSpacesWithProjects();
+        SearchResult<Space> spaces = openBISProcessor.retrieveAndCacheSpacesWithProjects();
         if (spaces.getTotalCount() == 0) {
             JOptionPane.showMessageDialog(this.panel,
                     "Sorry, there are no (accessible) spaces.\n\n" +
@@ -933,7 +930,7 @@ implements ActionListener, TreeSelectionListener, TreeWillExpandListener {
         }
 
         // Get the list of spaces
-        SearchResult<Space> spaceResult = this.openBISProcessor.getSpacesWithProjects();
+        SearchResult<Space> spaceResult = this.openBISProcessor.retrieveAndCacheSpacesWithProjects();
         if (spaceResult.getTotalCount() == 0) {
             return false;
         }
