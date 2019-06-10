@@ -341,7 +341,6 @@ public class OpenBISProcessor {
 
         // Update the space
         projects = spaceSearchResults.getObjects().get(0).getProjects();
-        s.setProjects(projects);
         return projects;
     }
 
@@ -639,73 +638,35 @@ public class OpenBISProcessor {
             retrieveAndCacheSpaces();
         }
 
-        // Get projects
-        List<Project> projects = getProjectsForSpace(space);
-        space.setProjects(projects);
-
-        // Find the COMMON_ORGANIZATION_UNITS project
+        // Declare the COMMON_ORGANIZATION_UNITS Project
         Project commonOrganizationUnitProject = null;
-        for (Project project : projects) {
-            if (project.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
-                commonOrganizationUnitProject = project;
-                break;
-            }
-        }
 
+        // Get the COMMON_ORGANIZATION_UNITS Project from openBIS
+        commonOrganizationUnitProject = getCommonOrganizationUnitsProjectForSpace(
+                space);
+
+        // If it does not exist yet, we create it
         if (commonOrganizationUnitProject == null) {
 
-            // Create the COMMON_ORGANIZATION_UNITS project
-            commonOrganizationUnitProject = createTagContainerProjectAndExperiment(
+            // Create the COMMON_ORGANIZATION_UNITS Project
+            commonOrganizationUnitProject = createCommonOrganizationUnitsProjectForSpace(
                     space);
-            if (commonOrganizationUnitProject == null) {
-                return false;
-            }
-        }
-        // Get the ORGANIZATION_UNITS_COLLECTION collection
-        ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
-        searchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
-        searchCriteria.withProject().withPermId().thatEquals(
-                commonOrganizationUnitProject.getPermId().toString());
-        ExperimentFetchOptions fetchOptions = new ExperimentFetchOptions();
-        SearchResult<Experiment> experiments = v3_api.searchExperiments(
-                v3_sessionToken, searchCriteria, fetchOptions);
-        if (experiments.getTotalCount() == 0) {
-
-            // Create collection ORGANIZATION_UNITS_COLLECTION object
-            ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
-            orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
-            orgUnitExpCreation
-                    .setProjectId(commonOrganizationUnitProject.getPermId());
-            orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
-            orgUnitExpCreation.setProperty("$NAME",
-                    "Organization Unit Collection");
-
-            // Create the experiments
-            List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
-            experimentCreationList.add(orgUnitExpCreation);
-            List<ExperimentPermId> experimentIds = v3_api
-                    .createExperiments(v3_sessionToken, experimentCreationList);
-
-            // Now fetch the newly created Experiment
-            ExperimentSearchCriteria newExpSearchCriteria = new ExperimentSearchCriteria();
-            newExpSearchCriteria.withCode()
-                    .thatEquals("ORGANIZATION_UNITS_COLLECTION");
-            newExpSearchCriteria.withPermId()
-                    .thatEquals(experimentIds.get(0).toString());
-            newExpSearchCriteria.withProject().withPermId().thatEquals(
-                    commonOrganizationUnitProject.getPermId().toString());
-            ExperimentFetchOptions newExpFetchOptions = new ExperimentFetchOptions();
-            experiments = v3_api.searchExperiments(v3_sessionToken,
-                    newExpSearchCriteria, newExpFetchOptions);
-
-            if (experiments.getTotalCount() == 0) {
-                // Could not create the collection!
-                return false;
-            }
         }
 
-        // Get the Experiment
-        Experiment experiment = experiments.getObjects().get(0);
+        // Declare the ORGANIZATION_UNITS_COLLECTION Experiment
+        Experiment organizationUnitsCollection = null;
+
+        // Now retrieve the ORGANIZATION_UNIT_COLLECTION from the project
+        organizationUnitsCollection = getOrganizationUnitCollectionForProject(
+                commonOrganizationUnitProject);
+
+        // If it does not exist yet, we create it
+        if (organizationUnitsCollection == null) {
+
+            // Create the ORGANIZATION_UNIT_COLLECTION
+            organizationUnitsCollection = createOrganizationUnitCollectionForProject(
+                    commonOrganizationUnitProject);
+        }
 
         // Add the Tag (a sample of type ORGANIZATION_UNIT; the code is
         // auto-generated)
@@ -713,7 +674,8 @@ public class OpenBISProcessor {
         orgUnitCreation.setTypeId(new EntityTypePermId("ORGANIZATION_UNIT"));
         orgUnitCreation.setSpaceId(space.getPermId());
         orgUnitCreation.setProjectId(commonOrganizationUnitProject.getPermId());
-        orgUnitCreation.setExperimentId(experiment.getPermId());
+        orgUnitCreation
+                .setExperimentId(organizationUnitsCollection.getPermId());
 
         // Set name and description as the properties $NAME and DESCRIPTION
         orgUnitCreation.setProperty("$NAME", tagCode);
@@ -723,6 +685,7 @@ public class OpenBISProcessor {
         List<SampleCreation> sampleCreationList = new ArrayList<SampleCreation>();
         sampleCreationList.add(orgUnitCreation);
         List<SamplePermId> createdSamples = null;
+
         try {
             createdSamples = v3_api.createSamples(v3_sessionToken,
                     sampleCreationList);
@@ -739,18 +702,56 @@ public class OpenBISProcessor {
     }
 
     /**
-     * Create the COMMON_ORGANIZATION_UNITS Project in the given Space.
+     * Get the Project with code COMMON_ORGANIZATION_UNITS from given Space.
      *
-     * @param space Space where to create the COMMON_ORGANIZATION_UNITS Project.
-     * @return the created COMMON_ORGANIZATION_UNITS Project or null if creation
-     *         failed.
+     * @param space Space to query for the Project.
+     * @return Project with code COMMON_ORGANIZATION_UNITS or null if not found.
      */
-    private Project createTagContainerProjectAndExperiment(Space space) {
+    private Project getCommonOrganizationUnitsProjectForSpace(Space space) {
 
-        // Do we have a valid session?
-        if (!isLoggedIn()) {
+        List<Project> projects = new ArrayList<Project>();
+
+        // Do we have a valid Space?
+        if (space == null) {
             return null;
         }
+
+        // Space
+        SpaceSearchCriteria searchCriteria = new SpaceSearchCriteria();
+        searchCriteria.withPermId().thatEquals(space.getPermId().getPermId());
+        SpaceFetchOptions spaceFetchOptions = new SpaceFetchOptions();
+        spaceFetchOptions.sortBy().code();
+        spaceFetchOptions.withProjects();
+
+        // Search openBIS
+        SearchResult<Space> spaceSearchResults = v3_api.searchSpaces(
+                v3_sessionToken, searchCriteria, spaceFetchOptions);
+        if (spaceSearchResults.getTotalCount() == 0) {
+            return null;
+        }
+
+        // Retrieve all projects for the space
+        projects = spaceSearchResults.getObjects().get(0).getProjects();
+
+        // Find the COMMON_ORGANIZATION_UNITS project
+        Project commonOrganizationUnitProject = null;
+        for (Project project : projects) {
+            if (project.getCode().equals("COMMON_ORGANIZATION_UNITS")) {
+                commonOrganizationUnitProject = project;
+                break;
+            }
+        }
+
+        return commonOrganizationUnitProject;
+    }
+
+    /**
+     * Create Project with code COMMON_ORGANIZATION_UNITS for given Space.
+     *
+     * @param space Space where the Project must be created.
+     * @return Generated Project with code COMMON_ORGANIZATION_UNITS.
+     */
+    private Project createCommonOrganizationUnitsProjectForSpace(Space space) {
 
         // Create a project with given space and project code
         // "COMMON_ORGANIZATION_UNITS"
@@ -762,8 +763,13 @@ public class OpenBISProcessor {
         List<ProjectCreation> projectCreationList = new ArrayList<ProjectCreation>();
         projectCreationList.add(projectCreation);
 
-        List<ProjectPermId> createdProjects = v3_api
-                .createProjects(v3_sessionToken, projectCreationList);
+        List<ProjectPermId> createdProjects = new ArrayList<ProjectPermId>();
+        try {
+            createdProjects = v3_api.createProjects(v3_sessionToken,
+                    projectCreationList);
+        } catch (UserFailureException e) {
+            return null;
+        }
         if (createdProjects.size() == 0) {
             return null;
         }
@@ -771,42 +777,140 @@ public class OpenBISProcessor {
         // Get the Project permId
         ProjectPermId permId = createdProjects.get(0);
 
-        // We need to retrieve the Projects from openBIS
-        ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
-        searchCriteria.withPermId().thatEquals(permId.toString());
-        ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
-        SearchResult<Project> projects = v3_api.searchProjects(v3_sessionToken,
-                searchCriteria, projectFetchOptions);
+        // Make sure we give the AS enough time to register the
+        // new project
+        int nProj = 0;
+        int nAttempts = 0;
+        int maxNAttempts = 10;
 
-        if (projects.getTotalCount() == 0) {
-            return null;
+        SearchResult<Project> projects = null;
+        while (nProj == 0 && nAttempts < maxNAttempts) {
+
+            // We retrieve the created Project from openBIS
+            ProjectSearchCriteria searchCriteria = new ProjectSearchCriteria();
+            searchCriteria.withPermId().thatEquals(permId.toString());
+            ProjectFetchOptions projectFetchOptions = new ProjectFetchOptions();
+            projects = v3_api.searchProjects(v3_sessionToken, searchCriteria,
+                    projectFetchOptions);
+
+            // How many projects did we get?
+            nProj = projects == null ? 0 : projects.getTotalCount();
+
+            if (nProj == 0) {
+                // Sleep 200 ms
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            nAttempts++;
         }
 
         // Get the newly created Project object
-        Project createdProject = projects.getObjects().get(0);
+        return projects == null ? null : projects.getObjects().get(0);
+    }
 
-        List<ExperimentPermId> createdExperiments = null;
+    /**
+     * Get the collection of with code ORGANIZATION_UNITS_COLLECTION and type
+     * COLLECTION that belongs to the given Project.
+     *
+     * @param project Project.
+     * @return Experiment of type COLLECTION or null if not found.
+     */
+    private Experiment getOrganizationUnitCollectionForProject(
+            Project project) {
 
-        // Now create the COLLECTION with CODE ORGANIZATION_UNITS_COLLECTION
-        ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
-        orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
-        orgUnitExpCreation.setProjectId(permId);
-        orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
-        orgUnitExpCreation.setProperty("$NAME", "Organization Unit Collection");
+        // Get the ORGANIZATION_UNITS_COLLECTION collection
+        ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
+        searchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
+        searchCriteria.withProject().withPermId()
+                .thatEquals(project.getPermId().toString());
+        ExperimentFetchOptions fetchOptions = new ExperimentFetchOptions();
+        fetchOptions.withType();
+        SearchResult<Experiment> experiments = v3_api.searchExperiments(
+                v3_sessionToken, searchCriteria, fetchOptions);
 
-        // Create the experiment
-        List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
-        experimentCreationList.add(orgUnitExpCreation);
-
-        createdExperiments = v3_api.createExperiments(v3_sessionToken,
-                experimentCreationList);
-
-        if (createdExperiments == null || createdExperiments.size() == 0) {
+        if (experiments == null || experiments.getTotalCount() == 0) {
             return null;
         }
 
-        // Return the newly created Project
-        return createdProject;
+        // Return the Experiment
+        return experiments.getObjects().get(0);
+    }
+
+    /**
+     * Get the collection of with code ORGANIZATION_UNITS_COLLECTION and type
+     * COLLECTION that belongs to the given Project.
+     *
+     * @param project Project.
+     * @return Experiment of type COLLECTION or null if not found.
+     */
+    private Experiment createOrganizationUnitCollectionForProject(
+            Project project) {
+
+        // Create collection ORGANIZATION_UNITS_COLLECTION object
+        ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
+        orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+        orgUnitExpCreation.setProjectId(project.getPermId());
+        orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
+        orgUnitExpCreation.setProperty("$NAME", "Organization Unit Collection");
+
+        // Create the experiments
+        List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
+        experimentCreationList.add(orgUnitExpCreation);
+
+        List<ExperimentPermId> experimentIds;
+        try {
+            experimentIds = v3_api.createExperiments(v3_sessionToken,
+                    experimentCreationList);
+        } catch (Exception e) {
+            return null;
+        }
+
+        if (experimentIds == null || experimentIds.size() == 0) {
+            return null;
+        }
+
+        ExperimentPermId experimentId = experimentIds.get(0);
+
+        // Make sure we give the AS enough time to register the
+        // new Experiment
+        int nExp = 0;
+        int nAttempts = 0;
+        int maxNAttempts = 10;
+
+        SearchResult<Experiment> experiments = null;
+        while (nExp == 0 && nAttempts < maxNAttempts) {
+
+            // Now fetch the newly created Experiment
+            ExperimentSearchCriteria newExpSearchCriteria = new ExperimentSearchCriteria();
+            newExpSearchCriteria.withCode()
+                    .thatEquals("ORGANIZATION_UNITS_COLLECTION");
+            newExpSearchCriteria.withPermId()
+                    .thatEquals(experimentId.toString());
+            newExpSearchCriteria.withProject().withPermId()
+                    .thatEquals(project.getPermId().toString());
+            ExperimentFetchOptions newExpFetchOptions = new ExperimentFetchOptions();
+            experiments = v3_api.searchExperiments(v3_sessionToken,
+                    newExpSearchCriteria, newExpFetchOptions);
+
+            // How many experiments did we get?
+            nExp = experiments == null ? 0 : experiments.getTotalCount();
+
+            if (nExp == 0) {
+                // Sleep 200 ms
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            nAttempts++;
+        }
+
+        // Get the newly created Project object
+        return experiments == null ? null : experiments.getObjects().get(0);
     }
 
     /**
