@@ -559,60 +559,51 @@ public class OpenBISProcessor {
         List<ProjectPermId> createdProjects = v3_api
                 .createProjects(v3_sessionToken, projectCreationList);
 
-        // Now create the COLLECTIONs with CODE
-        // MICROSCOPY_EXPERIMENTS_COLLECTION,
-        // FLOW_EXPERIMENTS_COLLECTION and ORGANIZATION_UNITS_COLLECTION.
-        for (ProjectPermId id : createdProjects) {
+        // Make sure ONE project was created
+        if (createdProjects.size() != 1) {
+            return new ArrayList<ProjectPermId>();
+        }
 
-            // Create collection ORGANIZATION_UNITS_COLLECTION object
-            ExperimentCreation orgUnitExpCreation = new ExperimentCreation();
-            orgUnitExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
-            orgUnitExpCreation.setProjectId(id);
-            orgUnitExpCreation.setCode("ORGANIZATION_UNITS_COLLECTION");
-            orgUnitExpCreation.setProperty("$NAME",
-                    "Organization Unit Collection");
+        // Are we requested to create the data collections?
+        if (createDataCollections == true) {
 
-            // Create the experiment creation list
+            // Get the permId of the new project
+            ProjectPermId projectPermId = createdProjects.get(0);
+
             List<ExperimentCreation> experimentCreationList = new ArrayList<ExperimentCreation>();
-            experimentCreationList.add(orgUnitExpCreation);
 
-            if (createDataCollections == true) {
+            // Create collection MICROSCOPY_EXPERIMENTS_COLLECTION object
+            ExperimentCreation micrExpCreation = new ExperimentCreation();
+            micrExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            micrExpCreation.setProjectId(projectPermId);
+            micrExpCreation.setCode("MICROSCOPY_EXPERIMENTS_COLLECTION");
+            micrExpCreation.setProperty("$NAME",
+                    "Microscopy experiments collection");
 
-                // Create collection MICROSCOPY_EXPERIMENTS_COLLECTION object
-                ExperimentCreation micrExpCreation = new ExperimentCreation();
-                micrExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
-                micrExpCreation.setProjectId(id);
-                micrExpCreation.setCode("MICROSCOPY_EXPERIMENTS_COLLECTION");
-                micrExpCreation.setProperty("$NAME",
-                        "Microscopy experiments collection");
+            // Create collection FLOW_SORTERS_EXPERIMENTS_COLLECTION object
+            ExperimentCreation flowSorterExpCreation = new ExperimentCreation();
+            flowSorterExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
+            flowSorterExpCreation.setProjectId(projectPermId);
+            flowSorterExpCreation
+                    .setCode("FLOW_SORTERS_EXPERIMENTS_COLLECTION");
+            flowSorterExpCreation.setProperty("$NAME",
+                    "Flow sorters experiments collection");
 
-                // Create collection FLOW_SORTERS_EXPERIMENTS_COLLECTION object
-                ExperimentCreation flowSorterExpCreation = new ExperimentCreation();
-                flowSorterExpCreation
-                        .setTypeId(new EntityTypePermId("COLLECTION"));
-                flowSorterExpCreation.setProjectId(id);
-                flowSorterExpCreation
-                        .setCode("FLOW_SORTERS_EXPERIMENTS_COLLECTION");
-                flowSorterExpCreation.setProperty("$NAME",
-                        "Flow sorters experiments collection");
+            // Create collection FLOW_ANALYZERS_EXPERIMENTS_COLLECTION
+            // object
+            ExperimentCreation flowAnalyzersExpCreation = new ExperimentCreation();
+            flowAnalyzersExpCreation
+                    .setTypeId(new EntityTypePermId("COLLECTION"));
+            flowAnalyzersExpCreation.setProjectId(projectPermId);
+            flowAnalyzersExpCreation
+                    .setCode("FLOW_ANALYZERS_EXPERIMENTS_COLLECTION");
+            flowAnalyzersExpCreation.setProperty("$NAME",
+                    "Flow analyzers experiment collection");
 
-                // Create collection FLOW_ANALYZERS_EXPERIMENTS_COLLECTION
-                // object
-                ExperimentCreation flowAnalyzersExpCreation = new ExperimentCreation();
-                flowAnalyzersExpCreation
-                        .setTypeId(new EntityTypePermId("COLLECTION"));
-                flowAnalyzersExpCreation.setProjectId(id);
-                flowAnalyzersExpCreation
-                        .setCode("FLOW_ANALYZERS_EXPERIMENTS_COLLECTION");
-                flowAnalyzersExpCreation.setProperty("$NAME",
-                        "Flow analyzers experiment collection");
-
-                // Add to the creation list
-                experimentCreationList.add(micrExpCreation);
-                experimentCreationList.add(flowSorterExpCreation);
-                experimentCreationList.add(flowAnalyzersExpCreation);
-
-            }
+            // Add to the creation list
+            experimentCreationList.add(micrExpCreation);
+            experimentCreationList.add(flowSorterExpCreation);
+            experimentCreationList.add(flowAnalyzersExpCreation);
 
             // Create the experiments
             v3_api.createExperiments(v3_sessionToken, experimentCreationList);
