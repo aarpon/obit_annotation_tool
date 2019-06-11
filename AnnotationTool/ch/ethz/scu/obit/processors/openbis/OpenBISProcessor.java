@@ -64,6 +64,8 @@ public class OpenBISProcessor {
     private boolean dataIsCached = false;
     private SearchResult<Space> cachedSpaces = null;
 
+    private String errorMessage = "";
+
     /**
      * Constructor
      *
@@ -232,6 +234,16 @@ public class OpenBISProcessor {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Return the last registered error message and resets it.
+     * @return Last error message.
+     */
+    public String getLastErrorMessage() {
+        String errorMessageToReturn = errorMessage;
+        errorMessage = "";
+        return errorMessageToReturn;
     }
 
     /**
@@ -584,7 +596,7 @@ public class OpenBISProcessor {
             flowSorterExpCreation.setTypeId(new EntityTypePermId("COLLECTION"));
             flowSorterExpCreation.setProjectId(projectPermId);
             flowSorterExpCreation
-                    .setCode("FLOW_SORTERS_EXPERIMENTS_COLLECTION");
+            .setCode("FLOW_SORTERS_EXPERIMENTS_COLLECTION");
             flowSorterExpCreation.setProperty("$NAME",
                     "Flow sorters experiments collection");
 
@@ -592,10 +604,10 @@ public class OpenBISProcessor {
             // object
             ExperimentCreation flowAnalyzersExpCreation = new ExperimentCreation();
             flowAnalyzersExpCreation
-                    .setTypeId(new EntityTypePermId("COLLECTION"));
+            .setTypeId(new EntityTypePermId("COLLECTION"));
             flowAnalyzersExpCreation.setProjectId(projectPermId);
             flowAnalyzersExpCreation
-                    .setCode("FLOW_ANALYZERS_EXPERIMENTS_COLLECTION");
+            .setCode("FLOW_ANALYZERS_EXPERIMENTS_COLLECTION");
             flowAnalyzersExpCreation.setProperty("$NAME",
                     "Flow analyzers experiment collection");
 
@@ -668,6 +680,21 @@ public class OpenBISProcessor {
                     commonOrganizationUnitProject);
         }
 
+        // Check whether a tag with the same name already exists
+        boolean found = false;
+        for (Sample sample : organizationUnitsCollection.getSamples()) {
+
+            if (sample.getProperty("$NAME").toLowerCase().equals(tagCode.toLowerCase())) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found == true) {
+            errorMessage = "A tag with the same name already exists!";
+            return false;
+        }
+
         // Add the Tag (a sample of type ORGANIZATION_UNIT; the code is
         // auto-generated)
         SampleCreation orgUnitCreation = new SampleCreation();
@@ -675,7 +702,7 @@ public class OpenBISProcessor {
         orgUnitCreation.setSpaceId(space.getPermId());
         orgUnitCreation.setProjectId(commonOrganizationUnitProject.getPermId());
         orgUnitCreation
-                .setExperimentId(organizationUnitsCollection.getPermId());
+        .setExperimentId(organizationUnitsCollection.getPermId());
 
         // Set name and description as the properties $NAME and DESCRIPTION
         orgUnitCreation.setProperty("$NAME", tagCode);
@@ -781,7 +808,7 @@ public class OpenBISProcessor {
         // new project
         int nProj = 0;
         int nAttempts = 0;
-        int maxNAttempts = 10;
+        int maxNAttempts = 25;
 
         SearchResult<Project> projects = null;
         while (nProj == 0 && nAttempts < maxNAttempts) {
@@ -825,9 +852,10 @@ public class OpenBISProcessor {
         ExperimentSearchCriteria searchCriteria = new ExperimentSearchCriteria();
         searchCriteria.withCode().thatEquals("ORGANIZATION_UNITS_COLLECTION");
         searchCriteria.withProject().withPermId()
-                .thatEquals(project.getPermId().toString());
+        .thatEquals(project.getPermId().toString());
         ExperimentFetchOptions fetchOptions = new ExperimentFetchOptions();
         fetchOptions.withType();
+        fetchOptions.withSamples().withProperties();
         SearchResult<Experiment> experiments = v3_api.searchExperiments(
                 v3_sessionToken, searchCriteria, fetchOptions);
 
@@ -878,7 +906,7 @@ public class OpenBISProcessor {
         // new Experiment
         int nExp = 0;
         int nAttempts = 0;
-        int maxNAttempts = 10;
+        int maxNAttempts = 25;
 
         SearchResult<Experiment> experiments = null;
         while (nExp == 0 && nAttempts < maxNAttempts) {
@@ -886,12 +914,14 @@ public class OpenBISProcessor {
             // Now fetch the newly created Experiment
             ExperimentSearchCriteria newExpSearchCriteria = new ExperimentSearchCriteria();
             newExpSearchCriteria.withCode()
-                    .thatEquals("ORGANIZATION_UNITS_COLLECTION");
+            .thatEquals("ORGANIZATION_UNITS_COLLECTION");
             newExpSearchCriteria.withPermId()
-                    .thatEquals(experimentId.toString());
+            .thatEquals(experimentId.toString());
             newExpSearchCriteria.withProject().withPermId()
-                    .thatEquals(project.getPermId().toString());
+            .thatEquals(project.getPermId().toString());
             ExperimentFetchOptions newExpFetchOptions = new ExperimentFetchOptions();
+            newExpFetchOptions.withType();
+            newExpFetchOptions.withSamples().withProperties();
             experiments = v3_api.searchExperiments(v3_sessionToken,
                     newExpSearchCriteria, newExpFetchOptions);
 

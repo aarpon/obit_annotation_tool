@@ -64,7 +64,7 @@ import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
  * @author Aaron Ponti
  */
 public class OpenBISViewer extends Observable implements ActionListener,
-        TreeSelectionListener, TreeWillExpandListener {
+TreeSelectionListener, TreeWillExpandListener {
 
     protected JPanel panel;
     protected JButton scanButton;
@@ -392,7 +392,7 @@ public class OpenBISViewer extends Observable implements ActionListener,
             JOptionPane.showMessageDialog(this.panel,
                     "The openBIS session is no longer valid!\n"
                             + "Please try logging in again.",
-                    "Session error", JOptionPane.ERROR_MESSAGE);
+                            "Session error", JOptionPane.ERROR_MESSAGE);
             clearTree();
             return;
         }
@@ -412,7 +412,7 @@ public class OpenBISViewer extends Observable implements ActionListener,
                             + "space for you or to grant you access to an "
                             + "existing one.\nNo data registration will be "
                             + "possible until this issue is fixed.",
-                    "Warning", JOptionPane.WARNING_MESSAGE);
+                            "Warning", JOptionPane.WARNING_MESSAGE);
             // We do not need to return, this case is treated below
         }
 
@@ -473,7 +473,7 @@ public class OpenBISViewer extends Observable implements ActionListener,
                             + "ask your space administrator to do it "
                             + "for you.\nNo data registration will be "
                             + "possible until this issue is fixed.",
-                    "Warning", JOptionPane.WARNING_MESSAGE);
+                            "Warning", JOptionPane.WARNING_MESSAGE);
             // We do not need to return, this case is treated below
 
         }
@@ -1068,7 +1068,7 @@ public class OpenBISViewer extends Observable implements ActionListener,
             setTagList(openBISProcessor.getTagsForSpace(space), space);
             return true;
         } else {
-            outputPane.err("Could not create tag " + tagName + "!");
+            outputPane.err("Could not create tag " + tagName + "! " + openBISProcessor.getLastErrorMessage());
             return false;
         }
     }
