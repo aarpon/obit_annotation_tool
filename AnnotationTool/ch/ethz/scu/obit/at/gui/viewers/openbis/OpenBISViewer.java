@@ -839,7 +839,7 @@ TreeSelectionListener, TreeWillExpandListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                createNewTag();
+                createNewTag(node);
             }
         });
         popup.add(createTagMenuItem);
@@ -867,7 +867,7 @@ TreeSelectionListener, TreeWillExpandListener {
             public void actionPerformed(ActionEvent e) {
                 // Set the project with given identified as default target
                 if (setAsDefaultProject(node.getIdentifier())) {
-                    outputPane.log("Project successfully set as default.");
+                    outputPane.log("Project " + node.getIdentifier() + " successfully set as default.");
                 } else {
                     outputPane.err("Project could not be set as default.");
                 }
@@ -901,7 +901,11 @@ TreeSelectionListener, TreeWillExpandListener {
 
         // Ask the user to specify a project name
         String projectCode = JOptionPane
-                .showInputDialog("Please enter new project name (code)");
+                .showInputDialog(null,
+                        "Space: " + space.getCode() +
+                        "\n\nNew project name:",
+                        "Create new project...",
+                        JOptionPane.INFORMATION_MESSAGE);
         if (projectCode == null || projectCode.equals("")) {
             outputPane.warn("Creation of new project aborted by user.");
             return false;
@@ -940,7 +944,7 @@ TreeSelectionListener, TreeWillExpandListener {
      *
      * @return true if creation was successful, false otherwise.
      */
-    private boolean createNewTag() {
+    private boolean createNewTag(AbstractOpenBISNode node) {
 
         // Retrieve and store the createProject service
         if (!openBISProcessor.isLoggedIn()) {
@@ -962,16 +966,33 @@ TreeSelectionListener, TreeWillExpandListener {
         // Get the list of Spaces
         List<Space> spaces = spaceResult.getObjects();
 
-        // Is there something already selected in the tree?
-        AbstractOpenBISNode node = (AbstractOpenBISNode) tree
-                .getLastSelectedPathComponent();
-
         // Initialize the Space object
         Space space = null;
 
+        // If we haven't Is there something already selected in the tree?
+        if (node == null) {
+            node = (AbstractOpenBISNode) tree.getLastSelectedPathComponent();
+        }
+
+        // If there is nothing selected in the tree, do we have a default project
+        // (from which to get the space?)
+        if (node == null) {
+            node = getDefaultProjectOrFirst();
+        }
+
+        // Still check if node is != null in case nothing usable was
+        // selected in the tree.
         if (node != null) {
             String className = node.getClass().getSimpleName();
-            if (className.equals("OpenBISSpaceNode")) {
+
+            if (className.equals("OpenBISUserNode")) {
+
+                node = getDefaultProjectOrFirst();
+                OpenBISSpaceNode spaceNode = (OpenBISSpaceNode) node
+                        .getParent();
+                space = (Space) spaceNode.getUserObject();
+
+            } else if (className.equals("OpenBISSpaceNode")) {
 
                 space = (Space) node.getUserObject();
 
@@ -1265,7 +1286,7 @@ TreeSelectionListener, TreeWillExpandListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                createNewTag();
+                createNewTag(null);
             }
         });
         constraints.gridx = 2;

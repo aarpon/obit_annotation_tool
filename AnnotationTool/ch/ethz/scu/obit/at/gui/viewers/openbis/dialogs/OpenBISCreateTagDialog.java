@@ -70,7 +70,7 @@ public class OpenBISCreateTagDialog extends JDialog {
         setResizable(false);
 
         // Add a label for the selection of the URL
-        JLabel spaceLabel = new JLabel("Select space");
+        JLabel spaceLabel = new JLabel("Select space:");
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 2;
@@ -102,7 +102,7 @@ public class OpenBISCreateTagDialog extends JDialog {
         setSelectedSpace(this.selectedSpace);
 
         // Add a label for the tag name
-        JLabel tagNameLabel = new JLabel("Tag name");
+        JLabel tagNameLabel = new JLabel("Tag name:");
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.gridwidth = 2;
@@ -120,7 +120,7 @@ public class OpenBISCreateTagDialog extends JDialog {
         add(tagNameField, constraints);
 
         // Add a label for the tag description
-        JLabel tagDescriptionLabel = new JLabel("Tag description (optional)");
+        JLabel tagDescriptionLabel = new JLabel("Tag description (optional):");
         constraints.gridx = 0;
         constraints.gridy = 4;
         constraints.gridwidth = 2;
