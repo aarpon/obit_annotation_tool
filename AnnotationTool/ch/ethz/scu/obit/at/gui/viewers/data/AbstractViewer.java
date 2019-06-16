@@ -151,7 +151,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a title JLabel
-        JLabel title = new JLabel("<html><b>Data viewer</b></html>");
+        JLabel title = new JLabel("<html><b>Data</b></html>");
 
         // Add the tree viewer to the layout
         constraints.gridx = 0;
@@ -975,7 +975,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a simple label
-        metadataView = new JLabel("<html><b>Metadata viewer</b></html>");
+        metadataView = new JLabel("<html><b>Metadata</b></html>");
         metadataView.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout
@@ -1025,7 +1025,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a simple label
-        invalidDatasets = new JLabel("<html><b>Invalid datasets</b></html>");
+        invalidDatasets = new JLabel("<html><b>Invalid Data</b></html>");
         invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout
