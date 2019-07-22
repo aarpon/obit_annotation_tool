@@ -120,7 +120,7 @@ public class AppSettingsManager {
 			return;
 		}
 
-    	if (index < 0 && index > (listAppSettings.size() - 1)) {
+    	if (index < 0 || index > (listAppSettings.size() - 1)) {
     		throw new ArrayIndexOutOfBoundsException();
     	}
 

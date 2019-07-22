@@ -1,14 +1,12 @@
 package ch.ethz.scu.obit.microscopy.readers.composite;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,19 +23,14 @@ import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
 
     private final static String FILENAME_REGEX =
-            "^(?<basename>.*?)" +                            // Series basename: group 1
-                    "(_w(?<channel>\\d.*?)" +                // Channel number (optional)
-                    "(?<channelname>.*?))?" +                // Channel name (optional)
-                    "(conf(?<wavelength>\\d.*?))?" +         // Wavelength
-                    "(_s(?<series>\\d.*?))?" +               // Series number (optional)
-                    "(_t(?<timepoint>\\d.*?))?" +            // Time index (optional)
-                    "(\\.tif{1,2}|\\.stk)$";                 // File extension
-
-    private final static String ATTR_REGEX =
-            "^(?<key>.*?)((?<channel>\\d*?))?$";             // Name of the attribute followed by an optional channel number
+            "(?<basename>.*?)" +                     // Base name
+                    "(_w(?<channel>\\d.*?)" +        // Channel number (optional)
+                    "(?<channelName>.*?))?" +        // Channel name (optional)
+                    "(_s(?<series>\\d.*?))?" +       // Series number (optional)
+                    "(_t(?<timepoint>\\d.*?))?" +    // Time index (optional)
+                    "(\\.tif{1,2}|\\.stk)$";         // File extension
 
     private static Pattern FILENAME_PATTERN = Pattern.compile(FILENAME_REGEX, Pattern.CASE_INSENSITIVE);
-    private static Pattern ATTR_PATTERN = Pattern.compile(ATTR_REGEX, Pattern.CASE_INSENSITIVE);
 
     /* Protected instance variables */
     private File folder;
@@ -129,88 +122,184 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
     @Override
     public boolean parse() throws Exception {
 
-        // Initialize the list of found and referenced files
-        List<String> foundFiles = new ArrayList<String>();
+        // First, find the ND file
+        File[] ndFiles = folder.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toUpperCase().endsWith(".ND");
+            }
+        });
 
-        // Make sure there is only one ND file in the folder
-        Boolean NDFileAlreadyFound = false;
+        // There can be only one ND file per (composite) folder
+        if (ndFiles.length == 0) {
+            // Mark failure
+            isValid = false;
+            errorMessage = "No ND file found in the folder!";
+            return isValid;
+        }
+        if (ndFiles.length > 1) {
+            // Mark failure
+            isValid = false;
+            errorMessage = "There must be exactly one ND file per folder.";
+            return isValid;
+        };
 
-        // Get a list of all files
-        File[] allFiles = folder.listFiles();
+        // Get the ND file
+        File ndFile = ndFiles[0];
+
+        // Now extract the basename
+        String NDFileName = ndFile.getName();
+        basename = NDFileName.substring(0, NDFileName.length() - 3);
+
+        /*
+         *
+         * FIRST PASS
+         *
+         *     Split the files into the subset that belongs to the ND file
+         *     and the subset of additional files (like overviews, ...)
+         */
+        List<File> filesAssociatedToNDFile = new ArrayList<File>();
+        List<File> additionalFiles = new ArrayList<File>();
+
+        // Get a list of all files in the folder
+        File[] allFiles = folder.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return (name.toUpperCase().endsWith(".TIF") ||
+                        name.toUpperCase().endsWith(".TIFF") ||
+                        name.toUpperCase().endsWith(".STK"));
+            }
+        });
         if (allFiles == null) {
 
             // Mark failure
             isValid = false;
-            errorMessage = "The folder is empty.";
+            errorMessage = "There are no image files in the folder.";
             return isValid;
 
         }
 
-        // Now process them
+        // Calculate total dataset size
+        for (File file : allFiles) {
+            totalDatasetSizeInBytes += file.length();
+        }
+
+        /*
+         *
+         * SECOND PASS
+         *
+         *     Partition the files into the subset that belongs to the ND file
+         *     and the subset of additional files (like overviews, ...)
+         */
         for (File file : allFiles) {
 
             // Get the file name
             String name = file.getName();
 
-            // TIF|TIFF or STK files are expected
-            if (name.toUpperCase().endsWith(".TIF") ||
-                    name.toUpperCase().endsWith(".TIFF") ||
-                    name.toUpperCase().endsWith(".STK")) {
-
-                // Add the file size to the total
-                totalDatasetSizeInBytes += file.length();
-
-                // Add the file to the list of found binary files
-                foundFiles.add(file.getAbsolutePath());
-
-                // Continue to the next file
-                continue;
-
-            } else if (name.toUpperCase().endsWith(".ND")) {
-
-                // The ND file is the one we process to extract metadata information.
-                // If something goes wrong in the parsing, the parseNDFile() method
-                // will set the isValid flag to false and the errorMessage string
-                // appropriately.
-
-
-                if (NDFileAlreadyFound == true) {
-
-                    isValid = false;
-                    errorMessage = "Only one experiment (i.e. one ND file) per folder expected!";
-                    return isValid;
-                }
-
-                NDFileAlreadyFound = true;
-
-                // Set the "basename"
-                String NDFileName = file.getName();
-                basename = NDFileName.substring(0, NDFileName.length() - 3);
-
-                // If parsing of the ND file succeeded, we still continue
-                // iterating over the files to update the total dataset size!
-
+            if (name.startsWith(basename)) {
+                filesAssociatedToNDFile.add(file);
             } else {
+                additionalFiles.add(file);
+            }
+        }
 
-                // These are non-data files that we will just store in the DSS
-                // with the composite dataset folder.
-                // Nothing to do.
+        /*
+         *
+         * THIRD PASS
+         *
+         *     Condense the non-basename part of the file name into a pattern.
+         */
+        // Create a map of series numbers to list of file names
+        Map<String, ArrayList<File>> mutableFileNamePattern = new HashMap<String, ArrayList<File>>();
+
+        // Consider only the part of the file name without the basename
+        int startIndex = basename.length();
+
+        for (File file : filesAssociatedToNDFile) {
+
+            // First parse the file name to extract some information
+            String currentFileNamePart = "";
+            try {
+                currentFileNamePart = file.getName().substring(startIndex);
+            } catch (Exception e) {
+                currentFileNamePart = file.getName();
             }
 
+
+            // Remove all digits
+            String pattern = currentFileNamePart.replaceAll("[^A-Za-z]","");
+
+            ArrayList<File> list;
+            if (mutableFileNamePattern.containsKey(pattern)) {
+                list = mutableFileNamePattern.get(pattern);
+            } else {
+                list = new ArrayList<File>();
+            }
+            list.add(file);
+            mutableFileNamePattern.put(pattern, list);
         }
 
-        // Make sure we found some files to process
-        if (foundFiles.size() == 0) {
-            // Mark failure
-            isValid = false;
-            errorMessage = "Could not find any image files in the folder!";
-            return isValid;
+        // There should be only one pattern; if not, we pick the one with most files
+        // and move the files from all other patterns into additionalFiles.
+        if (mutableFileNamePattern.keySet().size() > 1) {
+
+            int maxNumFilesPerPattern = -1;
+            String maxNumFilesPerPatternString = "";
+
+            for (String key : mutableFileNamePattern.keySet()) {
+                if (mutableFileNamePattern.get(key).size() > maxNumFilesPerPattern) {
+                    maxNumFilesPerPattern = mutableFileNamePattern.get(key).size();
+                    maxNumFilesPerPatternString = key;
+                }
+            }
+
+            // Move all the files that do not belong to the "winning" template
+            // to the additionalFiles list
+            for (String key : mutableFileNamePattern.keySet()) {
+                if (key.equals(maxNumFilesPerPatternString)) {
+                    continue;
+                }
+
+                // Move the files
+                for (File file : mutableFileNamePattern.get(key)) {
+                    int index = filesAssociatedToNDFile.indexOf(file);
+                    if (index == -1) {
+                        throw new Exception("There was a problem assigning files to the ND file!");
+                    }
+                    filesAssociatedToNDFile.remove(index);
+                    additionalFiles.add(file);
+                }
+            }
         }
 
-        // Now arrange the found files into series
-        if (! buildSeriesFromFiles(foundFiles)) {
+
+        // Reset the highestKnownSeriesNumber counter
+        int minAllowedSeriesNum = 0;
+
+        // Process the files associated to the ND file
+        if (! buildSeriesFromFileList(filesAssociatedToNDFile, minAllowedSeriesNum)) {
             // The status and the error message have been set by buildSeriesFromFiles()
             return false;
+        }
+
+        // Find the higest series number used
+        int mx = -1;
+        for (Integer s : combinedSeriesIndices) {
+            if (s > mx) {
+                mx = s;
+            }
+        }
+        minAllowedSeriesNum = mx + 1;
+
+        // The additional files are added as independent series.
+        // The basename obtained from the ND file can no longer be used.
+        for (File file : additionalFiles) {
+            // Create a list with one file
+            List<File> currentFile = new ArrayList<File>(1);
+            currentFile.add(file);
+            if (! buildSeriesFromFileList(currentFile, minAllowedSeriesNum)) {
+                return false;
+            }
         }
 
         // Mark success
@@ -285,130 +374,6 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
     }
 
     /**
-     * Merge two series attributes.
-     * @param attrTarget First series attribute to be extended.
-     * @param attrSource Second series attributes to be integrated.
-     * @return Merged series attributes.
-     */
-    private Map<String, HashMap<String, String>> mergeSeriesAttr(Map<String, HashMap<String, String>> attrTarget,
-            Map<String, HashMap<String, String>> attrSource) {
-
-        // Only one series per file is expected (and allowed)
-        assert(attrTarget.keySet().size() == 1);
-        assert(attrSource.keySet().size() == 1);
-
-        Iterator<Entry<String, HashMap<String, String>>> targetIt = attrTarget.entrySet().iterator();
-        Iterator<Entry<String, HashMap<String, String>>> sourceIt = attrSource.entrySet().iterator();
-
-        while (targetIt.hasNext()) {
-
-            // Get the series from the target
-            Entry<String, HashMap<String, String>> targetPair = targetIt.next();
-            String targetKey = targetPair.getKey();
-            HashMap<String, String> targetSeries = targetPair.getValue();
-
-            // Number of channels in the target series
-            int numChannelsInTarget = countChannelsInMetadata(targetSeries);
-
-            while (sourceIt.hasNext()) {
-
-                // Get the series from the source
-                Entry<String, HashMap<String, String>> sourcePair = sourceIt.next();
-                String sourceKey = sourcePair.getKey();
-                HashMap<String, String> sourceSeries = sourcePair.getValue();
-
-                // Number of channels in the source series. It MUST be 1.
-                int numChannelsInSource = countChannelsInMetadata(sourceSeries);
-                assert(numChannelsInSource == 1);
-
-                // Make sure we are trying to fuse attributes for the same series!
-                assert(sourceKey.equals(targetKey));
-
-                Set<String> keySetSource = sourceSeries.keySet();
-
-                // If the channel name is the same, we fuse by time; otherwise by channel
-                String channelNameTarget = targetSeries.get("channelName0");
-                String channelNameSource = sourceSeries.get("channelName0");
-
-                // Add by channel or by time point?
-                Boolean addAsNewChannel = false;
-                if (! channelNameTarget.equals(channelNameSource)) {
-                    addAsNewChannel = true;
-                }
-
-                // Do we have a new channel to add?
-                if (addAsNewChannel == true) {
-
-                    // Check geometry. These test should pass since the geometries per series
-                    // were checked by fileGeometryInSeriesMatch().
-                    assert(Integer.parseInt(targetSeries.get("sizeX")) == Integer.parseInt(sourceSeries.get("sizeX")));
-                    assert(Integer.parseInt(targetSeries.get("sizeY")) == Integer.parseInt(sourceSeries.get("sizeY")));
-                    assert(Integer.parseInt(targetSeries.get("sizeZ")) == Integer.parseInt(sourceSeries.get("sizeZ")));
-                    assert(Integer.parseInt(targetSeries.get("sizeT")) == Integer.parseInt(sourceSeries.get("sizeT")));
-
-                    // New channel number (for the channel to be transferred)
-                    int newChannelNum = numChannelsInTarget;
-
-                    // This is a new channel
-                    for (String key : keySetSource) {
-
-                        Matcher m = ATTR_PATTERN.matcher(key);
-                        if (m.find()) {
-                            // Add a new key to the target attributes with the value of
-                            // the source attributes
-                            if (! m.group("channel").equals("")) {
-                                String updateKey = m.group("key") + newChannelNum;
-                                int currentSourceChannel = Integer.parseInt(m.group("channel"));
-                                if (m.group("key").equals("channelColor")) {
-
-                                    // Source channel
-                                    double [] defC = BioFormatsWrapper.getDefaultChannelColor(currentSourceChannel);
-                                    String c  = "";
-                                    for (int k = 0; k < defC.length - 1; k++) {
-                                        c += defC[k] + ", ";
-                                    }
-                                    c += defC[defC.length - 1];
-                                    targetSeries.put(key, c);
-
-                                    // Target channel
-                                    defC = BioFormatsWrapper.getDefaultChannelColor(newChannelNum);
-                                    c  = "";
-                                    for (int k = 0; k < defC.length - 1; k++) {
-                                        c += defC[k] + ", ";
-                                    }
-                                    c += defC[defC.length - 1];
-                                    targetSeries.put(updateKey, c);
-
-                                } else {
-                                    targetSeries.put(updateKey, sourceSeries.get(key));
-                                }
-                            }
-                        }
-                    }
-
-                    // Do we have a new timepoint to add?
-                    targetSeries.put("sizeC", "" + (numChannelsInTarget + 1));
-
-                } else {
-
-                    // Number of timepoints in the source and target series
-                    int numTimepointsInSource = Integer.parseInt(sourceSeries.get("sizeT"));
-                    int numTimepointsInTarget = Integer.parseInt(targetSeries.get("sizeT"));
-                    targetSeries.put("sizeT", "" + (numTimepointsInTarget + numTimepointsInSource));
-                }
-
-                // Merge the filenames
-                targetSeries.put("filenames", sourceSeries.get("filenames") + ";" +
-                        targetSeries.get("filenames"));
-
-            }
-
-        }
-
-        return attrTarget;
-    }
-
-    /**
      * Set the series number in place.
      * @param attr Current attribute series.
      * @param targetSeriesNum Number of the series to set.
@@ -431,136 +396,285 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
      * Build Series objects from the list of files.
      * @param listOfFiles List of files to process
      * @return true if the parsing of the files into series was successful, false otherwise.
+     * @throws Exception
      */
-    private Boolean buildSeriesFromFiles(List<String> listOfFiles) {
+    private Boolean buildSeriesFromFileList(List<File> filesAssociatedToNDFile, int minAllowedSeriesNum) throws Exception {
+
+        // Keep track of the channels
+        // Create a map of channel names and numbers
+        Map<Integer, Map<String, Integer>> seriesChannels = new HashMap<Integer, Map<String, Integer>>();
+
+        // Create a map of timepoint indices
+        Map<Integer, ArrayList<Integer>> seriesTimepoints = new HashMap<Integer, ArrayList<Integer>>();
 
         // Create a map of file attributes
-        Map<String, Map<String, HashMap<String, String>>> fileAttributes =
-                new HashMap<String, Map<String, HashMap<String, String>>>();
+        Map<String, Map<String, HashMap<String, String>>> fileAttributes = new HashMap<String, Map<String, HashMap<String, String>>>();
 
         // Create a map of series numbers to list of file names
-        Map<Integer, ArrayList<String>> seriesMap = new HashMap<Integer, ArrayList<String>>();
+        Map<Integer, ArrayList<String>> seriesFileList = new HashMap<Integer, ArrayList<String>>();
 
-        // Keep track of the file basenames
-        List<String> basenames = new ArrayList<String>();
+        // Create a map of series numbers to list of file names
+        Map<Integer, String> seriesBasename = new HashMap<Integer, String>();
 
-        // Set the first candidate series number - 1 to enter the loop
-        int currentNewSeriesIndex = -1;
+        // Create a map of series dimensions
+        Map<Integer, Integer[]> seriesDimensions = new HashMap<Integer, Integer[]>();
+
+        // Consider only the part of the file name without the basename
+        int startIndex = 0; // basename.length();
+
+        // Keep track of the last file extension seen
+        String lastFileExtensionSeen = "";
 
         // Process all files
-        for (int i = 0; i < listOfFiles.size(); i++) {
+        for (int i = 0; i < filesAssociatedToNDFile.size(); i++) {
 
-            // Open the file
-            BioFormatsWrapper reader = new BioFormatsWrapper(new File(listOfFiles.get(i)), false);
-
-            // Parse the file
-            reader.parse();
-
-            // Get the attributes
-            Map<String, HashMap<String, String>> currAttr = reader.getAttributes();
-
-            // Add the filename
-            currAttr.get("series_0").put("filenames", listOfFiles.get(i));
-
-            // Store the updated attributes
-            fileAttributes.put(listOfFiles.get(i), currAttr);
-
-            // Close the file
-            reader.close();
-
-            // Default basename for current file
-            String basename = "default";
-
-            // Default channel number for current file (unused)
-            //int channel = 0;
-
-            // Default channel name for current file (unused)
-            //String  channelName = "";
-
-            // Default wavelength (string) for current file (unused)
-            // String wavelength = "";
-
-            // Default timepoint for current file (unused)
+            int seriesNum = 0;
+            String channelNameFromFileName = "";
+            int channelNumberFromFileName = -1;
             int timepoint = 0;
 
-            // Series number
-            int seriesNum = 0;
+            // First, get the series number from the file name
+            String currentFileNamePart = "";
+            try {
+                currentFileNamePart = filesAssociatedToNDFile.get(i).getName().substring(startIndex);
+            } catch (Exception e) {
+                currentFileNamePart = filesAssociatedToNDFile.get(i).getName();
+            }
 
-            // First parse the file name to extract some information
-            Matcher m = FILENAME_PATTERN.matcher(listOfFiles.get(i));
+            // Get the file extension
+            int lastDotIndex = currentFileNamePart.lastIndexOf(".");
+            String currentFileExtension = currentFileNamePart.substring(lastDotIndex);
+
+            // Initialize currentBasename as the basename
+            String currentBasename = basename;
+
+            // Parse the file name (template)
+            Matcher m = FILENAME_PATTERN.matcher(currentFileNamePart);
             if (m.find()) {
 
-                // Get the base name
-                if (m.group("basename") != null && m.group("basename") != "") {
-                    basename = m.group("basename");
-                }
+                // Get the information from the file name
+                if (m.group("basename") != null && !m.group("basename").equals("")) {
 
-                // Does it exist in the baseNames list already? If not, increase
-                // the series number
-                if (basenames.indexOf(basename) == -1) {
+                    currentBasename = m.group("basename");
 
-                    // Increase the series index
-                    currentNewSeriesIndex += 1;
-
-                    // Add the new basename to the list
-                    basenames.add(basename);
+                    // Compare it with the known basename
+                    if (!basename.equals("") && !currentBasename.equals(basename)) {
+                        // Could not parse and process the file name
+                        isValid = false;
+                        errorMessage = "The file " + filesAssociatedToNDFile.get(i) +
+                                " associated to the ND file does not have the " +
+                                "expected basename (" + basename + ")!";
+                        return isValid;
+                    }
                 }
 
                 // Get the information from the file name
-                if (m.group("series") != null && m.group("series") != "") {
+                if (m.group("series") != null && !m.group("series").equals("")) {
 
                     // The series number in the file name is 1-based
                     seriesNum = Integer.parseInt(m.group("series")) - 1;
 
                 } else {
-                    // Not defined
-                    seriesNum = -1;
+                    // No series number: fall back to 0
+                    seriesNum = 0;
+                }
+
+                // Retrieve the channel number from the file name
+                if (m.group("channel") != null && !m.group("channel").equals("")) {
+                    // The channel in the file name is 1-based
+                    channelNumberFromFileName = Integer.parseInt(m.group("channel")) - 1;
+                } else {
+                    // No channel number; fall back to 0
+                    channelNumberFromFileName = -1;
+                }
+
+                // Retrieve the channel name from the file name
+                if (m.group("channelName") != null && !m.group("channelName").equals("")) {
+                    // The channel in the file name is 1-based
+                    channelNameFromFileName = m.group("channelName");
+                } else {
+                    // Not channel name; fall back to ""
+                    channelNameFromFileName = "";
                 }
 
                 // Get the timepoint
-                if (m.group("timepoint") != null && m.group("timepoint") != "") {
+                if (m.group("timepoint") != null && !m.group("timepoint").equals("")) {
                     // The timepoint in the file name is 1-based
                     timepoint = Integer.parseInt(m.group("timepoint")) - 1;
                 } else {
-
-                    // Not defined
-                    timepoint = -1;
+                    // Not timepoint: fall back to 0
+                    timepoint = 0;
                 }
-
-                // If both series and timepoint are not defined, we force a new series
-                if (seriesNum == -1 && timepoint == -1) {
-                    seriesNum = currentNewSeriesIndex;
-                }
-
-                // Make sure that the geometry of the files in the series match,
-                // otherwise force a new series
-                if (! fileGeometryInSeriesMatch(seriesMap, fileAttributes, seriesNum, currAttr)) {
-                    currentNewSeriesIndex += 1;
-                    seriesNum +=1;
-                }
-
-                // Store the file name in current series
-                if (seriesMap.containsKey(seriesNum)) {
-                    seriesMap.get(seriesNum).add(listOfFiles.get(i));
-                } else {
-                    ArrayList<String> list = new ArrayList<String>();
-                    list.add(listOfFiles.get(i));
-                    seriesMap.put(seriesNum, list);
-                }
-
             } else {
 
                 // Could not parse and process the file name
                 isValid = false;
-                errorMessage = "Could not parse file name for file " + listOfFiles.get(i);
+                errorMessage = "Could not parse file name for file " + filesAssociatedToNDFile.get(i);
                 return isValid;
 
             }
 
+            // Open the file
+            BioFormatsWrapper reader = new BioFormatsWrapper(filesAssociatedToNDFile.get(i), false);
+
+            // Parse the file
+            reader.parse();
+
+            // Close the file
+            reader.close();
+
+            // Get the attributes
+            Map<String, HashMap<String, String>> currAttr = reader.getAttributes();
+
+            // Get the X, Y, Z size from the file
+            int seriesSizeX = Integer.parseInt(currAttr.get("series_0").get("sizeX"));
+            int seriesSizeY = Integer.parseInt(currAttr.get("series_0").get("sizeY"));
+            int seriesSizeZ = Integer.parseInt(currAttr.get("series_0").get("sizeZ"));
+            int seriesSizeT = Integer.parseInt(currAttr.get("series_0").get("sizeT"));
+
+            // The C dimension in the individual file MUST be 1.
+            int seriesSizeC = Integer.parseInt(currAttr.get("series_0").get("sizeC"));
+
+            if (seriesSizeC != 1) {
+                isValid = false;
+                errorMessage = "Only one channel expected in a file associated to an ND file!";
+                return isValid;
+            }
+
+            // Dimensions
+            Integer[] currentSeriesDimensions;
+            if (seriesDimensions.containsKey(seriesNum)) {
+                currentSeriesDimensions = seriesDimensions.get(seriesNum);
+                if (currentSeriesDimensions[0] != seriesSizeX ||
+                        currentSeriesDimensions[1] != seriesSizeY ||
+                        currentSeriesDimensions[2] != seriesSizeZ ||
+                        currentSeriesDimensions[3] != seriesSizeT ||
+                        (!lastFileExtensionSeen.equals("") && !currentFileExtension.equals(lastFileExtensionSeen)) ) {
+
+                    // Start a new series
+                    seriesNum++;
+
+                }
+            } else {
+                currentSeriesDimensions = new Integer[] {seriesSizeX, seriesSizeY, seriesSizeZ, seriesSizeT};
+                seriesDimensions.put(seriesNum, currentSeriesDimensions);
+            }
+
+            // Update the lastFileExtensionSeen property
+            lastFileExtensionSeen = currentFileExtension;
+
+            // Are we allowed to use this series number?
+            if (i == 0) {
+                // First file in the series
+                if (seriesNum < minAllowedSeriesNum) {
+                    seriesNum = minAllowedSeriesNum;
+                }
+            }
+
+            // Get channel names from series map
+            Map<String, Integer> currentSeriesChannels;
+            if (seriesChannels.containsKey(seriesNum)) {
+                currentSeriesChannels = seriesChannels.get(seriesNum);
+            } else {
+                currentSeriesChannels = new HashMap<String, Integer>();
+            }
+
+            // Retrieve the channel name from the file metadata (there is always
+            // only one channel in a single file)
+            String channelNameFromMetadata = currAttr.get("series_0").get("channelName0");
+
+            // Get consistent channel name and number of the series
+            int channelNumber = -1;
+            String channelName = "";
+
+            // Do we have a channel number?
+            if (channelNumberFromFileName != -1) {
+                channelNumber = channelNumberFromFileName;
+            }
+
+            // Do we have a channel name?
+            if (!channelNameFromMetadata.equals("")) {
+                channelName = channelNameFromMetadata;
+            } else if (!channelNameFromFileName.equals("")) {
+                channelName = channelNameFromFileName;
+            } else {
+                channelName = "";
+            }
+
+            if (channelName.equals("")) {
+                if (channelNumber == -1) {
+                    channelNumber = 0;
+                    channelName = "UNKNOWN";
+                }
+            }
+
+            // Does the channel name already exist in the map?
+            if (! currentSeriesChannels.containsKey(channelName)) {
+                if (channelNumber == -1) {
+                    // Find the max channel number in the map and add 1
+                    if (currentSeriesChannels.size() == 0) {
+                        channelNumber = 0;
+                    } else {
+                        int maxChannelNumber = -1;
+                        for (String key: currentSeriesChannels.keySet()) {
+                            if (currentSeriesChannels.get(key) > maxChannelNumber) {
+                                maxChannelNumber = currentSeriesChannels.get(key) + 1;
+                            }
+                            channelNumber = maxChannelNumber;
+                        }
+                    }
+                }
+                currentSeriesChannels.put(channelName, channelNumber);
+            }
+            seriesChannels.put(seriesNum, currentSeriesChannels);
+
+            // Does the timepoint already exist in the map?
+            if (seriesTimepoints.containsKey(seriesNum)) {
+                ArrayList<Integer> timepoints = seriesTimepoints.get(seriesNum);
+                if (seriesSizeT == 1) {
+                    if (! timepoints.contains(timepoint)) {
+                        timepoints.add(timepoint);
+                    }
+                } else {
+                    for (int t = 0; t <= timepoint; t++) {
+                        if (! timepoints.contains(t)) {
+                            timepoints.add(t);
+                        }
+                    }
+                }
+            } else {
+                ArrayList<Integer> timepoints = new ArrayList<Integer>();
+                if (seriesSizeT == 1) {
+                    timepoints.add(timepoint);
+                } else {
+                    for (int t = 0; t <= timepoint; t++) {
+                        timepoints.add(t);
+                    }
+                }
+                seriesTimepoints.put(seriesNum, timepoints);
+            }
+
+            // Store the series basename
+            seriesBasename.put(seriesNum, currentBasename);
+
+            // Store the file name in current series
+            if (seriesFileList.containsKey(seriesNum)) {
+                seriesFileList.get(seriesNum).add(filesAssociatedToNDFile.get(i).getAbsolutePath());
+            } else {
+                ArrayList<String> list = new ArrayList<String>();
+                list.add(filesAssociatedToNDFile.get(i).getAbsolutePath());
+                seriesFileList.put(seriesNum, list);
+            }
+
+            // Add the filename
+            currAttr.get("series_0").put("filenames", filesAssociatedToNDFile.get(i).getAbsolutePath());
+
+            // Store the updated attributes
+            fileAttributes.put(filesAssociatedToNDFile.get(i).getAbsolutePath(), currAttr);
         }
 
         // Get all series numbers
-        Object[] seriesNumbers = seriesMap.keySet().toArray();
+        Object[] seriesNumbers = seriesFileList.keySet().toArray();
         Arrays.sort(seriesNumbers);
 
         // Now combine the attributes
@@ -570,7 +684,7 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             int s = (int) seriesNumbers[i];
 
             // Get all files that belong to current series
-            ArrayList<String> fileList = seriesMap.get(s);
+            ArrayList<String> fileList = seriesFileList.get(s);
 
             // Get the attributes of the first file
             Map<String, HashMap<String, String>> currentAttr =
@@ -579,11 +693,16 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
             // Set the series number
             currentAttr = setSeriesNumber(currentAttr, s);
 
-            // Merge attributes
-            for (int f = 1; f < fileList.size(); f++) {
-                currentAttr = mergeSeriesAttr(currentAttr,
-                        setSeriesNumber(fileAttributes.get(fileList.get(f)), s));
-            }
+            // Update the series metadata
+            currentAttr.put("series_" + s,
+                    updateSeriesMetadata(
+                            currentAttr.get("series_" + s),
+                            seriesChannels.get(s),
+                            seriesTimepoints.get(s),
+                            seriesFileList.get(s),
+                            seriesBasename.get(s)
+                            )
+                    );
 
             combinedAttr.putAll(currentAttr);
 
@@ -595,59 +714,51 @@ public class VisitronNDReader extends AbstractCompositeMicroscopyReader {
         return true;
     }
 
-    /**
-     * Check that the geometry of the file to be added to the series matches the
-     * geometry of the files already assigned to it.
-     * @param seriesMap Map of series numbers to list of file names.
-     * @param fileAttributes Map of file attributes.
-     * @param seriesNum Number of the series
-     * @param currAttr Attributes of the file to compare.
-     * @return true if the geometry fits, false otherwise.
-     */
-    private Boolean fileGeometryInSeriesMatch(Map<Integer, ArrayList<String>> seriesMap,
-            Map<String, Map<String, HashMap<String, String>>> fileAttributes,
-            int seriesNum, Map<String, HashMap<String, String>> currAttr) {
+    private HashMap<String, String> updateSeriesMetadata(HashMap<String, String> seriesAttr,
+            Map<String, Integer> channels, List<Integer> timepoints, List<String> fileList, String basename) {
 
-        // Get current series values
-        HashMap<String, String> currentSeries = currAttr.get("series_0");
+        // New attributes
+        HashMap<String, String> newSeriesAttr = new HashMap<String, String>();
 
-        // Compare the geometry from currAttr with all stored geometries
-        if (seriesMap.containsKey(seriesNum)) {
-            ArrayList<String> processedFiles = seriesMap.get(seriesNum);
-            for (String processedFile : processedFiles) {
-                // Get the attributes
-                Map<String, HashMap<String, String>> processedFileAttr = fileAttributes.get(processedFile);
+        // Copy all properties with the exception of channels, time points and file-related entries
+        for (String key : seriesAttr.keySet()) {
+            if (key.startsWith("exWavelength") ||
+                    key.startsWith("channelName") ||
+                    key.startsWith("channelColor") ||
+                    key.startsWith("exWaveLength") ||
+                    key.startsWith("emWaveLength") ||
+                    key.equals("filenames") ||
+                    key.equals("sizeC") ||
+                    key.equals("sizeT")) {
 
-                // Now compare the geometry
-                HashMap<String, String> processedSeries = processedFileAttr.get("series_0");
+                // Skip
 
-                return (processedSeries.get("sizeX").equals(currentSeries.get("sizeX")) &&
-                        processedSeries.get("sizeY").equals(currentSeries.get("sizeY")) &&
-                        processedSeries.get("sizeZ").equals(currentSeries.get("sizeZ")));
-            }
-        } else {
-            // Since it is the first image of this series, it is compatible by definition.
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Count the number of channels in the metadata.
-     *
-     * Please note that some channels might be missing. One series could have channel 0 and 2 but no 1.
-     * @param metadata Metadata map.
-     * @return number of channels in the series.
-     */
-    private int countChannelsInMetadata(Map<String, String> metadata) {
-        int numChannels = 0;
-        for (String key : metadata.keySet()) {
-            if (key.startsWith("channelName")) {
-                numChannels += 1;
+            } else {
+                newSeriesAttr.put(key, seriesAttr.get(key));
             }
         }
-        return numChannels;
-    }
 
+        // Now add the channel names and colors and the channel number
+        for (String channelName : channels.keySet()) {
+            int channelNumber = channels.get(channelName);
+            double[] color = BioFormatsWrapper.getDefaultChannelColor(channelNumber);
+
+            newSeriesAttr.put("channelName" + channelNumber, channelName);
+            newSeriesAttr.put("channelColor" + channelNumber, implode(color));
+            newSeriesAttr.put("exWaveLength" + channelNumber, "NaN");
+            newSeriesAttr.put("emWaveLength" + channelNumber, "NaN");
+        }
+        newSeriesAttr.put("sizeC", "" + channels.size());
+
+        // Add the number of timepoints
+        newSeriesAttr.put("sizeT", "" + timepoints.size());
+
+        // Add the file list
+        newSeriesAttr.put("filenames", implode(fileList));
+
+        // Add the basename
+        newSeriesAttr.put("basename", basename);
+
+        return newSeriesAttr;
+    }
 }

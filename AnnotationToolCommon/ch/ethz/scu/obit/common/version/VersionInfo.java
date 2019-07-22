@@ -9,7 +9,7 @@ public class VersionInfo {
     /**
      * Program version
      */
-    public static final String version = "1.1.1";
+    public static final String version = "2.0.0";
 
     /**
      * Version status: "alpha", "beta", or "" for a stable release
@@ -21,7 +21,7 @@ public class VersionInfo {
      */
     public static final String copyright = "Copyright " +
             Character.toString('\u00A9') +
-            " 2012 - 2018, Single Cell Unit, " +
+            " 2012 - 2019, Single Cell Unit, " +
             "D-BSSE, ETH Zurich (Basel)";
 
     /**
@@ -38,6 +38,11 @@ public class VersionInfo {
      *  User settings (XML) file version
      */
     public static final int userSettingsVersion = 1;
+
+    /**
+     *  oBITXML (XML) metadata settings (.oix) file
+     */
+    public static final int oBITXMLVersion = 2;
 
     /**
      * Convert the version from string to integer

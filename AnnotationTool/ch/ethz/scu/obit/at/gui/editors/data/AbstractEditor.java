@@ -3,24 +3,21 @@ package ch.ethz.scu.obit.at.gui.editors.data;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
 
 import javax.swing.JPanel;
-import javax.swing.tree.TreeModel;
+import javax.swing.JTextArea;
 
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
+import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
-import ch.ethz.scu.obit.at.gui.viewers.openbis.model.AbstractOpenBISNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
+import ch.ethz.scu.obit.processors.data.model.Tag;
 
 /**
  * Abstract editor for processors
@@ -30,25 +27,22 @@ abstract public class AbstractEditor extends Observable
 implements ActionListener, Observer {
 
     protected JPanel panel;
+    protected JTextArea expTags;
 
     // Reference to the global settings manager
     protected GlobalSettingsManager globalSettingsManager;
 
     /**
-     * References to the data viewer and model
+     * References to the data and openBIS viewers
      */
     protected AbstractViewer dataViewer;
-    protected TreeModel dataModel;
-
-    /**
-     * References to the openBIS viewer and model
-     */
     protected OpenBISViewer openBISViewer;
-    protected TreeModel openBISModel;
+
+    // List of experiments from the Data Model
+    protected List<ExperimentNode> experiments = null;
 
     // List of openBISProjects
-    protected List<OpenBISProjectNode> openBISProjects =
-            new ArrayList<OpenBISProjectNode>();
+    protected List<OpenBISProjectNode> openBISProjects = null;
 
     /**
      * Constructor
@@ -68,6 +62,12 @@ implements ActionListener, Observer {
         this.globalSettingsManager = globalSettingsManager;
         this.dataViewer = dataViewer;
         this.openBISViewer = openBISViewer;
+
+        // Initialize node lists
+        experiments = new ArrayList<ExperimentNode>();
+
+        // List of openBISProjects
+        openBISProjects = new ArrayList<OpenBISProjectNode>();
 
         // Set the preferred and minimum size
         panel.setMinimumSize(new Dimension(400, 500));
@@ -92,6 +92,17 @@ implements ActionListener, Observer {
      * @param p Action parameters for the Observer.
      */
     abstract protected void resetMetadata(ObserverActionParameters p);
+
+    /**
+     * Update the Experiment tags.
+     */
+    abstract protected void updateExpTags(List<Tag> tagList);
+
+    /**
+     * Return the identifier of the project currently selected in the editor.
+     * @return
+     */
+    public abstract String getCurrentProjectIdentifier();
 
     /**
      * Observer update method
@@ -144,49 +155,6 @@ implements ActionListener, Observer {
             break;
         default:
             break;
-        }
-    }
-
-    /**
-     * Collects and stores openBIS projects for mapping
-     */
-    protected void storeOpenBISProjects() {
-
-        // Store the openBIS model
-        openBISModel = openBISViewer.getDataModel();
-
-        // We extract all projects from the openBIS model and create a list
-        // with which we will then create JComboBox associated to each project
-        // from the data model
-        openBISProjects = new ArrayList<OpenBISProjectNode>();
-
-        AbstractOpenBISNode openBISRoot =
-                (AbstractOpenBISNode) openBISModel.getRoot();
-
-        // Iterate over the space nodes (there should be at least one)
-        for (int i = 0; i < openBISRoot.getChildCount(); i++) {
-
-            // Get the Space
-            AbstractOpenBISNode openBISSpaceNode =
-                    (AbstractOpenBISNode) openBISRoot.getChildAt(i);
-
-            // Go over the child Projects
-            int n = openBISSpaceNode.getChildCount();
-
-            for (int j = 0; j < n; j++) {
-
-                // Get the OpenBISProjectNode
-                OpenBISProjectNode openBISProjectNode =
-                        (OpenBISProjectNode) openBISSpaceNode.getChildAt(j);
-
-                // Add it to the list: we wrap it into a wrapper
-                // class to override the toString() method; we do
-                // this because in constrast to what happens in the
-                // openBIS viewer, here we need the (openBIS) identifier
-                //  instead of the code.
-                openBISProjects.add(openBISProjectNode);
-
-            }
         }
     }
 
@@ -264,72 +232,28 @@ implements ActionListener, Observer {
     }
 
     /**
-     * Clean a comma-separated list of tags and remove duplicates.
+     * Updates the tags in the UI and updates the Experiments.
      * @param tagList List of tags to be processed.
      * @return comma-separated list of tags.
      */
-    protected String cleanTagList(String tagList) {
-
-        // Split the string into items
-        List<String> items = Arrays.asList(tagList.split("\\s*,\\s*"));
-
-        // Use a set to test for duplicates
-        Set<String> s = new LinkedHashSet<String>();
-
-        // Loop over list of items
-        for (String item : items) {
-            if (!s.contains(item)) {
-                s.add(item);
-            }
-        }
-
+    public void appendTags(List<Tag> tagList)
+    {
         // Build the string with a buffer
         StringBuffer buff = new StringBuffer();
 
-        for (Iterator<String> it = s.iterator(); it.hasNext();) {
-            buff.append(it.next());
-            buff.append(" ");
+        for (Tag tag : tagList) {
+            buff.append(tag.toString());
+            buff.append("; ");
         }
 
-        // Return the string
-        return buff.toString().trim().replaceAll(" ", ", ");
-    }
+        // Build the string
+        String strTags = buff.toString().trim();
+        strTags = strTags.substring(0, strTags.length() - 1);
 
-    /**
-     * Return the default target openBIS project as set in the User settings
-     * or the first returned project from openBIS if none is set.
-     * @return openBISProject node.
-     * @throws Exception if the openBIS server nodes have not been retrieved yet.
-     */
-    public OpenBISProjectNode getDefaultProjectOrFirst() throws Exception {
+        // Set current text
+        expTags.setText(strTags);
 
-        // This method must be called after the openBIS server nodes
-        // have been retrieved.
-        if (openBISProjects.size() == 0) {
-            // No projects retrieved/found!
-            return null;
-        }
-
-        // Retrieve the default target project from the User settings or
-        // revert to the first project in the list if none is set.
-        OpenBISProjectNode defaultProjectNode = null;
-        String defaultProject = globalSettingsManager.getDefaultProject();
-        if (defaultProject.equals("")) {
-            defaultProjectNode = openBISProjects.get(0);
-        } else {
-            for (OpenBISProjectNode current : openBISProjects) {
-                if (current.getIdentifier().equals(defaultProject)) {
-                    defaultProjectNode = current;
-                    break;
-                }
-            }
-            if (defaultProjectNode == null) {
-                // The stored default project does not exist!
-                // Fallback to the first one in the list.
-                defaultProjectNode = openBISProjects.get(0);
-            }
-        }
-
-        return defaultProjectNode;
+        // Update the Experiment
+        updateExpTags(tagList);
     }
 }

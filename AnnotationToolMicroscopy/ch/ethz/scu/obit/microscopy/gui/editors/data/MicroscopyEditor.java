@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -27,7 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -36,7 +33,6 @@ import ch.ethz.scu.obit.at.gui.viewers.ObserverActionParameters;
 import ch.ethz.scu.obit.at.gui.viewers.data.AbstractViewer;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
-import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.OpenBISViewer;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
@@ -46,6 +42,9 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experimen
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
+import ch.ethz.scu.obit.processors.data.model.Tag;
+import ch.ethz.scu.obit.processors.data.model.TagListImportTransferHandler;
+import ch.ethz.sis.openbis.generic.asapi.v3.dto.project.Project;
 
 /**
  * Metadata editor panel.
@@ -53,10 +52,6 @@ import ch.ethz.scu.obit.processors.data.model.DatasetDescriptor;
  *
  */
 public final class MicroscopyEditor extends AbstractEditor {
-
-    // List of experiments from the Data Model
-    private List<ExperimentNode> experiments =
-            new ArrayList<ExperimentNode>();
 
     // List of metadata mappers
     private List<MicroscopyMetadataMapper> metadataMappersList =
@@ -80,7 +75,6 @@ public final class MicroscopyEditor extends AbstractEditor {
     private JComboBox<String> comboProjectList;
     private JTextArea expDescription;
     private JTextArea fileDescription;
-    private JTextArea expTags;
     private JScrollPane areaFileScrollPane;
     private JScrollPane areaExpScrollPane;
 
@@ -145,6 +139,8 @@ public final class MicroscopyEditor extends AbstractEditor {
             // Set the openBIS experiment identifier
             Map<String, String> expOpenBISAttributes =
                     new Hashtable<String, String>();
+            expOpenBISAttributes.put("openBISCollectionIdentifier",
+                    currentMetadata.getOpenBISCollectionIdentifier());
             expOpenBISAttributes.put("openBISIdentifier",
                     currentMetadata.getOpenBISExerimentIdentifier());
             expOpenBISAttributes.put("openBISSpaceIdentifier",
@@ -156,8 +152,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                     new Hashtable<String, String>();
             expUserAttributes.put("description",
                     currentMetadata.getExperiment().description);
-            expUserAttributes.put("tags", expDescr.tags);
-            expUserAttributes.put("version", expDescr.version);
+            expUserAttributes.put("tags", expDescr.getTagIdentifierList());
             expDescr.addUserAttributes(expUserAttributes);
 
             // Now get the MicroscopyFile children of the Experiment
@@ -182,6 +177,9 @@ public final class MicroscopyEditor extends AbstractEditor {
                         "openBISSpaceIdentifier",
                         currentMetadata.getOpenBISSpaceIdentifier());
                 microscopyFileOpenBISAttributes.put(
+                        "openBISCollectionIdentifier",
+                        currentMetadata.getOpenBISCollectionIdentifier());
+                microscopyFileOpenBISAttributes.put(
                         "openBISExperimentIdentifier",
                         currentMetadata.getOpenBISExerimentIdentifier());
                 microscopyFileDescriptor.addOpenBISAttributes(
@@ -201,6 +199,15 @@ public final class MicroscopyEditor extends AbstractEditor {
         return true;
     }
 
+    @Override
+    public String getCurrentProjectIdentifier() {
+
+        MicroscopyMetadataMapper mapper = metadataMappersList.get(currentExperimentIndex);
+        Project project = (Project) mapper.getOpenBISProjectNode().getUserObject();
+        String identifier = project.getIdentifier().toString();
+        return identifier;
+    }
+
     /**
      * Map the data and openBIS models
      * @throws Exception it the metadata could not be initialized.
@@ -214,8 +221,8 @@ public final class MicroscopyEditor extends AbstractEditor {
         }
 
         // Store the and openBIS nodes
-        storeOpenBISProjects();
-        storeExperiments();
+        openBISProjects = openBISViewer.getOpenBISProjectNodes();
+        experiments = dataViewer.getExperimentNodes();
 
         // Check that there is at least one entry in each of the
         // arrays
@@ -225,7 +232,7 @@ public final class MicroscopyEditor extends AbstractEditor {
 
         // Retrieve the default target project from the User settings or
         // revert to the first project in the list if none is set.
-        OpenBISProjectNode defaultProjectNode = getDefaultProjectOrFirst();
+        OpenBISProjectNode defaultProjectNode = openBISViewer.getDefaultProjectOrFirst();
         if (defaultProjectNode == null) {
             JOptionPane optionPane = new JOptionPane(
                     "No projects could be found in openBIS!\n\n" +
@@ -411,67 +418,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         });
 
         // Append a custom transfer handler
-        expTags.setTransferHandler(new TransferHandler() {
-
-            private static final long serialVersionUID = 1L;
-
-            // Check if the transfer is valid
-            @Override
-            public boolean canImport(TransferHandler.TransferSupport info) {
-
-                // We only import Strings
-                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    return false;
-                }
-
-                // Can be imported
-                return true;
-            }
-
-            // Import and format the data
-            @Override
-            public boolean importData(TransferHandler.TransferSupport info) {
-
-                // Only if we are dropping something onto the field
-                if (!info.isDrop()) {
-                    return false;
-                }
-
-                // And only if it is a string flavor
-                if (!info.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                    return false;
-                }
-
-                // Get and format the strings
-                Transferable t = info.getTransferable();
-                String data;
-                try {
-                    data = (String)t.getTransferData(DataFlavor.stringFlavor);
-                    data = data.replaceAll("(\r\n|\n)", ", ");
-                }
-                catch (Exception e) {
-                    return false;
-                }
-
-                // Create the complete list
-                String currentText = expTags.getText();
-                if (! currentText.equals("")) {
-                    data = currentText + ", " + data;
-                }
-
-                // Clean the tag list
-                data = cleanTagList(data);
-
-                // Set the tag list
-                expTags.setText(data);
-
-                // Update the Experiment
-                updateExpTags();
-
-                // Return success
-                return true;
-            }
-        });
+        expTags.setTransferHandler(new TagListImportTransferHandler(this));
         panel.add(expTags, constraints);
 
         // Create a label for the explanation
@@ -692,16 +639,32 @@ public final class MicroscopyEditor extends AbstractEditor {
 
                         // Apply to all
                         for (int i = 0; i < nExperiments; i++) {
-                            metadataMappersList.get(i).openBISProjectNode = selProjNode;
+
+                            // Get the metadata mapper
+                            MicroscopyMetadataMapper mapper = metadataMappersList.get(i);
+
+                            // Set the project
+                            mapper.openBISProjectNode = selProjNode;
+
+                            // Reset tags
+                            mapper.getExperiment().tags = new ArrayList<Tag>();
                         }
 
                     } else {
 
+                        // Get the metadata mapper
+                        MicroscopyMetadataMapper mapper = metadataMappersList.get(currentExperimentIndex);
+
                         // Apply to current experiment only
-                        metadataMappersList.get(
-                                currentExperimentIndex).openBISProjectNode =
-                                selProjNode;
+                        mapper.openBISProjectNode = selProjNode;
+
+                        // Reset tags
+                        mapper.getExperiment().tags = new ArrayList<Tag>();
+
                     }
+
+                    // Clear the tag field
+                    expTags.setText("");
                 }
             }
         });
@@ -791,7 +754,7 @@ public final class MicroscopyEditor extends AbstractEditor {
         expDescription.setText(metadata.getExperiment().description);
 
         // Update the tags
-        expTags.setText(metadata.getExperiment().tags);
+        expTags.setText(metadata.getExperiment().getTagList());
 
         // Remove listeners on the comboProjectList element to prevent firing
         // while we set the value.
@@ -815,34 +778,6 @@ public final class MicroscopyEditor extends AbstractEditor {
             comboProjectList.addActionListener(l);
         }
 
-    }
-
-    /**
-     * Collects and stores data folders for mapping
-     */
-    private void storeExperiments() {
-
-        // Reset the Experiment list
-        experiments = new ArrayList<ExperimentNode>();
-
-        // Store the data model
-        dataModel = dataViewer.getDataModel();
-
-        // We extract all experiments from the data model
-        RootNode dataRoot = (RootNode) dataModel.getRoot();
-
-        // First level are the folder nodes
-        int dataNChildren = dataRoot.getChildCount();
-
-        for (int i = 0; i < dataNChildren; i++) {
-
-            // Get the FolderNode
-            ExperimentNode experimentNode =
-                    (ExperimentNode) dataRoot.getChildAt(i);
-
-            // Store the reference to the ExperimentNode
-            experiments.add(experimentNode);
-        }
     }
 
     /**
@@ -955,7 +890,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                             currentExperimentIndex);
 
                     // Store the experiment description
-                    metadata.getExperiment().tags = "";
+                    metadata.getExperiment().tags = new ArrayList<Tag>();
                 }
             });
             popup.add(clearMenuItem);
@@ -968,13 +903,11 @@ public final class MicroscopyEditor extends AbstractEditor {
     /**
      * We update the experiment tags.
      */
-    protected void updateExpTags() {
+    @Override
+    protected void updateExpTags(List<Tag> tagList) {
 
         // How many experiments do we have?
         int nExperiments = metadataMappersList.size();
-
-        // Selected tags
-        String selectedTags = expTags.getText();
 
         // Default to set the tags for current experiment only.
         int n = 0;
@@ -1000,7 +933,7 @@ public final class MicroscopyEditor extends AbstractEditor {
             for (int i = 0; i < nExperiments; i++) {
                 ((Experiment)
                         metadataMappersList.get(i).experimentNode.getUserObject()).tags =
-                        selectedTags;
+                        tagList;
             }
 
         } else {
@@ -1012,7 +945,7 @@ public final class MicroscopyEditor extends AbstractEditor {
                     currentExperimentIndex);
 
             // Store the experiment description
-            metadata.getExperiment().tags = selectedTags;
+            metadata.getExperiment().tags = tagList;
         }
 
     }

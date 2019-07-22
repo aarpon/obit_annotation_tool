@@ -212,9 +212,6 @@ public final class MicroscopyViewer extends AbstractViewer implements TreeWillEx
         // We will append the experiment nodes directly to the root node
         createNodes(rootNode, microscopyProcessor.folderDescriptor);
 
-        // Inform the user
-        outputPane.log("Successfully processed folder \"" +
-                microscopyProcessor.getFolder().getName() + "\".");
         return true;
     }
 

@@ -25,6 +25,7 @@ import org.w3c.dom.Element;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.AbstractNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.RootNode;
+import ch.ethz.scu.obit.common.version.VersionInfo;
 import ch.ethz.scu.obit.processors.data.model.AbstractDescriptor;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
@@ -36,177 +37,177 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  */
 public class DataViewerTreeToXML {
 
-	protected Map<String, Document> documents = 
-			new Hashtable<String, Document>();
-	
-	/**
-	 * Constructor
-	 * @param tree Custom JTree
-	 * @param userName user name.
-	 * @param machineName machine name.
-	 */
-	public DataViewerTreeToXML(DataViewerTree tree, 
-			String userName, String machineName) {
+    protected Map<String, Document> documents =
+            new Hashtable<String, Document>();
 
-		DocumentBuilder builder;
-		Document document = null;
+    /**
+     * Constructor
+     * @param tree Custom JTree
+     * @param userName user name.
+     * @param machineName machine name.
+     */
+    public DataViewerTreeToXML(DataViewerTree tree,
+            String userName, String machineName) {
 
-		// Get the root node of the JTree
-		RootNode rootNode = 
-				(RootNode) tree.getModel().getRoot();
+        DocumentBuilder builder;
+        Document document = null;
 
-		// We create and save an XML file for each Experiment in the
-		// data model. Experiments are at children of the Tree root,
-		// which is the UserFolder. The name and path of each XML file
-		// is obtained from the corresponding ExperimentDescriptor. 
+        // Get the root node of the JTree
+        RootNode rootNode =
+                (RootNode) tree.getModel().getRoot();
 
-		// Get all children of the rootNode - these are the Experiments
-		int nTopLevelChildren = rootNode.getChildCount();
+        // We create and save an XML file for each Experiment in the
+        // data model. Experiments are at children of the Tree root,
+        // which is the UserFolder. The name and path of each XML file
+        // is obtained from the corresponding ExperimentDescriptor.
 
-		for (int i = 0; i < nTopLevelChildren; i++) {
+        // Get all children of the rootNode - these are the Experiments
+        int nTopLevelChildren = rootNode.getChildCount();
 
-			// Get current Experiment
-			ExperimentNode expNode = 
-					(ExperimentNode) rootNode.getChildAt(i);
+        for (int i = 0; i < nTopLevelChildren; i++) {
 
-			ExperimentDescriptor expDescr = 
-					(ExperimentDescriptor) expNode.getUserObject();
+            // Get current Experiment
+            ExperimentNode expNode =
+                    (ExperimentNode) rootNode.getChildAt(i);
 
-			// Construct the properties file name (which we also use
-			// as key for the map)
-			String key = expDescr.getPropertiesFileNameWithRelPath();
+            ExperimentDescriptor expDescr =
+                    (ExperimentDescriptor) expNode.getUserObject();
 
-			// Now build the XML document for current experiment
-			try {
-				builder = DocumentBuilderFactory.newInstance()
-						.newDocumentBuilder();
-				document = builder.newDocument();
+            // Construct the properties file name (which we also use
+            // as key for the map)
+            String key = expDescr.getPropertiesFileNameWithRelPath();
 
-				// Create root element
-				Element root = document.createElement("obitXML");
-				root.setAttribute("version", "1");
-				root.setAttribute("userName", userName);
-				root.setAttribute("machineName", machineName);
+            // Now build the XML document for current experiment
+            try {
+                builder = DocumentBuilderFactory.newInstance()
+                        .newDocumentBuilder();
+                document = builder.newDocument();
 
-				// Create and add the experiment
-				Element element = createElement(document, expNode); 
-				root.appendChild(element);
+                // Create root element
+                Element root = document.createElement("obitXML");
+                root.setAttribute("version", "" + VersionInfo.oBITXMLVersion);
+                root.setAttribute("userName", userName);
+                root.setAttribute("machineName", machineName);
 
-				// Add all its children (recursively)
-				addNodeChildren(document, element, expNode);
+                // Create and add the experiment
+                Element element = createElement(document, expNode);
+                root.appendChild(element);
 
-				// Add the whole tree to the document (by adding the root node)
-				document.appendChild(root);
+                // Add all its children (recursively)
+                addNodeChildren(document, element, expNode);
 
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			}
+                // Add the whole tree to the document (by adding the root node)
+                document.appendChild(root);
 
-			// Store the document
-			documents.put(key, document);
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            }
 
-		}
+            // Store the document
+            documents.put(key, document);
 
-	}
+        }
 
-	/**
-	 * Save the XML document to file
-	 * @param outputDirectory Directory where XML property files are saved
-	 * @return true if saving was successful, false otherwise
-	 */
-	public boolean saveToFile(String outputDirectory) {
+    }
 
-		for (String key: documents.keySet()) {
+    /**
+     * Save the XML document to file
+     * @param outputDirectory Directory where XML property files are saved
+     * @return true if saving was successful, false otherwise
+     */
+    public boolean saveToFile(String outputDirectory) {
 
-			// Build the filename (with full path)
-			String filename = outputDirectory + File.separator + key;
+        for (String key: documents.keySet()) {
 
-			try {
-				Document document = documents.get(key);
-				Transformer t = 
-						TransformerFactory.newInstance().newTransformer();
-				OutputStream outputStream = new FileOutputStream(filename);
-				t.transform(new DOMSource(document), 
-						new StreamResult(outputStream));
-				outputStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			} catch (TransformerException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
+            // Build the filename (with full path)
+            String filename = outputDirectory + File.separator + key;
 
-		return true;
-	}
+            try {
+                Document document = documents.get(key);
+                Transformer t =
+                        TransformerFactory.newInstance().newTransformer();
+                OutputStream outputStream = new FileOutputStream(filename);
+                t.transform(new DOMSource(document),
+                        new StreamResult(outputStream));
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            } catch (TransformerException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
-	/**
-	 * Add a all children of JTree node as nodes to the XML document 
-	 * @param document  XML document to which the node has to be added.
-	 * @param parentNode The XML parent node to which to append
-	 * @param treeNode The JTree node to append
-	 */
-	protected void addNodeChildren(Document document, Element parentNode,
-			AbstractNode treeNode) {
-		// DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
-		// This causes a warning in Java > 5.
-		@SuppressWarnings("unchecked")
-		Enumeration<TreeNode> children = treeNode.children();
-		while (children.hasMoreElements()) {
-			final AbstractNode node = (AbstractNode) children.nextElement();
-			final Element element = createElement(document, node);
-			parentNode.appendChild(element);
-			addNodeChildren(document, element, node);
-		}
-	}
+        return true;
+    }
 
-	/**
-	 * Create an XML node from a JTree node
-	 * @param document XML document to which the node has to be added.
-	 * @param node JTree node from which an XML node is to be created  
-	 * @return an XML node
-	 */
-	protected Element createElement(Document document, AbstractNode node) {
-		final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
-		String tagName = node.getType();
-		String tagAttr = data.toString();
-		Element element;
-		try {
+    /**
+     * Add a all children of JTree node as nodes to the XML document
+     * @param document  XML document to which the node has to be added.
+     * @param parentNode The XML parent node to which to append
+     * @param treeNode The JTree node to append
+     */
+    protected void addNodeChildren(Document document, Element parentNode,
+            AbstractNode treeNode) {
+        // DefaultMutableTreeNode (since Java 1.2) returns a raw enumeration.
+        // This causes a warning in Java > 5.
+        @SuppressWarnings("unchecked")
+        Enumeration<TreeNode> children = treeNode.children();
+        while (children.hasMoreElements()) {
+            final AbstractNode node = (AbstractNode) children.nextElement();
+            final Element element = createElement(document, node);
+            parentNode.appendChild(element);
+            addNodeChildren(document, element, node);
+        }
+    }
 
-			// Create the element
-			element = document.createElement(tagName);
+    /**
+     * Create an XML node from a JTree node
+     * @param document XML document to which the node has to be added.
+     * @param node JTree node from which an XML node is to be created
+     * @return an XML node
+     */
+    protected Element createElement(Document document, AbstractNode node) {
+        final AbstractDescriptor data = (AbstractDescriptor)node.getUserObject();
+        String tagName = node.getType();
+        String tagAttr = data.toString();
+        Element element;
+        try {
 
-			// Store all openBIS node attributes
-			Map<String, String> openBISAttributes = data.getOpenBISAttributes();
-			for (String key: openBISAttributes.keySet() ) {
-				String value = openBISAttributes.get(key);
-				element.setAttribute(key, value);
-			}
+            // Create the element
+            element = document.createElement(tagName);
 
-			// Store all user node attributes
-			Map<String, String> userAttributes = data.getUserAttributes();
-			for (String key: userAttributes.keySet() ) {
-				String value = userAttributes.get(key);
-				element.setAttribute(key, value);
-			}
-			
-			// Store all node attributes
-			Map<String, String> attributes = data.getAttributes();
-			for (String key: attributes.keySet() ) {
-				String value = attributes.get(key);
-				element.setAttribute(key, value);
-			}
+            // Store all openBIS node attributes
+            Map<String, String> openBISAttributes = data.getOpenBISAttributes();
+            for (String key: openBISAttributes.keySet() ) {
+                String value = openBISAttributes.get(key);
+                element.setAttribute(key, value);
+            }
 
-			// Set the name as an attribute as well
-			element.setAttribute("name", tagAttr);
+            // Store all user node attributes
+            Map<String, String> userAttributes = data.getUserAttributes();
+            for (String key: userAttributes.keySet() ) {
+                String value = userAttributes.get(key);
+                element.setAttribute(key, value);
+            }
 
-		} catch (DOMException e) {
-			System.err.println("Element with name " + tagName + 
-					" could not be created.");
-			element = document.createElement("invalid");
-		}
-		return element;
-	}    
+            // Store all node attributes
+            Map<String, String> attributes = data.getAttributes();
+            for (String key: attributes.keySet() ) {
+                String value = attributes.get(key);
+                element.setAttribute(key, value);
+            }
+
+            // Set the name as an attribute as well
+            element.setAttribute("name", tagAttr);
+
+        } catch (DOMException e) {
+            System.err.println("Element with name " + tagName +
+                    " could not be created.");
+            element = document.createElement("invalid");
+        }
+        return element;
+    }
 }
 

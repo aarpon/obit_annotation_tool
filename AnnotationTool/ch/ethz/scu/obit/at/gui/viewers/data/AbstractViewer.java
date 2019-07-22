@@ -151,7 +151,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a title JLabel
-        JLabel title = new JLabel("<html><b>Data viewer</b></html>");
+        JLabel title = new JLabel("<html><b>Data</b></html>");
 
         // Add the tree viewer to the layout
         constraints.gridx = 0;
@@ -476,6 +476,37 @@ implements ActionListener, TreeSelectionListener {
      */
     public TreeModel getDataModel() {
         return tree.getModel();
+    }
+
+    /**
+     * Return a list of ExperimentNode from the data model.
+     * @return List of ExperimentNode objects.
+     */
+    public List<ExperimentNode> getExperimentNodes() {
+
+        // Reset the Experiment list
+        List<ExperimentNode> experiments = new ArrayList<ExperimentNode>();
+
+        // Store the data model
+        TreeModel dataModel = getDataModel();
+
+        // We extract all experiments from the data model
+        RootNode dataRoot = (RootNode) dataModel.getRoot();
+
+        // First level are the folder nodes
+        int dataNChildren = dataRoot.getChildCount();
+
+        for (int i = 0; i < dataNChildren; i++) {
+
+            // Get the FolderNode
+            ExperimentNode experimentNode =
+                    (ExperimentNode) dataRoot.getChildAt(i);
+
+            // Store the reference to the ExperimentNode
+            experiments.add(experimentNode);
+        }
+
+        return experiments;
     }
 
     /**
@@ -944,7 +975,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a simple label
-        metadataView = new JLabel("<html><b>Metadata viewer</b></html>");
+        metadataView = new JLabel("<html><b>Metadata</b></html>");
         metadataView.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout
@@ -994,7 +1025,7 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Add a simple label
-        invalidDatasets = new JLabel("<html><b>Invalid datasets</b></html>");
+        invalidDatasets = new JLabel("<html><b>Invalid Data</b></html>");
         invalidDatasets.setVerticalAlignment(SwingConstants.TOP);
 
         // Add to the layout

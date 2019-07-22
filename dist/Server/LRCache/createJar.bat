@@ -19,7 +19,7 @@ SET CLASSPATH=..\..\..\lib\dss_client\dss_client.jar
 ECHO Generating LRCache jar to query for the status of long server calls.
 
 ECHO Compiling classes...
-%JAVAC% -cp %CLASSPATH% -source 1.7 -target 1.7 @"%CURRENT_DIR%.\files.txt" -d %BUILD_PATH%
+%JAVAC% -cp %CLASSPATH% -source 1.8 -target 1.8 @"%CURRENT_DIR%.\files.txt" -d %BUILD_PATH%
 
 ECHO Packaging JAR archive...
 
