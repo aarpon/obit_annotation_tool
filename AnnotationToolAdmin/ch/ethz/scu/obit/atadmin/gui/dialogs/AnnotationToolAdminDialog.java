@@ -810,14 +810,19 @@ public class AnnotationToolAdminDialog extends JDialog {
 
     	// Enable/disable buttons
     	toggleDynamicWidgets();
-    	
+
+    	// Work around an issue with dark GTK themes in Linux
+    	if (QueryOS.isLinux() && UIManager.getSystemLookAndFeelClassName().contains("GTK"))
+    	{
+    		SwingUtilities.updateComponentTreeUI(this);
+    	}
+
 		// Display the dialog
 		setMinimumSize(new Dimension(700, 220));
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
-
 	}
 
 	/**
