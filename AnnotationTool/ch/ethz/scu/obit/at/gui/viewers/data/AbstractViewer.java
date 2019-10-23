@@ -12,6 +12,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,10 +57,10 @@ import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
 
 /**
  * Abstract viewer for processors
+ *
  * @author Aaron Ponti
  */
-abstract public class AbstractViewer extends Observable
-implements ActionListener, TreeSelectionListener {
+abstract public class AbstractViewer extends Observable implements ActionListener, TreeSelectionListener {
 
     protected GlobalSettingsManager globalSettingsManager;
 
@@ -93,6 +95,7 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Read-only table model.
+     * 
      * @author Aaron Ponti
      *
      */
@@ -101,7 +104,8 @@ implements ActionListener, TreeSelectionListener {
 
         /**
          * Constructor
-         * @param mdData 2D data array
+         * 
+         * @param mdData        2D data array
          * @param mdColumnNames Array of column names
          */
         public ReadOnlyTableModel(Object[][] mdData, String mdColumnNames[]) {
@@ -110,7 +114,8 @@ implements ActionListener, TreeSelectionListener {
 
         /**
          * Make sure the Table is non-editable
-         * @param row number
+         * 
+         * @param row    number
          * @param column number
          */
         @Override
@@ -121,18 +126,18 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Parses current dataset (file or folder) by doing the necessary
-     * preparation work and then calling the needed Processor.
+     * Parses current dataset (file or folder) by doing the necessary preparation
+     * work and then calling the needed Processor.
      *
-     * @param folder	 Full folder (or file) name
-     * @return true if the scanning of the dataset was successful, false
-     * otherwise.
+     * @param folder Full folder (or file) name
+     * @return true if the scanning of the dataset was successful, false otherwise.
      */
     abstract public boolean parse(File folder);
 
     /**
-     * Constructor
-     * The constructor creates the actual panel to be displayed on the UI.
+     * Constructor The constructor creates the actual panel to be displayed on the
+     * UI.
+     * 
      * @param globalSettingsManager The global settings manager.
      */
     public AbstractViewer(GlobalSettingsManager globalSettingsManager) {
@@ -163,14 +168,13 @@ implements ActionListener, TreeSelectionListener {
         panel.add(title, constraints);
 
         // Create a split panel
-        JSplitPane splitPaneTwo = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                metadataViewerPanel(), invalidDatasetsPanel());
+        JSplitPane splitPaneTwo = new JSplitPane(JSplitPane.VERTICAL_SPLIT, metadataViewerPanel(),
+                invalidDatasetsPanel());
         splitPaneTwo.setResizeWeight(0.75);
         splitPaneTwo.setBorder(null);
 
         // Create a split panel
-        JSplitPane splitPaneOne = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                dataViewerPanel(), splitPaneTwo);
+        JSplitPane splitPaneOne = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dataViewerPanel(), splitPaneTwo);
         splitPaneOne.setResizeWeight(0.5);
         splitPaneOne.setBorder(null);
 
@@ -191,9 +195,10 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Sets the user name to be used for scanning the user folder
+     * 
      * @param userName User name
      *
-     * This must be called before scan() can be called!
+     *                 This must be called before scan() can be called!
      */
     public void setUserName(String userName) {
 
@@ -204,8 +209,9 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Sets the reference to the OutputPane
-     * @param outputPane A reference to the main window output pane to be
-     * used to display information.
+     * 
+     * @param outputPane A reference to the main window output pane to be used to
+     *                   display information.
      */
     public void setOutputPane(OutputPane outputPane) {
 
@@ -215,8 +221,8 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Scans the datamover incoming directory for datasets to be processed.
-     * At the end of scanning, the function MUST set isReady to true.
+     * Scans the datamover incoming directory for datasets to be processed. At the
+     * end of scanning, the function MUST set isReady to true.
      */
     public void scan() {
 
@@ -229,8 +235,7 @@ implements ActionListener, TreeSelectionListener {
         // Notify observers that the scanning is about to start
         synchronized (this) {
             setChanged();
-            notifyObservers(new ObserverActionParameters(
-                    ObserverActionParameters.Action.ABOUT_TO_RESCAN, null));
+            notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.ABOUT_TO_RESCAN, null));
         }
 
         // Inform
@@ -243,9 +248,7 @@ implements ActionListener, TreeSelectionListener {
 
         // Get the user data folder from the application properties
         // to which we append the user name to personalize the working space
-        File userDataFolder = new File(
-                globalSettingsManager.getUserDataRootDir() +
-                File.separator + userName);
+        File userDataFolder = new File(globalSettingsManager.getUserDataRootDir() + File.separator + userName);
 
         // Does the folder exist? If not, we create it. Please mind,
         // if directory creation fails, the application will quit since
@@ -253,8 +256,8 @@ implements ActionListener, TreeSelectionListener {
         checkAndCreateFolderOrDie(userDataFolder, "user directory");
 
         // Prepare a new root node for the Tree
-        rootNode = new RootNode(new RootDescriptor(userDataFolder,
-                new File(globalSettingsManager.getUserDataRootDir())));
+        rootNode = new RootNode(
+                new RootDescriptor(userDataFolder, new File(globalSettingsManager.getUserDataRootDir())));
 
         // Then define and start the worker
         class Worker extends SwingWorker<Boolean, Void> {
@@ -265,8 +268,8 @@ implements ActionListener, TreeSelectionListener {
             /**
              * Constructor
              *
-             * @param userDataFolder Folder to be parsed.
-			 # @param ref AbstractViewer reference.
+             * @param userDataFolder Folder to be parsed. # @param ref AbstractViewer
+             *                       reference.
              */
             public Worker(File userDataFolder, AbstractViewer ref) {
                 this.userDataFolder = userDataFolder;
@@ -308,15 +311,13 @@ implements ActionListener, TreeSelectionListener {
 
                 // Inform the user if isReady is false
                 if (!isReady) {
-                    outputPane
-                    .err("Please fix the invalid datasets to continue!");
+                    outputPane.err("Please fix the invalid datasets to continue!");
                 }
 
                 // Notify observers that the scanning is done
                 synchronized (this) {
                     setChanged();
-                    notifyObservers(new ObserverActionParameters(
-                            ObserverActionParameters.Action.SCAN_COMPLETE, null));
+                    notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.SCAN_COMPLETE, null));
                 }
 
                 // Re-enable the "scan" button
@@ -335,21 +336,20 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Climb the JTree to find given parent node of passed one and return
-     * it. The required node must be below the root node (which must have
-     * name "RootDescriptor". The name of the node is given as follows:
+     * Climb the JTree to find given parent node of passed one and return it. The
+     * required node must be below the root node (which must have name
+     * "RootDescriptor". The name of the node is given as follows:
      *
      * {@code selectedNode.getUserObject().getClass().getSimpleName()}
      *
-     * where the user node contained in the selectedNode is usually a
-     * Descriptor generated by one of the processors.
+     * where the user node contained in the selectedNode is usually a Descriptor
+     * generated by one of the processors.
      *
      * @param selectedNode Node selected in the JTree
-     * @param nodeName Name of the selected node.
+     * @param nodeName     Name of the selected node.
      * @return desired node name (e.g. Experiment, Folder)
      */
-    protected AbstractNode getParentNodeByName(
-            AbstractNode selectedNode, String nodeName) {
+    protected AbstractNode getParentNodeByName(AbstractNode selectedNode, String nodeName) {
 
         // Get the class name of the selected node
         String className = selectedNode.getUserObject().getClass().getSimpleName();
@@ -383,17 +383,16 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Check for the existence of a folder and tries to create it; if
-     * creation fails, the error is considered to be fatal and the
-     * application quits.
-     * @param folder Full folder name
+     * Check for the existence of a folder and tries to create it; if creation
+     * fails, the error is considered to be fatal and the application quits.
+     * 
+     * @param folder     Full folder name
      * @param folderName Colloquial folder name (e.g. "User directory")
      */
     protected void checkAndCreateFolderOrDie(File folder, String folderName) {
         // Some string manipulation
         String allLower = folderName.toLowerCase();
-        String firstUpper = allLower.substring(0, 1).toUpperCase() +
-                allLower.substring(1);
+        String firstUpper = allLower.substring(0, 1).toUpperCase() + allLower.substring(1);
 
         // Does the folder exist? If not, we create it.
         if (!folder.exists()) {
@@ -412,12 +411,10 @@ implements ActionListener, TreeSelectionListener {
             // Inform and exit
             if (failed) {
                 outputPane.err("Failed creating " + allLower + "!");
-                JOptionPane.showMessageDialog(null,
-                        "Failed creating " + allLower + "!\n" +
-                                "Please contact your administrator. The application\n" +
-                                "will now exit!",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        null, "Failed creating " + allLower + "!\n"
+                                + "Please contact your administrator. The application\n" + "will now exit!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
         }
@@ -428,39 +425,34 @@ implements ActionListener, TreeSelectionListener {
             fullPath = folder.getCanonicalPath();
         } catch (IOException e) {
             outputPane.err("Failed accessing the user folder!");
-            JOptionPane.showMessageDialog(null,
-                    "Failed accessing the user folder!\n" +
-                            "Please contact your administrator. The application\n" +
-                            "will now exit!",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+            JOptionPane
+                    .showMessageDialog(null,
+                            "Failed accessing the user folder!\n"
+                                    + "Please contact your administrator. The application\n" + "will now exit!",
+                            "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
 
         String expectedFolderName = folder.toString();
-        if (! fullPath.equals(expectedFolderName)) {
+        if (!fullPath.equals(expectedFolderName)) {
             // Extract the username
             int p = fullPath.lastIndexOf(File.separatorChar);
             if (p == -1) {
                 outputPane.err("Unexpected path to user folder!");
-                JOptionPane.showMessageDialog(null,
-                        "Unexpected path to user folder!\n" +
-                                "Please contact your administrator. The application\n" +
-                                "will now exit!",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        null, "Unexpected path to user folder!\n"
+                                + "Please contact your administrator. The application\n" + "will now exit!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
 
             // Make sure that the case is the only difference between the two full paths
-            if (! fullPath.toLowerCase().equals(expectedFolderName.toLowerCase())) {
+            if (!fullPath.toLowerCase().equals(expectedFolderName.toLowerCase())) {
                 outputPane.err("Unexpected path to user folder!");
-                JOptionPane.showMessageDialog(null,
-                        "Unexpected path to user folder!\n" +
-                                "Please contact your administrator. The application\n" +
-                                "will now exit!",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        null, "Unexpected path to user folder!\n"
+                                + "Please contact your administrator. The application\n" + "will now exit!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
 
@@ -472,6 +464,7 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Return the Tree's data model.
+     * 
      * @return the data model.
      */
     public TreeModel getDataModel() {
@@ -480,6 +473,7 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Return a list of ExperimentNode from the data model.
+     * 
      * @return List of ExperimentNode objects.
      */
     public List<ExperimentNode> getExperimentNodes() {
@@ -499,8 +493,7 @@ implements ActionListener, TreeSelectionListener {
         for (int i = 0; i < dataNChildren; i++) {
 
             // Get the FolderNode
-            ExperimentNode experimentNode =
-                    (ExperimentNode) dataRoot.getChildAt(i);
+            ExperimentNode experimentNode = (ExperimentNode) dataRoot.getChildAt(i);
 
             // Store the reference to the ExperimentNode
             experiments.add(experimentNode);
@@ -510,8 +503,7 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Initialize the Tree. If a Tree already exists, it is cleared
-     * and replaced.
+     * Initialize the Tree. If a Tree already exists, it is cleared and replaced.
      */
     protected void clearTree() {
 
@@ -523,8 +515,7 @@ implements ActionListener, TreeSelectionListener {
         // Clear the tree model
         TreeModel model = tree.getModel();
         if (model != null) {
-            DefaultMutableTreeNode rootNode =
-                    (DefaultMutableTreeNode) model.getRoot();
+            DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model.getRoot();
             if (rootNode != null) {
                 rootNode.removeAllChildren();
                 ((DefaultTreeModel) model).reload();
@@ -533,8 +524,8 @@ implements ActionListener, TreeSelectionListener {
         }
 
         // Create a RootNode
-        rootNode = new RootNode(new RootDescriptor(new File("/"),
-                new File(globalSettingsManager.getUserDataRootDir())));
+        rootNode = new RootNode(
+                new RootDescriptor(new File("/"), new File(globalSettingsManager.getUserDataRootDir())));
 
         // Create a tree that allows one selection at a time.
         tree.setModel(new DefaultTreeModel(rootNode));
@@ -551,8 +542,7 @@ implements ActionListener, TreeSelectionListener {
      */
     protected void clearInvalidDatasetsTable() {
         if (invalidDatasetsTable != null) {
-            ReadOnlyTableModel model =
-                    (ReadOnlyTableModel) invalidDatasetsTable.getModel();
+            ReadOnlyTableModel model = (ReadOnlyTableModel) invalidDatasetsTable.getModel();
             for (int i = model.getRowCount() - 1; i >= 0; i--) {
                 model.removeRow(i);
             }
@@ -564,8 +554,7 @@ implements ActionListener, TreeSelectionListener {
      */
     protected void clearMetadataTable() {
         if (metadataViewTable != null) {
-            ReadOnlyTableModel model =
-                    (ReadOnlyTableModel) metadataViewTable.getModel();
+            ReadOnlyTableModel model = (ReadOnlyTableModel) metadataViewTable.getModel();
             for (int i = model.getRowCount() - 1; i >= 0; i--) {
                 model.removeRow(i);
             }
@@ -573,23 +562,20 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Adds all key-value pairs from an attributes Map to the metadata
-     * view table
-     * @param attributes Map of attributes returned by the various
-     * processors.
+     * Adds all key-value pairs from an attributes Map to the metadata view table
+     * 
+     * @param attributes Map of attributes returned by the various processors.
      */
     protected void addAttributesToMetadataTable(Map<String, String> attributes) {
-        ReadOnlyTableModel model =
-                (ReadOnlyTableModel) metadataViewTable.getModel();
-        for (String key: attributes.keySet() ) {
+        ReadOnlyTableModel model = (ReadOnlyTableModel) metadataViewTable.getModel();
+        for (String key : attributes.keySet()) {
             String value = attributes.get(key);
-            model.addRow(new Object[] {key, value});
+            model.addRow(new Object[] { key, value });
         }
 
         // Sort the table ascending by the first column
-        TableRowSorter<? extends TableModel> rowSorter =
-                (TableRowSorter<? extends TableModel>)
-                metadataViewTable.getRowSorter();
+        TableRowSorter<? extends TableModel> rowSorter = (TableRowSorter<? extends TableModel>) metadataViewTable
+                .getRowSorter();
         List<SortKey> keys = new ArrayList<SortKey>();
         SortKey sortKey = new SortKey(0, SortOrder.ASCENDING);
         keys.add(sortKey);
@@ -599,6 +585,7 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Create and save an XML representation of the JTree to file
+     * 
      * @param outputDirectory Directory where XML property files are saved
      * @return true if the XML file could be saved, false otherwise
      */
@@ -611,9 +598,10 @@ implements ActionListener, TreeSelectionListener {
     }
 
     /**
-     * Create and save a file containing a map of pointers to the
-     * experiment setting files at the root of the user folder to
-     * be used by the dropbox. The file name is structure.
+     * Create and save a file containing a map of pointers to the experiment setting
+     * files at the root of the user folder to be used by the dropbox. The file name
+     * is structure.
+     * 
      * @param outputDirectory Directory where XML property files are saved
      * @return true if the XML file could be saved, false otherwise
      */
@@ -631,21 +619,17 @@ implements ActionListener, TreeSelectionListener {
         }
 
         // File name
-        File fileName = new File(outputDirectory + File.separator +
-                "data_structure.ois");
+        File fileName = new File(outputDirectory + File.separator + "data_structure.ois");
 
         try {
 
             // Open file
-            BufferedWriter bw =
-                    new BufferedWriter(new FileWriter(fileName, false));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, false));
 
             // Go over all Experiments
             for (int i = 0; i < nExp; i++) {
-                ExperimentNode expNode =
-                        (ExperimentNode) rootNode.getChildAt(i);
-                ExperimentDescriptor expDescr =
-                        (ExperimentDescriptor)expNode.getUserObject();
+                ExperimentNode expNode = (ExperimentNode) rootNode.getChildAt(i);
+                ExperimentDescriptor expDescr = (ExperimentDescriptor) expNode.getUserObject();
 
                 // We need Linux-compatible file separators
                 String propertiesFile = expDescr.getPropertiesFileNameWithRelPath();
@@ -670,12 +654,16 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Returns true if the viewer has completed creation of the data model
+     * 
      * @return true if the data model is complete, false otherwise
      */
-    public boolean isReady() { return isReady; }
+    public boolean isReady() {
+        return isReady;
+    }
 
     /**
      * Return the reference to the JPanel to be added to a container component
+     * 
      * @return JPanel reference
      */
     public JPanel getPanel() {
@@ -684,82 +672,67 @@ implements ActionListener, TreeSelectionListener {
 
     /**
      * Create a popup menu with actions for handling invalid datasets
+     * 
      * @return a JPopupMenu for the passed item
      */
     private JPopupMenu createInvalidDatasetsPopup() {
 
+        // Show in Explorer/Finder/Nautilus/Dolphin
+        String[] fileExplorerCommand;
+        try {
+            fileExplorerCommand = QueryOS.getFileExplorerCommand();
+        } catch (Exception e2) {
+            outputPane.err("Could not find this system's file manager!");
+            return null;
+        }
+
+        // Do we have a valid file manager?
+        if (fileExplorerCommand[0].equals("")) {
+            outputPane.err("Unsupported file manager: browsing to invalid data will not be possible.");
+            return null;
+        }
+
         // Create the popup menu.
         JPopupMenu popup = new JPopupMenu();
 
-        // Show in Explorer/Finder
-        String menuEntry = "";
-        if (QueryOS.isWindows()) {
-            menuEntry = "Show in Windows Explorer";
-        } else if (QueryOS.isMac()) {
-            menuEntry = "Show in Finder";
-        } else {
-            throw new UnsupportedOperationException(
-                    "Operating system not supported.");
-        }
+        String menuEntry = "Show in " + fileExplorerCommand[1];
         JMenuItem menuItem = new JMenuItem(menuEntry);
         menuItem.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 // Build the full path of the invalid dataset
                 File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
 
                 // Full path to the invalid dataset
-                File fullPath = new File(userDataFolder +
-                        File.separator + invalidDataset);
+                File fullPath = new File(userDataFolder + File.separator + invalidDataset);
 
                 String fullPathStr;
                 try {
                     fullPathStr = fullPath.getCanonicalPath();
                 } catch (IOException e1) {
-                    outputPane.err("Could not retrieve full path " +
-                            "of selected invalid dataset!");
+                    outputPane.err("Could not retrieve full path " + "of selected invalid dataset!");
                     return;
                 }
 
-                // Command arguments
-                String command = "";
-                String commandName = "";
-                String commandArgument = "";
-                if (QueryOS.isMac()) {
-                    command = "open";
-                    commandName = "Finder";
-                    commandArgument = "-R";
-                } else if (QueryOS.isWindows()) {
-                    command = "Explorer.exe";
-                    commandName = "Windows Explorer";
-                    commandArgument = "/select,";
-                } else {
-                    throw new UnsupportedOperationException(
-                            "Operating system not supported.");
-                }
+                // Extract command parts for clarity
+                String command = fileExplorerCommand[0];
+                String commandName = fileExplorerCommand[1];
+                String commandArgument = fileExplorerCommand[2];
 
                 // Inform
-                outputPane.log("Showing invalid dataset \"" +
-                        invalidDataset + "\" in " + commandName);
+                outputPane.log("Showing invalid dataset \"" + invalidDataset + "\" in " + commandName);
 
                 // Execute the command
-                String [] commandArray = new String[3];
+                String[] commandArray = new String[3];
                 commandArray[0] = command;
                 commandArray[1] = commandArgument;
                 commandArray[2] = fullPathStr;
                 try {
                     Process p = Runtime.getRuntime().exec(commandArray);
-                    p.waitFor();
                 } catch (IOException e1) {
-                    outputPane.err("Could not show invalid dataset "
-                            + "in " + commandName + "!");
-                } catch (InterruptedException e1) {
-                    outputPane.err("Could not show invalid dataset "
-                            + "in " + commandName + "!");
+                    outputPane.err("Could not show invalid dataset " + "in " + commandName + "!");
                 }
-
             }
         });
 
@@ -769,8 +742,7 @@ implements ActionListener, TreeSelectionListener {
         menuItem.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 // Create a file chooser
                 final JFileChooser f = new JFileChooser();
                 f.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -781,36 +753,35 @@ implements ActionListener, TreeSelectionListener {
 
                 // Build the full path of the file/folder to move
                 File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
-                File fullPath = new File(userDataFolder +
-                        File.separator + invalidDataset);
+                File fullPath = new File(userDataFolder + File.separator + invalidDataset);
 
                 // Build full target
-                File fullTarget = new File(
-                        f.getSelectedFile() + File.separator +
-                        fullPath.getName());
+                File fullTarget = new File(f.getSelectedFile() + File.separator + fullPath.getName());
 
                 // Move
-                outputPane.log("Moving \"" + fullPath + "\" to \"" +
-                        fullTarget + "\"");
+                outputPane.log("Moving \"" + fullPath + "\" to \"" + fullTarget + "\"");
                 boolean isFile = fullPath.isFile();
-                if (! fullPath.renameTo(fullTarget)) {
+
+                try {
+
+                    // Move to target
+                    Files.move(fullPath.toPath(), fullTarget.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                    // Inform
+                    outputPane.warn("Please rescan the data folder when you have " + "fixed all invalid datasets!");
+
+                } catch (IOException e1) {
                     if (isFile) {
-                        JOptionPane.showMessageDialog(null,
-                                "Could not move \"" + fullPath + "\"!\n\n" +
-                                        "Please make sure that the file is not " +
-                                "open in some application.");
+                        JOptionPane.showMessageDialog(null, "Could not move \"" + fullPath + "\"!\n\n"
+                                + "Please make sure that the file is not " + "open in some application.");
                     } else {
                         JOptionPane.showMessageDialog(null,
-                                "Could not move \"" + fullPath + "\"!\n\n" +
-                                        "Please make sure that the folder is not open in " +
-                                        "the file manager or that any of the contained\n" +
-                                "files are not open in some application.");
+                                "Could not move \"" + fullPath + "\"!\n\n"
+                                        + "Please make sure that the folder is not open in "
+                                        + "the file manager or that any of the contained\n"
+                                        + "files are not open in some application.");
                     }
-                } else {
-                    outputPane.warn("Please rescan the data folder when you have " +
-                            "fixed all invalid datasets!");
                 }
-
             }
         });
         popup.add(menuItem);
@@ -820,41 +791,32 @@ implements ActionListener, TreeSelectionListener {
         menuItem.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 // Build the full path of the file/folder to delete
                 File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
-                File fullPath = new File(userDataFolder +
-                        File.separator + invalidDataset);
+                File fullPath = new File(userDataFolder + File.separator + invalidDataset);
 
                 // Ask the user for confirmation
-                if (JOptionPane.showConfirmDialog(null,
-                        "Are you sure you want to delete\n\"" +
-                                invalidDataset + "\" ?",
-                                "Question",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE) ==
-                                JOptionPane.YES_OPTION) {
+                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete\n\"" + invalidDataset + "\" ?",
+                        "Question", JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 
                     // Delete
                     outputPane.log("Deleting \"" + fullPath + "\"");
                     boolean isFile = fullPath.isFile();
                     if (!ATDataMover.deleteRecursively(fullPath)) {
                         if (isFile) {
-                            JOptionPane.showMessageDialog(null,
-                                    "Could not delete \"" + fullPath + "\"!\n\n" +
-                                            "Please make sure that the file is not " +
-                                    "open in some application.");
+                            JOptionPane.showMessageDialog(null, "Could not delete \"" + fullPath + "\"!\n\n"
+                                    + "Please make sure that the file is not " + "open in some application.");
                         } else {
                             JOptionPane.showMessageDialog(null,
-                                    "Could not delete \"" + fullPath + "\"!\n\n" +
-                                            "Please make sure that the folder is not open in " +
-                                            "the file manager or that any of the contained\n" +
-                                    "files are not open in some application.");
+                                    "Could not delete \"" + fullPath + "\"!\n\n"
+                                            + "Please make sure that the folder is not open in "
+                                            + "the file manager or that any of the contained\n"
+                                            + "files are not open in some application.");
                         }
                     } else {
-                        outputPane.warn("Please rescan the data folder when you have " +
-                                "fixed all invalid datasets!");
+                        outputPane.warn("Please rescan the data folder when you have " + "fixed all invalid datasets!");
                     }
 
                 }
@@ -865,9 +827,9 @@ implements ActionListener, TreeSelectionListener {
         return popup;
     }
 
-
     /**
      * Sets a mouse event listener on the JTable
+     * 
      * @param e Mouse event
      */
     private void setListenerOnJTable(MouseEvent e) {
@@ -883,24 +845,20 @@ implements ActionListener, TreeSelectionListener {
         int rowIndex = invalidDatasetsTable.getSelectedRow();
         if (rowIndex < 0)
             return;
-        invalidDataset = new File((String)
-                invalidDatasetsTable.getModel().getValueAt(
-                        rowIndex, 0));
+        invalidDataset = new File((String) invalidDatasetsTable.getModel().getValueAt(rowIndex, 0));
         // Display popup...
         if (e.isPopupTrigger() && e.getComponent() instanceof JTable) {
-            if (!QueryOS.isLinux()) {
-                JPopupMenu popup = createInvalidDatasetsPopup();
+            JPopupMenu popup = createInvalidDatasetsPopup();
+            if (popup != null) {
                 popup.show(e.getComponent(), e.getX(), e.getY());
-                return;
             }
+            return;
         }
         // ... or log to output pane on double click.
         if (e.getClickCount() == 2) {
-            String errorMsg = (String)
-                    invalidDatasetsTable.getModel().getValueAt(
-                            rowIndex, 1);
-            outputPane.log("File or folder '" + invalidDataset.getName() +
-                    "' is invalid for following reason: " + errorMsg);
+            String errorMsg = (String) invalidDatasetsTable.getModel().getValueAt(rowIndex, 1);
+            outputPane.log(
+                    "File or folder '" + invalidDataset.getName() + "' is invalid for following reason: " + errorMsg);
         }
     }
 
@@ -918,8 +876,8 @@ implements ActionListener, TreeSelectionListener {
         constraints.fill = GridBagConstraints.BOTH;
 
         // Create the Tree
-        rootNode = new RootNode(new RootDescriptor(new File("/"),
-                new File(globalSettingsManager.getUserDataRootDir())));
+        rootNode = new RootNode(
+                new RootDescriptor(new File("/"), new File(globalSettingsManager.getUserDataRootDir())));
 
         // Create a tree that allows one selection at a time.
         tree = new DataViewerTree(rootNode);
@@ -943,8 +901,7 @@ implements ActionListener, TreeSelectionListener {
         scanButton.addActionListener(new ActionListener() {
 
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 scan();
             }
         });
@@ -959,7 +916,6 @@ implements ActionListener, TreeSelectionListener {
 
         return dataViewerPanel;
     }
-
 
     private JPanel metadataViewerPanel() {
 
@@ -989,10 +945,9 @@ implements ActionListener, TreeSelectionListener {
         metadataViewerPanel.add(metadataView, constraints);
 
         // Add the table
-        Object[][] mdData = { };
+        Object[][] mdData = {};
         String mdColumnNames[] = { "Name", "Value" };
-        metadataViewTable = new JTable(
-                new ReadOnlyTableModel(mdData, mdColumnNames));
+        metadataViewTable = new JTable(new ReadOnlyTableModel(mdData, mdColumnNames));
         metadataViewTable.setShowGrid(false);
         metadataViewTable.setFillsViewportHeight(true);
         metadataViewTable.setAutoCreateRowSorter(true);
@@ -1039,10 +994,9 @@ implements ActionListener, TreeSelectionListener {
         invalidDatasetsPanel.add(invalidDatasets, constraints);
 
         // Add the table
-        Object[][] data = { };
+        Object[][] data = {};
         String columnNames[] = { "File or folder", "Issue" };
-        invalidDatasetsTable = new JTable(
-                new ReadOnlyTableModel(data, columnNames));
+        invalidDatasetsTable = new JTable(new ReadOnlyTableModel(data, columnNames));
         invalidDatasetsTable.setShowGrid(false);
         invalidDatasetsTable.setFillsViewportHeight(true);
         invalidDatasetsTable.setAutoCreateRowSorter(true);
