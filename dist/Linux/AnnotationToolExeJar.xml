@@ -12,7 +12,6 @@
                 <attribute name="Main-Class" value="ch.ethz.scu.obit.at.AnnotationTool"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
-            <fileset dir="${dir.workspace}/obit_annotation_tool/test_bin"/>
             <fileset dir="${dir.workspace}/obit_annotation_tool/bin"/>
             <zipfileset excludes="META-INF/*.SF" src="${dir.workspace}/obit_annotation_tool/lib/dss_client/log4j.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${dir.workspace}/obit_annotation_tool/lib/dss_client/dss_client.jar"/>
