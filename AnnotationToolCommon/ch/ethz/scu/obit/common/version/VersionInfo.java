@@ -27,7 +27,7 @@ public class VersionInfo {
     /**
      *  Application settings (XML) file version
      */
-    public static final int applicationSettingsVersion = 7;
+    public static final int applicationSettingsVersion = 8;
 
     /**
      *  Application updater settings (XML) file version
@@ -37,7 +37,7 @@ public class VersionInfo {
     /**
      *  User settings (XML) file version
      */
-    public static final int userSettingsVersion = 1;
+    public static final int userSettingsVersion = 2;
 
     /**
      *  oBITXML (XML) metadata settings (.oix) file

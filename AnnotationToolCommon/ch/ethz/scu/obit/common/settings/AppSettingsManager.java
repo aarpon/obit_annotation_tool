@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -689,6 +690,47 @@ public class AppSettingsManager {
 
 		// Return the document
 		return doc;
+	}
+	
+	/**
+	 * Validate that settings are compatible to each other.
+	 * @return true if the set of settings are valid.
+	 */
+	public boolean validate()
+	{
+		HashSet datamoverToServerSet = new HashSet();
+		HashSet settingsNameSet = new HashSet();
+
+		// Process all settings
+		for (AppSettings appSettings : listAppSettings) {
+		
+			// The combination of Datamover incoming folder
+			// and openBIS server *must* be unique across settings
+			String datamoverToServerKey =
+					appSettings.getSettingValue("DatamoverIncomingDir").toLowerCase() +
+					"_" +
+					appSettings.getSettingValue("OpenBISURL").toLowerCase();
+					
+			if (datamoverToServerKey.contains(datamoverToServerKey)) {
+				errorMessage = "There can be only one configuration " +
+				"containing a given Datamover Incoming Dir and openBIS URL.";
+				return false;
+			}
+			
+			String configurationName = appSettings.getSettingValue("ConfigurationName").toLowerCase(); 
+			
+			if (configurationName.equals("")) {
+				errorMessage = "Configuration names cannot be empty.";
+				return false;				
+			}
+			
+			if (settingsNameSet.contains(configurationName)) {
+				errorMessage = "Configurations must have unique names.";
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }
