@@ -131,23 +131,16 @@ class UserSettingsManager {
 		return false;
 	}
 
-//	/**
-//	 * Get the openBIS URL of currently active server.
-//	 *
-//	 * @return the URL of the currently active openBIS server.
-//	 */
-//	public String getActiveServer() {
-//		return listUserSettings.get(currentServerSettingsIndex).getOpenBISURL();
-//	}
-
-//	/**
-//	 * Get the favorite configuration.
-//	 *
-//	 * @return the name of the favorite configuration.
-//	 */
-//	public String getFavoriteServer() {
-//		return listUserSettings.get(favoriteConfigurationSettingsIndex).getOpenBISURL();
-//	}
+	/**
+	 * Set the current active settings by object.
+	 *
+	 * @param configuration User settings object.
+	 * @return true if the settings for the specified configuration could be set,
+	 *         false otherwise.
+	 */
+	public boolean setActiveConfiguration(UserSettings configuration) {
+		return setActiveConfiguration(configuration.getConfigurationName());
+	}
 
 	/**
 	 * Set and persist the favorite configuration. The favorite configuration MUST
@@ -170,26 +163,21 @@ class UserSettingsManager {
 				}
 			}
 		}
-		errorMessage = "Invalid openBIS URL.";
+		errorMessage = "Invalid configuration name.";
 		return false;
 	}
 
-//	/**
-//	 * Set without persisting the favorite server. The favorite server MUST be one
-//	 * of the servers passed in the UserSettingsManager class constructor.
-//	 *
-//	 * @param openBISURL openBIS URL
-//	 * @return true if the favorite server could be set, false otherwise.
-//	 */
-//	private boolean setFavoriteServer(String openBISURL) {
-//		for (int i = 0; i < listUserSettings.size(); i++) {
-//			if (listUserSettings.get(i).getOpenBISURL().equals(openBISURL)) {
-//				favoriteConfigurationSettingsIndex = i;
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
+	/**
+	 * Set and persist the favorite configuration. The favorite configuration MUST
+	 * be one of the configurations passed in the UserSettingsManager class
+	 * constructor.
+	 *
+	 * @param configuration User settings object
+	 * @return true if the favorite configuration could be stored, false otherwise.
+	 */
+	public boolean storeFavoriteConfiguration(UserSettings configuration) {
+		return storeFavoriteConfiguration(configuration.getConfigurationName());
+	}
 
 	/**
 	 * Set without persisting the favorite configuration. The favorite configuration
@@ -207,6 +195,18 @@ class UserSettingsManager {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Set without persisting the favorite configuration. The favorite configuration
+	 * MUST be one of the configurations passed in the UserSettingsManager class
+	 * constructor.
+	 *
+	 * @param configuration User settings object.
+	 * @return true if the favorite configuration could be set, false otherwise.
+	 */
+	private boolean setFavoriteConfiguration(UserSettings configuration) {
+		return setFavoriteConfiguration(configuration.getConfigurationName());
 	}
 
 	/**
@@ -336,102 +336,6 @@ class UserSettingsManager {
 		// Return success
 		return true;
 	}
-//
-//	/**
-//	 * Try writing settings to file. If writing fails, use getLastErrorMessage() to
-//	 * get the details.
-//	 *
-//	 * This function might require write access to a restricted system folder. It
-//	 * should be used only in code run with admin privileges.
-//	 *
-//	 * @return true if the properties were saved successfully, false otherwise
-//	 */
-//	private boolean save() {
-//
-//		// Check that the settings are set
-//		if (listUserSettings == null || listUserSettings.size() == 0) {
-//			errorMessage = "No settings to save!";
-//			return false;
-//		}
-//
-//		DocumentBuilder builder;
-//		Document document = null;
-//
-//		// Build the XML document
-//		try {
-//			builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-//			document = builder.newDocument();
-//
-//			// Create root element
-//			Element root = document.createElement("AnnotationTool_User_Settings");
-//			root.setAttribute("version", Integer.toString(VersionInfo.userSettingsVersion));
-//
-//			// Create servers element
-//			Element configurations = document.createElement("configurations");
-//			configurations.setAttribute("FavoriteConfiguration",
-//					listUserSettings.get(favoriteConfigurationSettingsIndex).getConfigurationName());
-//
-//			// Get all user properties for all servers and store them in an XML document
-//			for (UserSettings userSettings : listUserSettings) {
-//
-//				// Get its properties
-//				Map<String, String> currentProperties = userSettings.getAllSettings();
-//
-//				// Create the configuration
-//				Element element = document.createElement("configuration");
-//
-//				// Append all properties as attributes
-//				for (Map.Entry<String, String> curr : currentProperties.entrySet()) {
-//
-//					// Get the property name and value
-//					String propertyName = curr.getKey();
-//					String propertyValue = curr.getValue();
-//
-//					// Store them as attributes of the server element
-//					element.setAttribute(propertyName, propertyValue);
-//
-//				}
-//
-//				// Append the server element to the document
-//				configurations.appendChild(element);
-//
-//			}
-//
-//			// Append the servers node
-//			root.appendChild(configurations);
-//
-//			// Add the whole tree to the document (by adding the root node)
-//			document.appendChild(root);
-//
-//		} catch (ParserConfigurationException e) {
-//			e.printStackTrace();
-//			return false;
-//		} catch (DOMException e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//
-//		// Make sure the directory exists
-//		if (!createApplicationSettingsDir()) {
-//			return false;
-//		}
-//
-//		// Now try to write to disk
-//		try {
-//			Transformer t = TransformerFactory.newInstance().newTransformer();
-//			OutputStream outputStream = new FileOutputStream(getSettingsFileName());
-//			t.transform(new DOMSource(document), new StreamResult(outputStream));
-//			outputStream.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			return false;
-//		} catch (TransformerException e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//
-//		return true;
-//	}
 
 	/**
 	 * Try writing settings to file. If writing fails, use getLastErrorMessage() to

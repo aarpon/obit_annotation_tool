@@ -865,12 +865,6 @@ public class AppSettingsManager {
 					return false;
 				}
 
-				String userDataDir = appSettings.getSettingValue("UserDataDir").toLowerCase();
-
-				errorMessage = "There can be only one configuration "
-						+ "containing a given Datamover Incoming Dir and openBIS URL.";
-				return false;
-
 			}
 
 			String configurationName = appSettings.getSettingValue("ConfigurationName").toLowerCase();
