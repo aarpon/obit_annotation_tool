@@ -16,37 +16,40 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
+import ch.ethz.scu.obit.common.settings.AppSettings;
 import ch.ethz.scu.obit.common.settings.GlobalSettingsManager;
 
 /**
  * openBIS pick server dialog
+ *
  * @author Aaron Ponti
  */
 public class OpenBISPickServerDialog extends JDialog {
-	
+
 	/* Private instance variables */
 	private static final long serialVersionUID = 1L;
 
-	protected JComboBox<String> openBISURLList;
-	protected JCheckBox openBISSetDefault;
-	private String currentServer;
-	private String selectedServer;
-	
+	protected JComboBox<String> configurationsList;
+	protected JCheckBox configurationSetDefault;
+	private AppSettings currentConfiguration;
+	private AppSettings selectedConfiguration;
+
 	/**
 	 * Constructor
-	 * @param servers List of openBIS server URLs.
-	 * @param current URL of the currently active openBIS server.
+	 *
+	 * @param configurations       List of configurations.
+	 * @param current              Name of the currently selected configuration.
 	 * @param globalSettigsManager The global settings manager.
 	 */
-	public OpenBISPickServerDialog(ArrayList<String> servers, 
-			String current, final GlobalSettingsManager globalSettigsManager) {
+	public OpenBISPickServerDialog(ArrayList<AppSettings> configurations, AppSettings current,
+			final GlobalSettingsManager globalSettigsManager) {
 
-		// Store the currently selected server and keep track of
+		// Store the currently selected configuration and keep track of
 		// what the original selection was in case the user cancels
 		// the selection.
-		currentServer = current;
-		selectedServer = current;
-		
+		currentConfiguration = current;
+		selectedConfiguration = current;
+
 		// Create a GridBagLayout
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		setLayout(gridBagLayout);
@@ -54,90 +57,104 @@ public class OpenBISPickServerDialog extends JDialog {
 		// Common constraints
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
-		
+
 		// Make the dialog modal and not resizable
 		setModal(true);
 		setResizable(false);
-	
+
 		// Add a label for the selection of the URL
-		JLabel label = new JLabel(
-				"Please choose the openBIS server you want to use:");
+		JLabel label = new JLabel("Please choose the openBIS server you want to use:");
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridwidth = 2;
 		constraints.weightx = 1;
 		constraints.insets = new Insets(5, 5, 5, 5);
-        add(label, constraints);
-		
-        // Add a drop-down menu for the selection of the URL
-        openBISURLList = new JComboBox<String>();
-        for (String server : servers) {
-            openBISURLList.addItem(server);
-        }
-        openBISURLList.setSelectedItem(current);
-        openBISURLList.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (e.getActionCommand().equals("comboBoxChanged")) {
-                	selectedServer = (String) openBISURLList.getSelectedItem();
-                }
-            }
-        });
+		add(label, constraints);
+
+		// Add a drop-down menu for the selection of the configuration
+		configurationsList = new JComboBox<String>();
+		for (AppSettings configuration : configurations) {
+			configurationsList.addItem(configuration.getConfigurationName());
+		}
+		configurationsList.setSelectedItem(current);
+		configurationsList.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("comboBoxChanged")) {
+
+					// Selected configuration name
+					String selectedConfigurationName = (String) configurationsList.getSelectedItem();
+
+					for (AppSettings settings : configurations) {
+						if (settings.getConfigurationName().equals(selectedConfigurationName)) {
+							selectedConfiguration = settings;
+							return;
+						}
+					}
+
+					// If not found (this should not happen!), fall back to the first
+					selectedConfiguration = configurations.get(0);
+				}
+			}
+		});
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.gridwidth = 2;
 		constraints.weightx = 1;
 		constraints.insets = new Insets(5, 5, 5, 5);
-        add(openBISURLList, constraints);
+		add(configurationsList, constraints);
 
-        // Add a checkbox
-        openBISSetDefault = new JCheckBox("Set selected as default server");
+		// Add a checkbox
+		configurationSetDefault = new JCheckBox("Set selected as default server");
 		constraints.gridx = 0;
 		constraints.gridy = 2;
 		constraints.gridwidth = 2;
-		constraints.gridheight = 1;			
+		constraints.gridheight = 1;
 		constraints.weightx = 1.0;
 		constraints.weighty = 1.0;
-        constraints.insets = new Insets(5, 5, 5, 5);
-        add(openBISSetDefault, constraints);
-		
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(configurationSetDefault, constraints);
+
 		// Create a "Select" button
 		JButton selectButton = new JButton("Select");
 		constraints.gridx = 0;
 		constraints.gridy = 3;
 		constraints.gridwidth = 1;
-		constraints.gridheight = 1;			
+		constraints.gridheight = 1;
 		constraints.weightx = 0.50;
 		constraints.weighty = 1.0;
-        constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(5, 5, 5, 5);
 		selectButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            	// Store the default server if so requested by the user
-            	if (openBISSetDefault.isSelected()) {
-            		globalSettigsManager.setFavoriteServer(selectedServer);
-            	}
-            	setVisible(false);
-        		dispose();
-            }
-        });
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Store the default server if so requested by the user
+				if (configurationSetDefault.isSelected()) {
+					globalSettigsManager.setFavoriteConfiguration(selectedConfiguration.getConfigurationName());
+				}
+				setVisible(false);
+				dispose();
+			}
+		});
 		add(selectButton, constraints);
 
 		// Create a cancel button
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            	// Restore the original server
-            	selectedServer = currentServer;
-            	setVisible(false);
-            	dispose();
-            }
-        });
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Restore the original server
+				selectedConfiguration = currentConfiguration;
+				setVisible(false);
+				dispose();
+			}
+		});
 		constraints.gridx = 1;
 		constraints.gridy = 3;
 		constraints.gridwidth = 1;
-		constraints.gridheight = 1;			
+		constraints.gridheight = 1;
 		constraints.weightx = 0.50;
 		constraints.weighty = 1.0;
-        constraints.insets = new Insets(5, 0, 5, 5);
+		constraints.insets = new Insets(5, 0, 5, 5);
 		add(cancelButton, constraints);
 
 		// Make the ok button react to the enter key
@@ -148,14 +165,15 @@ public class OpenBISPickServerDialog extends JDialog {
 		// that he logs in since we need valid login credentials for the proper
 		// functioning of the application.
 		addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				// Restore the original server
-				selectedServer = currentServer;
+				selectedConfiguration = currentConfiguration;
 				setVisible(false);
 				dispose();
 			}
 		});
-		
+
 		// Display the dialog
 		setMinimumSize(new Dimension(350, 120));
 		pack();
@@ -163,13 +181,14 @@ public class OpenBISPickServerDialog extends JDialog {
 		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		setVisible(true);
 	}
-	
+
 	/**
-	 * Get the entered password
-	 * @return password entered in the dialog 
+	 * Get the selected configuration.
+	 *
+	 * @return name of the selected configuration.
 	 */
-	public String getOpenBISServer() {
-		return selectedServer;
+	public AppSettings getSelectedConfiguration() {
+		return selectedConfiguration;
 	}
 
 }
