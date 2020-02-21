@@ -384,8 +384,7 @@ public class AppSettingsManager {
 
 		// If the file version is 7, we try to import and upgrade
 		if (fileVersion == 7) {
-			loadV7();
-			return loadV8();
+			return loadV7();
 		}
 
 		// If the file version is 8, we try to import and upgrade
@@ -524,10 +523,10 @@ public class AppSettingsManager {
 		isFileRead = true;
 
 		// Now update the version and save the updated file
-		fileVersion = 8;
+		fileVersion = VersionInfo.applicationSettingsVersion;
 		save();
 
-		// Set file to be current
+		// Now update the version and save the updated file
 		isFileCurrent = true;
 
 		// Run a validation
