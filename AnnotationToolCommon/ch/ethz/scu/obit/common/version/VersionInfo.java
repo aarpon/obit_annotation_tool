@@ -19,12 +19,12 @@ public class VersionInfo {
 	 * Copyright string
 	 */
 	public static final String copyright = "Copyright " + Character.toString('\u00A9')
-			+ " 2012 - 2019, Single Cell Unit, " + "D-BSSE, ETH Zurich (Basel)";
+			+ " 2012 - 2020, Single Cell Unit, " + "D-BSSE, ETH Zurich (Basel)";
 
 	/**
 	 * Application settings (XML) file version
 	 */
-	public static final int applicationSettingsVersion = 8;
+	public static final int applicationSettingsVersion = 9;
 
 	/**
 	 * Application updater settings (XML) file version

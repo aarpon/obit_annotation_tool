@@ -84,6 +84,9 @@ public class AppSettings extends AbstractSettings {
 			options.add("");
 		} else if (name.equals("DatamoverIncomingDir")) {
 			options.add("");
+		} else if (name.equals("CreateMarkerFile")) {
+			options.add("no");
+			options.add("yes");
 		} else if (name.equals("ConfigurationName")) {
 			options.add("Default");
 		} else {
@@ -142,6 +145,7 @@ public class AppSettings extends AbstractSettings {
 		names.add("HumanFriendlyHostName");
 		names.add("UserDataDir");
 		names.add("DatamoverIncomingDir");
+		names.add("CreateMarkerFile");
 
 		return names;
 	}
@@ -183,6 +187,8 @@ public class AppSettings extends AbstractSettings {
 		} else if (name.equals("UserDataDir")) {
 			return false;
 		} else if (name.equals("DatamoverIncomingDir")) {
+			return false;
+		} else if (name.equals("CreateMarkerFile")) {
 			return false;
 		} else if (name.equals("ConfigurationName")) {
 			return true;

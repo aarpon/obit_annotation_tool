@@ -23,6 +23,8 @@ public class ATDataMover {
 	File sourceDir;
 	File targetDir;
 
+	boolean createMarkerDir = false;
+
 	// Secure random number generator
 	private SecureRandom random;
 
@@ -49,6 +51,11 @@ public class ATDataMover {
 			throw new IllegalArgumentException("sourceDir must be a directory!");
 		}
 
+		if (globalSettingsManager.createMarkerFileInDatamoverIncomingFolder().equals("yes")) {
+			createMarkerDir = true;
+		} else {
+			createMarkerDir = false;
+		}
 	}
 
 	/**
@@ -126,13 +133,32 @@ public class ATDataMover {
 						// nor target folders exist!
 						JOptionPane.showMessageDialog(null,
 								"Failed copying " + sourceDir + " to " + fullTarget + "!\n"
-										+ "Please contact your administrator. The application " + "will now exit!",
+										+ "Please contact your administrator. The application will now exit!",
 								"Fatal error!", JOptionPane.ERROR_MESSAGE);
 						System.exit(1);
 
 					}
 				}
 
+			}
+		}
+
+		// If requested, create the .MARKER_is_finished file
+		if (this.createMarkerDir == true) {
+			File markerFileName = new File(targetDir + File.separator + ".MARKER_is_finished_" + uniqueID);
+			boolean success;
+			try {
+				success = markerFileName.createNewFile();
+			} catch (IOException ioe) {
+				success = false;
+			}
+
+			if (success == false) {
+				JOptionPane.showMessageDialog(null,
+						"Could not create the marker file to trigger registration!\n"
+								+ "Please contact your administrator. The application will now exit!",
+						"Fatal error!", JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
 			}
 		}
 

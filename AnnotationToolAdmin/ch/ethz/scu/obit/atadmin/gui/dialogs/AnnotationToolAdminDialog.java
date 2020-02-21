@@ -60,6 +60,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 	protected JComboBox<String> acqStationsList;
 	protected JComboBox<String> configurationNameList;
 	protected JComboBox<String> acceptSelfSignedCertsList;
+	protected JComboBox<String> createMarkerFileList;
 
 	AppSettingsManager manager;
 
@@ -368,7 +369,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 
 		// Add a label for the options of accepting self-signed
 		// certificates
-		JLabel certLabel = new JLabel(arrow + "Accept self-signed SSL " + "certificates when logging in to openBIS");
+		JLabel certLabel = new JLabel(arrow + "Accept self-signed SSL certificates when logging in to openBIS");
 		constraints.gridx = 0;
 		constraints.gridy = ++rowIndex;
 		constraints.gridwidth = 20;
@@ -391,7 +392,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 			}
 		}
 		if (index == -1) {
-			String msg = "Unknown option for accepting self-signed " + "certificates! Defaulting to \""
+			String msg = "Unknown option for accepting self-signed certificates! Defaulting to \""
 					+ manager.defaultValueForSetting("AcceptSelfSignedCertificates") + "\".";
 			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
 			index = 0;
@@ -481,8 +482,8 @@ public class AnnotationToolAdminDialog extends JDialog {
 						// among servers!
 						if (manager.doesSettingExist("AcquisitionStation", value)) {
 							JOptionPane.showMessageDialog(null,
-									"This acquisition station has already " + "been assigned to another server!",
-									"Error", JOptionPane.ERROR_MESSAGE);
+									"This acquisition station has already been assigned to another server!", "Error",
+									JOptionPane.ERROR_MESSAGE);
 							return;
 						}
 					}
@@ -616,7 +617,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 					if (manager.settingMustBeUnique("UserDataDir")) {
 						if (manager.doesSettingExist("UserDataDir", selUserDataDir)) {
 							JOptionPane.showMessageDialog(null,
-									"This user directory has already been " + "assigned to another server!", "Error",
+									"This user directory has already been assigned to another server!", "Error",
 									JOptionPane.ERROR_MESSAGE);
 							return;
 						}
@@ -708,6 +709,82 @@ public class AnnotationToolAdminDialog extends JDialog {
 		constraints.weighty = 1.0;
 		constraints.insets = new Insets(5, 5, 5, 5);
 		add(infoLabel, constraints);
+
+		// Add a label for the options of creating the marker file to trigger
+		// registration
+		JLabel createMarkerFileLabel = new JLabel(
+				arrow + "(Advanced) Create marker file to trigger registration from the incoming folder");
+		constraints.gridx = 0;
+		constraints.gridy = ++rowIndex;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(createMarkerFileLabel, constraints);
+
+		// Add a drop-down menu for the options of accepting self-signed
+		// certificates
+		String createMarkerFile = manager.getSettingValue("CreateMarkerFile");
+		ArrayList<String> createMarkerFileOptions = manager.possibleValuesForSetting("CreateMarkerFile");
+		index = -1;
+		for (int i = 0; i < createMarkerFileOptions.size(); i++) {
+			if (createMarkerFileOptions.get(i).equals(createMarkerFile)) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) {
+			String msg = "Unknown option for creating marker file! Defaulting to \""
+					+ manager.defaultValueForSetting("CreateMarkerFile") + "\".";
+			JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+			index = 0;
+		}
+		createMarkerFileList = new JComboBox<String>();
+		for (String currCreateMarkerFileOption : createMarkerFileOptions) {
+			createMarkerFileList.addItem(currCreateMarkerFileOption);
+		}
+		createMarkerFileList.setSelectedIndex(index);
+		createMarkerFileList.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("comboBoxChanged")) {
+					String value = (String) createMarkerFileList.getSelectedItem();
+					if (manager.getSettingValue("CreateMarkerFile").equals(value)) {
+						// No change, just return
+						return;
+					}
+					if (manager.settingMustBeUnique("CreateMarkerFile")) {
+						if (manager.doesSettingExist("CreateMarkerFile", value)) {
+							JOptionPane.showMessageDialog(null, "You cannot duplicate this setting value!", "Error",
+									JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+					}
+					// We can store it
+					manager.setSettingValue("CreateMarkerFile", value);
+				}
+			}
+		});
+		constraints.gridx = 0;
+		constraints.gridy = ++rowIndex;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		add(createMarkerFileList, constraints);
+
+		// Add a label for the info text
+		JLabel infoMarkerLabel = new JLabel(
+				"This will work only if the Datamover incoming folder is also the dropbox folder.");
+		constraints.gridx = 0;
+		constraints.gridy = ++rowIndex;
+		constraints.gridwidth = 20;
+		constraints.gridheight = 1;
+		constraints.weightx = 1.0;
+		constraints.weighty = 1.0;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		add(infoMarkerLabel, constraints);
 
 		// Some spacer
 		JLabel spacerLabel = new JLabel("");
@@ -899,6 +976,7 @@ public class AnnotationToolAdminDialog extends JDialog {
 		acceptSelfSignedCertsList.setSelectedItem(manager.getSettingValue("AcceptSelfSignedCertificates"));
 		userdirButton.setText(manager.getSettingValue("UserDataDir"));
 		dirButton.setText(manager.getSettingValue("DatamoverIncomingDir"));
+		createMarkerFileList.setSelectedItem(manager.getSettingValue("CreateMarkerFile"));
 
 		// Enable/disable buttons
 		toggleDynamicWidgets();

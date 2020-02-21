@@ -198,18 +198,6 @@ class UserSettingsManager {
 	}
 
 	/**
-	 * Set without persisting the favorite configuration. The favorite configuration
-	 * MUST be one of the configurations passed in the UserSettingsManager class
-	 * constructor.
-	 *
-	 * @param configuration User settings object.
-	 * @return true if the favorite configuration could be set, false otherwise.
-	 */
-	private boolean setFavoriteConfiguration(UserSettings configuration) {
-		return setFavoriteConfiguration(configuration.getConfigurationName());
-	}
-
-	/**
 	 * Set and persist the default project for the active server.
 	 *
 	 * Please notice that the validation of the passed project identifier must be

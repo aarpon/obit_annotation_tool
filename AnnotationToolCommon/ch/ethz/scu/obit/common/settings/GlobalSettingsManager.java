@@ -162,6 +162,18 @@ public class GlobalSettingsManager {
 	}
 
 	/**
+	 * Returns whether the marker file to trigger registration shold be created
+	 * after moving the data to the Datamover incoming folder.
+	 *
+	 * This is an Application Setting.
+	 *
+	 * @return "yes" if the marker should be created, or "no" otherwise.
+	 */
+	public String createMarkerFileInDatamoverIncomingFolder() {
+		return appManager.getSettingValue("CreateMarkerFile");
+	}
+
+	/**
 	 * Set the user's favorite configuration..
 	 *
 	 * The configuration must be one of those defined by the Annotation Tool Admin

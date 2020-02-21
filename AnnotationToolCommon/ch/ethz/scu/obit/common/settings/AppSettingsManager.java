@@ -375,14 +375,22 @@ public class AppSettingsManager {
 			fileVersion = -1;
 		}
 
-		// If the file version is 7, we try to import and upgrade
+		// If the file version is less than 7, we abort.
 		if (fileVersion < 7) {
 			isFileCurrent = false;
 			isFileValid = false;
 			errorMessage = "Settings file too old to be imported. Please create new configuration.";
 		}
+
+		// If the file version is 7, we try to import and upgrade
 		if (fileVersion == 7) {
-			return loadV7();
+			loadV7();
+			return loadV8();
+		}
+
+		// If the file version is 8, we try to import and upgrade
+		if (fileVersion == 8) {
+			return loadV8();
 		}
 
 		// Now process all children
@@ -517,6 +525,105 @@ public class AppSettingsManager {
 
 		// Now update the version and save the updated file
 		fileVersion = 8;
+		save();
+
+		// Set file to be current
+		isFileCurrent = true;
+
+		// Run a validation
+		if (!allSet()) {
+			errorMessage = "File did not pass validation.";
+			isFileValid = false;
+			return false;
+		}
+
+		// Set the file to be valid
+		isFileValid = true;
+
+		// Reset error message
+		errorMessage = "";
+
+		// Return success
+		return true;
+	}
+
+	/**
+	 * Try reading settings from file. If loading fails, current settings are left
+	 * untouched.
+	 *
+	 * @return true if the settings were loaded correctly, false otherwise.
+	 */
+	public boolean loadV8() {
+
+		// Make sure the Properties file exists
+		fileExists = settingsFileExists();
+		if (!fileExists) {
+			isFileRead = false;
+			isFileCurrent = false;
+			isFileValid = false;
+			fileVersion = -1;
+			errorMessage = "Settings file does not exist.";
+			return false;
+		}
+
+		// Instantiate new Settings
+		ArrayList<AppSettings> loadedAppSettings = new ArrayList<AppSettings>();
+
+		// Read and parse the XML settings file
+		Document doc = readXMLFile();
+		if (doc == null) {
+			// Error message already set in readXMLFile()
+			return false;
+		}
+
+		// Get the root node
+		Element rootNode = doc.getDocumentElement();
+
+		// Store the file version
+		try {
+			fileVersion = Integer.parseInt(rootNode.getAttribute("version"));
+
+			if (fileVersion != 8) {
+				isFileCurrent = false;
+				this.errorMessage = "Expected settings file version 8, found " + fileVersion + ".";
+				return false;
+			}
+		} catch (NumberFormatException n) {
+			fileVersion = -1;
+		}
+
+		// Now process all children
+		NodeList openBISURLNodes = rootNode.getChildNodes();
+		for (int i = 0; i < openBISURLNodes.getLength(); i++) {
+			Node openBISURL = openBISURLNodes.item(i);
+
+			// Create a new AppSettings object
+			AppSettings setting = new AppSettings();
+
+			// Get and add the attributes
+			NamedNodeMap attrs = openBISURL.getAttributes();
+
+			for (int j = 0; j < attrs.getLength(); j++) {
+
+				// Get attribute name and value
+				String name = attrs.item(j).getNodeName();
+				String value = attrs.item(j).getNodeValue();
+
+				// Store it
+				setting.setSettingValue(name, value);
+			}
+
+			// Now add the AppSettings object
+			loadedAppSettings.add(setting);
+		}
+
+		// Now store the loaded settings
+		listAppSettings = loadedAppSettings;
+		currentSettingsIndex = 0;
+		isFileRead = true;
+
+		// Now update the version and save the updated file
+		fileVersion = 9;
 		save();
 
 		// Set file to be current
