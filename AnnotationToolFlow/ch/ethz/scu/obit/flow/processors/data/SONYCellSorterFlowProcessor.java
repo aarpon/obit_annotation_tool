@@ -13,35 +13,39 @@ import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
 /**
- * BIORADS3eFlowProcessor parses folder structures created by the following
+ * SONYCellSorterFlowProcessor parses folder structures created by the following
  * software and hardware combination:
  *
- * ProSort on BIORAD S3e Cell Sorter
+ * <ul>
+ * <li>? (x.x) on SONY SH800S Cell Sorter</li>
+ * <li>? (x.x) on SONY MA900 Multi-Application Cell Sorter</li>
+ * </ul>
  *
  * @author Aaron Ponti
  */
-public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
+public class SONYCellSorterFlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
 	static {
 		knownHardwareStrings = new HashMap<String, String>();
 
-		// S3
-		knownHardwareStrings.put("S3", "S3e");
+		// SONY MA900 Multi-Application Cell Sorter
+		knownHardwareStrings.put("LE-MA900FP", "SONY MA900");
+
+		// SONY SH800S Cell Sorter
+		knownHardwareStrings.put("LE-SH800SZFCPL", "SONY SH800S");
+
 	}
 
 	/**
 	 * Constructor
 	 * 
 	 * @param fullUserFolderName Full path of the user folder containing the
-	 *                           exported experiments.
+	 *                           experiments.
 	 */
-	public BIORADS3eFlowProcessor(String fullUserFolderName) {
-
-		// Call base constructor
+	public SONYCellSorterFlowProcessor(String fullUserFolderName) {
 		super(fullUserFolderName);
-
 	}
 
 	/**
@@ -54,11 +58,6 @@ public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
 		return "FCS-3.x based flow cytometry hardware";
 	}
 
-	/**
-	 * Parse the file to extract data and metadata.
-	 * 
-	 * @return true if parsing was successful, false otherwise.
-	 */
 	@Override
 	public boolean parse() {
 
@@ -79,67 +78,8 @@ public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
 
 	}
 
-	/**
-	 * Return a String representation of the BDLSRFortessaFlowProcessor.
-	 * 
-	 * @return String containing a description of the BDLSRFortessaFlowProcessor.
-	 */
-	@Override
-	public String toString() {
-		return userFolder.getName();
-	}
-
-	/**
-	 * Return a simplified class name to use in XML.
-	 * 
-	 * @return simplified class name.
-	 */
-	@Override
-	public String getType() {
-		return "FLOW";
-	}
-
-	/**
-	 * Extract and store the Experiment attributes
-	 * 
-	 * @param processor FCSProcessor with already scanned file
-	 * @return a key-value map of attributes
-	 */
-	protected Map<String, String> getExperimentAttributes(FCSReader processor) {
-		Map<String, String> attributes = new HashMap<String, String>();
-
-		// Owner name
-		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
-
-		// Hardware string
-		String acqHardwareString = processor.getStandardKeyword("$CYT");
-		if (knownHardwareStrings.containsKey(acqHardwareString)) {
-			// Standardize the hardware string
-			acqHardwareString = knownHardwareStrings.get(acqHardwareString);
-		} else {
-			validator.isValid = false;
-			validator.invalidFilesOrFolders.put(processor.getFile(), "Wrong hardware string: " + acqHardwareString);
-		}
-		attributes.put("acq_hardware", acqHardwareString);
-
-		// Acquisition software
-		attributes.put("acq_software", "ProSort");
-
-		// Acquisition date
-		attributes.put("date", processor.getStandardKeyword("$DATE"));
-
-		return attributes;
-	}
-
-	/**
-	 * Scan the folder recursively and process all fcs files found
-	 * 
-	 * @param dir Full path to the directory to scan
-	 * @throws IOException Thrown if a FCS file could not be processed
-	 */
 	@Override
 	protected void recursiveDir(File dir) throws IOException {
-
 		// To make things simple and robust, we make sure that the first
 		// thing we process at any sub-folder level is an FCS file.
 		String[] files = getSimplySortedList(dir);
@@ -267,45 +207,34 @@ public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
 			// Keep track of current experiment
 			currentExperiment = expDesc;
 
-			// Is the container a Tray or Specimen?
-			if (identifyContainerType(processor).equals("TRAY")) {
-
-				validator.isValid = false;
-				validator.invalidFilesOrFolders.put(file,
-						"This experiment contains TRAYs, which are not expected from " + " the S3e Cell Sorter!");
-				return;
-
+			// BDInflux does not have plates (TRAYs)
+			// Create a new Specimen or reuse an existing one
+			Specimen specDesc;
+			String specName = getSpecimenName(processor);
+			String specKey = experimentName + "_" + specName;
+			if (expDesc.specimens.containsKey(specKey)) {
+				specDesc = expDesc.specimens.get(specKey);
 			} else {
+				specDesc = new Specimen(specName);
+				// Store attributes
+				specDesc.addAttributes(getSpecimenAttributes(processor));
+				// Store it in the experiment descriptor
+				expDesc.specimens.put(specKey, specDesc);
+			}
 
-				// Create a new Specimen or reuse an existing one
-				Specimen specDesc;
-				String specName = getSpecimenName(processor);
-				String specKey = experimentName + "_" + specName;
-				if (expDesc.specimens.containsKey(specKey)) {
-					specDesc = expDesc.specimens.get(specKey);
-				} else {
-					specDesc = new Specimen(specName);
-					// Store attributes
-					specDesc.addAttributes(getSpecimenAttributes(processor));
-					// Store it in the experiment descriptor
-					expDesc.specimens.put(specKey, specDesc);
-				}
-
-				// Create a new Tube descriptor or reuse an existing one
-				Tube tubeDesc;
-				String tubeName = getTubeOrWellName(processor);
-				String tubeKey = specKey + "_" + tubeName;
-				if (!specDesc.tubes.containsKey(tubeKey)) {
-					tubeDesc = new Tube(tubeName, file, userRootFolder);
-					// Store attributes
-					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
-					// Store events and parameter attributes
-					tubeDesc.fcsFile.parameterList = new FCSFileParameterList(processor.numEvents(),
-							processor.numParameters(), processor.parametersAttr);
-					// Store it in the specimen descriptor
-					specDesc.tubes.put(tubeKey, tubeDesc);
-				}
-
+			// Create a new Tube descriptor or reuse an existing one
+			Tube tubeDesc;
+			String tubeName = getTubeOrWellName(processor);
+			String tubeKey = specKey + "_" + tubeName;
+			if (!specDesc.tubes.containsKey(tubeKey)) {
+				tubeDesc = new Tube(tubeName, file, userRootFolder);
+				// Store attributes
+				tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
+				// Store events and parameter attributes
+				tubeDesc.fcsFile.parameterList = new FCSFileParameterList(processor.numEvents(),
+						processor.numParameters(), processor.parametersAttr);
+				// Store it in the specimen descriptor
+				specDesc.tubes.put(tubeKey, tubeDesc);
 			}
 
 		}
@@ -327,15 +256,84 @@ public class BIORADS3eFlowProcessor extends AbstractFlowProcessor {
 	}
 
 	/**
+	 * Return the experiment name stored in the FCS file.
+	 *
+	 * If the FCS file does not contain an experiment name, the name of the folder
+	 * containing the FCS file is returned as experiment name.
+	 *
+	 * @param processor with already scanned file
+	 * @return name of the experiment
+	 */
+	@Override
+	protected String getExperimentName(FCSReader processor) {
+
+		// The Sortware software does not store the experiment name in the FCS file.
+		// Therefore, we return the name of the containing folder
+		File fcsFile = processor.getFile();
+		return fcsFile.getParentFile().getName();
+	}
+
+	/**
+	 * Extract and store the Experiment attributes
+	 * 
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
+	 */
+	protected Map<String, String> getExperimentAttributes(FCSReader processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
+
+		// Owner name
+		String owner = processor.getStandardKeyword("$EXP");
+		if (owner.equals("")) {
+			owner = "Unknown";
+		}
+		attributes.put("owner_name", owner);
+
+		// Hardware string
+		String acqHardwareString = processor.getStandardKeyword("$CYT");
+		if (knownHardwareStrings.containsKey(acqHardwareString)) {
+			// Standardize the hardware string
+			acqHardwareString = knownHardwareStrings.get(acqHardwareString);
+		} else {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(processor.getFile(), "Wrong hardware string: " + acqHardwareString);
+		}
+		attributes.put("acq_hardware", acqHardwareString);
+
+		// Software string: this is not found in the FCS file
+		// @TODO: Find out!
+		String acqSoftwareString = "";
+		if (acqHardwareString.contains("SH800")) {
+			acqSoftwareString = "SH 800";
+		} else if (acqHardwareString.contains("MA900")) {
+			acqSoftwareString = "Cell Sorter Software";
+		} else {
+			acqSoftwareString = "Unknown";
+		}
+
+		// Acquisition software
+		attributes.put("acq_software", acqSoftwareString);
+
+		// Acquisition date
+		attributes.put("date", processor.getStandardKeyword("$DATE"));
+
+		return attributes;
+	}
+
+	@Override
+	public String getType() {
+		return "FLOW";
+	}
+
+	/**
 	 * Returns true if the passed hardware string (from an FCS file) is a recognized
-	 * hardware string for the BD LSR Fortessa.
+	 * hardware string for one of the SONY Cell Sorters.
 	 * 
 	 * @param hardwareString Hardware string.
-	 * @return true if the string is a valid hardware string for the BD LSR
-	 *         Fortessa, false otherwise.
+	 * @return true if the string is a valid hardware string for one of the SONY
+	 *         Cell Sorters, false otherwise.
 	 */
 	public static boolean isValidHardwareString(String hardwareString) {
 		return knownHardwareStrings.containsKey(hardwareString);
 	}
-
 }
