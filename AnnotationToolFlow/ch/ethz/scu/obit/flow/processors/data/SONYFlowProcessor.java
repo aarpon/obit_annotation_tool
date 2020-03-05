@@ -304,7 +304,7 @@ public class SONYFlowProcessor extends AbstractFlowProcessor {
 		// @TODO: Find out!
 		String acqSoftwareString = "";
 		if (acqHardwareString.contains("SH800")) {
-			acqSoftwareString = "SH 800";
+			acqSoftwareString = "Cell Sorter SH800";
 		} else if (acqHardwareString.contains("MA900")) {
 			acqSoftwareString = "Cell Sorter Software";
 		} else {
