@@ -23,7 +23,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  *
  * @author Aaron Ponti
  */
-public class SONYCellSorterFlowProcessor extends AbstractFlowProcessor {
+public class SONYFlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
@@ -44,7 +44,7 @@ public class SONYCellSorterFlowProcessor extends AbstractFlowProcessor {
 	 * @param fullUserFolderName Full path of the user folder containing the
 	 *                           experiments.
 	 */
-	public SONYCellSorterFlowProcessor(String fullUserFolderName) {
+	public SONYFlowProcessor(String fullUserFolderName) {
 		super(fullUserFolderName);
 	}
 
