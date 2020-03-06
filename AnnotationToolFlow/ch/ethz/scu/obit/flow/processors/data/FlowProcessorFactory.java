@@ -48,8 +48,10 @@ public class FlowProcessorFactory {
 			return new BCMoFloXDPFlowProcessor(folder);
 		} else if (BIORADS3eFlowProcessor.isValidHardwareString(hardwareString)) {
 			return new BIORADS3eFlowProcessor(folder);
-		} else if (SONYFlowProcessor.isValidHardwareString(hardwareString)) {
-			return new SONYFlowProcessor(folder);
+		} else if (SONYSH800SFlowProcessor.isValidHardwareString(hardwareString)) {
+			return new SONYSH800SFlowProcessor(folder);
+		} else if (SONYMA900FlowProcessor.isValidHardwareString(hardwareString)) {
+			return new SONYMA900FlowProcessor(folder);
 		} else {
 			throw new IOException("Unknown hardware type!");
 		}

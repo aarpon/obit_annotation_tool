@@ -23,16 +23,15 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  *
  * @author Aaron Ponti
  */
-public class SONYSH800SFlowProcessor extends AbstractFlowProcessor {
+public class SONYMA900FlowProcessor extends AbstractFlowProcessor {
 
 	/* Map of known hardware strings to supported hardware */
 	private static final Map<String, String> knownHardwareStrings;
 	static {
 		knownHardwareStrings = new HashMap<String, String>();
 
-		// SONY SH800S Cell Sorter
-		knownHardwareStrings.put("LE-SH800SZFCPL", "SONY SH800S");
-
+		// SONY MA900 Multi-Application Cell Sorter
+		knownHardwareStrings.put("LE-MA900FP", "SONY MA900");
 	}
 
 	/**
@@ -41,7 +40,7 @@ public class SONYSH800SFlowProcessor extends AbstractFlowProcessor {
 	 * @param fullUserFolderName Full path of the user folder containing the
 	 *                           experiments.
 	 */
-	public SONYSH800SFlowProcessor(String fullUserFolderName) {
+	public SONYMA900FlowProcessor(String fullUserFolderName) {
 		super(fullUserFolderName);
 	}
 
@@ -300,8 +299,8 @@ public class SONYSH800SFlowProcessor extends AbstractFlowProcessor {
 		// Software string: this is not found in the FCS file
 		// @TODO: Find out!
 		String acqSoftwareString = "";
-		if (acqHardwareString.contains("SH800")) {
-			acqSoftwareString = "Cell Sorter SH800";
+		if (acqHardwareString.contains("MA900")) {
+			acqSoftwareString = "Cell Sorter Software";
 		} else {
 			acqSoftwareString = "Unknown";
 		}
