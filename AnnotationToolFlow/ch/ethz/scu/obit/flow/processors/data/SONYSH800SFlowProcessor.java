@@ -277,8 +277,8 @@ public class SONYSH800SFlowProcessor extends AbstractFlowProcessor {
     @Override
     protected String getExperimentName(FCSReader processor) {
 
-        // The Sortware software does not store the experiment name in the FCS
-        // file.
+        // The software does not store the experiment name in
+        // the FCS file.
         // Therefore, we return the name of the containing folder
         File fcsFile = processor.getFile();
         return fcsFile.getParentFile().getName();
