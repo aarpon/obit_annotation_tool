@@ -147,8 +147,7 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
             try {
                 major = Integer.parseInt(m.group(2));
                 // Known valid version is 2.3. The assumption is that 2.x and
-                // anything
-                // younger are fine.
+                // anything younger are fine.
                 if (major < 2) {
                     validator.isValid = false;
                     validator.invalidFilesOrFolders.put(processor.getFile(),
