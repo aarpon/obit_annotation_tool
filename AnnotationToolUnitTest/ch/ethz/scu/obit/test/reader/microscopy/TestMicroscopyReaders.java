@@ -3,6 +3,7 @@ package ch.ethz.scu.obit.test.reader.microscopy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Map;
 
 import org.junit.Test;
@@ -15,6 +16,7 @@ import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.Experimen
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyCompositeFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFile;
 import ch.ethz.scu.obit.microscopy.processors.data.MicroscopyProcessor.MicroscopyFileSeries;
+import ch.ethz.scu.obit.microscopy.readers.BioFormatsWrapper;
 
 public class TestMicroscopyReaders {
 
@@ -450,6 +452,27 @@ public class TestMicroscopyReaders {
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    public void testBioformatsWrapper() throws Exception {
+
+        File[] files = (new File(dataFolder + "/user/multiple/xyzt"))
+                .listFiles();
+
+        for (File file : files) {
+
+            if (file.toString().endsWith(".tif")) {
+                BioFormatsWrapper wrapper = new BioFormatsWrapper(file);
+                if (!wrapper.parse()) {
+                    throw new Exception(
+                            "Parsing the file " + file.getName() + " failed!");
+                }
+                byte[] bytes = wrapper.ReadBytes();
+                wrapper.close();
+            }
+
         }
     }
 }

@@ -11,7 +11,7 @@ REM Delete the existing classes if they existing
 IF exist %CURRENT_DIR%\build\ch\ ( RMDIR /S /Q %CURRENT_DIR%\build\ch )
 
 REM Classpath
-SET CLASSPATH=..\..\..\lib\bioformats-5.9.2.jar
+SET CLASSPATH=..\..\..\lib\bioformats-6.5.0.jar
 
 REM Build path
 SET BUILD_PATH=%CURRENT_DIR%\build
