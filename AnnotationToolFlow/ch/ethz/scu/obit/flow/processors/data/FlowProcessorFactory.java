@@ -59,11 +59,12 @@ public class FlowProcessorFactory {
         } else if (SONYMA900FlowProcessor
                 .isValidHardwareString(hardwareString)) {
             return new SONYMA900FlowProcessor(folder);
+        } else if (BCCytoFLEXSFlowProcessor
+                .isValidHardwareString(hardwareString)) {
+            return new BCCytoFLEXSFlowProcessor(folder);
         } else {
-            throw new IOException(
-                    "Unknown hardware type:" + hardwareString + "!");
+            throw new IOException("Unknown hardware type!");
         }
-
     }
 
     private static String recursiveDir(File dir) {
