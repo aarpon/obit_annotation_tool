@@ -12,9 +12,9 @@
 	<classpathentry kind="lib" path="lib/dss_client/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/test/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/bioformats-5.9.2.jar"/>
+    <classpathentry kind="lib" path="lib/bioformats-5.9.2.jar"/>
 	<classpathentry kind="lib" path="lib/dss_client/ij.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.6.jar"/>
-	<classpathentry kind="lib" path="lib/v3_api/openBIS-API-V3-batteries-included-19.06.3-r1575289925.jar"/>
+	<classpathentry kind="lib" path="lib/v3_api/openBIS-API-V3-batteries-included-19.06.5-r1591106793.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
