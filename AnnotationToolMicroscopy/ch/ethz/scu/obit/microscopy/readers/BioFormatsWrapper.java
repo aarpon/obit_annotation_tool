@@ -38,25 +38,21 @@ public class BioFormatsWrapper {
     private int numberOfSeries = 0;
 
     private final static double[][] defaultChannelColors = {
-            {255.0,   0.0,   0.0, 255.0},
-            {  0.0, 255.0,   0.0, 255.0},
-            {  0.0,   0.0, 255.0, 255.0},
-            {255.0, 255.0,   0.0, 255.0},
-            {255.0,   0.0, 255.0, 255.0},
-            {  0.0, 255.0, 255.0, 255.0},
-            {255.0, 255.0, 255.0, 255.0},
-    };
+            { 255.0, 0.0, 0.0, 255.0 }, { 0.0, 255.0, 0.0, 255.0 },
+            { 0.0, 0.0, 255.0, 255.0 }, { 255.0, 255.0, 0.0, 255.0 },
+            { 255.0, 0.0, 255.0, 255.0 }, { 0.0, 255.0, 255.0, 255.0 },
+            { 255.0, 255.0, 255.0, 255.0 }, };
 
     private boolean isFileScanned = false;
 
     /**
      * Metadata attributes
      */
-    private final Map<String, HashMap<String, String>> attr =
-            new HashMap<String, HashMap<String, String>>();
+    private final Map<String, HashMap<String, String>> attr = new HashMap<String, HashMap<String, String>>();
 
     /**
      * Constructor
+     *
      * @param filename Full path to the file to process.
      */
     public BioFormatsWrapper(File filename) {
@@ -74,7 +70,8 @@ public class BioFormatsWrapper {
 
     /**
      * Alternate constructor
-     * @param filename Full path to the file to process.
+     *
+     * @param filename   Full path to the file to process.
      * @param groupFiles Toggles the file grouping behavior of the reader.
      */
     public BioFormatsWrapper(File filename, Boolean groupFiles) {
@@ -86,14 +83,17 @@ public class BioFormatsWrapper {
         this.referencedFiles = new ArrayList<String>();
 
         // Initialize
-        if (! init(groupFiles)) {
-            throw new RuntimeException("Could not initialize the BioFormats Library for file " + filename);
+        if (!init(groupFiles)) {
+            throw new RuntimeException(
+                    "Could not initialize the BioFormats Library for file "
+                            + filename);
         }
 
     }
 
     /**
      * Initialize the reader and sets up the OMEXML metadata store
+     *
      * @param groupFiles Toggles the file grouping behavior of the reader.
      * @return bool True if the initialization was successful, false otherwise.
      */
@@ -113,17 +113,15 @@ public class BioFormatsWrapper {
             factory = new ServiceFactory();
             service = factory.getInstance(OMEXMLService.class);
         } catch (DependencyException e) {
-            this.errorMessage =
-                    "Could not initialize bio-formats library. " +
-                            "Error was: " + e.getMessage();
+            this.errorMessage = "Could not initialize bio-formats library. "
+                    + "Error was: " + e.getMessage();
             return false;
         }
         try {
             omexmlMeta = service.createOMEXMLMetadata();
         } catch (ServiceException e) {
-            this.errorMessage =
-                    "Could not initialize bio-formats library. " +
-                            "Error was: " + e.getMessage();
+            this.errorMessage = "Could not initialize bio-formats library. "
+                    + "Error was: " + e.getMessage();
             return false;
         }
         reader.setMetadataStore(omexmlMeta);
@@ -132,12 +130,12 @@ public class BioFormatsWrapper {
         try {
             reader.setId(filename.getCanonicalPath());
         } catch (FormatException e) {
-            this.errorMessage =
-                    "Could not open file. Error was: " + e.getMessage();
+            this.errorMessage = "Could not open file. Error was: "
+                    + e.getMessage();
             return false;
         } catch (IOException e) {
-            this.errorMessage =
-                    "Could not open file. Error was: " + e.getMessage();
+            this.errorMessage = "Could not open file. Error was: "
+                    + e.getMessage();
             return false;
         }
 
@@ -146,8 +144,9 @@ public class BioFormatsWrapper {
     }
 
     /**
-     * Close file.
-     * The client is responsible to call close to release the file handle!
+     * Close file. The client is responsible to call close to release the file
+     * handle!
+     *
      * @return true if the file could be closed, false otherwise.
      */
     public boolean close() {
@@ -188,6 +187,7 @@ public class BioFormatsWrapper {
 
     /**
      * Return the version of the bio-formats library used.
+     *
      * @return String with the bio-formats library version.
      */
     public String bioformatsVersion() {
@@ -196,6 +196,7 @@ public class BioFormatsWrapper {
 
     /**
      * Return the error message
+     *
      * @return The error message.
      */
     public String getErrorMessage() {
@@ -204,6 +205,7 @@ public class BioFormatsWrapper {
 
     /**
      * Return true if the file was scanned already, false otherwise.
+     *
      * @return true if the file was scanned already, false otherwise.
      */
     public boolean isScanned() {
@@ -211,8 +213,9 @@ public class BioFormatsWrapper {
     }
 
     /**
-     * Scan the file for metadata information and stores it as a
-     * String-String map of key-value attributes.
+     * Scan the file for metadata information and stores it as a String-String
+     * map of key-value attributes.
+     *
      * @return true if parsing was successful, false otherwise.
      */
     public boolean parse() {
@@ -220,11 +223,13 @@ public class BioFormatsWrapper {
     }
 
     /**
-     * Scan the file for metadata information and stores it as a
-     * String-String map of key-value attributes.
-     * @param firstSeriesIndex Index of the first series in the keys of
-     * the attributes property. Useful if one needs to concatenate the
-     * attributes over consecutive calls of parse on different files.
+     * Scan the file for metadata information and stores it as a String-String
+     * map of key-value attributes.
+     *
+     * @param firstSeriesIndex Index of the first series in the keys of the
+     *                         attributes property. Useful if one needs to
+     *                         concatenate the attributes over consecutive calls
+     *                         of parse on different files.
      * @return true if parsing was successful, false otherwise.
      */
     public boolean parse(int firstSeriesIndex) {
@@ -258,13 +263,15 @@ public class BioFormatsWrapper {
                 HashMap<String, String> seriesAttr = new HashMap<String, String>();
 
                 // Series number
-                seriesAttr.put("numSeries", Integer.toString(i + firstSeriesIndex));
+                seriesAttr.put("numSeries",
+                        Integer.toString(i + firstSeriesIndex));
 
                 // Image name
                 seriesAttr.put("name", omexmlMeta.getImageName(i));
                 if (seriesAttr.get("name").equals("")) {
                     // If the name is empty, fall back to series_{numSeries}
-                    seriesAttr.put("name", "series_" + seriesAttr.get("numSeries"));
+                    seriesAttr.put("name",
+                            "series_" + seriesAttr.get("numSeries"));
                 }
 
                 // Image size X
@@ -287,8 +294,8 @@ public class BioFormatsWrapper {
 
                 // Is Signed
                 seriesAttr.put("isSigned",
-                        Boolean.toString(loci.formats.FormatTools.isSigned(
-                                reader.getPixelType())));
+                        Boolean.toString(loci.formats.FormatTools
+                                .isSigned(reader.getPixelType())));
 
                 // Is Little Endian
                 seriesAttr.put("isLittleEndian",
@@ -306,9 +313,8 @@ public class BioFormatsWrapper {
                 // Channel names
                 String[] channelNames = getChannelNames(i);
                 for (int c = 0; c < reader.getSizeC(); c++) {
-                    seriesAttr.put("channelName" + c,
-                            Normalizer.normalize(channelNames[c],
-                                    Normalizer.Form.NFD));
+                    seriesAttr.put("channelName" + c, Normalizer
+                            .normalize(channelNames[c], Normalizer.Form.NFD));
                 }
 
                 // Emission wavelengths
@@ -333,11 +339,9 @@ public class BioFormatsWrapper {
                 // Channel colors
                 double[][] colors = getChannelColors(i);
                 for (int c = 0; c < reader.getSizeC(); c++) {
-                    seriesAttr.put("channelColor" + c , "" +
-                            colors[c][0] + ", " +
-                            colors[c][1] + ", " +
-                            colors[c][2] + ", " +
-                            colors[c][3]);
+                    seriesAttr.put("channelColor" + c,
+                            "" + colors[c][0] + ", " + colors[c][1] + ", "
+                                    + colors[c][2] + ", " + colors[c][3]);
                 }
 
                 // NAs
@@ -347,7 +351,8 @@ public class BioFormatsWrapper {
                 } else if (NAs.length == 1) {
                     seriesAttr.put("NA", Double.toString(NAs[0]));
                 } else {
-                    // In some cases, the bioformats library returns an NA per series
+                    // In some cases, the bioformats library returns an NA per
+                    // series
                     // in others just one for all.
                     String strNAs = "";
                     try {
@@ -396,6 +401,7 @@ public class BioFormatsWrapper {
 
     /**
      * Return the parsed metadata attributes.
+     *
      * @return map of series attributes.
      */
     public Map<String, HashMap<String, String>> getAttributes() {
@@ -404,6 +410,7 @@ public class BioFormatsWrapper {
 
     /**
      * Return the number of series in the file/dataset.
+     *
      * @return the number of series.
      */
     public int getNumberOfSeries() {
@@ -412,7 +419,9 @@ public class BioFormatsWrapper {
     }
 
     /**
-     * Return all referenced files for all series in the dataset as a list of Strings
+     * Return all referenced files for all series in the dataset as a list of
+     * Strings
+     *
      * @return List of file names as Strings
      */
     public List<String> getReferencedFiles() {
@@ -421,7 +430,9 @@ public class BioFormatsWrapper {
 
     /**
      * Return the data type
-     * @return string datatype, one of "uint8", "uint16", "float", "unsupported".
+     *
+     * @return string datatype, one of "uint8", "uint16", "float",
+     *         "unsupported".
      */
     public String getDataType() {
 
@@ -432,7 +443,8 @@ public class BioFormatsWrapper {
 
         // Get and store the dataset type
         String datatype;
-        switch (loci.formats.FormatTools.getBytesPerPixel(reader.getPixelType())) {
+        switch (loci.formats.FormatTools
+                .getBytesPerPixel(reader.getPixelType())) {
         case 1:
             datatype = "uint8";
             break;
@@ -452,9 +464,10 @@ public class BioFormatsWrapper {
 
     /**
      * Return the channel excitation wavelengths
+     *
      * @param seriesNum index of the series to query
-     * @return array of excitation wavelengths.
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     * @return array of excitation wavelengths. Values that could not be
+     *         retrieved will be replaced by Double.NaN.
      */
     private double[] getExcitationWavelengths(int seriesNum) {
 
@@ -487,9 +500,10 @@ public class BioFormatsWrapper {
 
     /**
      * Return the channel emission wavelengths
+     *
      * @param seriesNum index of the series to query
-     * @return array of emission wavelengths.
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     * @return array of emission wavelengths. Values that could not be retrieved
+     *         will be replaced by Double.NaN.
      */
     private double[] getEmissionWavelengths(int seriesNum) {
 
@@ -523,10 +537,11 @@ public class BioFormatsWrapper {
 
     /**
      * Return the objective numerical aperture(s) for a given series
-     * @return array of numerical apertures for the series.
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     *
+     * @return array of numerical apertures for the series. Values that could
+     *         not be retrieved will be replaced by Double.NaN.
      */
-    private double [] getNAs() {
+    private double[] getNAs() {
 
         // Make sure the reader is open
         if (reader == null) {
@@ -566,8 +581,8 @@ public class BioFormatsWrapper {
      *
      * The series must have set in advance with reader.setSeries(num).
      *
-     * @return array of [X Y] stage position.
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     * @return array of [X Y] stage position. Values that could not be retrieved
+     *         will be replaced by Double.NaN.
      */
     private double[] getStagePosition() {
 
@@ -588,14 +603,14 @@ public class BioFormatsWrapper {
         Set<String> keys = metadata.keySet();
         if (keys.contains("X position")) {
             Object m = metadata.get("X position");
-            x = (double) ((Length)m).value(); // Java 6 compatibility
+            x = (double) ((Length) m).value(); // Java 6 compatibility
         } else {
             x = Double.NaN;
         }
 
         if (keys.contains("Y position")) {
             Object m = metadata.get("Y position");
-            y = (double) ((Length)m).value(); // Java 6 compatibility
+            y = (double) ((Length) m).value(); // Java 6 compatibility
         } else {
             y = Double.NaN;
         }
@@ -610,9 +625,10 @@ public class BioFormatsWrapper {
 
     /**
      * Return the channel colors [R, G, B, A]n for current series
+     *
      * @param seriesNum index of the series to query
-     * @return array of arrays of [R, G, B, A]n, with n = 1 .. nChannels
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     * @return array of arrays of [R, G, B, A]n, with n = 1 .. nChannels Values
+     *         that could not be retrieved will be replaced by Double.NaN.
      */
     private double[][] getChannelColors(int seriesNum) {
 
@@ -658,9 +674,10 @@ public class BioFormatsWrapper {
 
     /**
      * Return the acquisition date for the specified series
+     *
      * @param seriesNum index of series to query
-     * @return string acquisition date
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     * @return string acquisition date Values that could not be retrieved will
+     *         be replaced by Double.NaN.
      */
     private String getAcquisitionDate(int seriesNum) {
 
@@ -682,9 +699,10 @@ public class BioFormatsWrapper {
 
     /**
      * Return the voxel sizes for given series
+     *
      * @param seriesNum index of series to query
-     * @return array of doubles [voxelX, voxelY, voxelZ]
-     * Values that could not be retrieved will be replaced by Double.NaN.
+     * @return array of doubles [voxelX, voxelY, voxelZ] Values that could not
+     *         be retrieved will be replaced by Double.NaN.
      */
     private double[] getVoxelSizes(int seriesNum) {
 
@@ -730,12 +748,13 @@ public class BioFormatsWrapper {
         }
 
         // Return
-        return new double[]{voxelX, voxelY, voxelZ};
+        return new double[] { voxelX, voxelY, voxelZ };
 
     }
 
     /**
      * Return the channel names
+     *
      * @param seriesNum index of the series to query
      * @return array of channel names
      */
@@ -763,7 +782,8 @@ public class BioFormatsWrapper {
             // Make sure to remove "\0" end of the name
             // (as found for instance in LSM files)
             if (channelName.endsWith("\0")) {
-                channelName = channelName.substring(0, channelName.length() - 1);
+                channelName = channelName.substring(0,
+                        channelName.length() - 1);
             }
             channelNames[i] = channelName;
         }
@@ -773,6 +793,7 @@ public class BioFormatsWrapper {
 
     /**
      * Return the list of series indices extracted from the file names
+     *
      * @return List of series indices
      */
     public List<Integer> getSeriesIndices() {
@@ -783,6 +804,10 @@ public class BioFormatsWrapper {
         }
         Collections.sort(indices);
         return indices;
+    }
+
+    public byte[] ReadBytes() throws FormatException, IOException {
+        return this.reader.openBytes(0);
     }
 
     static public double[] getDefaultChannelColor(int channelIndex) {
