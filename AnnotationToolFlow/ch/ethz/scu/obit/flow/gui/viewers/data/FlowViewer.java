@@ -33,12 +33,14 @@ import ch.ethz.scu.obit.flow.readers.FCSReader;
 
 /**
  * Simple graphical viewer for the AbstractFlowProcessor
+ *
  * @author Aaron Ponti
  */
 public final class FlowViewer extends AbstractViewer {
 
     /**
      * Constructor
+     *
      * @param globalSettingsManager global settings manager.
      */
     public FlowViewer(GlobalSettingsManager globalSettingsManager) {
@@ -47,7 +49,7 @@ public final class FlowViewer extends AbstractViewer {
     }
 
     /**
-     *  Parse the FCS folder and append the resulting tree to the root
+     * Parse the FCS folder and append the resulting tree to the root
      */
     @Override
     public boolean parse(File userFolder) {
@@ -55,8 +57,8 @@ public final class FlowViewer extends AbstractViewer {
         // Process the user folder
         AbstractFlowProcessor flowprocessor;
         try {
-            flowprocessor = FlowProcessorFactory.createProcessor(
-                    userFolder.getCanonicalPath());
+            flowprocessor = FlowProcessorFactory
+                    .createProcessor(userFolder.getCanonicalPath());
         } catch (IOException e) {
             outputPane.err(e.getMessage());
             return false;
@@ -71,9 +73,10 @@ public final class FlowViewer extends AbstractViewer {
 
         // Make sure we have a valid dataset
         if (!flowprocessor.validator.isValid) {
-            DefaultTableModel model =
-                    (DefaultTableModel) invalidDatasetsTable.getModel();
-            for (File file : flowprocessor.validator.invalidFilesOrFolders.keySet()) {
+            DefaultTableModel model = (DefaultTableModel) invalidDatasetsTable
+                    .getModel();
+            for (File file : flowprocessor.validator.invalidFilesOrFolders
+                    .keySet()) {
                 String filePath;
                 try {
                     filePath = file.getCanonicalPath();
@@ -86,20 +89,22 @@ public final class FlowViewer extends AbstractViewer {
                     // TODO Auto-generated catch block
                     filePath = "Unknown";
                 }
-                model.addRow(new Object[] {filePath,
-                        flowprocessor.validator.invalidFilesOrFolders.get(file)});
+                model.addRow(new Object[] { filePath,
+                        flowprocessor.validator.invalidFilesOrFolders
+                                .get(file) });
             }
             return false;
         }
 
         // We will append the experiment nodes directly to the root node
-        createNodes((RootNode)rootNode, flowprocessor.folderDescriptor);
+        createNodes((RootNode) rootNode, flowprocessor.folderDescriptor);
 
         return true;
     }
 
     /**
      * Called when selection in the Tree View is changed.
+     *
      * @param e A TreeSelectionEvent
      */
     @Override
@@ -133,37 +138,29 @@ public final class FlowViewer extends AbstractViewer {
             // Update the reference to the first contained experiment
             // to force a refresh of the editor when a new folder is
             // chosen
-            node = (AbstractNode)node.getChildAt(0);
-        } else if (className.equals("Experiment")) {
+            node = (AbstractNode) node.getChildAt(0);
+        } else if (className.equals("SorterExperiment")
+                || className.equals("AnalyzerExperiment")) {
             clearMetadataTable();
             addAttributesToMetadataTable(
-                    ((Experiment)
-                            nodeInfo).getAttributes());
+                    ((Experiment) nodeInfo).getAttributes());
         } else if (className.equals("Tray")) {
             clearMetadataTable();
-            addAttributesToMetadataTable(
-                    ((Tray)
-                            nodeInfo).getAttributes());
+            addAttributesToMetadataTable(((Tray) nodeInfo).getAttributes());
         } else if (className.equals("Specimen")) {
             clearMetadataTable();
-            addAttributesToMetadataTable(
-                    ((Specimen)
-                            nodeInfo).getAttributes());
+            addAttributesToMetadataTable(((Specimen) nodeInfo).getAttributes());
         } else if (className.equals("Tube")) {
             clearMetadataTable();
-            addAttributesToMetadataTable(
-                    ((Tube)
-                            nodeInfo).getAttributes());
+            addAttributesToMetadataTable(((Tube) nodeInfo).getAttributes());
         } else if (className.equals("Well")) {
             clearMetadataTable();
-            addAttributesToMetadataTable(
-                    ((Well)
-                            nodeInfo).getAttributes());
+            addAttributesToMetadataTable(((Well) nodeInfo).getAttributes());
         } else if (className.equals("FCSFile")) {
             // Cast
             FCSFile fcsFile = (FCSFile) nodeInfo;
-            FCSReader fcs = new FCSReader(
-                    new File(fcsFile.getFullPath()), false);
+            FCSReader fcs = new FCSReader(new File(fcsFile.getFullPath()),
+                    false);
             try {
                 fcs.parse();
                 clearMetadataTable();
@@ -174,14 +171,14 @@ public final class FlowViewer extends AbstractViewer {
         } else if (className.equals("FCSFileParameterList")) {
             clearMetadataTable();
             addAttributesToMetadataTable(
-                    ((FCSFileParameterList)
-                            nodeInfo).getAttributes());
+                    ((FCSFileParameterList) nodeInfo).getAttributes());
         } else {
             clearMetadataTable();
         }
 
         // Get the experiment name
-        AbstractNode expNode = getParentNodeByName(node, "Experiment");
+        AbstractNode expNode = getParentNodeByNameFuzzy(node, "Experiment",
+                "endswith");
         if (expNode != null && expNode != lastSelectedExperiment) {
 
             // Update the lastSelectedFolder property
@@ -199,7 +196,8 @@ public final class FlowViewer extends AbstractViewer {
 
     /**
      * Create the nodes for the tree
-     * @param top Root node for the tree
+     *
+     * @param top              Root node for the tree
      * @param folderDescriptor A folder descriptor object.
      */
     protected void createNodes(RootNode top, UserFolder folderDescriptor) {
@@ -215,17 +213,16 @@ public final class FlowViewer extends AbstractViewer {
         for (String expKey : folderDescriptor.experiments.keySet()) {
 
             // Get the ExperimentDescriptor
-            Experiment e =
-                    folderDescriptor.experiments.get(expKey);
+            Experiment e = folderDescriptor.experiments.get(expKey);
 
             // Add the experiments
             experiment = new ExperimentNode(e);
             top.add(experiment);
 
-            for (String trayKey: e.trays.keySet()) {
+            for (String trayKey : e.trays.keySet()) {
 
                 // Get the TrayDescriptor
-                Tray t  = e.trays.get(trayKey);
+                Tray t = e.trays.get(trayKey);
 
                 // Add the trays
                 tray = new TrayNode(t);
@@ -243,7 +240,7 @@ public final class FlowViewer extends AbstractViewer {
                     for (String wellKey : s.tubes.keySet()) {
 
                         // Get the TubeDescriptor
-                        Well wl  = (Well) s.tubes.get(wellKey);
+                        Well wl = (Well) s.tubes.get(wellKey);
 
                         // Add the tubes
                         well = new WellNode(wl);
@@ -254,7 +251,8 @@ public final class FlowViewer extends AbstractViewer {
                         well.add(fcs);
 
                         // Add the fcs file parameter list
-                        fcsparam = new FCSFileParemeterListNode(wl.fcsFile.parameterList);
+                        fcsparam = new FCSFileParemeterListNode(
+                                wl.fcsFile.parameterList);
                         fcs.add(fcsparam);
                     }
 
@@ -285,7 +283,8 @@ public final class FlowViewer extends AbstractViewer {
                     tube.add(fcs);
 
                     // Add the fcs file parameter list
-                    fcsparam = new FCSFileParemeterListNode(tb.fcsFile.parameterList);
+                    fcsparam = new FCSFileParemeterListNode(
+                            tb.fcsFile.parameterList);
                     fcs.add(fcsparam);
                 }
 
@@ -295,8 +294,9 @@ public final class FlowViewer extends AbstractViewer {
     }
 
     /**
-     *  React to actions
-     *  @param e An ActionEvent
+     * React to actions
+     *
+     * @param e An ActionEvent
      */
     @Override
     public void actionPerformed(ActionEvent e) {
