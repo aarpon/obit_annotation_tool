@@ -393,8 +393,20 @@ abstract public class AbstractViewer extends Observable
             parentNode = (AbstractNode) selectedNode.getParent();
             while (parentNode != null) {
                 // Are we at the folder node?
-                if (parentNode.getUserObject().getClass().getSimpleName()
-                        .equals(nodeName)) {
+                String parentNodeClassName = parentNode.getUserObject()
+                        .getClass().getSimpleName();
+
+                if (comparisonMode.equals("matches")
+                        && parentNodeClassName.equals(nodeName)) {
+                    // We are at the selected node, we just return it
+                    return parentNode;
+                } else if (comparisonMode.equals("contains")
+                        && parentNodeClassName.contains(nodeName)) {
+                    // We are at the selected node, we just return it
+                    return parentNode;
+                } else if (comparisonMode.equals("endswith")
+                        && parentNodeClassName.endsWith(nodeName)) {
+                    // We are at the selected node, we just return it
                     return parentNode;
                 } else {
                     parentNode = (AbstractNode) parentNode.getParent();
