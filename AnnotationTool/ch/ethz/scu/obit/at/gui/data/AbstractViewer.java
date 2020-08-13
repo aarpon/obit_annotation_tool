@@ -950,7 +950,6 @@ implements ActionListener, TreeSelectionListener {
         });
         popup.add(navigateToUserFolderMenuItem);
 
-<<<<<<< HEAD
         // Set target project for all experiments
         JMenuItem targetProjectMenuItem = new JMenuItem("Set target project for all experiments");
         targetProjectMenuItem.addActionListener(new ActionListener() {
@@ -976,9 +975,7 @@ implements ActionListener, TreeSelectionListener {
             }
         });
         popup.add(setTagsMenuItem);
-
-=======
->>>>>>> feature/2.0
+	
         return popup;
     }
 
