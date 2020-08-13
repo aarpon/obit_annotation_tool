@@ -41,6 +41,7 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
@@ -308,6 +309,26 @@ abstract public class AbstractViewer extends Observable
 
                 // Listen for when the selection changes.
                 tree.addTreeSelectionListener(ref);
+
+                // Add a context menu
+                tree.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if (QueryOS.isWindows()) {
+                            return;
+                        }
+                        setListenerOnDataViewerJTree(e);
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        if (QueryOS.isMac()) {
+                            return;
+                        }
+                        setListenerOnDataViewerJTree(e);
+                    }
+                });
 
                 // Clear the metadata table
                 clearMetadataTable();
@@ -773,6 +794,93 @@ abstract public class AbstractViewer extends Observable
     }
 
     /**
+     * Create a popup menu with actions for the root node.
+     *
+     * @param node Root node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createRootNodePopup(final RootNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Show in Explorer/Finder
+        String menuEntry = "";
+        if (QueryOS.isWindows()) {
+            menuEntry = "Show in Windows Explorer";
+        } else if (QueryOS.isMac()) {
+            menuEntry = "Show in Finder";
+        } else {
+            throw new UnsupportedOperationException(
+                    "Operating system not supported.");
+        }
+
+        // Add Show in {file browser}
+        JMenuItem navigateToUserFolderMenuItem = new JMenuItem(menuEntry);
+        navigateToUserFolderMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Build the full path of the invalid dataset
+                File userDataFolder = new File(
+                        globalSettingsManager.getUserDataRootDir()
+                                + File.separator + userName);
+
+                String fullPathStr;
+                try {
+                    fullPathStr = userDataFolder.getCanonicalPath();
+                } catch (IOException e1) {
+                    outputPane.err("Could not retrieve full path "
+                            + "of selected invalid dataset!");
+                    return;
+                }
+
+                // Command arguments
+                String command = "";
+                String commandName = "";
+                String commandArgument = "";
+                if (QueryOS.isMac()) {
+                    command = "open";
+                    commandName = "Finder";
+                    commandArgument = "";
+                } else if (QueryOS.isWindows()) {
+                    command = "Explorer.exe";
+                    commandName = "Windows Explorer";
+                    commandArgument = "/root,";
+                } else {
+                    throw new UnsupportedOperationException(
+                            "Operating system not supported.");
+                }
+
+                // Inform
+                outputPane.log("Opening user folder in " + commandName + "...");
+
+                // Execute the command
+                String[] commandArray = new String[3];
+                commandArray[0] = command;
+                commandArray[1] = commandArgument;
+                commandArray[2] = fullPathStr;
+                try {
+                    Process p = Runtime.getRuntime().exec(commandArray);
+                    p.waitFor();
+                } catch (IOException e1) {
+                    outputPane.err("Could not show invalid dataset " + "in "
+                            + commandName + "!");
+                } catch (InterruptedException e1) {
+                    outputPane.err("Could not show invalid dataset " + "in "
+                            + commandName + "!");
+                }
+
+            }
+
+        });
+        popup.add(navigateToUserFolderMenuItem);
+
+        // Return the menu
+        return popup;
+    }
+
+    /**
      * Create a popup menu with actions for handling invalid datasets
      *
      * @return a JPopupMenu for the passed item
@@ -953,11 +1061,45 @@ abstract public class AbstractViewer extends Observable
     }
 
     /**
-     * Sets a mouse event listener on the JTable
+     * Sets a mouse event listener on the Data Viewer JTree
      *
      * @param e Mouse event
      */
-    private void setListenerOnJTable(MouseEvent e) {
+    private void setListenerOnDataViewerJTree(MouseEvent e) {
+
+        if (e.isPopupTrigger() && e.getComponent() instanceof DataViewerTree) {
+
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+
+            // Get selected node
+            TreePath p = tree.getPathForLocation(x, y);
+            if (p == null) {
+                // There is nothing usable at that location
+                return;
+            }
+            AbstractNode node = (AbstractNode) p.getLastPathComponent();
+
+            // Type of node
+            String nodeType = node.getClass().getSimpleName();
+
+            // Add relevant context menu
+            if (nodeType.equals("RootNode")) {
+                JPopupMenu popup = createRootNodePopup((RootNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else {
+                // Nothing to do.
+            }
+        }
+    }
+
+    /**
+     * Sets a mouse event listener on the Invalid Datasets JTable
+     *
+     * @param e Mouse event
+     */
+    private void setListenerOnInvalidDatasetsJTable(MouseEvent e) {
         invalidDataset = null;
         int r = invalidDatasetsTable.rowAtPoint(e.getPoint());
         if (r >= 0 && r < invalidDatasetsTable.getRowCount()) {
@@ -1140,7 +1282,7 @@ abstract public class AbstractViewer extends Observable
                 if (QueryOS.isWindows()) {
                     return;
                 }
-                setListenerOnJTable(e);
+                setListenerOnInvalidDatasetsJTable(e);
             }
 
             @Override
@@ -1148,7 +1290,7 @@ abstract public class AbstractViewer extends Observable
                 if (QueryOS.isMac()) {
                     return;
                 }
-                setListenerOnJTable(e);
+                setListenerOnInvalidDatasetsJTable(e);
             }
         });
 
