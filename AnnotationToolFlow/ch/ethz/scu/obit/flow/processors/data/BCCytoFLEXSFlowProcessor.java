@@ -493,7 +493,7 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
         // }
 
         String name;
-        name = processor.getCustomKeyword("$SMNO");
+        name = processor.getStandardKeyword("$SMNO");
         if (name.contentEquals("")) {
             name = processor.getCustomKeyword("TBNM");
             if (name.contentEquals("")) {
