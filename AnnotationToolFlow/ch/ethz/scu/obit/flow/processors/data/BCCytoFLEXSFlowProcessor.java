@@ -410,21 +410,45 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
     /**
      * Return the experiment name stored in the FCS file.
      *
-     * If the FCS file does not contain an experiment name, the name of the
-     * folder containing the FCS file is returned as experiment name.
+     * The FCS file does not contain an experiment name, therefore we use the
+     * name of the folder containing the FCS file as the experiment name.
      *
      * @param processor with already scanned file
      * @return name of the experiment
      */
     @Override
     protected String getExperimentName(FCSReader processor) {
-        System.err.println(
-                "@TODO Investigate whether the FCS files from CytoFLEX S store the experiment name somewhere!");
-
         // As experiment name, return the name of the containing folder
         File fcsFile = processor.getFile();
         String experimentName = fcsFile.getParentFile().getName();
         return experimentName;
+    }
+
+    /**
+     * Identifies the container type of the file (Specimen or Plate or none).
+     *
+     * If the file comes from hardware that does not assign a container to an
+     * FCS file (e.g. the BD Influx), the container type is set to "".
+     *
+     * @param processor FCSProcessor with already scanned file
+     * @return one of "SPECIMEN" or "TRAY"
+     */
+    @Override
+    protected String identifyContainerType(FCSReader processor) {
+
+        // To discriminate between TRAY (Plate) and SPECIMEN as containers we
+        // can use following keywords:
+        //
+        // * PLTNO (*) Unique to TRAY
+        // * $SMNO (*) Unique to TRAY
+        //
+        // The keyword TBNM is common to both.
+        if (!processor.getCustomKeyword("PLTNO").isEmpty()
+                && !processor.getStandardKeyword("$SMNO").isEmpty()) {
+            return "TRAY";
+        } else {
+            return "SPECIMEN";
+        }
     }
 
     /**
@@ -438,8 +462,7 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
      */
     @Override
     protected String getTrayName(FCSReader processor) {
-        System.err.println(
-                "@TODO Investigate whether the FCS files from CytoFLEX S alway name their plates with a number!");
+        // The TRAY name is stored in the custom keyword PLTNO
         String trayName = processor.getCustomKeyword("PLTNO");
         if (trayName.isEmpty()) {
             trayName = "UNKNOWN";
@@ -450,15 +473,14 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
     /**
      * Return the specimen name stored in the FCS file.
      *
-     * @TODO Figure out whether the specimen info is stored somewhere!
+     * The FCS file does not store a specimen name; therefore we set it to
+     * UNKNOWN.
      *
      * @param processor with already scanned file
      * @return name of the specimen
      */
     @Override
     protected String getSpecimenName(FCSReader processor) {
-        System.err.println(
-                "@TODO Investigate whether FCS files from CytoFLEX S store the specimen name somewhere!");
         String specimenName = "UNKNOWN";
         return specimenName;
     }
@@ -471,37 +493,33 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
      */
     @Override
     protected String getTubeOrWellName(FCSReader processor) {
-        System.err.println(
-                "@TODO Investigate whether the FCS files from CytoFLEX S differentiate between tube and well names!");
-
-        // There are two candidate keywords:
-
-        // 1. $SMNO
-        // 2. TBNM (apparently corresponds to the file name)
-
-        // Do we need to differentiate between containers?
-
-        // String name;
-        // if (identifyContainerType(processor).equals("TRAY")) {
-        // name = processor.getCustomKeyword("$SMNO");
-        // } else if (identifyContainerType(processor).equals("SPECIMEN")) {
-        // name = processor.getCustomKeyword("$SMNO");
-        // } else {
-        // String fcsFileName = processor.getFile().getName();
-        // name = fcsFileName.substring(0,
-        // fcsFileName.toLowerCase().lastIndexOf(".fcs"));
-        // }
 
         String name;
-        name = processor.getStandardKeyword("$SMNO");
-        if (name.contentEquals("")) {
-            name = processor.getCustomKeyword("TBNM");
-            if (name.contentEquals("")) {
-                String fcsFileName = processor.getFile().getName();
-                name = fcsFileName.substring(0,
-                        fcsFileName.toLowerCase().lastIndexOf(".fcs"));
+
+        if (identifyContainerType(processor).equals("TRAY")) {
+
+            // The name should be in the standard keyword $SMNO
+            name = processor.getStandardKeyword("$SMNO");
+
+            // If nothing is found there, fall back to the custom keyword TBNM
+            if (name.isEmpty()) {
+                name = processor.getCustomKeyword("TBNM");
             }
+
+        } else {
+
+            // A Tube only has the custom keyword TBNM
+            name = processor.getCustomKeyword("TBNM");
         }
+
+        // If we haven't found anything so far, we fall back to the file name
+        if (name.isEmpty()) {
+            String fcsFileName = processor.getFile().getName();
+            name = fcsFileName.substring(0,
+                    fcsFileName.toLowerCase().lastIndexOf(".fcs"));
+        }
+
+        // Return
         return name;
     }
 
