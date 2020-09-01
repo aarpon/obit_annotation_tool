@@ -217,10 +217,11 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
                 continue;
             }
 
-            // A file 'ExpSummaryForAPI.xml' is exported along with the FCS
+            // A file 'ExpSummaryForAPI.xml' may be exported along with the FCS
             // that contains metadata that *might* be used to complement the
-            // information extracted from the FCS files.
-            // @TODO: Process the file
+            // information extracted from the FCS files. This file is very
+            // rarely present, therefore it will be registered as an accessory
+            // file but no information will be extracted from it.
             String fileName = file.getName();
             int indx = fileName.lastIndexOf(".");
             if (indx == -1) {
@@ -228,7 +229,6 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
             }
             String ext = fileName.substring(indx);
             if (ext.equalsIgnoreCase(".xml")) {
-                // @TODO: Parse!
                 continue;
             }
 
