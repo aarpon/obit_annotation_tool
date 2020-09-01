@@ -7,12 +7,14 @@ import java.util.Map;
 import ch.ethz.scu.obit.at.gui.editors.data.model.AbstractMetadataMapper;
 import ch.ethz.scu.obit.at.gui.viewers.data.model.ExperimentNode;
 import ch.ethz.scu.obit.at.gui.viewers.openbis.model.OpenBISProjectNode;
+import ch.ethz.scu.obit.flow.processors.data.model.AnalyzerExperiment;
 import ch.ethz.scu.obit.flow.processors.data.model.Experiment;
 import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 
 /**
- * Collects all relevant metadata to allow the registration of an
- * experiment from the BD LSR FORTESSA flow cytometer into OpenBIS.
+ * Collects all relevant metadata to allow the registration of an experiment
+ * from the BD LSR FORTESSA flow cytometer into OpenBIS.
+ *
  * @author Aaron Ponti
  *
  */
@@ -25,8 +27,9 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
      * Constructor
-     * @param expNode Experiment node (in the data viewr)
-     * @param openBISProjectNode  openBIS project node (in the openBIS viewer)
+     *
+     * @param expNode            Experiment node (in the data viewr)
+     * @param openBISProjectNode openBIS project node (in the openBIS viewer)
      */
     public FlowMetadataMapper(ExperimentNode experimentNode,
             OpenBISProjectNode openBISProjectNode) {
@@ -36,13 +39,13 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
         this.openBISProjectNode = openBISProjectNode;
 
         // Set the supported geometries
-        this.supportedTrayGeometries = new ArrayList<String>();
-        this.supportedTrayGeometries.add("96_WELLS_8X12");
-        this.supportedTrayGeometries.add("384_WELLS_16x24");
+        this.supportedTrayGeometries = ((AnalyzerExperiment) experimentNode
+                .getUserObject()).supportedTrayGeometries;
     }
 
     /**
      * Get the folder name
+     *
      * @return the folder name
      */
     public String getFolderName() {
@@ -51,6 +54,7 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
      * Get the experiment descriptor
+     *
      * @return the experiment descriptor
      */
     public Experiment getExperiment() {
@@ -59,6 +63,7 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
      * Get the experiment name
+     *
      * @return the experiment name
      */
     public String getExperimentName() {
@@ -67,6 +72,7 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
      * Get the project name
+     *
      * @return the experiment name
      */
     public String getProjectName() {
@@ -75,29 +81,32 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
      * Get the openBIS Experiment (Collection) Identifier
+     *
      * @return the openBIS Experiment identifier
      */
     public String getOpenBISCollectionIdentifier() {
         String openBISProjectID = openBISProjectNode.getIdentifier();
-        String collectionName = ((Experiment)experimentNode.getUserObject())
-                .getOpenBISCollectionIdentifierPrefix() +
-                "EXPERIMENTS_COLLECTION";
+        String collectionName = ((Experiment) experimentNode.getUserObject())
+                .getOpenBISCollectionIdentifierPrefix()
+                + "EXPERIMENTS_COLLECTION";
         return (openBISProjectID + "/" + collectionName);
     }
 
     /**
      * Get the openBIS Experiment Identifier
+     *
      * @return the openBIS Experiment identifier
      */
     @Override
     public String getOpenBISExerimentIdentifier() {
         String openBISProjectID = openBISProjectNode.getIdentifier();
-        String code = ((Experiment)experimentNode.getUserObject()).getCode();
+        String code = ((Experiment) experimentNode.getUserObject()).getCode();
         return (openBISProjectID + "/" + code).toUpperCase();
     }
 
     /**
      * Get the openBIS Space Identifier
+     *
      * @return the openBIS space identifier
      */
     @Override
@@ -110,8 +119,7 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
         if (indx == -1) {
             // This should not happen, since the identifier came
             // from openBIS in the first place.
-            System.err.println(
-                    "Malformed openBIS project identifier!");
+            System.err.println("Malformed openBIS project identifier!");
             return "INVALID";
         }
 
@@ -120,6 +128,7 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
 
     /**
      * Get the plates for the stored Experiment.
+     *
      * @return Plates contained in current Experiment.
      */
     public Map<String, Tray> getTraysForExperiment() {

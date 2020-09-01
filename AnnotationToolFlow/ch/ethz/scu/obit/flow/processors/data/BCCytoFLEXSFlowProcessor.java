@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.ethz.scu.obit.flow.processors.data.model.AnalyzerExperiment;
 import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
 import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
 import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.flow.processors.data.model.Tube;
 import ch.ethz.scu.obit.flow.processors.data.model.Well;
+import ch.ethz.scu.obit.flow.processors.data.model.specializations.BCCytoFLEXSExperiment;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
@@ -298,7 +298,7 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
             }
 
             // Create a new ExperimentDescriptor or reuse an existing one
-            AnalyzerExperiment expDesc = null;
+            BCCytoFLEXSExperiment expDesc = null;
             String experimentName = getExperimentName(processor);
             String experimentPath = getExperimentPath(processor, file);
             if (experimentPath.equals("")) {
@@ -309,10 +309,10 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
                 continue;
             }
             if (folderDescriptor.experiments.containsKey(experimentPath)) {
-                expDesc = (AnalyzerExperiment) folderDescriptor.experiments
+                expDesc = (BCCytoFLEXSExperiment) folderDescriptor.experiments
                         .get(experimentPath);
             } else {
-                expDesc = new AnalyzerExperiment(new File(experimentPath),
+                expDesc = new BCCytoFLEXSExperiment(new File(experimentPath),
                         experimentName, userRootFolder);
                 // Store attributes
                 expDesc.addAttributes(getExperimentAttributes(processor));
@@ -521,6 +521,21 @@ public class BCCytoFLEXSFlowProcessor extends AbstractFlowProcessor {
 
         // Return
         return name;
+    }
+
+    /**
+     * Extract and store the Tray attributes
+     *
+     * @param processor FCSProcessor with already scanned file
+     * @return a key-value map of attributes
+     */
+    @Override
+    protected Map<String, String> getTrayAttributes(FCSReader processor) {
+        // Since this is information is not stored anywhere in the FCS file,
+        // we set the geometry here.
+        HashMap<String, String> attrs = new HashMap<String, String>();
+        attrs.put("geometry", "96_WELLS_8X12");
+        return attrs;
     }
 
     /**

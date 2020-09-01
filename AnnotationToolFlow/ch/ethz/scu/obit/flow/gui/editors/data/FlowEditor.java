@@ -171,7 +171,8 @@ public final class FlowEditor extends AbstractEditor {
                 if (firstLevelSample.getType().equals("Tray")) {
                     Tray tray = (Tray) firstLevelSample;
                     Map<String, String> firstLevelUserAttributes = new Hashtable<String, String>();
-                    firstLevelUserAttributes.put("trayGeometry", tray.geometry);
+                    firstLevelUserAttributes.put("trayGeometry",
+                            tray.getGeometry());
                     firstLevelSample
                             .addUserAttributes(firstLevelUserAttributes);
                 }
@@ -537,7 +538,7 @@ public final class FlowEditor extends AbstractEditor {
         constraints.weighty = 0;
         constraints.gridx = 0;
         constraints.gridy = gridy++;
-        JLabel labelGeometry = new JLabel("<html><u>Plate geometry");
+        JLabel labelGeometry = new JLabel("<html><u>");
         labelGeometry.setHorizontalAlignment(JLabel.CENTER);
         panel.add(labelGeometry, constraints);
 
@@ -584,7 +585,7 @@ public final class FlowEditor extends AbstractEditor {
                 Tray tray = trays.get(trayName);
 
                 // Select current geometry
-                c.setSelectedItem(tray.geometry);
+                c.setSelectedItem(tray.getGeometry());
 
                 // When a geometry is selected, update the corresponding
                 // experiment in the data model
@@ -601,7 +602,7 @@ public final class FlowEditor extends AbstractEditor {
                             Tray tray = comboGeometryList.get(obj);
 
                             // Set the geometry
-                            tray.geometry = (String) obj.getSelectedItem();
+                            tray.setGeometry((String) obj.getSelectedItem());
 
                         }
                     }
