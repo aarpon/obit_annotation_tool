@@ -39,8 +39,13 @@ public final class FlowMetadataMapper extends AbstractMetadataMapper {
         this.openBISProjectNode = openBISProjectNode;
 
         // Set the supported geometries
-        this.supportedTrayGeometries = ((AnalyzerExperiment) experimentNode
-                .getUserObject()).supportedTrayGeometries;
+        if (experimentNode.getUserObject() instanceof AnalyzerExperiment) {
+            this.supportedTrayGeometries = ((AnalyzerExperiment) experimentNode
+                    .getUserObject()).supportedTrayGeometries;
+        } else {
+            this.supportedTrayGeometries = new ArrayList<String>();
+        }
+
     }
 
     /**
