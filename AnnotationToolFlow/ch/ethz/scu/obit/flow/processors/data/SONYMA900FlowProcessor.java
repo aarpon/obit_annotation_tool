@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
 import ch.ethz.scu.obit.flow.processors.data.model.SorterExperiment;
@@ -33,6 +35,10 @@ public class SONYMA900FlowProcessor extends AbstractFlowProcessor {
         // SONY MA900 Multi-Application Cell Sorter
         knownHardwareStrings.put("LE-MA900FP", "SONY MA900");
     }
+
+    // Regular expression pattern to use to test for index sorts
+    private static final Pattern pattern = Pattern.compile(
+            "^.*_(?<sort>\\[(?:Index\\s)*\\d{1,4}\\sWell Plate\\])?.*$");
 
     /**
      * Constructor
@@ -281,6 +287,30 @@ public class SONYMA900FlowProcessor extends AbstractFlowProcessor {
         // Therefore, we return the name of the containing folder
         File fcsFile = processor.getFile();
         return fcsFile.getParentFile().getName();
+    }
+
+    /**
+     * Return true if the experiment was an indexed sort
+     *
+     * @param processor with already scanned file
+     * @return true if the experiment was an indexed sort, false otherwise
+     */
+    @Override
+    protected boolean isIndexSort(FCSReader processor) {
+
+        // The information whether an FCS file corresponds to an index sort
+        // is stored in the file name
+        String fileName = processor.getFile().getName();
+
+        // Test against the regular expression
+        Matcher m = pattern.matcher(fileName);
+
+        if (!m.find()) {
+            return false;
+        }
+
+        // Have we found it?
+        return m.group("sort") != null;
     }
 
     /**
