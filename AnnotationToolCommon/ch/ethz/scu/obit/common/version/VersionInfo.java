@@ -13,7 +13,7 @@ public class VersionInfo {
     /**
      * Version status: "alpha", "beta", or "" for a stable release
      */
-    public static final String status = "alpha";
+    public static final String status = "";
 
     /**
      * Copyright string
@@ -44,7 +44,7 @@ public class VersionInfo {
 
     /**
      * Convert the version from string to integer
-     * 
+     *
      * @param version string like "1.0.0"
      * @return version integer like
      */
@@ -69,7 +69,7 @@ public class VersionInfo {
 
     /**
      * Convert the version from integer to string
-     * 
+     *
      * @param version string like
      * @return version integer like "1.0.0"
      */
