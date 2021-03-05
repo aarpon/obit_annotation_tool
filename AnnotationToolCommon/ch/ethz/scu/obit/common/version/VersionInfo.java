@@ -13,13 +13,13 @@ public class VersionInfo {
     /**
      * Version status: "alpha", "beta", or "" for a stable release
      */
-    public static final String status = "";
+    public static final String status = "beta_1";
 
     /**
      * Copyright string
      */
     public static final String copyright = "Copyright "
-            + Character.toString('\u00A9') + " 2012 - 2020, Single Cell Unit, "
+            + Character.toString('\u00A9') + " 2012 - 2021, Single Cell Unit, "
             + "D-BSSE, ETH Zurich (Basel)";
 
     /**
