@@ -23,8 +23,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  * Please notice that when exporting data from the FACSDiva software, there are
  * two options:
  *
- * 1) export as FCS files (supported)
- * 2) export as experiment (not supported)
+ * 1) export as FCS files (supported) 2) export as experiment (not supported)
  *
  * When exporting as experiment, the experiment metadata is written to an
  * additional XML file and not correctly stored in the FCS files. These FCS
@@ -36,313 +35,327 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  */
 public final class BDFACSAriaFlowProcessor extends BDLSRFortessaFlowProcessor {
 
-    /* Map of known hardware strings to supported hardware */
-    private static final Map<String, String> knownHardwareStrings;
-    static
-    {
-        knownHardwareStrings = new HashMap<String, String>();
+	/* Map of known hardware strings to supported hardware */
+	private static final Map<String, String> knownHardwareStrings;
+	static {
+		knownHardwareStrings = new HashMap<String, String>();
 
-        // FD FACSAria III
-        knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
-    }
+		// FD FACSAria III
+		knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
+	}
 
-    /**
-     * Constructor.
-     * @param fullUserFolderName Full path of the user folder containing the exported experiments.
-     */
-    public BDFACSAriaFlowProcessor(String fullUserFolderName) {
-        super(fullUserFolderName);
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param fullUserFolderName Full path of the user folder containing the
+	 *                           exported experiments.
+	 */
+	public BDFACSAriaFlowProcessor(String fullUserFolderName) {
+		super(fullUserFolderName);
+	}
 
-    /**
-     * Extract and store the Experiment attributes
-     * @param processor FCSProcessor with already scanned file
-     * @return a key-value map of attributes
-     */
-    @Override
-    protected Map<String, String> getExperimentAttributes(FCSReader processor) {
-        Map<String, String> attributes = new HashMap<String, String>();
+	/**
+	 * Extract and store the Experiment attributes
+	 * 
+	 * @param processor FCSProcessor with already scanned file
+	 * @return a key-value map of attributes
+	 */
+	@Override
+	protected Map<String, String> getExperimentAttributes(FCSReader processor) {
+		Map<String, String> attributes = new HashMap<String, String>();
 
-        // Owner name
-        attributes.put("owner_name", processor.getStandardKeyword("$OP"));
+		// Owner name
+		attributes.put("owner_name", processor.getStandardKeyword("$OP"));
 
-        // Hardware string
-        String acqHardwareString = processor.getStandardKeyword("$CYT");
-        if (knownHardwareStrings.containsKey(acqHardwareString)) {
-            // Standardize the hardware string
-            acqHardwareString = knownHardwareStrings.get(acqHardwareString);
-        } else {
-            validator.isValid = false;
-            validator.invalidFilesOrFolders.put(
-                    processor.getFile(),
-                    "Wrong hardware string: " + acqHardwareString);
-        }
-        attributes.put("acq_hardware", acqHardwareString);
+		// Hardware string
+		String acqHardwareString = processor.getStandardKeyword("$CYT");
+		if (knownHardwareStrings.containsKey(acqHardwareString)) {
+			// Standardize the hardware string
+			acqHardwareString = knownHardwareStrings.get(acqHardwareString);
+		} else {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(processor.getFile(), "Wrong hardware string: " + acqHardwareString);
+		}
+		attributes.put("acq_hardware", acqHardwareString);
 
-        // Software string
-        String acqSoftwareString = processor.getCustomKeyword("CREATOR");
-        if (acqSoftwareString.isEmpty()) {
-            acqSoftwareString = processor.getCustomKeyword("APPLICATION");
-        }
+		// Software string
+		String acqSoftwareString = processor.getCustomKeyword("CREATOR");
+		if (acqSoftwareString.isEmpty()) {
+			acqSoftwareString = processor.getCustomKeyword("APPLICATION");
+		}
 
-        // Check major and minor version (we ignore the patch)
-        Pattern p = Pattern.compile(
-                "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
-        Matcher m = p.matcher(acqSoftwareString);
-        if (!m.matches()) {
-            validator.isValid = false;
-            validator.invalidFilesOrFolders.put(
-                    processor.getFile(),
-                    "Unknown software version.");
-        } else {
-            int major;
-            int minor;
-            try {
-                major = Integer.parseInt(m.group(2));
-                minor = Integer.parseInt(m.group(3));
-                // Known valid versions are 6.1 and 7.0
-                if (!((major == 6 && minor == 1) ||
-                        (major == 7 && minor == 0) ||
-                        (major == 8 && minor == 0))) {
-                    validator.isValid = false;
-                    validator.invalidFilesOrFolders.put(
-                            processor.getFile(),
-                            "Unsupported software version: " +
-                                    m.group(2) + "." +
-                                    m.group(3));
-                }
-            } catch (NumberFormatException n) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        processor.getFile(),
-                        "Unknown software version.");
-            }
-        }
+		// Check major and minor version (we ignore the patch)
+		Pattern p = Pattern.compile("(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
+		Matcher m = p.matcher(acqSoftwareString);
+		if (!m.matches()) {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(processor.getFile(), "Unknown software version.");
+		} else {
+			int major;
+			int minor;
+			try {
+				major = Integer.parseInt(m.group(2));
+				minor = Integer.parseInt(m.group(3));
+				// Known valid versions are 6.1 and 7.0
+				if (!((major == 6 && minor == 1) || (major == 7 && minor == 0) || (major == 8 && minor == 0))) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(processor.getFile(),
+							"Unsupported software version: " + m.group(2) + "." + m.group(3));
+				}
+			} catch (NumberFormatException n) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(processor.getFile(), "Unknown software version.");
+			}
+		}
 
-        // Acquisition software
-        attributes.put("acq_software", acqSoftwareString);
+		// Acquisition software
+		attributes.put("acq_software", acqSoftwareString);
 
-        // Acquisition date
-        attributes.put("date", processor.getStandardKeyword("$DATE"));
+		// Acquisition date
+		attributes.put("date", processor.getStandardKeyword("$DATE"));
 
-        return attributes;
-    }
+		return attributes;
+	}
 
-    /**
-     * Returns true if the passed hardware string (from an FCS file) is a recognized
-     * hardware string for the BD FACS Aria.
-     * @param hardwareString Hardware string.
-     * @return true if the string is a valid hardware string for the BD FACS Aria, false otherwise.
-     */
-    public static boolean isValidHardwareString(String hardwareString) {
+	/**
+	 * Return the tube name stored in the FCS file (if it is found) or something
+	 * else, depending on the hardware.
+	 * 
+	 * @param processor with already scanned file
+	 * @return name of the tube or well
+	 */
+	protected String getTubeOrWellName(FCSReader processor) {
 
-        return knownHardwareStrings.containsKey(hardwareString);
-    }
+		// FACS DIVA software
+		//
+		// We discriminate here since there is a formatting
+		// difference in the value stored in the "TUBE NAME"
+		// keyword (which is always found in the file, no
+		// matter whether the container is a Specimen or a
+		// Tray) and the one stored in the "WELL ID" (which
+		// is found only in Trays). A "TUBE NAME" value like
+		// A1 becomes a WELL ID like A01.
+		//
+		// FACS SORTWARE software
+		//
+		// The FACS SORTWARE software does not contain either WELL ID nor
+		// TUBE NAME. We return the name of the file without path and
+		// without extension.
 
-    /**
-     * Scan the folder recursively and process all fcs files found
-     * @param dir Full path to the directory to scan
-     * @throws IOException
-     */
-    @Override
-    protected void recursiveDir(File dir) throws IOException {
+		String name;
+		if (identifyContainerType(processor).equals("TRAY")) {
+			name = processor.getCustomKeyword("WELL ID");
+		} else if (identifyContainerType(processor).equals("SPECIMEN")) {
+			name = processor.getCustomKeyword("TUBE NAME");
+		} else {
+			String fcsFileName = processor.getFile().getName();
+			name = fcsFileName.substring(0, fcsFileName.toLowerCase().lastIndexOf(".fcs"));
+		}
+		return name;
+	}
 
-        // To make things simple and robust, we make sure that the first
-        // thing we process at any sub-folder level is an FCS file.
-        String [] files = getSimplySortedList(dir);
+	/**
+	 * Returns true if the passed hardware string (from an FCS file) is a recognized
+	 * hardware string for the BD FACS Aria.
+	 * 
+	 * @param hardwareString Hardware string.
+	 * @return true if the string is a valid hardware string for the BD FACS Aria,
+	 *         false otherwise.
+	 */
+	public static boolean isValidHardwareString(String hardwareString) {
 
-        // Empty subfolders are not accepted
-        if (files.length == 0 && !dir.equals(this.userFolder)) {
-            validator.isValid = false;
-            validator.invalidFilesOrFolders.put(
-                    dir, "Empty folder");
-            return;
-        }
+		return knownHardwareStrings.containsKey(hardwareString);
+	}
 
-        // Go over the files and folders
-        for (String f : files) {
+	/**
+	 * Scan the folder recursively and process all fcs files found
+	 * 
+	 * @param dir Full path to the directory to scan
+	 * @throws IOException
+	 */
+	@Override
+	protected void recursiveDir(File dir) throws IOException {
 
-            File file = new File(dir + File.separator + f);
+		// To make things simple and robust, we make sure that the first
+		// thing we process at any sub-folder level is an FCS file.
+		String[] files = getSimplySortedList(dir);
 
-            // Is it a directory? Recurse into it
-            if (file.isDirectory()) {
+		// Empty subfolders are not accepted
+		if (files.length == 0 && !dir.equals(this.userFolder)) {
+			validator.isValid = false;
+			validator.invalidFilesOrFolders.put(dir, "Empty folder");
+			return;
+		}
 
-                // Recurse into the subfolder
-                recursiveDir(file);
+		// Go over the files and folders
+		for (String f : files) {
 
-                // Move on to the next file
-                continue;
-            }
+			File file = new File(dir + File.separator + f);
 
-            // No files are allowed in the root
-            if (dir.equals(this.userFolder)) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Files must be in sub-folders.");
-                return;
-            }
+			// Is it a directory? Recurse into it
+			if (file.isDirectory()) {
 
-            // Delete some known garbage
-            if (deleteIfKnownUselessFile(file)) {
-                continue;
-            }
+				// Recurse into the subfolder
+				recursiveDir(file);
 
-            // The DIVA software can export FCS files in two modes: FCS export
-            // creates valid FCS 3.0-compliant files. Experiment export creates
-            // files that cannot be used in subsequent analysis in third-party
-            // software like FlowJo. In case of Experiment exports, an XML file
-            // is saved along with the series of FCS files. We use the presence
-            // of the XML file to discriminate between the two export modes.
-            String fileName = file.getName();
-            int indx = fileName.lastIndexOf(".");
-            if (indx == -1) {
-                continue;
-            }
-            String ext = fileName.substring(indx);
-            if (ext.equalsIgnoreCase(".xml")) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Experiment export");
-                continue;
-            }
+				// Move on to the next file
+				continue;
+			}
 
-            // Check whether the file is a valid attachment
-            if (ExperimentDescriptor.isValidAttachment(file)) {
+			// No files are allowed in the root
+			if (dir.equals(this.userFolder)) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file, "Files must be in sub-folders.");
+				return;
+			}
 
-                // By design, when we find an attachment, the corresponding
-                // Experiment must exist
-                if (currentExperiment == null) {
-                    validator.isValid = false;
-                    validator.invalidFilesOrFolders.put(file,
-                            "This attachment does not seem to be assigned"
-                                    + " to any experiment!");
-                    continue;
-                }
+			// Delete some known garbage
+			if (deleteIfKnownUselessFile(file)) {
+				continue;
+			}
 
-                // Attach the files
-                if (! currentExperiment.addAttachment(file)) {
-                    validator.isValid = false;
-                    validator.invalidFilesOrFolders.put(file,
-                            "Could not assign attachments to esperiment!");
-                    continue;
-                }
+			// The DIVA software can export FCS files in two modes: FCS export
+			// creates valid FCS 3.0-compliant files. Experiment export creates
+			// files that cannot be used in subsequent analysis in third-party
+			// software like FlowJo. In case of Experiment exports, an XML file
+			// is saved along with the series of FCS files. We use the presence
+			// of the XML file to discriminate between the two export modes.
+			String fileName = file.getName();
+			int indx = fileName.lastIndexOf(".");
+			if (indx == -1) {
+				continue;
+			}
+			String ext = fileName.substring(indx);
+			if (ext.equalsIgnoreCase(".xml")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file, "Experiment export");
+				continue;
+			}
 
-                continue;
-            }
+			// Check whether the file is a valid attachment
+			if (ExperimentDescriptor.isValidAttachment(file)) {
 
-            // Check whether we find a data_structure.ois file. This
-            // means that the whole folder has apparently been annotated
-            // already, but for some unknown reason it has not been
-            // moved into Datamover's incoming folder.
-            // We break here.
-            if (fileName.toLowerCase().equals("data_structure.ois")) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Failed registration to openBIS!");
-                return;
-            }
+				// By design, when we find an attachment, the corresponding
+				// Experiment must exist
+				if (currentExperiment == null) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file,
+							"This attachment does not seem to be assigned" + " to any experiment!");
+					continue;
+				}
 
-            // Check whether an experiment is already annotated. Please
-            // mind that at this stage we do not know WHICH experiment
-            // was annotated. We just react to the fact that at least
-            // one has been annotated, somewhere.
-            if (fileName.contains("_properties.oix")) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Experiment already annotated");
-                return;
-            }
+				// Attach the files
+				if (!currentExperiment.addAttachment(file)) {
+					validator.isValid = false;
+					validator.invalidFilesOrFolders.put(file, "Could not assign attachments to esperiment!");
+					continue;
+				}
 
-            // Do we have an unknown file? If we do, we move on to the next.
-            if (! ext.equalsIgnoreCase(".fcs")) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Unsupported file format");
-                continue;
-            }
+				continue;
+			}
 
-            // Is it an FCS file? Scan it and extract the information
-            FCSReader processor = new FCSReader(file, false);
-            if (!processor.parse()) {
-                System.err.println("File " + file.getCanonicalPath() +
-                        " could not be parsed!");
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Parsing failed");
-                continue;
-            }
+			// Check whether we find a data_structure.ois file. This
+			// means that the whole folder has apparently been annotated
+			// already, but for some unknown reason it has not been
+			// moved into Datamover's incoming folder.
+			// We break here.
+			if (fileName.toLowerCase().equals("data_structure.ois")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file, "Failed registration to openBIS!");
+				return;
+			}
 
-            // Create a new ExperimentDescriptor or reuse an existing one
-            SorterExperiment expDesc = null;
-            String experimentName = getExperimentName(processor);
-            String experimentPath = getExperimentPath(processor, file);
-            if (experimentPath.equals("")) {
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(file,
-                        "Containing folder name does not match experiment "
-                                + "name (" + experimentName + ").");
-                continue;
-            }
-            if (folderDescriptor.experiments.containsKey(experimentPath)) {
-                expDesc = (SorterExperiment) folderDescriptor.experiments.get(experimentPath);
-            } else {
-                expDesc = new SorterExperiment(new File(experimentPath),
-                        experimentName, userRootFolder);
-                // Store attributes
-                expDesc.addAttributes(getExperimentAttributes(processor));
-                folderDescriptor.experiments.put(experimentPath, expDesc);
-            }
+			// Check whether an experiment is already annotated. Please
+			// mind that at this stage we do not know WHICH experiment
+			// was annotated. We just react to the fact that at least
+			// one has been annotated, somewhere.
+			if (fileName.contains("_properties.oix")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file, "Experiment already annotated");
+				return;
+			}
 
-            // Keep track of current experiment
-            currentExperiment = expDesc;
+			// Do we have an unknown file? If we do, we move on to the next.
+			if (!ext.equalsIgnoreCase(".fcs")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file, "Unsupported file format");
+				continue;
+			}
 
-            // Is the container a Tray or Specimen?
-            if (identifyContainerType(processor).equals("TRAY")) {
+			// Is it an FCS file? Scan it and extract the information
+			FCSReader processor = new FCSReader(file, false);
+			if (!processor.parse()) {
+				System.err.println("File " + file.getCanonicalPath() + " could not be parsed!");
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file, "Parsing failed");
+				continue;
+			}
 
-                validator.isValid = false;
-                validator.invalidFilesOrFolders.put(file,
-                        "This experiment contains TRAYs, which are not expected from "
-                                + " the FACS ARIA Cell Sorter!");
-                return;
+			// Create a new ExperimentDescriptor or reuse an existing one
+			SorterExperiment expDesc = null;
+			String experimentName = getExperimentName(processor);
+			String experimentPath = getExperimentPath(processor, file);
+			if (experimentPath.equals("")) {
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file,
+						"Containing folder name does not match experiment " + "name (" + experimentName + ").");
+				continue;
+			}
+			if (folderDescriptor.experiments.containsKey(experimentPath)) {
+				expDesc = (SorterExperiment) folderDescriptor.experiments.get(experimentPath);
+			} else {
+				expDesc = new SorterExperiment(new File(experimentPath), experimentName, userRootFolder);
+				// Store attributes
+				expDesc.addAttributes(getExperimentAttributes(processor));
+				folderDescriptor.experiments.put(experimentPath, expDesc);
+			}
 
-            } else {
+			// Keep track of current experiment
+			currentExperiment = expDesc;
 
-                // Create a new Specimen or reuse an existing one
-                Specimen specDesc;
-                String specName = getSpecimenName(processor);
-                String specKey = experimentName + "_" + specName;
-                if (expDesc.specimens.containsKey(specKey)) {
-                    specDesc = expDesc.specimens.get(specKey);
-                } else {
-                    specDesc = new Specimen(specName);
-                    // Store attributes
-                    specDesc.addAttributes(getSpecimenAttributes(processor));
-                    // Store it in the experiment descriptor
-                    expDesc.specimens.put(specKey, specDesc);
-                }
+			// Is the container a Tray or Specimen?
+			if (identifyContainerType(processor).equals("TRAY")) {
 
-                // Create a new Tube descriptor or reuse an existing one
-                Tube tubeDesc;
-                String tubeName = getTubeOrWellName(processor);
-                String tubeKey = specKey + "_" + tubeName;
-                if (! specDesc.tubes.containsKey(tubeKey)) {
-                    tubeDesc = new Tube(tubeName, file, userRootFolder);
-                    // Store attributes
-                    tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
-                    // Store events and parameter attributes
-                    tubeDesc.fcsFile.parameterList =
-                            new FCSFileParameterList(
-                                    processor.numEvents(),
-                                    processor.numParameters(),
-                                    processor.parametersAttr);
-                    // Store it in the specimen descriptor
-                    specDesc.tubes.put(tubeKey, tubeDesc);
-                }
+				validator.isValid = false;
+				validator.invalidFilesOrFolders.put(file,
+						"This experiment contains TRAYs, which are not expected from " + " the FACS ARIA Cell Sorter!");
+				return;
 
-            }
+			} else {
 
-        }
+				// Create a new Specimen or reuse an existing one
+				Specimen specDesc;
+				String specName = getSpecimenName(processor);
+				String specKey = experimentName + "_" + specName;
+				if (expDesc.specimens.containsKey(specKey)) {
+					specDesc = expDesc.specimens.get(specKey);
+				} else {
+					specDesc = new Specimen(specName);
+					// Store attributes
+					specDesc.addAttributes(getSpecimenAttributes(processor));
+					// Store it in the experiment descriptor
+					expDesc.specimens.put(specKey, specDesc);
+				}
 
-    }
+				// Create a new Tube descriptor or reuse an existing one
+				Tube tubeDesc;
+				String tubeName = getTubeOrWellName(processor);
+				String tubeKey = specKey + "_" + tubeName;
+				if (!specDesc.tubes.containsKey(tubeKey)) {
+					tubeDesc = new Tube(tubeName, file, userRootFolder);
+					// Store attributes
+					tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
+					// Store events and parameter attributes
+					tubeDesc.fcsFile.parameterList = new FCSFileParameterList(processor.numEvents(),
+							processor.numParameters(), processor.parametersAttr);
+					// Store it in the specimen descriptor
+					specDesc.tubes.put(tubeKey, tubeDesc);
+				}
+
+			}
+
+		}
+
+	}
 
 }

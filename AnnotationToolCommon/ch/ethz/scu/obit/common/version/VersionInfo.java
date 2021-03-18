@@ -13,13 +13,13 @@ public class VersionInfo {
     /**
      * Version status: "alpha", "beta", or "" for a stable release
      */
-    public static final String status = "alpha";
+    public static final String status = "";
 
     /**
      * Copyright string
      */
     public static final String copyright = "Copyright "
-            + Character.toString('\u00A9') + " 2012 - 2020, Single Cell Unit, "
+            + Character.toString('\u00A9') + " 2012 - 2021, Single Cell Unit, "
             + "D-BSSE, ETH Zurich (Basel)";
 
     /**
@@ -44,7 +44,7 @@ public class VersionInfo {
 
     /**
      * Convert the version from string to integer
-     * 
+     *
      * @param version string like "1.0.0"
      * @return version integer like
      */
@@ -69,7 +69,7 @@ public class VersionInfo {
 
     /**
      * Convert the version from integer to string
-     * 
+     *
      * @param version string like
      * @return version integer like "1.0.0"
      */
