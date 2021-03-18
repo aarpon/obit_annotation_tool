@@ -13,7 +13,7 @@ public class VersionInfo {
     /**
      * Version status: "alpha", "beta", or "" for a stable release
      */
-    public static final String status = "beta_1";
+    public static final String status = "";
 
     /**
      * Copyright string
