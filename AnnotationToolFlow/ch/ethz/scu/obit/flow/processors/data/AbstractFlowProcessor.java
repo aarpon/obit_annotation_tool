@@ -27,20 +27,22 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	protected Experiment currentExperiment;
 
 	/**
-	 *  A folder descriptor.
+	 * A folder descriptor.
 	 */
 	public UserFolder folderDescriptor = null;
 
 	/**
 	 * Constructor
-	 * @param fullUserFolderName Full path of the user folder containing the exported experiments.
+	 * 
+	 * @param fullUserFolderName Full path of the user folder containing the
+	 *                           exported experiments.
 	 */
 	public AbstractFlowProcessor(String fullUserFolderName) {
 
 		// Instantiate the validator
 		validator = new GenericValidator();
 
-		// fullFolderName MUST be a folder! If it is not, there is 
+		// fullFolderName MUST be a folder! If it is not, there is
 		// a major problem with the software setup!
 		File folder = new File(fullUserFolderName);
 		if (!folder.isDirectory()) {
@@ -54,20 +56,22 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 		this.userRootFolder = folder.getParentFile();
 
 		// Create a descriptor for the user folder
-		folderDescriptor = new UserFolder(folder, userRootFolder); 
+		folderDescriptor = new UserFolder(folder, userRootFolder);
 
 	}
 
 	/**
 	 * Return information regarding the file format.
+	 * 
 	 * @return descriptive String for the Processor.
 	 */
 	public String info() {
-		return "FCS-3.x based blow cytometry hardware";
+		return "FCS-3.x based flow cytometry hardware";
 	}
 
 	/**
 	 * Parse the file to extract data and metadata.
+	 * 
 	 * @return true if parsing was successful, false otherwise.
 	 */
 	@Override
@@ -75,6 +79,7 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 
 	/**
 	 * Return a String representation of the AbstractFlowProcessor.
+	 * 
 	 * @return String containing a description of the AbstractFlowProcessor.
 	 */
 	public String toString() {
@@ -83,22 +88,24 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 
 	/**
 	 * Scan the folder recursively and process all fcs files found
+	 * 
 	 * @param dir Full path to the directory to scan
 	 * @throws IOException Thrown if a FCS file could not be processed
 	 */
 	protected abstract void recursiveDir(File dir) throws IOException;
 
 	/**
-	 * Make sure that the first entry in the file list is an FCS file,
-	 * if there is at least one. 
-	 * @param dir	Current directory
+	 * Make sure that the first entry in the file list is an FCS file, if there is
+	 * at least one.
+	 * 
+	 * @param dir Current directory
 	 * @return String[] moderately sorted files.
 	 */
 	protected String[] getSimplySortedList(File dir) {
 
 		// Go over the list, the first FCS file we find we put it in front of
 		// the list and return.
-		String [] files = dir.list();
+		String[] files = dir.list();
 		if (files == null) {
 			return new String[0];
 		}
@@ -125,68 +132,39 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Return the tube name stored in the FCS file
+	 * Return the tube name stored in the FCS file (if it is found) or something
+	 * else, depending on the hardware.
+	 * 
 	 * @param processor with already scanned file
 	 * @return name of the tube or well
 	 */
-	protected String getTubeOrWellName(FCSReader processor) {
-
-	    // FACS DIVA software
-	    //
-		// We discriminate here since there is a formatting
-		// difference in the value stored in the "TUBE NAME"
-		// keyword (which is always found in the file, no 
-		// matter whether the container is a Specimen or a
-		// Tray) and the one stored in the "WELL ID" (which 
-		// is found only in Trays). A "TUBE NAME" value like 
-		// A1 becomes a WELL ID like A01.
-	    //
-	    // FACS SORTWARE software
-	    //
-	    // The FACS SORTWARE software does not contain either WELL ID nor
-	    // TUBE NAME. We return the name of the file without path and 
-	    // without extension.
-
-		String name;
-		if (identifyContainerType(processor).equals("TRAY")) {
-			name = processor.getCustomKeyword("WELL ID");
-		} else if (identifyContainerType(processor).equals("SPECIMEN")) {
-		    name = processor.getCustomKeyword("TUBE NAME");
-		} else {
-		    String fcsFileName = processor.getFile().getName(); 
-		    name = fcsFileName.substring(0,
-		            fcsFileName.toLowerCase().lastIndexOf(".fcs"));
-		}
-		return name;
-	}
+	protected abstract String getTubeOrWellName(FCSReader processor);
 
 	/**
 	 * Return true if the experiment was an indexed sort
+	 * 
 	 * @param processor with already scanned file
-	 * @return true if the experiment was an indexed sort, false 
-	 * otherwise 
+	 * @return true if the experiment was an indexed sort, false otherwise
 	 */
 	protected boolean isIndexSort(FCSReader processor) {
 
-	    // BD FACSAria
-		String indexSortLocationCount = processor.getCustomKeyword(
-				"INDEX SORTING SORTED LOCATION COUNT");
+		// BD FACSAria
+		String indexSortLocationCount = processor.getCustomKeyword("INDEX SORTING SORTED LOCATION COUNT");
 
 		// BD Influx Cell Sorter
-		String indexSortPositions = processor.getCustomKeyword(
-		        "INDEXSORTPOSITIONS");
+		String indexSortPositions = processor.getCustomKeyword("INDEXSORTPOSITIONS");
 
 		// If any one of indexSortLocationCount and indexSortPositions is not
 		// empty, we have an index sort
-		return (!indexSortLocationCount.isEmpty() || 
-		        !indexSortPositions.isEmpty());
+		return (!indexSortLocationCount.isEmpty() || !indexSortPositions.isEmpty());
 
 	}
 
 	/**
-	 * Return the experiment path the folder name matches the experiment
-	 * name stored in the FCS file
-	 * @param processor with already scanned file
+	 * Return the experiment path the folder name matches the experiment name stored
+	 * in the FCS file
+	 * 
+	 * @param processor   with already scanned file
 	 * @param fcsFilePath full file path of the FCS file
 	 * @return experiment path
 	 */
@@ -219,8 +197,8 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	/**
 	 * Return the experiment name stored in the FCS file.
 	 *
-	 * If the FCS file does not contain an experiment name, the name of the 
-	 * folder containing the FCS file is returned as experiment name.
+	 * If the FCS file does not contain an experiment name, the name of the folder
+	 * containing the FCS file is returned as experiment name.
 	 * 
 	 * @param processor with already scanned file
 	 * @return name of the experiment
@@ -228,9 +206,9 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	protected String getExperimentName(FCSReader processor) {
 		String experimentName = processor.getCustomKeyword("EXPERIMENT NAME");
 		if (experimentName.isEmpty()) {
-		    // As experiment name, return the name of the containing folder
-		    File fcsFile = processor.getFile();
-		    experimentName = fcsFile.getParentFile().getName();
+			// As experiment name, return the name of the containing folder
+			File fcsFile = processor.getFile();
+			experimentName = fcsFile.getParentFile().getName();
 		}
 		return experimentName;
 	}
@@ -238,13 +216,13 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	/**
 	 * Return the specimen name stored in the FCS file.
 	 *
-	 * Before you query for the specimen name, make sure to
-	 * correctly identifyContainerType().
+	 * Before you query for the specimen name, make sure to correctly
+	 * identifyContainerType().
 	 *
-	 * Some hardware does not specify a specimen name for the FCS file.
-	 * In this case (and only in this case!), as a used convention, we 
-	 * extract a date in the form 20160801 from the experiment name and
-	 * return it. If no date can be found, we return "UNKNOWN".
+	 * Some hardware does not specify a specimen name for the FCS file. In this case
+	 * (and only in this case!), as a used convention, we extract a date in the form
+	 * 20160801 from the experiment name and return it. If no date can be found, we
+	 * return "UNKNOWN".
 	 * 
 	 * @param processor with already scanned file
 	 * @return name of the specimen
@@ -253,16 +231,16 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 		String specimenName = processor.getStandardKeyword("$SRC");
 		if (specimenName.isEmpty()) {
 
-		    // Extract date information from the experiment name if it
-		    // exists or return UNKNOWN
-		    String expName = getExperimentName(processor);
-		    Pattern p = Pattern.compile("(\\d{8})");
-		    Matcher m = p.matcher(expName);
-		    if (m.find()) {
-		      specimenName = m.group(1);
-		    } else {
-		        specimenName = "UNKNOWN";
-		    }
+			// Extract date information from the experiment name if it
+			// exists or return UNKNOWN
+			String expName = getExperimentName(processor);
+			Pattern p = Pattern.compile("(\\d{8})");
+			Matcher m = p.matcher(expName);
+			if (m.find()) {
+				specimenName = m.group(1);
+			} else {
+				specimenName = "UNKNOWN";
+			}
 		}
 		return specimenName;
 	}
@@ -270,8 +248,9 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	/**
 	 * Return the tray (plate) name stored in the FCS file.
 	 * 
-	 * Before you query for the tray (plate) name, make sure to
-	 * correctly identifyContainerType().
+	 * Before you query for the tray (plate) name, make sure to correctly
+	 * identifyContainerType().
+	 * 
 	 * @param processor with already scanned file
 	 * @return name of the experiment
 	 */
@@ -286,8 +265,8 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	/**
 	 * Identifies the container type of the file (Specimen or Plate or none).
 	 *
-	 * If the file comes from hardware that does not assign a container to an
-	 * FCS file (e.g. the BD Influx), the container type is set to "".
+	 * If the file comes from hardware that does not assign a container to an FCS
+	 * file (e.g. the BD Influx), the container type is set to "".
 	 *
 	 * @param processor FCSProcessor with already scanned file
 	 * @return one of "SPECIMEN" or "TRAY"
@@ -295,39 +274,41 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 	protected String identifyContainerType(FCSReader processor) {
 
 		if (processor.getCustomKeyword("PLATE NAME").isEmpty()) {
-		    if (! processor.getStandardKeyword("$SRC").isEmpty()) {
-		        return "SPECIMEN";
-		    } else {
-		        return "";
-		    }
+			if (!processor.getStandardKeyword("$SRC").isEmpty()) {
+				return "SPECIMEN";
+			} else {
+				return "";
+			}
 		} else {
 			return "TRAY";
 		}
 	}
 
-
 	/**
 	 * Extract and store the Tray attributes
+	 * 
 	 * @param processor FCSProcessor with already scanned file
 	 * @return a key-value map of attributes
 	 */
 	protected Map<String, String> getTrayAttributes(FCSReader processor) {
-        // Nothing
+		// Nothing
 		return new HashMap<String, String>();
 	}
 
 	/**
 	 * Extract and store the Specimen attributes
+	 * 
 	 * @param processor FCSProcessor with already scanned file
 	 * @return a key-value map of attributes
 	 */
 	protected Map<String, String> getSpecimenAttributes(FCSReader processor) {
-        // Nothing
+		// Nothing
 		return new HashMap<String, String>();
 	}
 
 	/**
 	 * Extract and store the Tube attributes
+	 * 
 	 * @param processor FCSProcessor with already scanned file
 	 * @return a key-value map of attributes
 	 */
@@ -337,13 +318,18 @@ public abstract class AbstractFlowProcessor extends AbstractProcessor {
 		attributes.put("indexSort", isIndexSort(processor) ? "true" : "false");
 		return attributes;
 	}
-	
+
 	/**
 	 * Returns true if the passed hardware string (from an FCS file) is a recognized
 	 * hardware string for the processor.
+	 * 
+	 * The classes inheriting from AbstractFlowProcessor must override this method.
+	 * 
 	 * @param hardwareString Hardware string.
-	 * @return true if the string is a valid hardware string for the procesdor, false otherwise.
-	 */	
-	public static boolean isValidHardwareString(String hardwareString) { return false; }
-
+	 * @return true if the string is a valid hardware string for the procesdor,
+	 *         false otherwise.
+	 */
+	public static boolean isValidHardwareString(String hardwareString) {
+		throw new UnsupportedOperationException("This method must be overridden!");
+	}
 }

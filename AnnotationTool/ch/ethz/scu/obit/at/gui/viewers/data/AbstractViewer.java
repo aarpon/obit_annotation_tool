@@ -41,6 +41,7 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import ch.ethz.scu.obit.at.datamover.ATDataMover;
 import ch.ethz.scu.obit.at.gui.pane.OutputPane;
@@ -60,7 +61,8 @@ import ch.ethz.scu.obit.processors.data.model.RootDescriptor;
  *
  * @author Aaron Ponti
  */
-abstract public class AbstractViewer extends Observable implements ActionListener, TreeSelectionListener {
+abstract public class AbstractViewer extends Observable
+        implements ActionListener, TreeSelectionListener {
 
     protected GlobalSettingsManager globalSettingsManager;
 
@@ -95,7 +97,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Read-only table model.
-     * 
+     *
      * @author Aaron Ponti
      *
      */
@@ -104,7 +106,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
         /**
          * Constructor
-         * 
+         *
          * @param mdData        2D data array
          * @param mdColumnNames Array of column names
          */
@@ -114,7 +116,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
         /**
          * Make sure the Table is non-editable
-         * 
+         *
          * @param row    number
          * @param column number
          */
@@ -126,18 +128,19 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Parses current dataset (file or folder) by doing the necessary preparation
-     * work and then calling the needed Processor.
+     * Parses current dataset (file or folder) by doing the necessary
+     * preparation work and then calling the needed Processor.
      *
      * @param folder Full folder (or file) name
-     * @return true if the scanning of the dataset was successful, false otherwise.
+     * @return true if the scanning of the dataset was successful, false
+     *         otherwise.
      */
     abstract public boolean parse(File folder);
 
     /**
-     * Constructor The constructor creates the actual panel to be displayed on the
-     * UI.
-     * 
+     * Constructor The constructor creates the actual panel to be displayed on
+     * the UI.
+     *
      * @param globalSettingsManager The global settings manager.
      */
     public AbstractViewer(GlobalSettingsManager globalSettingsManager) {
@@ -168,13 +171,14 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         panel.add(title, constraints);
 
         // Create a split panel
-        JSplitPane splitPaneTwo = new JSplitPane(JSplitPane.VERTICAL_SPLIT, metadataViewerPanel(),
-                invalidDatasetsPanel());
+        JSplitPane splitPaneTwo = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                metadataViewerPanel(), invalidDatasetsPanel());
         splitPaneTwo.setResizeWeight(0.75);
         splitPaneTwo.setBorder(null);
 
         // Create a split panel
-        JSplitPane splitPaneOne = new JSplitPane(JSplitPane.VERTICAL_SPLIT, dataViewerPanel(), splitPaneTwo);
+        JSplitPane splitPaneOne = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                dataViewerPanel(), splitPaneTwo);
         splitPaneOne.setResizeWeight(0.5);
         splitPaneOne.setBorder(null);
 
@@ -195,7 +199,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Sets the user name to be used for scanning the user folder
-     * 
+     *
      * @param userName User name
      *
      *                 This must be called before scan() can be called!
@@ -209,9 +213,9 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Sets the reference to the OutputPane
-     * 
-     * @param outputPane A reference to the main window output pane to be used to
-     *                   display information.
+     *
+     * @param outputPane A reference to the main window output pane to be used
+     *                   to display information.
      */
     public void setOutputPane(OutputPane outputPane) {
 
@@ -221,8 +225,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Scans the datamover incoming directory for datasets to be processed. At the
-     * end of scanning, the function MUST set isReady to true.
+     * Scans the datamover incoming directory for datasets to be processed. At
+     * the end of scanning, the function MUST set isReady to true.
      */
     public void scan() {
 
@@ -235,7 +239,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         // Notify observers that the scanning is about to start
         synchronized (this) {
             setChanged();
-            notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.ABOUT_TO_RESCAN, null));
+            notifyObservers(new ObserverActionParameters(
+                    ObserverActionParameters.Action.ABOUT_TO_RESCAN, null));
         }
 
         // Inform
@@ -248,7 +253,9 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
         // Get the user data folder from the application properties
         // to which we append the user name to personalize the working space
-        File userDataFolder = new File(globalSettingsManager.getUserDataRootDir() + File.separator + userName);
+        File userDataFolder = new File(
+                globalSettingsManager.getUserDataRootDir() + File.separator
+                        + userName);
 
         // Does the folder exist? If not, we create it. Please mind,
         // if directory creation fails, the application will quit since
@@ -256,8 +263,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         checkAndCreateFolderOrDie(userDataFolder, "user directory");
 
         // Prepare a new root node for the Tree
-        rootNode = new RootNode(
-                new RootDescriptor(userDataFolder, new File(globalSettingsManager.getUserDataRootDir())));
+        rootNode = new RootNode(new RootDescriptor(userDataFolder,
+                new File(globalSettingsManager.getUserDataRootDir())));
 
         // Then define and start the worker
         class Worker extends SwingWorker<Boolean, Void> {
@@ -268,8 +275,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             /**
              * Constructor
              *
-             * @param userDataFolder Folder to be parsed. # @param ref AbstractViewer
-             *                       reference.
+             * @param userDataFolder Folder to be parsed.
+             * @param ref            AbstractViewer reference.
              */
             public Worker(File userDataFolder, AbstractViewer ref) {
                 this.userDataFolder = userDataFolder;
@@ -303,6 +310,26 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                 // Listen for when the selection changes.
                 tree.addTreeSelectionListener(ref);
 
+                // Add a context menu
+                tree.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if (QueryOS.isWindows()) {
+                            return;
+                        }
+                        setListenerOnDataViewerJTree(e);
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        if (QueryOS.isMac()) {
+                            return;
+                        }
+                        setListenerOnDataViewerJTree(e);
+                    }
+                });
+
                 // Clear the metadata table
                 clearMetadataTable();
 
@@ -311,13 +338,16 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
                 // Inform the user if isReady is false
                 if (!isReady) {
-                    outputPane.err("Please fix the invalid datasets to continue!");
+                    outputPane.err(
+                            "Please fix the invalid datasets to continue!");
                 }
 
                 // Notify observers that the scanning is done
                 synchronized (this) {
                     setChanged();
-                    notifyObservers(new ObserverActionParameters(ObserverActionParameters.Action.SCAN_COMPLETE, null));
+                    notifyObservers(new ObserverActionParameters(
+                            ObserverActionParameters.Action.SCAN_COMPLETE,
+                            null));
                 }
 
                 // Re-enable the "scan" button
@@ -336,8 +366,80 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Climb the JTree to find given parent node of passed one and return it. The
-     * required node must be below the root node (which must have name
+     * Climb the JTree to find given parent node of passed one and return it.
+     * The required node must be below the root node (which must have name
+     * "RootDescriptor". The name of the node is given as follows:
+     *
+     * {@code selectedNode.getUserObject().getClass().getSimpleName()}
+     *
+     * where the user node contained in the selectedNode is usually a Descriptor
+     * generated by one of the processors.
+     *
+     * @param selectedNode   Node selected in the JTree
+     * @param nodeName       Name of the selected node.
+     * @param comparisonMode Type of comparison; one of "matches", "contains",
+     *                       "endswith"
+     * @return desired node name (e.g. Experiment, Folder)
+     */
+    protected AbstractNode getParentNodeByNameFuzzy(AbstractNode selectedNode,
+            String nodeName, String comparisonMode) {
+
+        // Get the class name of the selected node
+        String className = selectedNode.getUserObject().getClass()
+                .getSimpleName();
+
+        // Did we select the root already?
+        AbstractNode parentNode = (AbstractNode) selectedNode.getParent();
+
+        if (parentNode == null) {
+            // We indeed are at the root
+            return null;
+        }
+
+        // Did we already select the desired node?
+        if (comparisonMode.equals("matches") && className.equals(nodeName)) {
+            // We are at the selected node, we just return it
+            return selectedNode;
+        } else if (comparisonMode.equals("contains")
+                && className.contains(nodeName)) {
+            // We are at the selected node, we just return it
+            return selectedNode;
+        } else if (comparisonMode.equals("endswith")
+                && className.endsWith(nodeName)) {
+            // We are at the selected node, we just return it
+            return selectedNode;
+        } else {
+            // We are somewhere below the requested node: we climb up the
+            // tree until we find it and then return it
+            parentNode = (AbstractNode) selectedNode.getParent();
+            while (parentNode != null) {
+                // Are we at the folder node?
+                String parentNodeClassName = parentNode.getUserObject()
+                        .getClass().getSimpleName();
+
+                if (comparisonMode.equals("matches")
+                        && parentNodeClassName.equals(nodeName)) {
+                    // We are at the selected node, we just return it
+                    return parentNode;
+                } else if (comparisonMode.equals("contains")
+                        && parentNodeClassName.contains(nodeName)) {
+                    // We are at the selected node, we just return it
+                    return parentNode;
+                } else if (comparisonMode.equals("endswith")
+                        && parentNodeClassName.endsWith(nodeName)) {
+                    // We are at the selected node, we just return it
+                    return parentNode;
+                } else {
+                    parentNode = (AbstractNode) parentNode.getParent();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Climb the JTree to find given parent node of passed one and return it.
+     * The required node must be below the root node (which must have name
      * "RootDescriptor". The name of the node is given as follows:
      *
      * {@code selectedNode.getUserObject().getClass().getSimpleName()}
@@ -349,10 +451,12 @@ abstract public class AbstractViewer extends Observable implements ActionListene
      * @param nodeName     Name of the selected node.
      * @return desired node name (e.g. Experiment, Folder)
      */
-    protected AbstractNode getParentNodeByName(AbstractNode selectedNode, String nodeName) {
+    protected AbstractNode getParentNodeByName(AbstractNode selectedNode,
+            String nodeName) {
 
         // Get the class name of the selected node
-        String className = selectedNode.getUserObject().getClass().getSimpleName();
+        String className = selectedNode.getUserObject().getClass()
+                .getSimpleName();
 
         // Did we select the root already?
         AbstractNode parentNode = (AbstractNode) selectedNode.getParent();
@@ -372,7 +476,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             parentNode = (AbstractNode) selectedNode.getParent();
             while (parentNode != null) {
                 // Are we at the folder node?
-                if (parentNode.getUserObject().getClass().getSimpleName().equals(nodeName)) {
+                if (parentNode.getUserObject().getClass().getSimpleName()
+                        .equals(nodeName)) {
                     return parentNode;
                 } else {
                     parentNode = (AbstractNode) parentNode.getParent();
@@ -385,14 +490,15 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     /**
      * Check for the existence of a folder and tries to create it; if creation
      * fails, the error is considered to be fatal and the application quits.
-     * 
+     *
      * @param folder     Full folder name
      * @param folderName Colloquial folder name (e.g. "User directory")
      */
     protected void checkAndCreateFolderOrDie(File folder, String folderName) {
         // Some string manipulation
         String allLower = folderName.toLowerCase();
-        String firstUpper = allLower.substring(0, 1).toUpperCase() + allLower.substring(1);
+        String firstUpper = allLower.substring(0, 1).toUpperCase()
+                + allLower.substring(1);
 
         // Does the folder exist? If not, we create it.
         if (!folder.exists()) {
@@ -411,10 +517,10 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             // Inform and exit
             if (failed) {
                 outputPane.err("Failed creating " + allLower + "!");
-                JOptionPane.showMessageDialog(
-                        null, "Failed creating " + allLower + "!\n"
-                                + "Please contact your administrator. The application\n" + "will now exit!",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Failed creating "
+                        + allLower + "!\n"
+                        + "Please contact your administrator. The application\n"
+                        + "will now exit!", "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
         }
@@ -425,11 +531,11 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             fullPath = folder.getCanonicalPath();
         } catch (IOException e) {
             outputPane.err("Failed accessing the user folder!");
-            JOptionPane
-                    .showMessageDialog(null,
-                            "Failed accessing the user folder!\n"
-                                    + "Please contact your administrator. The application\n" + "will now exit!",
-                            "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    "Failed accessing the user folder!\n"
+                            + "Please contact your administrator. The application\n"
+                            + "will now exit!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
 
@@ -439,19 +545,23 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             int p = fullPath.lastIndexOf(File.separatorChar);
             if (p == -1) {
                 outputPane.err("Unexpected path to user folder!");
-                JOptionPane.showMessageDialog(
-                        null, "Unexpected path to user folder!\n"
-                                + "Please contact your administrator. The application\n" + "will now exit!",
+                JOptionPane.showMessageDialog(null,
+                        "Unexpected path to user folder!\n"
+                                + "Please contact your administrator. The application\n"
+                                + "will now exit!",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
 
-            // Make sure that the case is the only difference between the two full paths
-            if (!fullPath.toLowerCase().equals(expectedFolderName.toLowerCase())) {
+            // Make sure that the case is the only difference between the two
+            // full paths
+            if (!fullPath.toLowerCase()
+                    .equals(expectedFolderName.toLowerCase())) {
                 outputPane.err("Unexpected path to user folder!");
-                JOptionPane.showMessageDialog(
-                        null, "Unexpected path to user folder!\n"
-                                + "Please contact your administrator. The application\n" + "will now exit!",
+                JOptionPane.showMessageDialog(null,
+                        "Unexpected path to user folder!\n"
+                                + "Please contact your administrator. The application\n"
+                                + "will now exit!",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
             }
@@ -464,7 +574,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Return the Tree's data model.
-     * 
+     *
      * @return the data model.
      */
     public TreeModel getDataModel() {
@@ -473,7 +583,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Return a list of ExperimentNode from the data model.
-     * 
+     *
      * @return List of ExperimentNode objects.
      */
     public List<ExperimentNode> getExperimentNodes() {
@@ -493,7 +603,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         for (int i = 0; i < dataNChildren; i++) {
 
             // Get the FolderNode
-            ExperimentNode experimentNode = (ExperimentNode) dataRoot.getChildAt(i);
+            ExperimentNode experimentNode = (ExperimentNode) dataRoot
+                    .getChildAt(i);
 
             // Store the reference to the ExperimentNode
             experiments.add(experimentNode);
@@ -503,7 +614,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Initialize the Tree. If a Tree already exists, it is cleared and replaced.
+     * Initialize the Tree. If a Tree already exists, it is cleared and
+     * replaced.
      */
     protected void clearTree() {
 
@@ -515,7 +627,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         // Clear the tree model
         TreeModel model = tree.getModel();
         if (model != null) {
-            DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model.getRoot();
+            DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model
+                    .getRoot();
             if (rootNode != null) {
                 rootNode.removeAllChildren();
                 ((DefaultTreeModel) model).reload();
@@ -524,8 +637,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         }
 
         // Create a RootNode
-        rootNode = new RootNode(
-                new RootDescriptor(new File("/"), new File(globalSettingsManager.getUserDataRootDir())));
+        rootNode = new RootNode(new RootDescriptor(new File("/"),
+                new File(globalSettingsManager.getUserDataRootDir())));
 
         // Create a tree that allows one selection at a time.
         tree.setModel(new DefaultTreeModel(rootNode));
@@ -542,7 +655,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
      */
     protected void clearInvalidDatasetsTable() {
         if (invalidDatasetsTable != null) {
-            ReadOnlyTableModel model = (ReadOnlyTableModel) invalidDatasetsTable.getModel();
+            ReadOnlyTableModel model = (ReadOnlyTableModel) invalidDatasetsTable
+                    .getModel();
             for (int i = model.getRowCount() - 1; i >= 0; i--) {
                 model.removeRow(i);
             }
@@ -554,7 +668,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
      */
     protected void clearMetadataTable() {
         if (metadataViewTable != null) {
-            ReadOnlyTableModel model = (ReadOnlyTableModel) metadataViewTable.getModel();
+            ReadOnlyTableModel model = (ReadOnlyTableModel) metadataViewTable
+                    .getModel();
             for (int i = model.getRowCount() - 1; i >= 0; i--) {
                 model.removeRow(i);
             }
@@ -562,12 +677,15 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Adds all key-value pairs from an attributes Map to the metadata view table
-     * 
+     * Adds all key-value pairs from an attributes Map to the metadata view
+     * table
+     *
      * @param attributes Map of attributes returned by the various processors.
      */
-    protected void addAttributesToMetadataTable(Map<String, String> attributes) {
-        ReadOnlyTableModel model = (ReadOnlyTableModel) metadataViewTable.getModel();
+    protected void addAttributesToMetadataTable(
+            Map<String, String> attributes) {
+        ReadOnlyTableModel model = (ReadOnlyTableModel) metadataViewTable
+                .getModel();
         for (String key : attributes.keySet()) {
             String value = attributes.get(key);
             model.addRow(new Object[] { key, value });
@@ -585,7 +703,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Create and save an XML representation of the JTree to file
-     * 
+     *
      * @param outputDirectory Directory where XML property files are saved
      * @return true if the XML file could be saved, false otherwise
      */
@@ -598,10 +716,10 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Create and save a file containing a map of pointers to the experiment setting
-     * files at the root of the user folder to be used by the dropbox. The file name
-     * is structure.
-     * 
+     * Create and save a file containing a map of pointers to the experiment
+     * setting files at the root of the user folder to be used by the dropbox.
+     * The file name is structure.
+     *
      * @param outputDirectory Directory where XML property files are saved
      * @return true if the XML file could be saved, false otherwise
      */
@@ -619,20 +737,25 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         }
 
         // File name
-        File fileName = new File(outputDirectory + File.separator + "data_structure.ois");
+        File fileName = new File(
+                outputDirectory + File.separator + "data_structure.ois");
 
         try {
 
             // Open file
-            BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, false));
+            BufferedWriter bw = new BufferedWriter(
+                    new FileWriter(fileName, false));
 
             // Go over all Experiments
             for (int i = 0; i < nExp; i++) {
-                ExperimentNode expNode = (ExperimentNode) rootNode.getChildAt(i);
-                ExperimentDescriptor expDescr = (ExperimentDescriptor) expNode.getUserObject();
+                ExperimentNode expNode = (ExperimentNode) rootNode
+                        .getChildAt(i);
+                ExperimentDescriptor expDescr = (ExperimentDescriptor) expNode
+                        .getUserObject();
 
                 // We need Linux-compatible file separators
-                String propertiesFile = expDescr.getPropertiesFileNameWithRelPath();
+                String propertiesFile = expDescr
+                        .getPropertiesFileNameWithRelPath();
                 propertiesFile = propertiesFile.replace("\\", "/");
 
                 // Write them one per line
@@ -654,7 +777,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Returns true if the viewer has completed creation of the data model
-     * 
+     *
      * @return true if the data model is complete, false otherwise
      */
     public boolean isReady() {
@@ -663,7 +786,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
     /**
      * Return the reference to the JPanel to be added to a container component
-     * 
+     *
      * @return JPanel reference
      */
     public JPanel getPanel() {
@@ -671,8 +794,95 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
+     * Create a popup menu with actions for the root node.
+     *
+     * @param node Root node to which the popup menu is associated.
+     * @return a JPopupMenu for the passed item
+     */
+    private JPopupMenu createRootNodePopup(final RootNode node) {
+
+        // Create the popup menu.
+        JPopupMenu popup = new JPopupMenu();
+
+        // Show in Explorer/Finder
+        String menuEntry = "";
+        if (QueryOS.isWindows()) {
+            menuEntry = "Show in Windows Explorer";
+        } else if (QueryOS.isMac()) {
+            menuEntry = "Show in Finder";
+        } else {
+            throw new UnsupportedOperationException(
+                    "Operating system not supported.");
+        }
+
+        // Add Show in {file browser}
+        JMenuItem navigateToUserFolderMenuItem = new JMenuItem(menuEntry);
+        navigateToUserFolderMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Build the full path of the invalid dataset
+                File userDataFolder = new File(
+                        globalSettingsManager.getUserDataRootDir()
+                                + File.separator + userName);
+
+                String fullPathStr;
+                try {
+                    fullPathStr = userDataFolder.getCanonicalPath();
+                } catch (IOException e1) {
+                    outputPane.err("Could not retrieve full path "
+                            + "of selected invalid dataset!");
+                    return;
+                }
+
+                // Command arguments
+                String command = "";
+                String commandName = "";
+                String commandArgument = "";
+                if (QueryOS.isMac()) {
+                    command = "open";
+                    commandName = "Finder";
+                    commandArgument = "";
+                } else if (QueryOS.isWindows()) {
+                    command = "Explorer.exe";
+                    commandName = "Windows Explorer";
+                    commandArgument = "/root,";
+                } else {
+                    throw new UnsupportedOperationException(
+                            "Operating system not supported.");
+                }
+
+                // Inform
+                outputPane.log("Opening user folder in " + commandName + "...");
+
+                // Execute the command
+                String[] commandArray = new String[3];
+                commandArray[0] = command;
+                commandArray[1] = commandArgument;
+                commandArray[2] = fullPathStr;
+                try {
+                    Process p = Runtime.getRuntime().exec(commandArray);
+                    p.waitFor();
+                } catch (IOException e1) {
+                    outputPane.err("Could not show invalid dataset " + "in "
+                            + commandName + "!");
+                } catch (InterruptedException e1) {
+                    outputPane.err("Could not show invalid dataset " + "in "
+                            + commandName + "!");
+                }
+
+            }
+
+        });
+        popup.add(navigateToUserFolderMenuItem);
+
+        // Return the menu
+        return popup;
+    }
+
+    /**
      * Create a popup menu with actions for handling invalid datasets
-     * 
+     *
      * @return a JPopupMenu for the passed item
      */
     private JPopupMenu createInvalidDatasetsPopup() {
@@ -688,7 +898,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
         // Do we have a valid file manager?
         if (fileExplorerCommand[0].equals("")) {
-            outputPane.err("Unsupported file manager: browsing to invalid data will not be possible.");
+            outputPane.err(
+                    "Unsupported file manager: browsing to invalid data will not be possible.");
             return null;
         }
 
@@ -702,16 +913,19 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Build the full path of the invalid dataset
-                File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
+                File userDataFolder = new File(
+                        globalSettingsManager.getUserDataRootDir());
 
                 // Full path to the invalid dataset
-                File fullPath = new File(userDataFolder + File.separator + invalidDataset);
+                File fullPath = new File(
+                        userDataFolder + File.separator + invalidDataset);
 
                 String fullPathStr;
                 try {
                     fullPathStr = fullPath.getCanonicalPath();
                 } catch (IOException e1) {
-                    outputPane.err("Could not retrieve full path " + "of selected invalid dataset!");
+                    outputPane.err("Could not retrieve full path "
+                            + "of selected invalid dataset!");
                     return;
                 }
 
@@ -721,7 +935,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                 String commandArgument = fileExplorerCommand[2];
 
                 // Inform
-                outputPane.log("Showing invalid dataset \"" + invalidDataset + "\" in " + commandName);
+                outputPane.log("Showing invalid dataset \"" + invalidDataset
+                        + "\" in " + commandName);
 
                 // Execute the command
                 String[] commandArray = new String[3];
@@ -731,7 +946,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                 try {
                     Process p = Runtime.getRuntime().exec(commandArray);
                 } catch (IOException e1) {
-                    outputPane.err("Could not show invalid dataset " + "in " + commandName + "!");
+                    outputPane.err("Could not show invalid dataset " + "in "
+                            + commandName + "!");
                 }
             }
         });
@@ -752,34 +968,43 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                 }
 
                 // Build the full path of the file/folder to move
-                File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
-                File fullPath = new File(userDataFolder + File.separator + invalidDataset);
+                File userDataFolder = new File(
+                        globalSettingsManager.getUserDataRootDir());
+                File fullPath = new File(
+                        userDataFolder + File.separator + invalidDataset);
 
                 // Build full target
-                File fullTarget = new File(f.getSelectedFile() + File.separator + fullPath.getName());
+                File fullTarget = new File(f.getSelectedFile() + File.separator
+                        + fullPath.getName());
 
                 // Move
-                outputPane.log("Moving \"" + fullPath + "\" to \"" + fullTarget + "\"");
+                outputPane.log("Moving \"" + fullPath + "\" to \"" + fullTarget
+                        + "\"");
                 boolean isFile = fullPath.isFile();
 
                 try {
 
                     // Move to target
-                    Files.move(fullPath.toPath(), fullTarget.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Files.move(fullPath.toPath(), fullTarget.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING);
 
                     // Inform
-                    outputPane.warn("Please rescan the data folder when you have " + "fixed all invalid datasets!");
+                    outputPane
+                            .warn("Please rescan the data folder when you have "
+                                    + "fixed all invalid datasets!");
 
                 } catch (IOException e1) {
                     if (isFile) {
-                        JOptionPane.showMessageDialog(null, "Could not move \"" + fullPath + "\"!\n\n"
-                                + "Please make sure that the file is not " + "open in some application.");
+                        JOptionPane.showMessageDialog(null, "Could not move \""
+                                + fullPath + "\"!\n\n"
+                                + "Please make sure that the file is not "
+                                + "open in some application.");
                     } else {
-                        JOptionPane.showMessageDialog(null,
-                                "Could not move \"" + fullPath + "\"!\n\n"
-                                        + "Please make sure that the folder is not open in "
-                                        + "the file manager or that any of the contained\n"
-                                        + "files are not open in some application.");
+                        JOptionPane.showMessageDialog(null, "Could not move \""
+                                + fullPath + "\"!\n\n"
+                                + "Please make sure that the folder is not open in "
+                                + "the file manager or that any of the contained\n"
+                                + "files are not open in some application.");
                     }
                 }
             }
@@ -793,11 +1018,15 @@ abstract public class AbstractViewer extends Observable implements ActionListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Build the full path of the file/folder to delete
-                File userDataFolder = new File(globalSettingsManager.getUserDataRootDir());
-                File fullPath = new File(userDataFolder + File.separator + invalidDataset);
+                File userDataFolder = new File(
+                        globalSettingsManager.getUserDataRootDir());
+                File fullPath = new File(
+                        userDataFolder + File.separator + invalidDataset);
 
                 // Ask the user for confirmation
-                if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete\n\"" + invalidDataset + "\" ?",
+                if (JOptionPane.showConfirmDialog(null,
+                        "Are you sure you want to delete\n\"" + invalidDataset
+                                + "\" ?",
                         "Question", JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 
@@ -806,8 +1035,10 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                     boolean isFile = fullPath.isFile();
                     if (!ATDataMover.deleteRecursively(fullPath)) {
                         if (isFile) {
-                            JOptionPane.showMessageDialog(null, "Could not delete \"" + fullPath + "\"!\n\n"
-                                    + "Please make sure that the file is not " + "open in some application.");
+                            JOptionPane.showMessageDialog(null,
+                                    "Could not delete \"" + fullPath + "\"!\n\n"
+                                            + "Please make sure that the file is not "
+                                            + "open in some application.");
                         } else {
                             JOptionPane.showMessageDialog(null,
                                     "Could not delete \"" + fullPath + "\"!\n\n"
@@ -816,7 +1047,9 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                                             + "files are not open in some application.");
                         }
                     } else {
-                        outputPane.warn("Please rescan the data folder when you have " + "fixed all invalid datasets!");
+                        outputPane.warn(
+                                "Please rescan the data folder when you have "
+                                        + "fixed all invalid datasets!");
                     }
 
                 }
@@ -828,11 +1061,45 @@ abstract public class AbstractViewer extends Observable implements ActionListene
     }
 
     /**
-     * Sets a mouse event listener on the JTable
-     * 
+     * Sets a mouse event listener on the Data Viewer JTree
+     *
      * @param e Mouse event
      */
-    private void setListenerOnJTable(MouseEvent e) {
+    private void setListenerOnDataViewerJTree(MouseEvent e) {
+
+        if (e.isPopupTrigger() && e.getComponent() instanceof DataViewerTree) {
+
+            // Position of mouse click
+            int x = e.getPoint().x;
+            int y = e.getPoint().y;
+
+            // Get selected node
+            TreePath p = tree.getPathForLocation(x, y);
+            if (p == null) {
+                // There is nothing usable at that location
+                return;
+            }
+            AbstractNode node = (AbstractNode) p.getLastPathComponent();
+
+            // Type of node
+            String nodeType = node.getClass().getSimpleName();
+
+            // Add relevant context menu
+            if (nodeType.equals("RootNode")) {
+                JPopupMenu popup = createRootNodePopup((RootNode) node);
+                popup.show(e.getComponent(), x, y);
+            } else {
+                // Nothing to do.
+            }
+        }
+    }
+
+    /**
+     * Sets a mouse event listener on the Invalid Datasets JTable
+     *
+     * @param e Mouse event
+     */
+    private void setListenerOnInvalidDatasetsJTable(MouseEvent e) {
         invalidDataset = null;
         int r = invalidDatasetsTable.rowAtPoint(e.getPoint());
         if (r >= 0 && r < invalidDatasetsTable.getRowCount()) {
@@ -843,9 +1110,11 @@ abstract public class AbstractViewer extends Observable implements ActionListene
 
         // Store the selected file
         int rowIndex = invalidDatasetsTable.getSelectedRow();
-        if (rowIndex < 0)
+        if (rowIndex < 0) {
             return;
-        invalidDataset = new File((String) invalidDatasetsTable.getModel().getValueAt(rowIndex, 0));
+        }
+        invalidDataset = new File((String) invalidDatasetsTable.getModel()
+                .getValueAt(rowIndex, 0));
         // Display popup...
         if (e.isPopupTrigger() && e.getComponent() instanceof JTable) {
             JPopupMenu popup = createInvalidDatasetsPopup();
@@ -856,9 +1125,10 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         }
         // ... or log to output pane on double click.
         if (e.getClickCount() == 2) {
-            String errorMsg = (String) invalidDatasetsTable.getModel().getValueAt(rowIndex, 1);
-            outputPane.log(
-                    "File or folder '" + invalidDataset.getName() + "' is invalid for following reason: " + errorMsg);
+            String errorMsg = (String) invalidDatasetsTable.getModel()
+                    .getValueAt(rowIndex, 1);
+            outputPane.log("File or folder '" + invalidDataset.getName()
+                    + "' is invalid for following reason: " + errorMsg);
         }
     }
 
@@ -876,8 +1146,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         constraints.fill = GridBagConstraints.BOTH;
 
         // Create the Tree
-        rootNode = new RootNode(
-                new RootDescriptor(new File("/"), new File(globalSettingsManager.getUserDataRootDir())));
+        rootNode = new RootNode(new RootDescriptor(new File("/"),
+                new File(globalSettingsManager.getUserDataRootDir())));
 
         // Create a tree that allows one selection at a time.
         tree = new DataViewerTree(rootNode);
@@ -947,7 +1217,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         // Add the table
         Object[][] mdData = {};
         String mdColumnNames[] = { "Name", "Value" };
-        metadataViewTable = new JTable(new ReadOnlyTableModel(mdData, mdColumnNames));
+        metadataViewTable = new JTable(
+                new ReadOnlyTableModel(mdData, mdColumnNames));
         metadataViewTable.setShowGrid(false);
         metadataViewTable.setFillsViewportHeight(true);
         metadataViewTable.setAutoCreateRowSorter(true);
@@ -996,7 +1267,8 @@ abstract public class AbstractViewer extends Observable implements ActionListene
         // Add the table
         Object[][] data = {};
         String columnNames[] = { "File or folder", "Issue" };
-        invalidDatasetsTable = new JTable(new ReadOnlyTableModel(data, columnNames));
+        invalidDatasetsTable = new JTable(
+                new ReadOnlyTableModel(data, columnNames));
         invalidDatasetsTable.setShowGrid(false);
         invalidDatasetsTable.setFillsViewportHeight(true);
         invalidDatasetsTable.setAutoCreateRowSorter(true);
@@ -1010,7 +1282,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                 if (QueryOS.isWindows()) {
                     return;
                 }
-                setListenerOnJTable(e);
+                setListenerOnInvalidDatasetsJTable(e);
             }
 
             @Override
@@ -1018,7 +1290,7 @@ abstract public class AbstractViewer extends Observable implements ActionListene
                 if (QueryOS.isMac()) {
                     return;
                 }
-                setListenerOnJTable(e);
+                setListenerOnInvalidDatasetsJTable(e);
             }
         });
 

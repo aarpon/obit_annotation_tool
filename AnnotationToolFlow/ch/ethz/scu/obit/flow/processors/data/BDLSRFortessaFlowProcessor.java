@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.ethz.scu.obit.flow.processors.data.model.AnalyzerExperiment;
 import ch.ethz.scu.obit.flow.processors.data.model.FCSFileParameterList;
 import ch.ethz.scu.obit.flow.processors.data.model.Specimen;
 import ch.ethz.scu.obit.flow.processors.data.model.Tray;
 import ch.ethz.scu.obit.flow.processors.data.model.Tube;
 import ch.ethz.scu.obit.flow.processors.data.model.Well;
+import ch.ethz.scu.obit.flow.processors.data.model.specializations.BDLSRFortessaExperiment;
 import ch.ethz.scu.obit.flow.readers.FCSReader;
 import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
 
@@ -25,8 +25,7 @@ import ch.ethz.scu.obit.processors.data.model.ExperimentDescriptor;
  * Please notice that when exporting data from the FACSDiva software, there are
  * two options:
  *
- * 1) export as FCS files (supported)
- * 2) export as experiment (not supported)
+ * 1) export as FCS files (supported) 2) export as experiment (not supported)
  *
  * When exporting as experiment, the experiment metadata is written to an
  * additional XML file and not correctly stored in the FCS files. These FCS
@@ -40,19 +39,21 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 
     /* Map of known hardware strings to supported hardware */
     private static final Map<String, String> knownHardwareStrings;
-    static
-    {
+    static {
         knownHardwareStrings = new HashMap<String, String>();
 
         // BD LSR Fortessa
         knownHardwareStrings.put("LSRII", "BD LSR Fortessa");
-        knownHardwareStrings.put("BD LSR Fortessa SORP (LSRII)", "BD LSR Fortessa");
+        knownHardwareStrings.put("BD LSR Fortessa SORP (LSRII)",
+                "BD LSR Fortessa");
         knownHardwareStrings.put("LSRFortessa", "BD LSR Fortessa");
     }
 
     /**
      * Constructor
-     * @param fullUserFolderName Full path of the user folder containing the exported experiments.
+     *
+     * @param fullUserFolderName Full path of the user folder containing the
+     *                           exported experiments.
      */
     public BDLSRFortessaFlowProcessor(String fullUserFolderName) {
 
@@ -63,15 +64,17 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 
     /**
      * Return information regarding the file format.
+     *
      * @return descriptive String for the Processor.
      */
     @Override
     public String info() {
-        return "FCS-3.x based blow cytometry hardware";
+        return "FCS-3.x based flow cytometry hardware";
     }
 
     /**
      * Parse the file to extract data and metadata.
+     *
      * @return true if parsing was successful, false otherwise.
      */
     @Override
@@ -96,7 +99,9 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 
     /**
      * Return a String representation of the BDLSRFortessaFlowProcessor.
-     * @return String containing a description of the BDLSRFortessaFlowProcessor.
+     *
+     * @return String containing a description of the
+     *         BDLSRFortessaFlowProcessor.
      */
     @Override
     public String toString() {
@@ -105,6 +110,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 
     /**
      * Return a simplified class name to use in XML.
+     *
      * @return simplified class name.
      */
     @Override
@@ -113,7 +119,31 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
     }
 
     /**
+     * Return the tube name stored in the FCS file (if it is found) or something
+     * else, depending on the hardware.
+     *
+     * @param processor with already scanned file
+     * @return name of the tube or well
+     */
+    @Override
+    protected String getTubeOrWellName(FCSReader processor) {
+
+        String name;
+        if (identifyContainerType(processor).equals("TRAY")) {
+            name = processor.getCustomKeyword("WELL ID");
+        } else if (identifyContainerType(processor).equals("SPECIMEN")) {
+            name = processor.getCustomKeyword("TUBE NAME");
+        } else {
+            String fcsFileName = processor.getFile().getName();
+            name = fcsFileName.substring(0,
+                    fcsFileName.toLowerCase().lastIndexOf(".fcs"));
+        }
+        return name;
+    }
+
+    /**
      * Extract and store the Experiment attributes
+     *
      * @param processor FCSProcessor with already scanned file
      * @return a key-value map of attributes
      */
@@ -130,8 +160,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
             acqHardwareString = knownHardwareStrings.get(acqHardwareString);
         } else {
             validator.isValid = false;
-            validator.invalidFilesOrFolders.put(
-                    processor.getFile(),
+            validator.invalidFilesOrFolders.put(processor.getFile(),
                     "Wrong hardware string: " + acqHardwareString);
         }
         attributes.put("acq_hardware", acqHardwareString);
@@ -143,13 +172,12 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
         }
 
         // Check major and minor version (we ignore the patch)
-        Pattern p = Pattern.compile(
-                "(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
+        Pattern p = Pattern
+                .compile("(.*?)(\\d{1,2})\\.(\\d{1,2})(\\.\\d{1,2})?");
         Matcher m = p.matcher(acqSoftwareString);
         if (!m.matches()) {
             validator.isValid = false;
-            validator.invalidFilesOrFolders.put(
-                    processor.getFile(),
+            validator.invalidFilesOrFolders.put(processor.getFile(),
                     "Unknown software version.");
         } else {
             int major;
@@ -158,20 +186,16 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 major = Integer.parseInt(m.group(2));
                 minor = Integer.parseInt(m.group(3));
                 // Known valid versions are 6.1 and 7.0
-                if (!((major == 6 && minor == 1) ||
-                        (major == 7 && minor == 0) ||
-                        (major == 8 && minor == 0))) {
+                if (!((major == 6 && minor == 1) || (major == 7 && minor == 0)
+                        || (major == 8 && minor == 0))) {
                     validator.isValid = false;
-                    validator.invalidFilesOrFolders.put(
-                            processor.getFile(),
-                            "Unsupported software version: " +
-                                    m.group(2) + "." +
-                                    m.group(3));
+                    validator.invalidFilesOrFolders.put(processor.getFile(),
+                            "Unsupported software version: " + m.group(2) + "."
+                                    + m.group(3));
                 }
             } catch (NumberFormatException n) {
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        processor.getFile(),
+                validator.invalidFilesOrFolders.put(processor.getFile(),
                         "Unknown software version.");
             }
         }
@@ -187,6 +211,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 
     /**
      * Scan the folder recursively and process all fcs files found
+     *
      * @param dir Full path to the directory to scan
      * @throws IOException Thrown if a FCS file could not be processed
      */
@@ -195,13 +220,12 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
 
         // To make things simple and robust, we make sure that the first
         // thing we process at any sub-folder level is an FCS file.
-        String [] files = getSimplySortedList(dir);
+        String[] files = getSimplySortedList(dir);
 
         // Empty subfolders are not accepted
         if (files.length == 0 && !dir.equals(this.userFolder)) {
             validator.isValid = false;
-            validator.invalidFilesOrFolders.put(
-                    dir, "Empty folder");
+            validator.invalidFilesOrFolders.put(dir, "Empty folder");
             return;
         }
 
@@ -223,8 +247,8 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
             // No files are allowed in the root
             if (dir.equals(this.userFolder)) {
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Files must be in sub-folders.");
+                validator.invalidFilesOrFolders.put(file,
+                        "Files must be in sub-folders.");
                 return;
             }
 
@@ -247,8 +271,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
             String ext = fileName.substring(indx);
             if (ext.equalsIgnoreCase(".xml")) {
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Experiment export");
+                validator.invalidFilesOrFolders.put(file, "Experiment export");
                 continue;
             }
 
@@ -266,7 +289,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 }
 
                 // Attach the files
-                if (! currentExperiment.addAttachment(file)) {
+                if (!currentExperiment.addAttachment(file)) {
                     validator.isValid = false;
                     validator.invalidFilesOrFolders.put(file,
                             "Could not assign attachments to esperiment!");
@@ -283,8 +306,8 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
             // We break here.
             if (fileName.toLowerCase().equals("data_structure.ois")) {
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Failed registration to openBIS!");
+                validator.invalidFilesOrFolders.put(file,
+                        "Failed registration to openBIS!");
                 return;
             }
 
@@ -294,32 +317,31 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
             // one has been annotated, somewhere.
             if (fileName.contains("_properties.oix")) {
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Experiment already annotated");
+                validator.invalidFilesOrFolders.put(file,
+                        "Experiment already annotated");
                 return;
             }
 
             // Do we have an unknown file? If we do, we move on to the next.
-            if (! ext.equalsIgnoreCase(".fcs")) {
+            if (!ext.equalsIgnoreCase(".fcs")) {
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Unsupported file format");
+                validator.invalidFilesOrFolders.put(file,
+                        "Unsupported file format");
                 continue;
             }
 
             // Is it an FCS file? Scan it and extract the information
             FCSReader processor = new FCSReader(file, false);
             if (!processor.parse()) {
-                System.err.println("File " + file.getCanonicalPath() +
-                        " could not be parsed!");
+                System.err.println("File " + file.getCanonicalPath()
+                        + " could not be parsed!");
                 validator.isValid = false;
-                validator.invalidFilesOrFolders.put(
-                        file, "Parsing failed");
+                validator.invalidFilesOrFolders.put(file, "Parsing failed");
                 continue;
             }
 
             // Create a new ExperimentDescriptor or reuse an existing one
-            AnalyzerExperiment expDesc = null;
+            BDLSRFortessaExperiment expDesc = null;
             String experimentName = getExperimentName(processor);
             String experimentPath = getExperimentPath(processor, file);
             if (experimentPath.equals("")) {
@@ -330,9 +352,10 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 continue;
             }
             if (folderDescriptor.experiments.containsKey(experimentPath)) {
-                expDesc = (AnalyzerExperiment) folderDescriptor.experiments.get(experimentPath);
+                expDesc = (BDLSRFortessaExperiment) folderDescriptor.experiments
+                        .get(experimentPath);
             } else {
-                expDesc = new AnalyzerExperiment(new File(experimentPath),
+                expDesc = new BDLSRFortessaExperiment(new File(experimentPath),
                         experimentName, userRootFolder);
                 // Store attributes
                 expDesc.addAttributes(getExperimentAttributes(processor));
@@ -352,8 +375,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 if (expDesc.trays.containsKey(trayKey)) {
                     trayDesc = expDesc.trays.get(trayKey);
                 } else {
-                    trayDesc =
-                            new Tray(trayName);
+                    trayDesc = new Tray(trayName);
                     // Store attributes
                     trayDesc.addAttributes(getTrayAttributes(processor));
                     // Store it in the experiment descriptor
@@ -367,8 +389,7 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 if (trayDesc.specimens.containsKey(specKey)) {
                     specDesc = trayDesc.specimens.get(specKey);
                 } else {
-                    specDesc =
-                            new Specimen(specName);
+                    specDesc = new Specimen(specName);
                     // Store attributes
                     specDesc.addAttributes(getSpecimenAttributes(processor));
                     // Store it in the tray descriptor
@@ -379,16 +400,14 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 Well wellDesc;
                 String wellName = getTubeOrWellName(processor);
                 String wellKey = specKey + "_" + wellName;
-                if (! specDesc.tubes.containsKey(wellKey)) {
+                if (!specDesc.tubes.containsKey(wellKey)) {
                     wellDesc = new Well(wellName, file, userRootFolder);
                     // Store attributes
                     wellDesc.addAttributes(getTubeOrWellAttributes(processor));
                     // Store events and parameter attributes
-                    wellDesc.fcsFile.parameterList =
-                            new FCSFileParameterList(
-                                    processor.numEvents(),
-                                    processor.numParameters(),
-                                    processor.parametersAttr);
+                    wellDesc.fcsFile.parameterList = new FCSFileParameterList(
+                            processor.numEvents(), processor.numParameters(),
+                            processor.parametersAttr);
                     // Store it in the specimen descriptor
                     specDesc.tubes.put(wellKey, wellDesc);
                 }
@@ -413,16 +432,14 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
                 Tube tubeDesc;
                 String tubeName = getTubeOrWellName(processor);
                 String tubeKey = specKey + "_" + tubeName;
-                if (! specDesc.tubes.containsKey(tubeKey)) {
+                if (!specDesc.tubes.containsKey(tubeKey)) {
                     tubeDesc = new Tube(tubeName, file, userRootFolder);
                     // Store attributes
                     tubeDesc.addAttributes(getTubeOrWellAttributes(processor));
                     // Store events and parameter attributes
-                    tubeDesc.fcsFile.parameterList =
-                            new FCSFileParameterList(
-                                    processor.numEvents(),
-                                    processor.numParameters(),
-                                    processor.parametersAttr);
+                    tubeDesc.fcsFile.parameterList = new FCSFileParameterList(
+                            processor.numEvents(), processor.numParameters(),
+                            processor.parametersAttr);
                     // Store it in the specimen descriptor
                     specDesc.tubes.put(tubeKey, tubeDesc);
                 }
@@ -434,10 +451,31 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
     }
 
     /**
-     * Returns true if the passed hardware string (from an FCS file) is a recognized
-     * hardware string for the BD LSR Fortessa.
+     * Extract and store the Tray attributes
+     *
+     * @param processor FCSProcessor with already scanned file
+     * @return a key-value map of attributes
+     */
+    @Override
+    protected Map<String, String> getTrayAttributes(FCSReader processor) {
+        // Since this is information is not stored anywhere in the FCS file,
+        // we set a default geometry here.
+        // The LSRFortessa supports:
+        // * 96_WELLS_8X12
+        // * 384_WELLS_16x24
+        // We default to 96_WELLS_8X12.
+        HashMap<String, String> attrs = new HashMap<String, String>();
+        attrs.put("geometry", "96_WELLS_8X12");
+        return attrs;
+    }
+
+    /**
+     * Returns true if the passed hardware string (from an FCS file) is a
+     * recognized hardware string for the BD LSR Fortessa.
+     *
      * @param hardwareString Hardware string.
-     * @return true if the string is a valid hardware string for the BD LSR Fortessa, false otherwise.
+     * @return true if the string is a valid hardware string for the BD LSR
+     *         Fortessa, false otherwise.
      */
     public static boolean isValidHardwareString(String hardwareString) {
 
