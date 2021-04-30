@@ -64,7 +64,7 @@ import ch.ethz.sis.openbis.generic.asapi.v3.dto.space.Space;
  * @author Aaron Ponti
  */
 public class OpenBISViewer extends Observable implements ActionListener,
-TreeSelectionListener, TreeWillExpandListener {
+        TreeSelectionListener, TreeWillExpandListener {
 
     protected JPanel panel;
     protected JButton scanButton;
@@ -392,7 +392,7 @@ TreeSelectionListener, TreeWillExpandListener {
             JOptionPane.showMessageDialog(this.panel,
                     "The openBIS session is no longer valid!\n"
                             + "Please try logging in again.",
-                            "Session error", JOptionPane.ERROR_MESSAGE);
+                    "Session error", JOptionPane.ERROR_MESSAGE);
             clearTree();
             return;
         }
@@ -412,7 +412,7 @@ TreeSelectionListener, TreeWillExpandListener {
                             + "space for you or to grant you access to an "
                             + "existing one.\nNo data registration will be "
                             + "possible until this issue is fixed.",
-                            "Warning", JOptionPane.WARNING_MESSAGE);
+                    "Warning", JOptionPane.WARNING_MESSAGE);
             // We do not need to return, this case is treated below
         }
 
@@ -473,7 +473,7 @@ TreeSelectionListener, TreeWillExpandListener {
                             + "ask your space administrator to do it "
                             + "for you.\nNo data registration will be "
                             + "possible until this issue is fixed.",
-                            "Warning", JOptionPane.WARNING_MESSAGE);
+                    "Warning", JOptionPane.WARNING_MESSAGE);
             // We do not need to return, this case is treated below
 
         }
@@ -867,7 +867,8 @@ TreeSelectionListener, TreeWillExpandListener {
             public void actionPerformed(ActionEvent e) {
                 // Set the project with given identified as default target
                 if (setAsDefaultProject(node.getIdentifier())) {
-                    outputPane.log("Project " + node.getIdentifier() + " successfully set as default.");
+                    outputPane.log("Project " + node.getIdentifier()
+                            + " successfully set as default.");
                 } else {
                     outputPane.err("Project could not be set as default.");
                 }
@@ -900,22 +901,20 @@ TreeSelectionListener, TreeWillExpandListener {
         Space space = (Space) node.getUserObject();
 
         // Ask the user to specify a project name
-        String projectCode = JOptionPane
-                .showInputDialog(null,
-                        "Space: " + space.getCode() +
-                        "\n\nNew project name:",
-                        "Create new project...",
-                        JOptionPane.INFORMATION_MESSAGE);
+        String projectCode = JOptionPane.showInputDialog(null,
+                "Space: " + space.getCode() + "\n\nNew project name:",
+                "Create new project...", JOptionPane.INFORMATION_MESSAGE);
         if (projectCode == null || projectCode.equals("")) {
             outputPane.warn("Creation of new project aborted by user.");
             return false;
         }
 
-        // Create the project
+        // Create the project and the corresponding experiment collections
+        boolean create_exp_collections = true;
         List<ProjectPermId> createdProjects;
         try {
             createdProjects = openBISProcessor.createProject(space.getCode(),
-                    projectCode, false);
+                    projectCode, create_exp_collections);
         } catch (Exception e) {
             outputPane.err("Could not create project /" + space.getCode() + "/"
                     + projectCode + "! " + e.getMessage());
@@ -974,7 +973,8 @@ TreeSelectionListener, TreeWillExpandListener {
             node = (AbstractOpenBISNode) tree.getLastSelectedPathComponent();
         }
 
-        // If there is nothing selected in the tree, do we have a default project
+        // If there is nothing selected in the tree, do we have a default
+        // project
         // (from which to get the space?)
         if (node == null) {
             node = getDefaultProjectOrFirst();
@@ -1089,7 +1089,8 @@ TreeSelectionListener, TreeWillExpandListener {
             setTagList(openBISProcessor.getTagsForSpace(space), space);
             return true;
         } else {
-            outputPane.err("Could not create tag " + tagName + "! " + openBISProcessor.getLastErrorMessage());
+            outputPane.err("Could not create tag " + tagName + "! "
+                    + openBISProcessor.getLastErrorMessage());
             return false;
         }
     }
