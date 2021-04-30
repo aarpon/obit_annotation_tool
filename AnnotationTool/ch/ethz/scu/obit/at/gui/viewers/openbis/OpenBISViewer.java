@@ -913,11 +913,12 @@ public class OpenBISViewer extends Observable implements ActionListener,
         // project name
         projectCode = projectCode.replaceAll("[^a-zA-Z0-9]", "_");
 
-        // Create the project
+        // Create the project and the corresponding experiment collections
+        boolean create_exp_collections = true;
         List<ProjectPermId> createdProjects;
         try {
             createdProjects = openBISProcessor.createProject(space.getCode(),
-                    projectCode, false);
+                    projectCode, create_exp_collections);
         } catch (Exception e) {
             outputPane.err("Could not create project /" + space.getCode() + "/"
                     + projectCode + "! " + e.getMessage());
