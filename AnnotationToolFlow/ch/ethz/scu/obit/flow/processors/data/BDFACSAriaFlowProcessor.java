@@ -40,7 +40,10 @@ public final class BDFACSAriaFlowProcessor extends BDLSRFortessaFlowProcessor {
     static {
         knownHardwareStrings = new HashMap<String, String>();
 
-        // FD FACSAria III
+        // BD FacsAria
+        knownHardwareStrings.put("FACSAria", "BD FACSAria");
+
+        // BD FACSAria III
         knownHardwareStrings.put("FACSAriaIII", "BD FACSAria III");
     }
 
@@ -99,8 +102,8 @@ public final class BDFACSAriaFlowProcessor extends BDLSRFortessaFlowProcessor {
             try {
                 major = Integer.parseInt(m.group(2));
                 minor = Integer.parseInt(m.group(3));
-                // Known valid versions are 6.1 and 7.0, 8.0 and 9.0
-                if (major < 6 || major > 9) {
+                // Known valid versions are 5.0, 6.1 and 7.0, 8.0 and 9.0
+                if (major < 5 || major > 9) {
                     validator.isValid = false;
                     validator.invalidFilesOrFolders.put(processor.getFile(),
                             "Unsupported software version: " + m.group(2) + "."
