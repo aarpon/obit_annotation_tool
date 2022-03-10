@@ -185,9 +185,8 @@ public class BDLSRFortessaFlowProcessor extends AbstractFlowProcessor {
             try {
                 major = Integer.parseInt(m.group(2));
                 minor = Integer.parseInt(m.group(3));
-                // Known valid versions are 6.1 and 7.0
-                if (!((major == 6 && minor == 1) || (major == 7 && minor == 0)
-                        || (major == 8 && minor == 0))) {
+                // Known valid versions are 5.0, 6.1 and 7.0, 8.0 and 9.0
+                if (major < 5 || major > 9) {
                     validator.isValid = false;
                     validator.invalidFilesOrFolders.put(processor.getFile(),
                             "Unsupported software version: " + m.group(2) + "."
