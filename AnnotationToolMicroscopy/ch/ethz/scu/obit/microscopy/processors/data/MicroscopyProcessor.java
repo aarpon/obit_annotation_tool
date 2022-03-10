@@ -43,37 +43,34 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     /* Keep track of the folder level when recursing into subfolders */
     private int folderLevel = ROOT_LEVEL;
 
-    /* List of supported file formats
+    /*
+     * List of supported file formats
      *
      * This is the list of extensions that should be readable by bioformats.
-     * Some of them would not be compatible with oBIT at this stage, and so
-     * the actual list of supported formats is much shorter.
+     * Some of them would not be compatible with oBIT at this stage, and so the
+     * actual list of supported formats is much shorter.
      *
-     *      ".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff",
-     *      ".afm", ".aim", ".al3d", ".am", ".amiramesh", ".apl",
-     *      ".arf", ".avi", ".bip", ".bmp", ".c01", ".cfg", ".cr2",
-     *      ".crw", ".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2",
-     *      ".dm3", ".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf",
-     *      ".fff", ".ffr", ".fits", ".flex", ".fli", ".frm", ".gel",
-     *      ".gif", ".grey", ".hdr", ".hed", ".his", ".htd", ".html",
-     *      ".hx", ".ics", ".ids", ".img", ".ims", ".inr", ".ipl",
-     *      ".ipm", ".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d",
-     *      ".labels", ".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb",
-     *      ".mea", ".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw",
-     *      ".mtb", ".mvd2", ".naf", ".nd", ".nd2", ".ndpi", ".nef",
-     *      ".nhdr", ".nrrd", ".obsep", ".oib", ".oif", ".ome", ".par",
-     *      ".pcx", ".pds", ".pgm", ".pic", ".pict", ".png", ".pnl",
-     *      ".pr3", ".ps", ".psd", ".r3d", ".raw", ".res", ".scn",
-     *      ".sdt", ".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk",
-     *      ".stp", ".svs", ".sxm", ".tfr", ".tga", ".tif", ".tiff",
-     *      ".tnb", ".top", ".txt", ".v", ".vms", ".vsi", ".vws",
-     *      ".wat", ".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys",
-     *      ".zfp", ".zfr", ".zvi"));
+     * ".1sc", ".2", ".2fl", ".3", ".4", ".5", ".acff", ".afm", ".aim", ".al3d",
+     * ".am", ".amiramesh", ".apl", ".arf", ".avi", ".bip", ".bmp", ".c01",
+     * ".cfg", ".cr2", ".crw", ".cxd", ".czi", ".dat", ".dcm", ".dicom", ".dm2",
+     * ".dm3", ".dti", ".dv", ".eps", ".epsi", ".exp", ".fdf", ".fff", ".ffr",
+     * ".fits", ".flex", ".fli", ".frm", ".gel", ".gif", ".grey", ".hdr",
+     * ".hed", ".his", ".htd", ".html", ".hx", ".ics", ".ids", ".img", ".ims",
+     * ".inr", ".ipl", ".ipm", ".ipw", ".jp2", ".jpg", ".jpk", ".jpx", ".l2d",
+     * ".labels", ".lei", ".lif", ".liff", ".lim", ".lsm", ".mdb", ".mea",
+     * ".mnc", ".mng", ".mod", ".mov", ".mrc", ".mrw", ".mtb", ".mvd2", ".naf",
+     * ".nd", ".nd2", ".ndpi", ".nef", ".nhdr", ".nrrd", ".obsep", ".oib",
+     * ".oif", ".ome", ".par", ".pcx", ".pds", ".pgm", ".pic", ".pict", ".png",
+     * ".pnl", ".pr3", ".ps", ".psd", ".r3d", ".raw", ".res", ".scn", ".sdt",
+     * ".seq", ".sld", ".sm2", ".sm3", ".spi", ".stk", ".stp", ".svs", ".sxm",
+     * ".tfr", ".tga", ".tif", ".tiff", ".tnb", ".top", ".txt", ".v", ".vms",
+     * ".vsi", ".vws", ".wat", ".xdce", ".xml", ".xqd", ".xqf", ".xv", ".xys",
+     * ".zfp", ".zfr", ".zvi"));
      */
     private final ArrayList<String> supportedFormats = new ArrayList<String>(
-            Arrays.asList(".czi", ".dv", ".ics", ".ids", ".ims", ".lei",
-                    ".lif", ".liff", ".lsm", ".nd2", ".oib", ".oif",
-                    ".ome", ".r3d", ".stk", ".tif", ".tiff", ".zvi"));
+            Arrays.asList(".czi", ".dv", ".ims", ".lei", ".lif", ".liff",
+                    ".lsm", ".nd2", ".oib", ".oif", ".ome", ".r3d", ".stk",
+                    ".tif", ".tiff", ".zvi"));
 
     /**
      * Descriptor for the user folder (root of the tree).
@@ -83,8 +80,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     /**
      * Constructor
      *
-     * @param fullFolderName
-     *            Full path of the folder containing the exported experiment.
+     * @param fullFolderName Full path of the folder containing the exported
+     *                       experiment.
      */
     public MicroscopyProcessor(String fullFolderName) {
 
@@ -152,15 +149,14 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     /**
      * Scan the folder recursively and process all microscopy files found
      *
-     * @param dir
-     *            Full path to the directory to scan
-     * @throws IOException
-     *             Thrown if a file could not be processed
+     * @param dir Full path to the directory to scan
+     * @throws IOException Thrown if a file could not be processed
      */
     private void recursiveDir(File dir) throws IOException {
 
         // We do not allow recursion above folderLevel = DATASET_LEVEL == 2;
-        // deeper levels must be taken care of by the CompositeMicroscopyReaders.
+        // deeper levels must be taken care of by the
+        // CompositeMicroscopyReaders.
         if (folderLevel == DATASET_LEVEL) {
             return;
         }
@@ -208,11 +204,13 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
                     // Get a reader to process the folder as a composite
                     // microscope type
-                    reader = CompositeMicroscopyReaderFactory.createReader(file);
+                    reader = CompositeMicroscopyReaderFactory
+                            .createReader(file);
                     if (reader == null) {
                         validator.isValid = false;
                         validator.invalidFilesOrFolders.put(file,
-                                "Unsupported composite file format in folder " + file);
+                                "Unsupported composite file format in folder "
+                                        + file);
                         continue;
                     }
 
@@ -293,28 +291,37 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                 // Do we have an unknown file (i.e. neither a supported dataset
                 // format nor a valid attachment)? If we do, we add it to the
                 // list of invalid files and move on to the next.
-                if (!supportedFormats.contains(ext.toLowerCase()) &&
-                        !ExperimentDescriptor.isValidAttachment(file)) {
+                if (!supportedFormats.contains(ext.toLowerCase())
+                        && !ExperimentDescriptor.isValidAttachment(file)) {
                     validator.isValid = false;
                     validator.invalidFilesOrFolders.put(file,
-                            "Invalid file type.");
+                            "Invalid/unsupported file type.");
                     continue;
                 }
 
-                // Failed Nikon acquisitions are known to create a 4096-byte header
-                // only file that the bio-formats library will fail reading. Also Leica
-                // failed acquisition can result in very small files (<1kB) that are
-                // broken and cannot be read by bioformats. To prevent registration
-                // failures on the DataStore Server, we try opening any suspiciously
-                // small file to reduce the risk of failed registrations on the DSS.
-                // Since we already checked whether the file is a supported microscopy
+                // Failed Nikon acquisitions are known to create a 4096-byte
+                // header
+                // only file that the bio-formats library will fail reading.
+                // Also Leica
+                // failed acquisition can result in very small files (<1kB) that
+                // are
+                // broken and cannot be read by bioformats. To prevent
+                // registration
+                // failures on the DataStore Server, we try opening any
+                // suspiciously
+                // small file to reduce the risk of failed registrations on the
+                // DSS.
+                // Since we already checked whether the file is a supported
+                // microscopy
                 // file (or an attachment), we just go ahead and try to open it.
                 if (file.length() <= 4096) {
-                    // We try opening the file -- if it fails, we flag it as corrupted.
+                    // We try opening the file -- if it fails, we flag it as
+                    // corrupted.
                     try {
                         BioFormatsWrapper wrapper = new BioFormatsWrapper(file);
                         if (!wrapper.parse()) {
-                            throw new Exception("Parsing the file " + file.getName() + " failed!");
+                            throw new Exception("Parsing the file "
+                                    + file.getName() + " failed!");
                         }
                         wrapper.close();
                     } catch (Exception e) {
@@ -341,7 +348,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
             // If the file is an attachment, add it and move on
             if (ExperimentDescriptor.isValidAttachment(file)) {
 
-                if (! expDesc.addAttachment(file)) {
+                if (!expDesc.addAttachment(file)) {
                     validator.isValid = false;
                     validator.invalidFilesOrFolders.put(file,
                             "Could not assign attachment to esperiment!");
@@ -359,7 +366,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                 //
                 // The isParsed() call is not strictly necessary, since in
                 // case something went wrong with the parsing, we would not
-                //  reach this point (see the try .. catch block above).
+                // reach this point (see the try .. catch block above).
                 if (reader.isParsed()) {
 
                     // Store
@@ -368,10 +375,13 @@ public final class MicroscopyProcessor extends AbstractProcessor {
                             + microscopyCompositeFileName;
 
                     // Store it in the Experiment descriptor
-                    if (! expDesc.microscopyCompositeFiles.containsKey(microscopyCompositeFileKey)) {
+                    if (!expDesc.microscopyCompositeFiles
+                            .containsKey(microscopyCompositeFileKey)) {
                         MicroscopyCompositeFile microscopyCompositeFileDesc;
-                        microscopyCompositeFileDesc = new MicroscopyCompositeFile(reader, userRootFolder);
-                        expDesc.microscopyCompositeFiles.put(microscopyCompositeFileKey,
+                        microscopyCompositeFileDesc = new MicroscopyCompositeFile(
+                                reader, userRootFolder);
+                        expDesc.microscopyCompositeFiles.put(
+                                microscopyCompositeFileKey,
                                 microscopyCompositeFileDesc);
                     }
 
@@ -410,13 +420,13 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     }
 
     /**
-     * Deletes safe-to-remove microscopy-related files. It also
-     * invokes the parent method to delete common safe-to-remove
-     * files like .DS_Store, Thumbs.db, ...
+     * Deletes safe-to-remove microscopy-related files. It also invokes the
+     * parent method to delete common safe-to-remove files like .DS_Store,
+     * Thumbs.db, ...
+     *
      * @param file File to be checked.
-     * @return true if the file was recognized as a useless hidden
-     * file and deleted, false if the file is a relevant file to be
-     * processed.
+     * @return true if the file was recognized as a useless hidden file and
+     *         deleted, false if the file is a relevant file to be processed.
      */
     @Override
     protected boolean deleteIfKnownUselessFile(File file) {
@@ -449,12 +459,12 @@ public final class MicroscopyProcessor extends AbstractProcessor {
         /**
          * Hash map of experiments
          */
-        public final Map<String, Experiment> experiments =
-                new LinkedHashMap<String, Experiment>();
+        public final Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
 
         /**
          * Constructor
-         * @param fullFolder Full path to the folder
+         *
+         * @param fullFolder       Full path to the folder
          * @param userRootDataPath Full path to the user data folder.
          */
         public Folder(File fullFolder, File userRootDataPath) {
@@ -482,22 +492,19 @@ public final class MicroscopyProcessor extends AbstractProcessor {
     public class Experiment extends ExperimentDescriptor {
 
         /**
-         *  Store the microscopy files associated with this Experiment
+         * Store the microscopy files associated with this Experiment
          */
-        public final Map<String, MicroscopyFile> microscopyFiles =
-                new LinkedHashMap<String, MicroscopyFile>();
+        public final Map<String, MicroscopyFile> microscopyFiles = new LinkedHashMap<String, MicroscopyFile>();
 
         /**
          * Hash map of microscopy composite file descriptors.
          */
-        public final Map<String, MicroscopyCompositeFile> microscopyCompositeFiles =
-                new LinkedHashMap<String, MicroscopyCompositeFile>();
+        public final Map<String, MicroscopyCompositeFile> microscopyCompositeFiles = new LinkedHashMap<String, MicroscopyCompositeFile>();
 
         /**
          * Constructor
          *
-         * @param name
-         *            Name of the experiment.
+         * @param name Name of the experiment.
          */
         public Experiment(File name) {
 
@@ -531,12 +538,12 @@ public final class MicroscopyProcessor extends AbstractProcessor {
         /**
          * Hash map of experiments.
          */
-        public final Map<String, Experiment> experiments =
-                new LinkedHashMap<String, Experiment>();
+        public final Map<String, Experiment> experiments = new LinkedHashMap<String, Experiment>();
 
         /**
          * Constructor
-         * @param fullFolder Full path to the folder
+         *
+         * @param fullFolder     Full path to the folder
          * @param userRootFolder Full path to the user data folder.
          */
         public UserFolder(File fullFolder, File userRootFolder) {
@@ -565,17 +572,17 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
         private boolean fileScanned = false;
 
-        private final Map<String, MicroscopyFileSeries> series =
-                new LinkedHashMap<String, MicroscopyFileSeries>();
+        private final Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
 
         /**
          * Constructor.
          *
          * @param microscopyFileName Microscopy file name with full path.
-         * @param userRootDataPath Full path the the user data folder.
+         * @param userRootDataPath   Full path the the user data folder.
          * @throws IOException if parsing the microscopy file failed.
          */
-        public MicroscopyFile(File microscopyFileName, File userRootDataPath) throws IOException {
+        public MicroscopyFile(File microscopyFileName, File userRootDataPath)
+                throws IOException {
 
             // Call base constructor
             super(microscopyFileName, userRootDataPath);
@@ -629,6 +636,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
         /**
          * Scans the file and stores the metadata into the attributes
          * String-String map
+         *
          * @return true of the scan was successful, false otherwise.
          */
         public boolean scanForSeries() {
@@ -685,6 +693,7 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
         /**
          * Return the extracted microscopy file series.
+         *
          * @return String, MicroscopyFileSeries map
          */
         public Map<String, MicroscopyFileSeries> getSeries() {
@@ -705,14 +714,16 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
         /**
          * Constructor.
-         * @param reader An AbstractCompositeMicroscopyReader object: in reality,
-         *               a concrete specialization.
+         *
+         * @param reader           An AbstractCompositeMicroscopyReader object:
+         *                         in reality, a concrete specialization.
          * @param userRootDataPath The full path to the root of the user data
-         *               folder.
+         *                         folder.
          *
          * @throws IOException if scanning the folder fails.
          */
-        public MicroscopyCompositeFile(AbstractCompositeMicroscopyReader reader, File userRootDataPath) throws IOException {
+        public MicroscopyCompositeFile(AbstractCompositeMicroscopyReader reader,
+                File userRootDataPath) throws IOException {
 
             // Call base constructor
             super(reader.getFolder(), userRootDataPath);
@@ -777,17 +788,17 @@ public final class MicroscopyProcessor extends AbstractProcessor {
 
         /**
          * Return the extracted microscopy file series.
+         *
          * @return String, MicroscopyFileSeries map
          */
         public Map<String, MicroscopyFileSeries> getSeries() {
 
             // Initialize the series map
-            Map<String, MicroscopyFileSeries> series =
-                    new LinkedHashMap<String, MicroscopyFileSeries>();
+            Map<String, MicroscopyFileSeries> series = new LinkedHashMap<String, MicroscopyFileSeries>();
 
             // Get the series attributes
-            Map<String, HashMap<String, String>> seriesAttr =
-                    reader.getAttributes();
+            Map<String, HashMap<String, String>> seriesAttr = reader
+                    .getAttributes();
 
             // Get the series indices
 
@@ -822,10 +833,8 @@ public final class MicroscopyProcessor extends AbstractProcessor {
         /**
          * Constructor.
          *
-         * @param index
-         *            Index of the series in file.
-         * @param attr
-         *            String-string map of attributes for the series
+         * @param index Index of the series in file.
+         * @param attr  String-string map of attributes for the series
          */
         public MicroscopyFileSeries(int index, Map<String, String> attr) {
 
